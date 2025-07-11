@@ -1,60 +1,68 @@
-use anchor_lang::prelude::*;
-use crate::state::*;
 use crate::errors::RalliError;
+use crate::state::*;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 #[instruction(game_id: u64)]
 pub struct CreateGame<'info> {
+    #[account(mut)]
+    pub creator: Signer<'info>,
+
     #[account(
         init,
         payer = creator,
-        space = Game::MAX_SIZE,
+        space = 8 + Game::INIT_SPACE,
         seeds = [b"game", game_id.to_le_bytes().as_ref()],
         bump
     )]
     pub game: Account<'info, Game>,
-    
+
     #[account(
         init,
         payer = creator,
-        space = GameEscrow::SIZE,
+        space = 8 + GameEscrow::INIT_SPACE,
         seeds = [b"escrow", game.key().as_ref()],
         bump
     )]
     pub game_escrow: Account<'info, GameEscrow>,
-    
-    #[account(mut)]
-    pub creator: Signer<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(
-    ctx: Context<CreateGame>,
-    game_id: u64,
-    max_players: u8,
-    entry_fee: u64,
-) -> Result<()> {
-    require!(max_players >= 2, RalliError::NotEnoughPlayers);
-    require!(max_players <= 50, RalliError::GameFull);
-    
-    let game = &mut ctx.accounts.game;
-    let game_escrow = &mut ctx.accounts.game_escrow;
-    let clock = Clock::get()?;
-    
-    game.game_id = game_id;
-    game.creator = ctx.accounts.creator.key();
-    game.players = Vec::new();
-    game.max_players = max_players;
-    game.entry_fee = entry_fee;
-    game.status = GameStatus::Open;
-    game.created_at = clock.unix_timestamp;
-    game.locked_at = None;
-    game.bump = ctx.bumps.game;
-    
-    game_escrow.game = game.key();
-    game_escrow.total_amount = 0;
-    game_escrow.bump = ctx.bumps.game_escrow;
-    
-    msg!("Game created with ID: {}", game_id);
-    Ok(())
+impl<'info> CreateGame<'info> {
+    pub fn create_game(
+        &mut self,
+        game_id: u64,
+        max_players: u8,
+        entry_fee: u64,
+        bumps: &CreateGameBumps,
+    ) -> Result<()> {
+        require!(max_players >= 2, RalliError::NotEnoughPlayers);
+        require!(max_players <= 50, RalliError::GameFull);
+        require!(entry_fee > 0, RalliError::InvalidEntryFee);
+
+        let game = &mut ctx.accounts.game;
+        let game_escrow = &mut ctx.accounts.game_escrow;
+        let clock = Clock::get()?;
+
+        self.game.set_inner(Game {
+            game_id,
+            creator: self.creator.key(),
+            players: Vec::new(),
+            max_players,
+            entry_fee,
+            status: self.GameStatus::Open;
+            created_at: Clock::get().unix_timestamp,
+            locked_at: None,
+            bump: bumps.game
+        })
+
+        self.game_escrow.set_inner(GameEscrow {
+           game: self.game.key(),
+           total_amount: 0,
+           bump: bumps.game_escrow,
+        });
+        Ok(())
+    }
 }
+
