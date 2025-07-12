@@ -41,28 +41,28 @@ impl<'info> CreateGame<'info> {
         require!(max_players <= 50, RalliError::GameFull);
         require!(entry_fee > 0, RalliError::InvalidEntryFee);
 
-        let game = &mut ctx.accounts.game;
-        let game_escrow = &mut ctx.accounts.game_escrow;
+        let game = &mut self.game;
+        let game_escrow = &mut self.game_escrow;
         let clock = Clock::get()?;
 
-        self.game.set_inner(Game {
+        game.set_inner(Game {
             game_id,
             creator: self.creator.key(),
             players: Vec::new(),
             max_players,
             entry_fee,
-            status: self.GameStatus::Open;
-            created_at: Clock::get().unix_timestamp,
+            status: GameStatus::Open,
+            created_at: clock.unix_timestamp,
             locked_at: None,
-            bump: bumps.game
-        })
-
-        self.game_escrow.set_inner(GameEscrow {
-           game: self.game.key(),
-           total_amount: 0,
-           bump: bumps.game_escrow,
+            bump: bumps.game,
         });
+
+        game_escrow.set_inner(GameEscrow {
+            game: game.key(),
+            total_amount: 0,
+            bump: bumps.game_escrow,
+        });
+
         Ok(())
     }
 }
-
