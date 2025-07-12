@@ -20,11 +20,11 @@ pub mod ralli_bet {
         max_players: u8,
         entry_fee: u64,
     ) -> Result<()> {
-        instructions::create_game::handler(ctx, game_id, max_players, entry_fee)
+        ctx.accounts.create_game(game_id, max_players, entry_fee,&ctx.bumps)
     }
 
     pub fn join_game(ctx: Context<JoinGame>) -> Result<()> {
-        instructions::join_game::handler(ctx)
+        ctx.accounts.join_game()
     }
 
     pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
