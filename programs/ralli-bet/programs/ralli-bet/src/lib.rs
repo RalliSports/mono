@@ -8,7 +8,7 @@ pub mod errors;
 use instructions::*;
 
 
-declare_id!("2dCihkBppHzVaE4yKJCUNQBteW2cA4YmLR9xViTQSwpD");
+declare_id!("5NZFLwJXVRzaJ69RkF5qtQ7CKzrSo4UkpG934SPSWpdY");
 
 #[program]
 pub mod ralli_bet {
@@ -27,28 +27,28 @@ pub mod ralli_bet {
         ctx.accounts.join_game()
     }
 
-    pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
-        instructions::submit_bet::handler(ctx, picks)
-    }
+    // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
+    //     instructions::submit_bet::handler(ctx, picks)
+    // }
 
-    pub fn lock_game(ctx: Context<LockGame>) -> Result<()> {
-        instructions::lock_game::handler(ctx)
-    }
+    // pub fn lock_game(ctx: Context<LockGame>) -> Result<()> {
+    //     instructions::lock_game::handler(ctx)
+    // }
 
-    pub fn resolve_game(
-        ctx: Context<ResolveGame>,
-        stat_results: Vec<(u16, u16)>, // (stat_id, actual_value)
-    ) -> Result<()> {
-        instructions::resolve_game::handler(ctx, stat_results)
-    }
+    // pub fn resolve_game(
+    //     ctx: Context<ResolveGame>,
+    //     stat_results: Vec<(u16, u16)>, // (stat_id, actual_value)
+    // ) -> Result<()> {
+    //     instructions::resolve_game::handler(ctx, stat_results)
+    // }
 
-    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
-        instructions::cancel_game::handler(ctx)
-    }
+    // pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+    //     instructions::cancel_game::handler(ctx)
+    // }
 
     // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
-    pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
-        instructions::refund_entry::handler(ctx)
-    }
+    // pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
+    //     instructions::refund_entry::handler(ctx)
+    // }
 }

@@ -4,14 +4,14 @@
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-ralli_bet = "2dCihkBppHzVaE4yKJCUNQBteW2cA4YmLR9xViTQSwpD"
+[programs.devnet]
+ralli_bet = "5NZFLwJXVRzaJ69RkF5qtQ7CKzrSo4UkpG934SPSWpdY"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

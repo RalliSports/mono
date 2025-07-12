@@ -5,6 +5,7 @@ use anchor_lang::prelude::*;
 pub struct Game {
     pub game_id: u64,
     pub creator: Pubkey,
+    #[max_len(10)]
     pub players: Vec<Pubkey>,
     pub max_players: u8,
     pub entry_fee: u64,
@@ -14,7 +15,7 @@ pub struct Game {
     pub bump: u8,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace)]
 pub enum GameStatus {
     Open,
     Locked,

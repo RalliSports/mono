@@ -52,4 +52,6 @@ pub enum RalliError {
     
     #[msg("All players must submit bets before locking")]
     AllPlayersMustSubmitBets,
+
+    InvalidEntryFee,
 }
