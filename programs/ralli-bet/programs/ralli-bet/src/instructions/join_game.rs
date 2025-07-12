@@ -31,9 +31,13 @@ impl<'info> JoinGame<'info> {
         let game_escrow = &mut self.game_escrow;
         let player = &self.player;
 
-        
-        require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
-        require_ne!(game.creator, player.key(), RalliError::CannotJoinOwnGame);
+        // require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
+
+        if game.status != GameStatus::Open {
+            return Err(RalliError::GameNotOpen.into());
+        }
+
+        require_neq!(game.creator, player.key(), RalliError::CannotJoinOwnGame);
         require!(
             !game.players.contains(&player.key()),
             RalliError::PlayerAlreadyJoined
