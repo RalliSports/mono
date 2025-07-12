@@ -46,13 +46,7 @@ pub mod ralli_bet {
         instructions::cancel_game::handler(ctx)
     }
 
-    pub fn update_game(
-        ctx: Context<UpdateGame>,
-        max_players: Option<u8>,
-        entry_fee: Option<u64>,
-    ) -> Result<()> {
-        instructions::update_game::handler(ctx, max_players, entry_fee)
-    }
+    // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
     pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
         instructions::refund_entry::handler(ctx)
