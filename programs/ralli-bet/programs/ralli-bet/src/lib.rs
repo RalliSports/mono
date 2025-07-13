@@ -8,7 +8,7 @@ pub mod errors;
 use instructions::*;
 
 
-declare_id!("5NZFLwJXVRzaJ69RkF5qtQ7CKzrSo4UkpG934SPSWpdY");
+declare_id!("ChmHckgUpnwUiyfTw4xymNcnAqWT9JmQW3n4HctBCKPG");
 
 #[program]
 pub mod ralli_bet {

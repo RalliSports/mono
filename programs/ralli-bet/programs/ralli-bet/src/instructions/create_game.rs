@@ -33,12 +33,12 @@ impl<'info> CreateGame<'info> {
     pub fn create_game(
         &mut self,
         game_id: u64,
-        max_players: u8,
+        max_users: u8,
         entry_fee: u64,
         bumps: &CreateGameBumps,
     ) -> Result<()> {
-        require!(max_players >= 2, RalliError::NotEnoughPlayers);
-        require!(max_players <= 50, RalliError::GameFull);
+        require!(max_users >= 2, RalliError::NotEnoughUsers);
+        require!(max_users <= 50, RalliError::GameFull);
         require!(entry_fee > 0, RalliError::InvalidEntryFee);
 
         let game = &mut self.game;
@@ -48,8 +48,8 @@ impl<'info> CreateGame<'info> {
         game.set_inner(Game {
             game_id,
             creator: self.creator.key(),
-            players: Vec::new(),
-            max_players,
+            users: Vec::new(),
+            max_users,
             entry_fee,
             status: GameStatus::Open,
             created_at: clock.unix_timestamp,

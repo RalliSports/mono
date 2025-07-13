@@ -14,11 +14,11 @@ pub enum RalliError {
     #[msg("Game is already resolved")]
     GameAlreadyResolved,
     
-    #[msg("Player already joined")]
-    PlayerAlreadyJoined,
+    #[msg("User already joined")]
+    UserAlreadyJoined,
     
-    #[msg("Player not in game")]
-    PlayerNotInGame,
+    #[msg("User not in game")]
+    UserNotInGame,
     
     #[msg("Invalid pick count (must be between 2 and 6)")]
     InvalidPickCount,
@@ -29,8 +29,8 @@ pub enum RalliError {
     #[msg("Bet already submitted")]
     BetAlreadySubmitted,
     
-    #[msg("Not enough players to lock game")]
-    NotEnoughPlayers,
+    #[msg("Not enough users to lock game")]
+    NotEnoughUsers,
     
     #[msg("Only game creator can perform this action")]
     OnlyCreator,
@@ -50,8 +50,8 @@ pub enum RalliError {
     #[msg("Invalid stat result")]
     InvalidStatResult,
     
-    #[msg("All players must submit bets before locking")]
-    AllPlayersMustSubmitBets,
+    #[msg("All users must submit bets before locking")]
+    AllUsersMustSubmitBets,
 
     InvalidEntryFee,
 }

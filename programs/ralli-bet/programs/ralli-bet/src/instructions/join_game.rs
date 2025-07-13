@@ -6,7 +6,7 @@ use anchor_lang::system_program::{transfer, Transfer};
 #[derive(Accounts)]
 pub struct JoinGame<'info> {
     #[account(mut)]
-    pub player: Signer<'info>,
+    pub user: Signer<'info>,
 
     #[account(
         mut,
@@ -29,7 +29,7 @@ impl<'info> JoinGame<'info> {
     pub fn join_game(&mut self) -> Result<()> {
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
-        let player = &self.player;
+        let user = &self.user;
 
         // require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
 
@@ -37,19 +37,19 @@ impl<'info> JoinGame<'info> {
             return Err(RalliError::GameNotOpen.into());
         }
 
-        require_neq!(game.creator, player.key(), RalliError::CannotJoinOwnGame);
+        require_neq!(game.creator, user.key(), RalliError::CannotJoinOwnGame);
         require!(
-            !game.players.contains(&player.key()),
-            RalliError::PlayerAlreadyJoined
+            !game.users.contains(&user.key()),
+            RalliError::UserAlreadyJoined
         );
         require!(
-            game.players.len() < game.max_players as usize,
+            game.users.len() < game.max_users as usize,
             RalliError::GameFull
         );
 
         // Transfer The entry fee to escrow (in game-escrow)
         let transfer_instruction = Transfer {
-            from: player.to_account_info(),
+            from: user.to_account_info(),
             to: game_escrow.to_account_info(),
         };
 
@@ -59,8 +59,8 @@ impl<'info> JoinGame<'info> {
         );
         transfer(cpi_ctx, game.entry_fee)?;
 
-        // Adding The player to game
-        game.players.push(player.key());
+        // Adding The user to game
+        game.users.push(user.key());
         game_escrow.total_amount += game.entry_fee;
 
         Ok(())
