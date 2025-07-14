@@ -32,7 +32,11 @@ impl<'info> CancelGame<'info> {
         let user = &self.user;
 
         // Can only cancel open games
-        require_eq!(game.status, GameStatus::Open, RalliError::GameMustBeOpen);
+        require_eq!(
+            game.status.clone(),
+            GameStatus::Open,
+            RalliError::GameMustBeOpen
+        );
 
         // Check if user is a valid player in the game (including creator)
         let is_valid_user = game.users.contains(&user.key()) || game.creator == user.key();
@@ -42,37 +46,31 @@ impl<'info> CancelGame<'info> {
         game.status = GameStatus::Cancelled;
 
         // Refund the calling user their entry fee
-        let user_refund_amount = if game.creator == user.key() {
-            // Creator doesn't pay entry fee, so no refund
-            0
-        } else {
-            game.entry_fee
+        let user_refund_amount = game.entry_fee;
+
+        let binding = game.key();
+        let escrow_seeds = &[b"escrow", binding.as_ref(), &[game_escrow.bump]];
+        let signer = &[&escrow_seeds[..]];
+
+        let transfer_instruction = Transfer {
+            from: game_escrow.to_account_info(),
+            to: user.to_account_info(),
         };
 
-        if user_refund_amount > 0 {
-            let escrow_seeds = &[b"escrow", game.key().as_ref(), &[game_escrow.bump]];
-            let signer = &[&escrow_seeds[..]];
+        let cpi_ctx = CpiContext::new_with_signer(
+            self.system_program.to_account_info(),
+            transfer_instruction,
+            signer,
+        );
 
-            let transfer_instruction = Transfer {
-                from: game_escrow.to_account_info(),
-                to: user.to_account_info(),
-            };
+        transfer(cpi_ctx, user_refund_amount)?;
 
-            let cpi_ctx = CpiContext::new_with_signer(
-                self.system_program.to_account_info(),
-                transfer_instruction,
-                signer,
-            );
+        // Update escrow total
+        game_escrow.total_amount = game_escrow.total_amount.saturating_sub(user_refund_amount);
 
-            transfer(cpi_ctx, user_refund_amount)?;
-
-            // Update escrow total
-            game_escrow.total_amount = game_escrow.total_amount.saturating_sub(user_refund_amount);
-
-            // Remove user from game
-            if let Some(pos) = game.users.iter().position(|&x| x == user.key()) {
-                game.users.remove(pos);
-            }
+        // Remove user from game
+        if let Some(pos) = game.users.iter().position(|&x| x == user.key()) {
+            game.users.remove(pos);
         }
 
         msg!(
