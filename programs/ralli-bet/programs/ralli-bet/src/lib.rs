@@ -27,9 +27,9 @@ pub mod ralli_bet {
         ctx.accounts.join_game()
     }
 
-    pub fn refund_entry(
-        ctx: Context<RefundEntry>,
-        remaining_accounts: Vec<AccountInfo>,
+    pub fn refund_entry<'a>(
+        ctx: Context<RefundEntry<'a>>,
+        remaining_accounts: Vec<AccountInfo<'a>>,
     ) -> Result<()> {
         ctx.accounts.refund_all_users(&remaining_accounts)
     }

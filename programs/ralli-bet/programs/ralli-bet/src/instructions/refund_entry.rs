@@ -40,7 +40,7 @@ impl<'info> RefundEntry<'info> {
         let game_escrow = &mut self.game_escrow;
         let game_result = &self.game_result;
 
-        // Not resolved (something went wrong)
+        // Game must be either Locked (something went wrong) or not resolved
         require!(
             game.status == GameStatus::Locked || !game_result.resolved,
             RalliError::GameNotRefundable
@@ -50,11 +50,11 @@ impl<'info> RefundEntry<'info> {
         require!(!game_result.resolved, RalliError::GameAlreadyResolved);
 
         // Game must not be already cancelled
-        require_neq!(
-            game.status,
-            GameStatus::Cancelled,
-            RalliError::GameAlreadyCancelled
-        );
+        // require_neq!(
+        //     game.status,
+        //     GameStatus::Cancelled,
+        //     RalliError::GameAlreadyCancelled
+        // );
 
         // Game must have users to refund
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
@@ -81,7 +81,8 @@ impl<'info> RefundEntry<'info> {
         );
 
         // Prepare escrow seeds for signing
-        let escrow_seeds = &[b"escrow", game.key().as_ref(), &[game_escrow.bump]];
+        let binding = game.key();
+        let escrow_seeds = &[b"escrow", binding.as_ref(), &[game_escrow.bump]];
         let signer = &[&escrow_seeds[..]];
 
         // Refund each user
