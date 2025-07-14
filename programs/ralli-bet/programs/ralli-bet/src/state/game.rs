@@ -22,3 +22,14 @@ pub enum GameStatus {
     Resolved,
     Cancelled,
 }
+
+impl fmt::Display for GameStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            GameStatus::Open => write!(f, "Open"),
+            GameStatus::Cancelled => write!(f, "Cancelled"),
+            GameStatus::Locked => write!(f, "Locked"),
+            GameStatus::Resolved => write!(f, "Resolved"),
+        }
+    }
+}

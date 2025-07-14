@@ -34,6 +34,10 @@ pub mod ralli_bet {
         ctx.accounts.refund_all_users(&remaining_accounts)
     }
 
+    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+        ctx.accounts.cancel_game()
+    }
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }
