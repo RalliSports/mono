@@ -71,9 +71,6 @@ pub enum RalliError {
     #[msg("Game is not refundable")]
     GameNotRefundable,
 
-    #[msg("Game already cancelled")]
-    GameAlreadyCancelled,
-
     #[msg("No users to refund")]
     NoUsersToRefund,
 
