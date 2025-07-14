@@ -49,6 +49,13 @@ impl<'info> RefundEntry<'info> {
         // If game is resolved, it cannot be refunded
         require!(!game_result.resolved, RalliError::GameAlreadyResolved);
 
+        //Game must not be already cancelled
+        require_neq!(
+            game.status,
+            GameStatus::Cancelled,
+            RalliError::GameAlreadyCancelled
+        );
+
         // Game must have users to refund
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
 
