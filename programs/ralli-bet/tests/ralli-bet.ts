@@ -33,8 +33,8 @@ let gameEscrow: PublicKey;
 
 const gameId = new BN(3);
 
-const playerKeypair = Keypair.generate();
-const playerWallet = new anchor.Wallet(playerKeypair);
+const userKeypair = Keypair.generate();
+const userWallet = new anchor.Wallet(userKeypair);
 
 before(async () => {
  [game] = PublicKey.findProgramAddressSync(
@@ -47,7 +47,7 @@ before(async () => {
     program.programId
   );
 
-  const signature = await connection.requestAirdrop(playerKeypair.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+  const signature = await connection.requestAirdrop(userKeypair.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
   await connection.confirmTransaction(signature);
 })
 
@@ -78,11 +78,11 @@ describe("ralli-bet", () => {
 
   it("Join Game", async () => {
     const tx = await program.methods.joinGame().accountsPartial({
-      player: playerKeypair.publicKey,
+      player: userWallet.publicKey,
       game: game,
       gameEscrow: gameEscrow,
       systemProgram: SystemProgram.programId,
-    }).signers([playerKeypair]).rpc();
+    }).signers([userWallet.payer]).rpc();
 
     console.log(`Join Game Transaction Signature: ${tx}`);
 
