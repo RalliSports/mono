@@ -38,19 +38,54 @@ impl<'info> CancelGame<'info> {
             RalliError::GameMustBeOpen
         );
 
-        // Check if user is a valid player in the game (including creator)
+        // Check if user is a valid participant in the game (including creator)
         let is_valid_user = game.users.contains(&user.key()) || game.creator == user.key();
-        require!(is_valid_user, RalliError::PlayerNotInGame);
+        require!(is_valid_user, RalliError::UserNotInGame);
 
-        // Set game status to cancelled
-        game.status = GameStatus::Cancelled;
+        // 1. Game should not be full (if game is full, users should wait for it to be locked/resolved)
+        require!(
+            game.users.len() < game.max_users as usize,
+            RalliError::GameIsFull
+        );
 
-        // Refund the calling user their entry fee
-        let user_refund_amount = game.entry_fee;
+        // 2. Check if game has been running for too long without filling up
+        // This prevents indefinite open games
+        let current_time = Clock::get()?.unix_timestamp;
+        let game_age = current_time - game.created_at;
+        let max_open_duration = 24 * 60 * 60; // 24 hours in seconds
 
+        let can_cancel_due_to_timeout = game_age > max_open_duration;
+        let can_cancel_due_to_low_participation = game.users.len() <= (game.max_users as usize / 2);
+
+        // 3. Allow cancellation only if:
+        //    - Game has low participation (less than half full), OR
+        //    - Game has been open too long without filling u
+        require!(
+            can_cancel_due_to_low_participation || can_cancel_due_to_timeout,
+            RalliError::GameCannotBeCancelled
+        );
+
+        // 4. Verify escrow has the expected amount
+        let expected_escrow_amount = game.entry_fee * game.users.len() as u64;
+        require_eq!(
+            game_escrow.total_amount,
+            expected_escrow_amount,
+            RalliError::EscrowAmountMismatch
+        );
+
+        // 5. Ensure escrow has sufficient balance for the refund
+        require!(
+            game_escrow.to_account_info().lamports() >= game.entry_fee,
+            RalliError::InsufficientEscrowBalance
+        );
+
+        // Prepare escrow seeds for signing
         let binding = game.key();
         let escrow_seeds = &[b"escrow", binding.as_ref(), &[game_escrow.bump]];
         let signer = &[&escrow_seeds[..]];
+
+        // Refund the calling user their entry fee
+        let user_refund_amount = game.entry_fee;
 
         let transfer_instruction = Transfer {
             from: game_escrow.to_account_info(),
@@ -73,12 +108,27 @@ impl<'info> CancelGame<'info> {
             game.users.remove(pos);
         }
 
-        msg!(
-            "Game {} cancelled by user {}. Refunded {} lamports",
-            game.game_id,
-            user.key(),
-            user_refund_amount
-        );
+        // If no users left after removal, mark game as cancelled
+        if game.users.is_empty() {
+            game.status = GameStatus::Cancelled;
+            game.locked_at = Some(current_time);
+
+            msg!(
+                "Game {} fully cancelled - no users remaining. Final cancellation by user {}",
+                game.game_id,
+                user.key()
+            );
+        } else {
+            msg!(
+                "User {} left game {} (ID: {}). {} users remaining. Refunded {} lamports",
+                user.key(),
+                game.key(),
+                game.game_id,
+                game.users.len(),
+                user_refund_amount
+            );
+        }
+
         Ok(())
     }
 }

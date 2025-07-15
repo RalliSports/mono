@@ -53,9 +53,6 @@ pub enum RalliError {
     #[msg("All users must submit bets before locking")]
     AllUsersMustSubmitBets,
 
-    #[msg("Player is not in this game")]
-    PlayerNotInGame,
-
     #[msg("Invalid entry fee")]
     InvalidEntryFee,
 
@@ -74,6 +71,12 @@ pub enum RalliError {
     #[msg("Game already cancelled")]
     GameAlreadyCancelled,
 
+    #[msg("Game is full")]
+    GameIsFull,
+
+    #[msg("Game cannot be cancelled")]
+    GameCannotBeCancelled,
+
     #[msg("No users to refund")]
     NoUsersToRefund,
 
@@ -88,4 +91,25 @@ pub enum RalliError {
 
     #[msg("Invalid account owner")]
     InvalidAccountOwner,
+
+    #[msg("Escrow game mismatch")]
+    EscrowGameMismatch,
+
+    #[msg("Refund window has expired")]
+    RefundWindowExpired,
+
+    #[msg("Invalid game creation time")]
+    InvalidGameCreationTime,
+
+    #[msg("Arithmetic overflow occurred")]
+    ArithmeticOverflow,
+
+    #[msg("Invalid max users")]
+    InvalidMaxUsers,
+
+    #[msg("Game result mismatch")]
+    GameResultMismatch,
+
+    #[msg("Duplicate user account")]
+    DuplicateUserAccount,
 }
