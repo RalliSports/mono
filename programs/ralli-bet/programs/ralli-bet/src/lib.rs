@@ -27,11 +27,15 @@ pub mod ralli_bet {
         ctx.accounts.join_game()
     }
 
-    pub fn refund_entry(
-        ctx: Context<RefundEntry>,
-        remaining_accounts: Vec<AccountInfo>,
-    ) -> Result<()> {
-        ctx.accounts.refund_all_users(&remaining_accounts)
+    // pub fn refund_entry<'a>(
+    //     ctx: Context<RefundEntry<'a>>,
+    //     remaining_accounts: Vec<AccountInfo<'a>>,
+    // ) -> Result<()> {
+    //     ctx.accounts.refund_all_users(&remaining_accounts)
+    // }
+
+    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+        ctx.accounts.cancel_game()
     }
 
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
