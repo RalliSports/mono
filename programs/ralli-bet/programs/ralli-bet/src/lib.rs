@@ -8,7 +8,7 @@ pub mod errors;
 use instructions::*;
 
 
-declare_id!("ChmHckgUpnwUiyfTw4xymNcnAqWT9JmQW3n4HctBCKPG");
+declare_id!("DxZXSZ2ax3zpEdeLhvadEZqauMnexKZ9yD5NqgoAkHAd");
 
 #[program]
 pub mod ralli_bet {
@@ -42,13 +42,14 @@ pub mod ralli_bet {
     //     instructions::resolve_game::handler(ctx, stat_results)
     // }
 
-    // pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
-    //     instructions::cancel_game::handler(ctx)
-    // }
+    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+        ctx.accounts.cancel_game()
+    }
 
     // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
     // pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
-    //     instructions::refund_entry::handler(ctx)
+    //     ctx.accounts.refund_all_users(&ctx.remaining_accounts)
     // }
+
 }
