@@ -214,4 +214,3 @@ impl<'info> RefundEntry<'info> {
 
         Ok(())
     }
-}
