@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ParlayModule } from './parlay/parlay.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
+import { WebsocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule,
     ParlayModule,
     AuthModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],
