@@ -112,4 +112,16 @@ pub enum RalliError {
 
     #[msg("Duplicate user account")]
     DuplicateUserAccount,
+
+    #[msg("Unauthorized cancellation")]
+    UnauthorizedCancellation,
+
+    #[msg("Bets have already started")]
+    BetsAlreadyStarted,
+
+    #[msg("No valid reason to cancel the game")]
+    NoValidReasonToCancel,
+
+    #[msg("Treasury is not empty")]
+    TreasuryNotEmpty,
 }
