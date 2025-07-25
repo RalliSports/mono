@@ -1,9 +1,10 @@
 use anchor_lang::prelude::*;
+use crate::state::line::Direction;
 
 #[account]
 pub struct Bet {
     pub game: Pubkey,
-    pub user: Pubkey,
+    pub player: Pubkey,
     pub picks: Vec<Pick>,
     pub correct_count: u8,
     pub submitted_at: i64,
@@ -11,18 +12,12 @@ pub struct Bet {
 }
 
 impl Bet {
-    pub const MAX_SIZE: usize = 8 + 32 + 32 + (4 + 6 * (2 + 1 + 8)) + 1 + 8 + 1;
+    // Adjusted size for the new Pick structure
+    pub const MAX_SIZE: usize = 8 + 32 + 32 + (4 + 6 * (32 + 1)) + 1 + 8 + 1;
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct Pick {
-    pub stat_id: u16,
+    pub line_id: Pubkey,
     pub direction: Direction,
-    pub threshold: u64,
-}
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
-pub enum Direction {
-    Over,
-    Under,
 }
