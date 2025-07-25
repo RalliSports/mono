@@ -7,7 +7,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("ChmHckgUpnwUiyfTw4xymNcnAqWT9JmQW3n4HctBCKPG");
+declare_id!("LRhAmFhGim1KcSvCBBBndkpPF9Shm9B843QCEa94GUh");
 
 #[program]
 pub mod ralli_bet {
@@ -52,10 +52,6 @@ pub mod ralli_bet {
     // ) -> Result<()> {
     //     instructions::resolve_game::handler(ctx, stat_results)
     // }
-
-    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
-        ctx.accounts.cancel_game()
-    }
 
     // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
