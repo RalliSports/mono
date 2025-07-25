@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { Connection, PublicKey, SystemProgram , Keypair} from "@solana/web3.js";
 
-const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+const connection = new Connection("http://127.0.0.1:8899", "confirmed");
 
 const keypairPath = path.resolve(process.env.HOME!, ".config/solana/id.json");
 
@@ -19,10 +19,11 @@ const keypair = Keypair.fromSecretKey(secretKey);
 const wallet = new anchor.Wallet(keypair);
 
 const provider = new anchor.AnchorProvider(
-  new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+  new anchor.web3.Connection("http://127.0.0.1:8899", "confirmed"),
   wallet,
   { commitment: "confirmed" }
 );
+
 
 anchor.setProvider(provider);
 
@@ -91,5 +92,21 @@ describe("ralli-bet", () => {
     
     const gameEscrowAccount = await program.account.gameEscrow.fetch(gameEscrow);
     console.log("Game Escrow Account after join:", gameEscrowAccount);
-  })
+  });
+
+  it("Cancel game", async () => {
+    try {
+      const tx = await program.methods.cancelGame().accountsPartial({
+        game: game,
+        gameEscrow: gameEscrow,
+        user: userKeypair.publicKey,
+        systemProgram: SystemProgram.programId,
+      }).signers([userKeypair]).rpc();
+
+      console.log(`Cancel Game Transaction Signature: ${tx}`);
+    } catch (err) {
+      console.error("Cancel game failed:", err);
+    }
+  });
+
 });
