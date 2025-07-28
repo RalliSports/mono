@@ -7,8 +7,7 @@ pub mod errors;
 
 use instructions::*;
 
-
-declare_id!("DxZXSZ2ax3zpEdeLhvadEZqauMnexKZ9yD5NqgoAkHAd");
+declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
 
 #[program]
 pub mod ralli_bet {
@@ -48,8 +47,7 @@ pub mod ralli_bet {
 
     // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
-    // pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
-    //     ctx.accounts.refund_all_users(&ctx.remaining_accounts)
-    // }
-
+    pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
+        ctx.accounts.refund_all_users(&ctx.remaining_accounts)
+    }
 }

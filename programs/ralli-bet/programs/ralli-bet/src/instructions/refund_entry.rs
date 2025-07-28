@@ -50,11 +50,11 @@ impl<'info> RefundEntry<'info> {
         require!(!game_result.resolved, RalliError::GameAlreadyResolved);
 
         // Game must not be already cancelled
-        require_neq!(
-            game.status.clone(),
-            GameStatus::Cancelled,
-            RalliError::GameAlreadyCancelled
-        );
+        // require_neq!(
+        //     game.status.clone(),
+        //     GameStatus::Cancelled,
+        //     RalliError::GameAlreadyCancelled
+        // );
 
         // Game must have users to refund
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
@@ -213,5 +213,7 @@ impl<'info> RefundEntry<'info> {
         );
 
         Ok(())
-    }
+    };
+
+    
 }
