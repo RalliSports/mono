@@ -56,6 +56,7 @@ impl<'info> RefundEntry<'info> {
             RalliError::GameAlreadyCancelled
         );
 
+
         // Game must have users to refund
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
 
@@ -213,5 +214,7 @@ impl<'info> RefundEntry<'info> {
         );
 
         Ok(())
-    }
+    };
+
+    
 }

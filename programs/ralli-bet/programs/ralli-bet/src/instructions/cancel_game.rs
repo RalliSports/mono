@@ -31,7 +31,6 @@ impl<'info> CancelGame<'info> {
         let game_escrow = &mut self.game_escrow;
         let user = &self.user;
 
-        // Can only cancel open games
         require_eq!(
             game.status.clone(),
             GameStatus::Open,
