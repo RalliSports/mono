@@ -20,6 +20,7 @@ const provider = new anchor.AnchorProvider(
   { commitment: "confirmed" }
 );
 
+
 anchor.setProvider(provider);
 const program = anchor.workspace.RalliBet as Program<RalliBet>;
 
@@ -710,4 +711,24 @@ describe("RalliBet Comprehensive Tests", () => {
     }
   });
 });
+    console.log("Game Account after join:", gameAccount);
+    
+    const gameEscrowAccount = await program.account.gameEscrow.fetch(gameEscrow);
+    console.log("Game Escrow Account after join:", gameEscrowAccount);
+  });
+
+  it("Cancel game", async () => {
+    try {
+      const tx = await program.methods.cancelGame().accountsPartial({
+        game: game,
+        gameEscrow: gameEscrow,
+        user: userKeypair.publicKey,
+        systemProgram: SystemProgram.programId,
+      }).signers([userKeypair]).rpc();
+
+      console.log(`Cancel Game Transaction Signature: ${tx}`);
+    } catch (err) {
+      console.error("Cancel game failed:", err);
+    }
+  });
 });

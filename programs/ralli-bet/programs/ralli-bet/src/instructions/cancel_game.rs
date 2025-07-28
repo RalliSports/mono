@@ -31,12 +31,11 @@ impl<'info> CancelGame<'info> {
         let game_escrow = &mut self.game_escrow;
         let user = &self.user;
 
-        // Can only cancel open games
-        // require_eq!(
-        //     game.status.clone(),
-        //     GameStatus::Open,
-        //     RalliError::GameMustBeOpen
-        // );
+        require_eq!(
+            game.status.clone(),
+            GameStatus::Open,
+            RalliError::GameMustBeOpen
+        );
 
         // Check if user is a valid participant in the game (including creator)
         let is_valid_user = game.users.contains(&user.key()) || game.creator == user.key();
