@@ -16,27 +16,26 @@ pub mod ralli_bet {
     pub fn create_game(
         ctx: Context<CreateGame>,
         game_id: u64,
-        max_players: u8,
+        max_users: u8,
         entry_fee: u64,
+        admin: Option<Pubkey>,
     ) -> Result<()> {
         ctx.accounts
-            .create_game(game_id, max_players, entry_fee, &ctx.bumps)
+            .create_game(game_id, max_users, entry_fee, admin, &ctx.bumps)
     }
 
     pub fn join_game(ctx: Context<JoinGame>) -> Result<()> {
         ctx.accounts.join_game()
     }
 
-    // pub fn refund_entry<'a>(
-    //     ctx: Context<RefundEntry<'a>>,
-    //     remaining_accounts: Vec<AccountInfo<'a>>,
-    // ) -> Result<()> {
-    //     ctx.accounts.refund_all_users(&remaining_accounts)
-    // }
+    pub fn withdraw_submission(ctx: Context<WithdrawSubmission>) -> Result<()> {
+        ctx.accounts.withdraw_submission()
+    }
 
-    // pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
-    //     ctx.accounts.cancel_game()
-    // }
+    pub fn cancel_game<'info>(ctx: Context<'_, '_, '_, 'info, CancelGame<'info>>) -> Result<()> {
+        let remaining_accounts = ctx.remaining_accounts;
+        ctx.accounts.cancel_game(remaining_accounts)
+    }
 
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
@@ -53,19 +52,11 @@ pub mod ralli_bet {
     //     instructions::resolve_game::handler(ctx, stat_results)
     // }
 
-    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
-        ctx.accounts.cancel_game()
-    }
-
-    // removed update_game, it can be vulnerable, this can create some sortof backdoor
-
-    pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
-        ctx.accounts.refund_all_users(&ctx.remaining_accounts)
-    }
-    // removed update_game, it can be vulnerable, this can create some sortof backdoor
+    // pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+    //     ctx.accounts.cancel_game()
+    // }
 
     // pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
     //     ctx.accounts.refund_all_users(&ctx.remaining_accounts)
     // }
-
 }

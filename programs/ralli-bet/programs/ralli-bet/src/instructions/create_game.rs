@@ -35,6 +35,7 @@ impl<'info> CreateGame<'info> {
         game_id: u64,
         max_users: u8,
         entry_fee: u64,
+        admin: Option<Pubkey>,
         bumps: &CreateGameBumps,
     ) -> Result<()> {
         require!(max_users >= 2, RalliError::NotEnoughUsers);
@@ -45,15 +46,19 @@ impl<'info> CreateGame<'info> {
         let game_escrow = &mut self.game_escrow;
         let clock = Clock::get()?;
 
+        let admin_key = admin.unwrap_or(self.creator.key());
+
         game.set_inner(Game {
             game_id,
             creator: self.creator.key(),
+            admin: admin_key,
             users: Vec::new(),
             max_users,
             entry_fee,
             status: GameStatus::Open,
             created_at: clock.unix_timestamp,
             locked_at: None,
+            lines: Vec::new(), // Initialize empty lines vector
             bump: bumps.game,
         });
 
