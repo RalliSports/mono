@@ -1,15 +1,18 @@
 import { relations } from "drizzle-orm";
-import { pgTable, varchar, pgEnum } from "drizzle-orm/pg-core";
+
+import { pgTable, varchar, pgEnum, timestamp } from "drizzle-orm/pg-core";
 import { games } from "./games";
 import { users } from "./users";
+import { uuid } from "drizzle-orm/pg-core";
 
-export const accessStatusEnum = pgEnum("accessStatus", ["whitelisted", "blacklisted"]);
+export const accessStatusEnum = pgEnum("access_status", ["whitelisted", "blacklisted"]);
 
 export const game_access = pgTable("game_access", {
-  id: varchar("id").primaryKey(),
-  gameId: varchar("game_id"),
+  id: uuid("id").primaryKey().defaultRandom(),
+  gameId: uuid("game_id"),
   userId: varchar("user_id"),
-  status: accessStatusEnum("accessStatus"),
+  status: accessStatusEnum("access_status"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 
