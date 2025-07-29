@@ -1,11 +1,14 @@
 import { relations } from "drizzle-orm";
-import { pgTable, varchar } from "drizzle-orm/pg-core";
+
+import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { games } from "./games";
+import { uuid } from "drizzle-orm/pg-core";
 
 export const game_mode = pgTable("game_mode", {
-  id: varchar("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   label: varchar("label"),
   description: varchar("description"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 

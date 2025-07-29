@@ -1,9 +1,11 @@
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
-import schema from '@repo/db';
+import * as schema from '@repo/db';
 
 export const DRIZZLE_PROVIDER = 'DRIZZLE_PROVIDER';
+
+export type Database = NodePgDatabase<typeof schema>
 
 export const drizzleProvider = [
   {
@@ -14,7 +16,7 @@ export const drizzleProvider = [
       const pool = new Pool({
         connectionString,
       });
-      return drizzle(pool, { schema, casing: 'snake_case' }) as NodePgDatabase<typeof schema>;
+      return drizzle(pool, { schema, casing: 'snake_case' }) as Database;
     },
   },
 ];
