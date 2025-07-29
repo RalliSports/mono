@@ -37,7 +37,8 @@
     "db:generate": "drizzle-kit generate",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "db:migrate": "drizzle-kit migrate",
-    "seed": "tsx src/seeds/index.ts",
+    "db:seed": "tsx src/seeds/index.ts",
+    "prepare": "pnpm db:generate && pnpm db:migrate && pnpm build",
     "studio": "drizzle-kit studio"
   },
   "types": "dist/index.d.ts"
