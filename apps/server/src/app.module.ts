@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { GamesModule } from './games/games.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     DatabaseModule,
     AuthModule,
     WebsocketModule,
+    GamesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

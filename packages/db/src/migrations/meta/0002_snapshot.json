@@ -1,6 +1,6 @@
 {
-  "id": "a3ba37b9-933c-46b6-96c3-f9f2f7069504",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "13e88353-2336-4aac-83d2-6599b912ab93",
+  "prevId": "34a8400a-5be8-477f-a7c2-439bcb6009de",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -171,7 +171,7 @@
         },
         "creator_id": {
           "name": "creator_id",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -234,12 +234,6 @@
           "name": "type",
           "type": "type",
           "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "game_access_id": {
-          "name": "game_access_id",
-          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },

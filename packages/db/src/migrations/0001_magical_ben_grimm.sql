@@ -1,0 +1,1 @@
+ALTER TABLE "games" ALTER COLUMN "creator_id" SET DATA TYPE text;

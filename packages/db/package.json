@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-     "@repo/eslint-config": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "argon2": "^0.43.0",
     "dotenv": "^16.5.0",

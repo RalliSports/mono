@@ -3,13 +3,14 @@ import { roles } from "./roles";
 import { relations } from "drizzle-orm";
 import { participants } from "./participants";
 import { games } from "./games";
+import { uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey(),
+  id:  uuid("id").primaryKey().defaultRandom(),
   username: varchar("username"),
   walletAddress: varchar("wallet_address"),
   createdAt: timestamp("created_at", { withTimezone: true }),
-  roleId: varchar("role_id").references(() => roles.id),
+  roleId: uuid("role_id").references(() => roles.id),
 });
 
 export const usersRelations = relations(users, ({ many, one }) => ({

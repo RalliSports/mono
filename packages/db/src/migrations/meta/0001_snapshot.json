@@ -1,6 +1,6 @@
 {
-  "id": "a3ba37b9-933c-46b6-96c3-f9f2f7069504",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "34a8400a-5be8-477f-a7c2-439bcb6009de",
+  "prevId": "a3ba37b9-933c-46b6-96c3-f9f2f7069504",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -171,7 +171,7 @@
         },
         "creator_id": {
           "name": "creator_id",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

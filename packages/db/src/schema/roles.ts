@@ -1,10 +1,12 @@
 import { relations } from "drizzle-orm";
-import { pgTable, varchar } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { uuid } from "drizzle-orm/pg-core";
 
 export const roles = pgTable("roles", {
-  id: varchar("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const rolesRelations = relations(roles, ({ many }) => ({
