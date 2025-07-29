@@ -7,7 +7,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("LRhAmFhGim1KcSvCBBBndkpPF9Shm9B843QCEa94GUh");
+declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
 
 #[program]
 pub mod ralli_bet {
@@ -34,9 +34,9 @@ pub mod ralli_bet {
     //     ctx.accounts.refund_all_users(&remaining_accounts)
     // }
 
-    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
-        ctx.accounts.cancel_game()
-    }
+    // pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+    //     ctx.accounts.cancel_game()
+    // }
 
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
@@ -53,6 +53,15 @@ pub mod ralli_bet {
     //     instructions::resolve_game::handler(ctx, stat_results)
     // }
 
+    pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
+        ctx.accounts.cancel_game()
+    }
+
+    // removed update_game, it can be vulnerable, this can create some sortof backdoor
+
+    pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
+        ctx.accounts.refund_all_users(&ctx.remaining_accounts)
+    }
     // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
     // pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {

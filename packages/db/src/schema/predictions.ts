@@ -1,3 +1,4 @@
+
 import {
   pgTable,
   varchar,
@@ -5,11 +6,13 @@ import {
   boolean,
   timestamp,
 } from "drizzle-orm/pg-core";
+
 import { participants } from "./participants";
 import { athletes } from "./athletes";
 import { stats } from "./stats";
 import { matchups } from "./matchups";
 import { relations } from "drizzle-orm";
+
 import { uuid } from "drizzle-orm/pg-core";
 
 export const predictions = pgTable("predictions", {
@@ -42,4 +45,6 @@ export const predictionsRelations = relations(predictions, ({ one }) => ({
     fields: [predictions.matchupId],
     references: [matchups.id],
   }),
+
 }));
+

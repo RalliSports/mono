@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { uuid } from "drizzle-orm/pg-core";

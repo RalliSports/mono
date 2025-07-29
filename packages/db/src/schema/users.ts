@@ -3,6 +3,7 @@ import { roles } from "./roles";
 import { relations } from "drizzle-orm";
 import { participants } from "./participants";
 import { games } from "./games";
+
 import { uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {

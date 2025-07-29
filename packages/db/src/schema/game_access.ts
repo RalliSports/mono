@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+
 import { pgTable, varchar, pgEnum, timestamp } from "drizzle-orm/pg-core";
 import { games } from "./games";
 import { users } from "./users";

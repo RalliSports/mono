@@ -1,4 +1,5 @@
 {
+
   "id": "a3ba37b9-933c-46b6-96c3-f9f2f7069504",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
@@ -10,11 +11,41 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team": {
+          "name": "team",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "position": {
+          "name": "position",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jersey_number": {
+          "name": "jersey_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "age": {
+          "name": "age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+
         "name": {
           "name": "name",
           "type": "varchar",
@@ -83,10 +114,43 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+
+        "picture": {
+          "name": "picture",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.game_access": {
+      "name": "game_access",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "user_id": {
           "name": "user_id",
           "type": "varchar",
+
           "primaryKey": false,
           "notNull": false
         },
@@ -175,6 +239,80 @@
           "primaryKey": false,
           "notNull": false
         },
+
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accessStatus": {
+          "name": "accessStatus",
+          "type": "accessStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.game_mode": {
+      "name": "game_mode",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.games": {
+      "name": "games",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creator_id": {
+          "name": "creator_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+
         "deposit_amount": {
           "name": "deposit_amount",
           "type": "numeric",
@@ -193,6 +331,15 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+
+          "notNull": false
+        },
+        "invite_link": {
+          "name": "invite_link",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+
         },
         "status": {
           "name": "status",
@@ -239,7 +386,9 @@
         },
         "game_access_id": {
           "name": "game_access_id",
+
           "type": "uuid",
+
           "primaryKey": false,
           "notNull": false
         },
@@ -252,6 +401,7 @@
         },
         "game_mode_id": {
           "name": "game_mode_id",
+
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -428,10 +578,12 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
+
         }
       },
       "indexes": {},
       "foreignKeys": {
+
         "participants_game_id_games_id_fk": {
           "name": "participants_game_id_games_id_fk",
           "tableFrom": "participants",
@@ -443,6 +595,7 @@
             "id"
           ],
           "onDelete": "no action",
+
           "onUpdate": "no action"
         }
       },
@@ -452,17 +605,19 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+
     "public.predictions": {
       "name": "predictions",
+
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
+
         "participant_id": {
           "name": "participant_id",
           "type": "uuid",
@@ -521,6 +676,7 @@
       },
       "indexes": {},
       "foreignKeys": {
+
         "predictions_participant_id_participants_id_fk": {
           "name": "predictions_participant_id_participants_id_fk",
           "tableFrom": "predictions",
@@ -553,6 +709,7 @@
           "tableTo": "stats",
           "columnsFrom": [
             "stat_id"
+
           ],
           "columnsTo": [
             "id"
@@ -560,6 +717,7 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+
         "predictions_matchup_id_matchups_id_fk": {
           "name": "predictions_matchup_id_matchups_id_fk",
           "tableFrom": "predictions",
@@ -580,17 +738,36 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+
     "public.roles": {
       "name": "roles",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "athlete_id": {
+          "name": "athlete_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stat_id": {
+          "name": "stat_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+
         "name": {
           "name": "name",
           "type": "varchar",
@@ -603,6 +780,7 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+
         }
       },
       "indexes": {},
@@ -623,10 +801,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+
         },
         "name": {
           "name": "name",
           "type": "varchar",
+
           "primaryKey": false,
           "notNull": false
         },
@@ -635,17 +815,49 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wallet_address": {
+          "name": "wallet_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
+          "notNull": false
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "users_role_id_roles_id_fk": {
+          "name": "users_role_id_roles_id_fk",
+          "tableFrom": "users",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -712,6 +924,7 @@
     }
   },
   "enums": {
+
     "public.access_status": {
       "name": "access_status",
       "schema": "public",

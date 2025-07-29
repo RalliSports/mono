@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { predictions } from "./predictions";
 import { uuid } from "drizzle-orm/pg-core";
@@ -8,7 +9,6 @@ export const stats = pgTable("stats", {
   name: varchar("name"),
   description: varchar("description"),
   createdAt: timestamp("created_at").defaultNow(),
-  
 });
 
 
