@@ -7,7 +7,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("ChmHckgUpnwUiyfTw4xymNcnAqWT9JmQW3n4HctBCKPG");
+declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
 
 #[program]
 pub mod ralli_bet {
@@ -55,8 +55,6 @@ pub mod ralli_bet {
     // pub fn cancel_game(ctx: Context<CancelGame>) -> Result<()> {
     //     ctx.accounts.cancel_game()
     // }
-
-    // removed update_game, it can be vulnerable, this can create some sortof backdoor
 
     // pub fn refund_entry(ctx: Context<RefundEntry>) -> Result<()> {
     //     ctx.accounts.refund_all_users(&ctx.remaining_accounts)
