@@ -29,6 +29,16 @@ pub enum RalliError {
     #[msg("Bet already submitted")]
     BetAlreadySubmitted,
 
+    #[msg("Invalid line start time - must be in the future")]
+    InvalidLineStartTime,
+    
+    #[msg("Line start time does not match provided line account")]
+    LineStartTimeMismatch,
+    
+    #[msg("Line is not part of this game")]
+    LineNotInGame,
+
+
     #[msg("Not enough users to lock game")]
     NotEnoughUsers,
 

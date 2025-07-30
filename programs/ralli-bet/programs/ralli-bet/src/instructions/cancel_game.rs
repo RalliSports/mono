@@ -1,7 +1,9 @@
 use crate::errors::RalliError;
 use crate::state::*;
+use crate::constants::*;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
+
 
 #[derive(Accounts)]
 pub struct CancelGame<'info> {
@@ -32,7 +34,7 @@ pub struct CancelGame<'info> {
 }
 
 impl<'info> CancelGame<'info> {
-    pub fn cancel_game(&mut self, remaining_accounts: &[AccountInfo<'info>]) -> Result<()> {
+    pub fn cancel_game(&mut self, remaining_accounts: &'info [AccountInfo<'info>]) -> Result<()> {
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
         let game_result = &self.game_result;
@@ -58,7 +60,7 @@ impl<'info> CancelGame<'info> {
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
 
         // Check authorization: Admin can always cancel, or single user can cancel their own game
-        let is_admin = admin_or_user.key() == game.admin;
+        let is_admin = admin_or_user.key() == ADMIN_PUBLIC_KEY;
         let is_single_user_game = game.users.len() == 1 && game.users[0] == admin_or_user.key();
 
         require!(
@@ -87,14 +89,18 @@ impl<'info> CancelGame<'info> {
                     let line_accounts = &remaining_accounts[user_count..];
                     
                     for line_account in line_accounts {
-                        // Deserialize Line account to check should_refund_bettors
-                        let line_data = line_account.try_borrow_data()?;
-                        if line_data.len() >= 8 + 2 + 8 + 32 + 8 + 1 + 1 { // Minimum Line size
-                            // Parse should_refund_bettors field (offset calculation based on Line struct)
-                            let should_refund_offset = 8 + 2 + 8 + 32 + 8 + 1; // After result field
-                            if line_data[should_refund_offset] == 1 {
-                                should_cancel = true;
-                                break;
+                        // Try to cast AccountInfo to Account<Line> for type-safe access
+                        match Account::<Line>::try_from(line_account) {
+                            Ok(line) => {
+                                if line.should_refund_bettors {
+                                    should_cancel = true;
+                                    break;
+                                }
+                            }
+                            Err(_) => {
+                                // Skip invalid Line accounts
+                                msg!("Warning: Invalid Line account in remaining_accounts");
+                                continue;
                             }
                         }
                     }
@@ -112,7 +118,7 @@ impl<'info> CancelGame<'info> {
 
         // Validate max_users is reasonable
         require!(
-            game.max_users > 0 && game.max_users <= 50, // Updated to match create_game limit
+            game.max_users > 0 && game.max_users <= MAX_USERS_LIMIT,
             RalliError::InvalidMaxUsers
         );
 
