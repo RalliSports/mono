@@ -22,11 +22,18 @@ pub struct WithdrawSubmission<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
+    /// Optional: Line account with the new earliest start time (if provided)
+    /// CHECK: Validated in instruction logic if provided
+    pub new_earliest_line: Option<Account<'info, Line>>,
+
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> WithdrawSubmission<'info> {
-    pub fn withdraw_submission(&mut self) -> Result<()> {
+    pub fn withdraw_submission(
+        &mut self, 
+        new_first_line_starts_at: Option<i64>
+    ) -> Result<()> {
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
         let user = &self.user;
@@ -52,14 +59,11 @@ impl<'info> WithdrawSubmission<'info> {
         if game.users.len() >= 2 {
             let current_time = Clock::get()?.unix_timestamp;
 
-            // Check if any of the lines in this game have started
-            // Assuming game has a lines field with first_line_starts_at timestamps
-            for line in &game.lines {
-                require!(
-                    current_time < line.first_line_starts_at,
-                    RalliError::BetsAlreadyStarted
-                );
-            }
+            // Check using the global first_line_starts_at on the Game object
+            require!(
+                current_time < game.first_line_starts_at,
+                RalliError::BetsAlreadyStarted
+            );
         }
         // If there's only 1 player (the user themselves), they can always withdraw
 
@@ -105,10 +109,51 @@ impl<'info> WithdrawSubmission<'info> {
             game.users.remove(pos);
         }
 
-        // If no users left after removal, mark game as cancelled
+        // Update first_line_starts_at if a new earliest time is provided
+        if let Some(new_start_time) = new_first_line_starts_at {
+            // Validate that the new start time is reasonable (not in the past, not too far in future)
+            let current_time = Clock::get()?.unix_timestamp;
+            require!(
+                new_start_time > current_time,
+                RalliError::InvalidLineStartTime
+            );
+
+            // If a line account is provided, validate it matches the new start time
+            if let Some(ref line_account) = self.new_earliest_line {
+                require_eq!(
+                    line_account.starts_at,
+                    new_start_time,
+                    RalliError::LineStartTimeMismatch
+                );
+
+                // Validate this line is actually part of this game (check involved_lines)
+                require!(
+                    game.involved_lines.contains(&line_account.key()),
+                    RalliError::LineNotInGame
+                );
+            }
+
+            // Update the game's first_line_starts_at
+            game.first_line_starts_at = new_start_time;
+
+            msg!(
+                "Updated first_line_starts_at to {} for game {}",
+                new_start_time,
+                game.game_id
+            );
+        }
+
+        // If no users left after removal, mark game as cancelled and clear vectors
         if game.users.is_empty() {
             game.status = GameStatus::Cancelled;
             game.locked_at = Some(Clock::get()?.unix_timestamp);
+            
+            // Clear lines and involved_lines when game is cancelled
+            game.lines.clear();
+            game.involved_lines.clear();
+            
+            // Reset first_line_starts_at when no users left
+            game.first_line_starts_at = i64::MAX;
 
             msg!(
                 "Game {} fully cancelled - no users remaining. Final withdrawal by user {}",

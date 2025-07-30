@@ -50,6 +50,7 @@ impl<'info> CreateGame<'info> {
 
         game.set_inner(Game {
             game_id,
+            first_line_starts_at: i64::MAX, // Initialize to max value (no lines yet)
             creator: self.creator.key(),
             admin: admin_key,
             users: Vec::new(),
@@ -59,6 +60,7 @@ impl<'info> CreateGame<'info> {
             created_at: clock.unix_timestamp,
             locked_at: None,
             lines: Vec::new(), // Initialize empty lines vector
+            involved_lines: Vec::new(), // Initialize empty involved_lines vector
             bump: bumps.game,
         });
 

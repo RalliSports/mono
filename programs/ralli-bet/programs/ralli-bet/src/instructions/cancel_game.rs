@@ -1,7 +1,9 @@
 use crate::errors::RalliError;
 use crate::state::*;
+use crate::constants::*;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
+
 
 #[derive(Accounts)]
 pub struct CancelGame<'info> {
@@ -32,7 +34,7 @@ pub struct CancelGame<'info> {
 }
 
 impl<'info> CancelGame<'info> {
-    pub fn cancel_game(&mut self, remaining_accounts: &[AccountInfo<'info>]) -> Result<()> {
+    pub fn cancel_game(&mut self, remaining_accounts: &'info [AccountInfo<'info>]) -> Result<()> {
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
         let game_result = &self.game_result;
@@ -58,7 +60,7 @@ impl<'info> CancelGame<'info> {
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
 
         // Check authorization: Admin can always cancel, or single user can cancel their own game
-        let is_admin = admin_or_user.key() == game.admin; // Assuming admin field exists in Game struct
+        let is_admin = admin_or_user.key() == ADMIN_PUBLIC_KEY;
         let is_single_user_game = game.users.len() == 1 && game.users[0] == admin_or_user.key();
 
         require!(
@@ -70,24 +72,40 @@ impl<'info> CancelGame<'info> {
         if game.users.len() >= 2 {
             let current_time = Clock::get()?.unix_timestamp;
 
-            // Check if any of the lines in this game have started
-            // Assuming game has a lines field with first_line_starts_at timestamps
-            for line in &game.lines {
-                require!(
-                    current_time < line.first_line_starts_at,
-                    RalliError::BetsAlreadyStarted
-                );
-            }
+            // Check using the global first_line_starts_at on the Game object
+            require!(
+                current_time < game.first_line_starts_at,
+                RalliError::BetsAlreadyStarted
+            );
 
-            // For admin cancellation of multi-player games, check should_refund_bettors
+            // For admin cancellation of multi-player games, check should_refund_bettors on involved lines
             if is_admin {
                 let mut should_cancel = false;
-                for line in &game.lines {
-                    if line.should_refund_bettors {
-                        should_cancel = true;
-                        break;
+                
+                // Check involved_lines using remaining_accounts for Line PDAs
+                // Note: This assumes remaining_accounts contains Line accounts after user accounts
+                let user_count = game.users.len();
+                if remaining_accounts.len() > user_count {
+                    let line_accounts = &remaining_accounts[user_count..];
+                    
+                    for line_account in line_accounts {
+                        // Try to cast AccountInfo to Account<Line> for type-safe access
+                        match Account::<Line>::try_from(line_account) {
+                            Ok(line) => {
+                                if line.should_refund_bettors {
+                                    should_cancel = true;
+                                    break;
+                                }
+                            }
+                            Err(_) => {
+                                // Skip invalid Line accounts
+                                msg!("Warning: Invalid Line account in remaining_accounts");
+                                continue;
+                            }
+                        }
                     }
                 }
+                
                 require!(should_cancel, RalliError::NoValidReasonToCancel);
             }
         }
@@ -100,7 +118,7 @@ impl<'info> CancelGame<'info> {
 
         // Validate max_users is reasonable
         require!(
-            game.max_users > 0 && game.max_users <= 10, // Adjust limit as needed
+            game.max_users > 0 && game.max_users <= MAX_USERS_LIMIT,
             RalliError::InvalidMaxUsers
         );
 
@@ -146,9 +164,12 @@ impl<'info> CancelGame<'info> {
             RalliError::EscrowGameMismatch
         );
 
-        // Check for duplicate user accounts in remaining_accounts
+        // Extract user accounts from remaining_accounts (first N accounts are users)
+        let user_accounts = &remaining_accounts[..game.users.len()];
+
+        // Check for duplicate user accounts
         let mut seen_accounts = std::collections::HashSet::new();
-        for account in remaining_accounts {
+        for account in user_accounts {
             require!(
                 seen_accounts.insert(account.key()),
                 RalliError::DuplicateUserAccount
@@ -161,10 +182,9 @@ impl<'info> CancelGame<'info> {
             RalliError::GameResultMismatch
         );
 
-        // Ensure we have remaining accounts for all users
-        require_eq!(
-            remaining_accounts.len(),
-            game.users.len(),
+        // Ensure we have at least the user accounts
+        require!(
+            remaining_accounts.len() >= game.users.len(),
             RalliError::InvalidAccountCount
         );
 
@@ -174,7 +194,7 @@ impl<'info> CancelGame<'info> {
         let signer = &[&escrow_seeds[..]];
 
         // Refund each user
-        for (i, user_account) in remaining_accounts.iter().enumerate() {
+        for (i, user_account) in user_accounts.iter().enumerate() {
             // Verify this account matches the user in the game
             require_eq!(
                 user_account.key(),
@@ -225,6 +245,10 @@ impl<'info> CancelGame<'info> {
         // Clear users list
         game.users.clear();
 
+        // Clear lines and involved_lines
+        game.lines.clear();
+        game.involved_lines.clear();
+
         // Set game status to cancelled
         game.status = GameStatus::Cancelled;
 
@@ -233,7 +257,7 @@ impl<'info> CancelGame<'info> {
 
         msg!(
             "Successfully cancelled and refunded all {} users for game {} (ID: {})",
-            remaining_accounts.len(),
+            user_accounts.len(),
             game.key(),
             game.game_id
         );

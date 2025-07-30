@@ -4,6 +4,7 @@ use anchor_lang::prelude::*;
 pub mod errors;
 pub mod instructions;
 pub mod state;
+pub mod constants;
 
 use instructions::*;
 
@@ -28,11 +29,11 @@ pub mod ralli_bet {
         ctx.accounts.join_game()
     }
 
-    pub fn withdraw_submission(ctx: Context<WithdrawSubmission>) -> Result<()> {
-        ctx.accounts.withdraw_submission()
+    pub fn withdraw_submission(ctx: Context<WithdrawSubmission>, new_first_line_starts_at: Option<i64>) -> Result<()> {
+        ctx.accounts.withdraw_submission(new_first_line_starts_at)
     }
 
-    pub fn cancel_game<'info>(ctx: Context<'_, '_, '_, 'info, CancelGame<'info>>) -> Result<()> {
+    pub fn cancel_game<'info>(ctx: Context<'_, '_, 'info, 'info, CancelGame<'info>>) -> Result<()> {
         let remaining_accounts = ctx.remaining_accounts;
         ctx.accounts.cancel_game(remaining_accounts)
     }
