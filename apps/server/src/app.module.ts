@@ -4,8 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
-import { WebsocketModule } from './websocket/websocket.module';
 import { GamesModule } from './games/games.module';
+import { WebsocketModule } from './websocket/websocket.module';
 import { LinesModule } from './lines/lines.module';
 
 @Module({

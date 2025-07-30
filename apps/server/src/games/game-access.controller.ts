@@ -45,7 +45,7 @@ export class GameAccessController {
   }
 
   // Todo: Admin update access
-  @Patch(':id')
+  @Patch('/update/game-access/:id')
   update(@Param('id') id: string, @Body() dto: UpdateGameAccessDto) {
     return this.service.update(id, dto);
   }

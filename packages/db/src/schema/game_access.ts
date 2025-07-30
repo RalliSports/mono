@@ -11,7 +11,7 @@ export const game_access = pgTable("game_access", {
   id: uuid("id").primaryKey().defaultRandom(),
   gameId: uuid("game_id"),
   userId: varchar("user_id"),
-  status: accessStatusEnum("access_status"),
+  status: accessStatusEnum("status"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

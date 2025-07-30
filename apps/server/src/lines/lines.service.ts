@@ -5,13 +5,15 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { lines } from '@repo/db';
 import type { InferInsertModel } from 'drizzle-orm';
 import { EspnScoreboardResponse } from './types/espn-odds.types';
+import { Drizzle } from 'src/database/database.decorator';
+import { Database } from 'src/database/database.provider';
 type LineInsert = InferInsertModel<typeof lines>;
 
 @Injectable()
 export class LinesService {
   private readonly logger = new Logger(LinesService.name);
 
-  constructor(private readonly db: NodePgDatabase<any>) {}
+  constructor(@Drizzle() private readonly db: Database) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async fetchAndStoreNFLBettingLines(): Promise<void> {

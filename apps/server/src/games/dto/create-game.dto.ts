@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateGameDto {
@@ -58,7 +59,7 @@ export class CreateGameDto {
   userControlType: 'whitelist' | 'blacklist' | 'none';
 
   @ApiProperty()
-  @IsOptional()
-  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
   gameModeId?: string;
 }

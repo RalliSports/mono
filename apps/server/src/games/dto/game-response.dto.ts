@@ -1,5 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GameAccessResponseDto } from './game-access-response.dto';
+
+export class GameMode {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  label: string;
+
+  @ApiProperty()
+  description: string;
+
+  @ApiProperty()
+  createdAt: string;
+}
+
 
 export class GameResponseDto {
   @ApiProperty()
@@ -42,11 +56,12 @@ export class GameResponseDto {
   type: 'parlay' | 'head_to_head' | 'pool';
 
   @ApiProperty()
-  gameAccess: GameAccessResponseDto;
-
-  @ApiProperty()
   userControlType: 'whitelist' | 'blacklist' | 'none';
 
   @ApiProperty()
   gameModeId: string;
+
+  @ApiProperty()
+  gameMode: GameMode;
 }
+

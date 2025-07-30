@@ -12,14 +12,12 @@ export const gameTypeEnum = pgEnum("type", ["1v1", "limited", "unlimited"]);
 export const userControlTypeEnum = pgEnum("user_control_type", ["whitelist", "blacklist", "none"]);
 
 export const games = pgTable("games", {
-
   id: uuid("id").primaryKey().defaultRandom(),
   title: varchar("title"),
   creatorId: text("creator_id"),
   depositAmount: numeric("deposit_amount", {mode: 'number'}),
   currency: varchar("currency"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-
   status: varchar("status"),
   maxParticipants: integer("max_participants"),
   gameCode: varchar("game_code"),
