@@ -12,6 +12,7 @@ import { seedMatchups } from "./matchups.seed";
 import { seedGames } from "./games.seed";
 import { seedParticipants } from "./participants.seed";
 import { seedPredictions } from "./predictions.seed";
+import { seedLines } from "./lines.seed";
 
 config();
 
@@ -32,6 +33,7 @@ async function seed(db: NodePgDatabase<typeof schema>) {
     await seedMatchups(db);
     await seedGames(db);
     await seedParticipants(db);
+    await seedLines(db);
     await seedPredictions(db);
     console.log("🎉 Database seeding completed successfully!");
   } catch (error) {

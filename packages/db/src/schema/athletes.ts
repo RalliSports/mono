@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { pgTable, varchar, integer, timestamp } from "drizzle-orm/pg-core";
-import { predictions } from "./predictions";
+import { lines } from "./lines";
 import { matchup_performance } from "./matchup_performance";
 import { uuid } from "drizzle-orm/pg-core";
 
@@ -13,10 +13,9 @@ export const athletes = pgTable("athletes", {
   age: integer("age"),
   picture: varchar("picture"),
   createdAt: timestamp("created_at").defaultNow(),
-  
 });
 
 export const athletesRelations = relations(athletes, ({ many }) => ({
-  predictions: many(predictions),
+  lines: many(lines),
   matchupPerformances: many(matchup_performance),
 }));
