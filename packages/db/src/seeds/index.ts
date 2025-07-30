@@ -33,8 +33,8 @@ async function seed(db: NodePgDatabase<typeof schema>) {
     await seedMatchups(db);
     await seedGames(db);
     await seedParticipants(db);
-    await seedPredictions(db);
     await seedLines(db);
+    await seedPredictions(db);
     console.log("🎉 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Seeding data failed:", error);
