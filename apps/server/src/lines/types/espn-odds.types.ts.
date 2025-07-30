@@ -1,0 +1,106 @@
+// ESPN Odds API Types
+
+export interface EspnTeam {
+  id: string;
+  uid: string;
+  location?: string;
+  name: string;
+  abbreviation: string;
+  displayName: string;
+  shortDisplayName: string;
+  color?: string;
+  alternateColor?: string;
+  isActive?: boolean;
+  logo?: string[]; // Array of URLs
+}
+
+export interface EspnOddsOutcome {
+  name: string; // e.g. "Over", "Under", "TeamName"
+  price?: number; // e.g. American odds like -110
+  point?: number; // The line value (e.g., 217.5 for totals)
+  // Add other fields if necessary
+}
+
+export interface EspnOddsMarket {
+  key: string; // e.g. "spreads", "totals", "h2h"
+  outcomes: EspnOddsOutcome[];
+  // Additional fields if needed
+}
+
+export interface EspnOddsProvider {
+  id: string;
+  name: string;
+  priority?: number;
+}
+
+export interface EspnOdds {
+  provider: EspnOddsProvider;
+  details?: string; // E.g., "DET -2"
+  overUnder?: number; // Total points line
+  spread?: number; // Point spread
+  awayTeamOdds?: {
+    favorite: boolean;
+    underdog: boolean;
+    team: EspnTeam;
+  };
+  homeTeamOdds?: {
+    favorite: boolean;
+    underdog: boolean;
+    team: EspnTeam;
+  };
+  markets?: EspnOddsMarket[]; // Sometimes markets is nested
+  // Possibly other fields like 'open', 'current', etc.
+}
+
+export interface EspnCompetition {
+  id: string;
+  odds?: EspnOdds[];
+  // Add other competition fields as needed
+}
+
+export interface EspnEvent {
+  id: string;
+  uid: string;
+  date: string; // ISO date string
+  name: string;
+  shortName?: string;
+  season?: {
+    year: number;
+    type: number;
+    slug?: string;
+  };
+  week?: {
+    number: number;
+  };
+  competitions?: EspnCompetition[];
+  // Other event fields as needed
+}
+
+export interface EspnScoreboardResponse {
+  leagues: Array<{
+    id: string;
+    name: string;
+    abbreviation: string;
+    slug: string;
+    season: {
+      year: number;
+      startDate: string;
+      endDate: string;
+      displayName: string;
+      type: {
+        id: string;
+        type: number;
+        name: string;
+        abbreviation: string;
+      };
+    };
+  }>;
+  season: {
+    type: number;
+    year: number;
+  };
+  week: {
+    number: number;
+  };
+  events: EspnEvent[];
+}
