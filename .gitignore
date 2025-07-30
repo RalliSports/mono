@@ -27,6 +27,7 @@ out/
 build
 dist
 
+/migrations
 
 # Debug
 npm-debug.log*

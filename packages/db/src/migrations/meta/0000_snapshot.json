@@ -1,5 +1,5 @@
 {
-  "id": "0f6854fc-0025-45d5-bcdb-8b445c86fa3e",
+  "id": "287b449d-414a-4e8f-b67c-0b75bc739643",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -90,8 +90,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "access_status": {
-          "name": "access_status",
+        "status": {
+          "name": "status",
           "type": "access_status",
           "typeSchema": "public",
           "primaryKey": false,

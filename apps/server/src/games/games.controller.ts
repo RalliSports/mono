@@ -22,7 +22,8 @@ import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
-import { GameResponseDto } from './dto/game-response-dto';
+import { GameResponseDto } from './dto/game-response.dto';
+import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 
 @Controller('')
 export class GamesController {
@@ -73,8 +74,29 @@ export class GamesController {
     description: 'Games created by the user',
     type: [GameResponseDto],
   })
-  findByUser() {
-    return this.gamesService.findGamesCreateByUser();
+  findGamesByUser() {
+    return this.gamesService.findGamesCreatedByUser();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @Get('/games/user-joined')
+  @ApiOperation({ summary: 'Get all games a user has joined' })
+  @ApiResponse({
+    status: 200,
+    description: 'Games joined by user',
+    type: [GameResponseDto],
+  })
+  getJoinedGames() {
+    return this.gamesService.getJoinedGames();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Predict games' })
+  @Post('/game/predict')
+  predictGame(@Body() body: BulkCreatePredictionsDto) {
+    return this.gamesService.predictGames(body);
   }
 
   @ApiSecurity('x-para-session')

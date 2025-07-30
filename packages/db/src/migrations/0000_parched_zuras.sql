@@ -17,7 +17,7 @@ CREATE TABLE "game_access" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"game_id" uuid,
 	"user_id" varchar,
-	"access_status" "access_status",
+	"status" "access_status",
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
@@ -42,7 +42,11 @@ CREATE TABLE "games" (
 	"deposit_token" varchar,
 	"isPrivate" boolean,
 	"type" "type",
+<<<<<<<< Updated upstream:packages/db/src/migrations/0000_parallel_jack_flag.sql
 	"user_control_type" "user_control_type",
+========
+	"userControlType" "user_control_type",
+>>>>>>>> Stashed changes:packages/db/src/migrations/0000_parched_zuras.sql
 	"game_mode_id" uuid
 );
 --> statement-breakpoint
@@ -76,7 +80,11 @@ CREATE TABLE "predictions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"participant_id" uuid,
 	"line_id" uuid,
+<<<<<<<< Updated upstream:packages/db/src/migrations/0000_parallel_jack_flag.sql
 	"predicted_direction" "predicted_direction",
+========
+	"predicted_direction" varchar,
+>>>>>>>> Stashed changes:packages/db/src/migrations/0000_parched_zuras.sql
 	"is_correct" boolean,
 	"created_at" timestamp DEFAULT now()
 );

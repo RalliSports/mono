@@ -7,28 +7,28 @@ import { UpdateLineDto } from './dto/update-line.dto';
 export class LinesController {
   constructor(private readonly linesService: LinesService) {}
 
-  @Post()
-  create(@Body() createLineDto: CreateLineDto) {
-    return this.linesService.create(createLineDto);
-  }
+  // @Post()
+  // create(@Body() createLineDto: CreateLineDto) {
+  //   return this.linesService.create(createLineDto);
+  // }
 
-  @Get()
-  findAll() {
-    return this.linesService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.linesService.findAll();
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.linesService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.linesService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLineDto: UpdateLineDto) {
-    return this.linesService.update(+id, updateLineDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateLineDto: UpdateLineDto) {
+  //   return this.linesService.update(+id, updateLineDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.linesService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.linesService.remove(+id);
+  // }
 }
