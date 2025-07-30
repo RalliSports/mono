@@ -4,6 +4,7 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct Game {
     pub game_id: u64,
+    pub first_line_starts_at: i64,
     pub creator: Pubkey,
     pub admin: Pubkey, // Added admin field for authorization
     #[max_len(10)]
@@ -15,28 +16,17 @@ pub struct Game {
     pub locked_at: Option<i64>,
     #[max_len(12)] // Adjust max length as needed
     pub lines: Vec<GameLine>,
+    #[max_len(12)] // this can also be adjusted as needs
+    pub involved_lines: Vec<Pubkey>, 
     pub bump: u8,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace)]
 pub struct GameLine {
     pub line_id: u64,
-    pub first_line_starts_at: i64,
-    pub should_refund_bettors: bool,
-    pub line_type: LineType,
-    #[max_len(50)]
-    pub description: String,
-    pub odds: i64,
     pub is_active: bool,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace)]
-pub enum LineType {
-    Moneyline,
-    Spread,
-    OverUnder,
-    Prop,
-}
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace)]
 pub enum GameStatus {
@@ -57,13 +47,3 @@ impl core::fmt::Display for GameStatus {
     }
 }
 
-impl core::fmt::Display for LineType {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            LineType::Moneyline => write!(f, "Moneyline"),
-            LineType::Spread => write!(f, "Spread"),
-            LineType::OverUnder => write!(f, "Over/Under"),
-            LineType::Prop => write!(f, "Prop Bet"),
-        }
-    }
-}

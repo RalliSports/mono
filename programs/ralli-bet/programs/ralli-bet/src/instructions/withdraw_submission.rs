@@ -52,14 +52,11 @@ impl<'info> WithdrawSubmission<'info> {
         if game.users.len() >= 2 {
             let current_time = Clock::get()?.unix_timestamp;
 
-            // Check if any of the lines in this game have started
-            // Assuming game has a lines field with first_line_starts_at timestamps
-            for line in &game.lines {
-                require!(
-                    current_time < line.first_line_starts_at,
-                    RalliError::BetsAlreadyStarted
-                );
-            }
+            // Check using the global first_line_starts_at on the Game object
+            require!(
+                current_time < game.first_line_starts_at,
+                RalliError::BetsAlreadyStarted
+            );
         }
         // If there's only 1 player (the user themselves), they can always withdraw
 
@@ -105,10 +102,17 @@ impl<'info> WithdrawSubmission<'info> {
             game.users.remove(pos);
         }
 
-        // If no users left after removal, mark game as cancelled
+        // If no users left after removal, mark game as cancelled and clear vectors
         if game.users.is_empty() {
             game.status = GameStatus::Cancelled;
             game.locked_at = Some(Clock::get()?.unix_timestamp);
+            
+            // Clear lines and involved_lines when game is cancelled
+            game.lines.clear();
+            game.involved_lines.clear();
+            
+            // Reset first_line_starts_at when no users left
+            game.first_line_starts_at = i64::MAX;
 
             msg!(
                 "Game {} fully cancelled - no users remaining. Final withdrawal by user {}",
