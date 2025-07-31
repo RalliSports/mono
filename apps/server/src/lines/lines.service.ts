@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { lines } from '@repo/db';
 import type { InferInsertModel } from 'drizzle-orm';
 import { EspnScoreboardResponse } from './types/espn-odds.types';
@@ -15,7 +14,7 @@ export class LinesService {
 
   constructor(@Drizzle() private readonly db: Database) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_12_HOURS)
   async fetchAndStoreNFLBettingLines(): Promise<void> {
     try {
       this.logger.log('Fetching NFL betting lines from ESPN...');
@@ -47,7 +46,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-spread-home`,
                 athleteId: null,
-                statId: '550e8400-e29b-41d4-a716-446655440040', // "spread" stat ID
+                statId: 69, // "spread" stat ID
                 matchupId,
                 predictedValue: odds.spread.toString(),
                 actualValue: null,
@@ -61,7 +60,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-spread-away`,
                 athleteId: null,
-                statId: '550e8400-e29b-41d4-a716-446655440040',
+                statId: 13,
                 matchupId,
                 predictedValue: (-odds.spread).toString(),
                 actualValue: null,
@@ -77,7 +76,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-total-over`,
                 athleteId: null,
-                statId: '550e8400-e29b-41d4-a716-446655440041', // "total_over" stat ID
+                statId: 7, // "total_over" stat ID
                 matchupId,
                 predictedValue: odds.overUnder.toString(),
                 actualValue: null,
@@ -90,7 +89,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-total-under`,
                 athleteId: null,
-                statId: '550e8400-e29b-41d4-a716-446655440041',
+                statId: 9,
                 matchupId,
                 predictedValue: odds.overUnder.toString(),
                 actualValue: null,
