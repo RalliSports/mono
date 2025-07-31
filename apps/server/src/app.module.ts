@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { GamesModule } from './games/games.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { LinesModule } from './lines/lines.module';
+import { ReferralModule } from './referral/referral.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LinesModule } from './lines/lines.module';
     WebsocketModule,
     GamesModule,
     LinesModule,
+    ReferralModule,
   ],
   controllers: [AppController],
   providers: [AppService],

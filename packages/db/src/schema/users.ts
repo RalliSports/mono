@@ -9,6 +9,7 @@ import { uuid } from "drizzle-orm/pg-core";
 export const users = pgTable("users", {
   id:  uuid("id").primaryKey().defaultRandom(),
   username: varchar("username"),
+  emailAddress: varchar("email_address"),
   walletAddress: varchar("wallet_address"),
   createdAt: timestamp("created_at", { withTimezone: true }),
   roleId: uuid("role_id").references(() => roles.id),
