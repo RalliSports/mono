@@ -2,6 +2,7 @@ CREATE TYPE "public"."access_status" AS ENUM('whitelisted', 'blacklisted');--> s
 CREATE TYPE "public"."type" AS ENUM('1v1', 'limited', 'unlimited');--> statement-breakpoint
 CREATE TYPE "public"."user_control_type" AS ENUM('whitelist', 'blacklist', 'none');--> statement-breakpoint
 CREATE TYPE "public"."predicted_direction" AS ENUM('higher', 'lower');--> statement-breakpoint
+CREATE TYPE "public"."referral_status" AS ENUM('pending', 'completed');--> statement-breakpoint
 CREATE TABLE "athletes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar,
@@ -42,11 +43,7 @@ CREATE TABLE "games" (
 	"deposit_token" varchar,
 	"isPrivate" boolean,
 	"type" "type",
-<<<<<<<< Updated upstream:packages/db/src/migrations/0000_parallel_jack_flag.sql
 	"user_control_type" "user_control_type",
-========
-	"userControlType" "user_control_type",
->>>>>>>> Stashed changes:packages/db/src/migrations/0000_parched_zuras.sql
 	"game_mode_id" uuid
 );
 --> statement-breakpoint
@@ -80,11 +77,7 @@ CREATE TABLE "predictions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"participant_id" uuid,
 	"line_id" uuid,
-<<<<<<<< Updated upstream:packages/db/src/migrations/0000_parallel_jack_flag.sql
 	"predicted_direction" "predicted_direction",
-========
-	"predicted_direction" varchar,
->>>>>>>> Stashed changes:packages/db/src/migrations/0000_parched_zuras.sql
 	"is_correct" boolean,
 	"created_at" timestamp DEFAULT now()
 );
@@ -96,7 +89,7 @@ CREATE TABLE "roles" (
 );
 --> statement-breakpoint
 CREATE TABLE "stats" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar,
 	"description" varchar,
 	"created_at" timestamp DEFAULT now()
@@ -105,6 +98,7 @@ CREATE TABLE "stats" (
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar,
+	"email_address" varchar,
 	"wallet_address" varchar,
 	"created_at" timestamp with time zone,
 	"role_id" uuid
@@ -113,11 +107,27 @@ CREATE TABLE "users" (
 CREATE TABLE "lines" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"athlete_id" uuid,
-	"stat_id" uuid,
+	"stat_id" serial NOT NULL,
 	"matchup_id" uuid,
 	"predicted_value" numeric,
 	"actual_value" numeric,
 	"is_higher" boolean,
+	"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "referral_codes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" text,
+	"code" varchar(12) NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	CONSTRAINT "referral_codes_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
+CREATE TABLE "referrals" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"referrer_code" varchar(12) NOT NULL,
+	"referee_id" text,
+	"status" "referral_status" DEFAULT 'pending',
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
@@ -129,4 +139,5 @@ ALTER TABLE "predictions" ADD CONSTRAINT "predictions_line_id_lines_id_fk" FOREI
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lines" ADD CONSTRAINT "lines_athlete_id_athletes_id_fk" FOREIGN KEY ("athlete_id") REFERENCES "public"."athletes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lines" ADD CONSTRAINT "lines_stat_id_stats_id_fk" FOREIGN KEY ("stat_id") REFERENCES "public"."stats"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "lines" ADD CONSTRAINT "lines_matchup_id_matchups_id_fk" FOREIGN KEY ("matchup_id") REFERENCES "public"."matchups"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "lines" ADD CONSTRAINT "lines_matchup_id_matchups_id_fk" FOREIGN KEY ("matchup_id") REFERENCES "public"."matchups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "referrals" ADD CONSTRAINT "referrals_referrer_code_referral_codes_code_fk" FOREIGN KEY ("referrer_code") REFERENCES "public"."referral_codes"("code") ON DELETE no action ON UPDATE no action;
