@@ -47,8 +47,11 @@ pub enum RalliError {
     #[msg("Maximum lines per game reached")]
     MaxLinesReached,
     
-    #[msg("Invalid threshold - must be greater than 0")]
-    InvalidThreshold,
+    #[msg("Invalid predicted value - must be greater than 0")]
+    InvalidPredictedValue,
+
+    #[msg("Direction has a mismatch!")]
+    DirectionMismatch,
     
     #[msg("Invalid stat ID - must be greater than 0")]
     InvalidStatId,

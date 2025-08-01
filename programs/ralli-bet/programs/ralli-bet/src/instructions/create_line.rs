@@ -26,9 +26,11 @@ impl<'info> CreateLine<'info> {
         &mut self,
         line_seed: u64,
         stat_id: u16,
-        threshold: u64,
+        predicted_value: u64,
+        actual_value: u64,
         athlete_id: Pubkey,
         starts_at: i64,
+        direction: Direction,
         bumps: &CreateLineBumps,
     ) -> Result<()> {
         let admin = &self.admin;
@@ -48,29 +50,40 @@ impl<'info> CreateLine<'info> {
             RalliError::InvalidLineStartTime
         );
 
-        // Validate threshold is reasonable (prevent edge cases)
-        require!(threshold > 0, RalliError::InvalidThreshold);
+        // Validate predicted value is reasonable (prevent edge cases)
+        require!(predicted_value > 0, RalliError::InvalidPredictedValue);
 
         // Validate stat_id is reasonable
         require!(stat_id > 0, RalliError::InvalidStatId);
 
+        // this verifies that predicted vs actual reflects the direction passed
+        match direction {
+        Direction::Over => {
+            require!(actual_value > predicted_value, RalliError::DirectionMismatch);
+        }
+        Direction::Under => {
+            require!(actual_value < predicted_value, RalliError::DirectionMismatch);
+        }
+        }
+
         // Initialize the Line account
         line.set_inner(Line {
             stat_id,
-            threshold,
+            predicted_value,
+            actual_value,
             athlete_id,
             starts_at,
-            result: None,
+            result: Some(direction),
             should_refund_bettors: false,
             bump: bumps.line,
         });
 
         msg!(
-            "Created independent line {} - Athlete: {}, Stat: {}, Threshold: {}, Starts: {}",
+            "Created independent line {} - Athlete: {}, Stat: {}, Predicted Value: {}, Starts: {}",
             line.key(),
             athlete_id,
             stat_id,
-            threshold,
+            predicted_value,
             starts_at
         );
 
