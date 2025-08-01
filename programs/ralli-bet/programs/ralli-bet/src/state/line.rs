@@ -15,7 +15,7 @@ impl Line {
     pub const MAX_SIZE: usize = 8 + 2 + 8 + 32 + 8 + (1 + 1) + 1 + 1;
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Copy, Debug)]
 pub enum Direction {
     Over,
     Under,

@@ -1,17 +1,20 @@
 #![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
 
+pub mod constants;
 pub mod errors;
 pub mod instructions;
 pub mod state;
-pub mod constants;
 
 use instructions::*;
+use state::*;
 
 declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
 
 #[program]
 pub mod ralli_bet {
+    use crate::state::Direction;
+
     use super::*;
 
     pub fn create_game(
@@ -29,13 +32,25 @@ pub mod ralli_bet {
         ctx.accounts.join_game()
     }
 
-    pub fn withdraw_submission(ctx: Context<WithdrawSubmission>, new_first_line_starts_at: Option<i64>) -> Result<()> {
+    pub fn withdraw_submission(
+        ctx: Context<WithdrawSubmission>,
+        new_first_line_starts_at: Option<i64>,
+    ) -> Result<()> {
         ctx.accounts.withdraw_submission(new_first_line_starts_at)
     }
 
     pub fn cancel_game<'info>(ctx: Context<'_, '_, 'info, 'info, CancelGame<'info>>) -> Result<()> {
         let remaining_accounts = ctx.remaining_accounts;
         ctx.accounts.cancel_game(remaining_accounts)
+    }
+
+    pub fn submit_bet<'info>(
+        ctx: Context<'_, '_, 'info, 'info, SubmitBet<'info>>,
+        picks: Vec<Direction>,
+    ) -> Result<()> {
+        let remaining_accounts = ctx.remaining_accounts;
+        ctx.accounts
+            .submit_bet(picks, &ctx.bumps, remaining_accounts)
     }
 
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
