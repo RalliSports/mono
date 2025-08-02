@@ -38,6 +38,21 @@ pub enum RalliError {
     #[msg("Line is not part of this game")]
     LineNotInGame,
 
+    #[msg("Unauthorized to create lines - admin only")]
+    UnauthorizedLineCreation,
+    
+    #[msg("Game is not open for line creation")]
+    GameNotOpenforLine,
+    
+    #[msg("Maximum lines per game reached")]
+    MaxLinesReached,
+    
+    #[msg("Invalid threshold - must be greater than 0")]
+    InvalidThreshold,
+    
+    #[msg("Invalid stat ID - must be greater than 0")]
+    InvalidStatId,
+
     #[msg("Not enough users to lock game")]
     NotEnoughUsers,
 

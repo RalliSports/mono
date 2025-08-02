@@ -12,7 +12,7 @@ export class SessionAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req: Request = context.switchToHttp().getRequest();
+    const req = context.switchToHttp().getRequest();
 
     const sessionId = req.headers['x-para-session'];
 
@@ -20,6 +20,9 @@ export class SessionAuthGuard implements CanActivate {
       throw new UnauthorizedException('Session ID missing');
     }
 
-    return await this.authService.validateSession(sessionId);
+    const user = await this.authService.validateSession(sessionId);
+
+    req.user = user;
+    return true;
   }
 }

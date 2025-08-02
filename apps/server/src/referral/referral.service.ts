@@ -6,6 +6,7 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
 import { ReferralStatus } from './enum/referral';
+import { User } from 'src/user/dto/user-respons.dto';
 
 @Injectable()
 export class ReferralService {
@@ -14,13 +15,10 @@ export class ReferralService {
     private readonly authService: AuthService,
   ) {}
 
-  async generateReferralCode() {
-    const para = await this.authService.getPara();
+  async generateReferralCode(user: User) {
     const newCode = await this.generateUniqueReferralCode();
-    const userId = para.getUserId() ?? '';
-
     const existing = await this.db.query.referralCodes.findFirst({
-      where: eq(referralCodes.userId, userId),
+      where: eq(referralCodes.userId, user.id),
     });
 
     if (existing) return existing;
@@ -28,7 +26,7 @@ export class ReferralService {
     const [code] = await this.db
       .insert(referralCodes)
       .values({
-        userId,
+        userId: user.id,
         code: newCode,
       })
       .returning();
@@ -36,22 +34,18 @@ export class ReferralService {
     return code;
   }
 
-  async findAllReferredUsers() {
-    const para = await this.authService.getPara();
-    const userId = para.getUserId() ?? '';
+  async findAllReferredUsers(user: User) {
 
     const referredUsers = await this.db.query.referrals.findMany({
-      where: eq(referralCodes.userId, userId),
+      where: eq(referralCodes.userId, user.id),
     });
 
     return referredUsers;
   }
 
-  async fetchUserReferralCode() {
-    const para = await this.authService.getPara();
-
+  async fetchUserReferralCode(user: User) {
     const referralCode = await this.db.query.referralCodes.findFirst({
-      where: eq(referralCodes.userId, para.getUserId() ?? ''),
+      where: eq(referralCodes.userId, user.id),
     });
 
     if (!referralCode) {
@@ -61,10 +55,8 @@ export class ReferralService {
     return referralCode;
   }
 
-  async applyReferralCode(code: string) {
-    const para = await this.authService.getPara();
-    const userId = para.getUserId() ?? '';
-
+  async applyReferralCode(code: string, user: User) {
+   
     // Check if code exists
     const codeEntry = await this.db.query.referralCodes.findFirst({
       where: eq(referralCodes.code, code),
@@ -73,12 +65,12 @@ export class ReferralService {
     if (!codeEntry) throw new Error('Referral code not found');
 
     // Prevent self-referral
-    if (codeEntry.userId === userId)
+    if (codeEntry.userId === user.id)
       throw new Error('Cannot use your own code');
 
     // Check if already applied
     const existingReferral = await this.db.query.referrals.findFirst({
-      where: eq(referrals.refereeId, userId),
+      where: eq(referrals.refereeId, user.id),
     });
 
     if (existingReferral) throw new Error('Referral already used');
@@ -87,7 +79,7 @@ export class ReferralService {
       .insert(referrals)
       .values({
         referrerCode: code,
-        refereeId: userId,
+        refereeId: user.id,
         status: ReferralStatus.PENDING,
       })
       .returning();
