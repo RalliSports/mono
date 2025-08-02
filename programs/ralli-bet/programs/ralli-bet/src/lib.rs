@@ -29,6 +29,18 @@ pub mod ralli_bet {
         ctx.accounts.join_game()
     }
 
+    pub fn create_line(
+        ctx: Context<CreateLine>,
+        line_seed: u64,
+        stat_id: u16,
+        threshold: u64,
+        athlete_id: Pubkey,
+        starts_at: i64,
+    ) -> Result<()> {
+        ctx.accounts
+            .create_line(line_seed, stat_id, threshold, athlete_id, starts_at, &ctx.bumps)
+    }
+
     pub fn withdraw_submission(ctx: Context<WithdrawSubmission>, new_first_line_starts_at: Option<i64>) -> Result<()> {
         ctx.accounts.withdraw_submission(new_first_line_starts_at)
     }
