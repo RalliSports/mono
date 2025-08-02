@@ -12,6 +12,7 @@ declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
 
 #[program]
 pub mod ralli_bet {
+
     use super::*;
 
     pub fn create_game(
@@ -27,6 +28,20 @@ pub mod ralli_bet {
 
     pub fn join_game(ctx: Context<JoinGame>) -> Result<()> {
         ctx.accounts.join_game()
+    }
+
+    pub fn create_line(
+        ctx: Context<CreateLine>,
+        line_seed: u64,
+        stat_id: u16,
+        predicted_value: u64,
+        actual_value: u64,
+        athlete_id: Pubkey,
+        starts_at: i64,
+        direction: state::Direction,
+    ) -> Result<()> {
+        ctx.accounts
+            .create_line(line_seed, stat_id, predicted_value, actual_value, athlete_id, starts_at, direction, &ctx.bumps)
     }
 
     pub fn withdraw_submission(ctx: Context<WithdrawSubmission>, new_first_line_starts_at: Option<i64>) -> Result<()> {
