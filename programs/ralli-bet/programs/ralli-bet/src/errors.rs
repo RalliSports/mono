@@ -46,6 +46,15 @@ pub enum RalliError {
     
     #[msg("Maximum lines per game reached")]
     MaxLinesReached,
+
+    #[msg("Unauthorized to resolve line")]
+    UnauthorizedLineResolution,
+    
+    #[msg("Line has already been resolved")]
+    LineAlreadyResolved,
+    
+    #[msg("Line has not started yet")]
+    LineNotStarted,
     
     #[msg("Invalid predicted value - must be greater than 0")]
     InvalidPredictedValue,

@@ -17,6 +17,7 @@ impl Line {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum Direction {
     Over,
     Under,
