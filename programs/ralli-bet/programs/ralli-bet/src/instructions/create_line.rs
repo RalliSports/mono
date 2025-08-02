@@ -30,7 +30,6 @@ impl<'info> CreateLine<'info> {
         actual_value: u64,
         athlete_id: Pubkey,
         starts_at: i64,
-        direction: Direction,
         bumps: &CreateLineBumps,
     ) -> Result<()> {
         let admin = &self.admin;
