@@ -31,13 +31,12 @@ pub enum RalliError {
 
     #[msg("Invalid line start time - must be in the future")]
     InvalidLineStartTime,
-    
+
     #[msg("Line start time does not match provided line account")]
     LineStartTimeMismatch,
-    
+
     #[msg("Line is not part of this game")]
     LineNotInGame,
-
 
     #[msg("Not enough users to lock game")]
     NotEnoughUsers,
@@ -134,4 +133,17 @@ pub enum RalliError {
 
     #[msg("Treasury is not empty")]
     TreasuryNotEmpty,
+
+    #[msg("Empty picks provided")]
+    EmptyPicks,
+    #[msg("Picks do not match the expected line")]
+    PicksLinesMismatch,
+    #[msg("Invalid line account provided")]
+    InvalidLineAccount,
+    #[msg("Line already started")]
+    LineAlreadyStarted,
+    #[msg("Line already resolved")]
+    LineAlreadyResolved,
+    #[msg("Invalid remaining accounts count")]
+    InvalidRemainingAccountsCount,
 }

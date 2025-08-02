@@ -1,10 +1,10 @@
-use anchor_lang::prelude::*;
 use crate::state::line::Direction;
+use anchor_lang::prelude::*;
 
 #[account]
 pub struct Bet {
     pub game: Pubkey,
-    pub player: Pubkey,
+    pub user: Pubkey,
     pub picks: Vec<Pick>,
     pub correct_count: u8,
     pub submitted_at: i64,
