@@ -67,10 +67,9 @@ impl<'info> SubmitBet<'info> {
 
             // Check if this line is part of the game
             let line_pubkey = line_account_info.key();
-            require!(
-                game.involved_lines.contains(&line_pubkey),
-                RalliError::LineNotInGame
-            );
+            if(!game.involved_lines.contains(&line_pubkey)) {
+            game.involved_lines.push(&line_pubkey);
+            }
 
             // Check if the line hasn't started yet (can still bet on it)
             require!(
