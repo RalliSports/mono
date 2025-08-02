@@ -1,6 +1,6 @@
 {
-  "id": "ed51cdbd-6cdc-46ed-b335-606803627478",
-  "prevId": "287b449d-414a-4e8f-b67c-0b75bc739643",
+  "id": "503c465f-122c-4f24-84ce-55fc03fbd2e7",
+  "prevId": "29cae41e-7474-4216-979f-4600195f3790",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -86,7 +86,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -171,7 +171,7 @@
         },
         "creator_id": {
           "name": "creator_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -400,7 +400,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -608,8 +608,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "username": {
-          "name": "username",
+        "wallet_address": {
+          "name": "wallet_address",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -620,9 +620,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "wallet_address": {
-          "name": "wallet_address",
-          "type": "varchar",
+        "para_user_id": {
+          "name": "para_user_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -630,31 +630,12 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
-        },
-        "role_id": {
-          "name": "role_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "users_role_id_roles_id_fk": {
-          "name": "users_role_id_roles_id_fk",
-          "tableFrom": "users",
-          "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -777,7 +758,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -830,7 +811,7 @@
         },
         "referee_id": {
           "name": "referee_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },

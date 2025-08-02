@@ -7,9 +7,10 @@ import { GameAccessService } from './game-access.service';
 import { GameAccessController } from './game-access.controller';
 import { GameModeController } from './game-mode.controller';
 import { GameModeService } from './game-mode.service';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule, UserModule],
   controllers: [GamesController, GameAccessController, GameModeController],
   providers: [GamesService, GameAccessService, GameModeService],
 })
