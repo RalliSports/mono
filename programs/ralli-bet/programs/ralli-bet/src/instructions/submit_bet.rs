@@ -1,3 +1,4 @@
+use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
@@ -44,7 +45,7 @@ impl<'info> SubmitBet<'info> {
         );
         require!(!picks.is_empty(), RalliError::EmptyPicks);
         require!(
-            picks.len() >= 2 && picks.len() <= 12,
+            picks.len() >= MIN_LINES_PER_GAME && picks.len() <= MAX_LINES_PER_GAME,
             RalliError::InvalidPickCount
         );
 
