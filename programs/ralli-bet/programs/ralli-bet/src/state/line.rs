@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 pub struct Line {
     pub stat_id: u16,
     pub predicted_value: u64,
-    pub actual_value: u64,
+    pub actual_value: Option<u64>,
     pub athlete_id: Pubkey,
     pub starts_at: i64,
     pub result: Option<Direction>,
