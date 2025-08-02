@@ -27,7 +27,6 @@ impl<'info> CreateLine<'info> {
         line_seed: u64,
         stat_id: u16,
         predicted_value: u64,
-        actual_value: u64,
         athlete_id: Pubkey,
         starts_at: i64,
         bumps: &CreateLineBumps,
