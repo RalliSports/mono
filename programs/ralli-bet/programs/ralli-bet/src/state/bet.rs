@@ -1,10 +1,11 @@
-use anchor_lang::prelude::*;
 use crate::state::line::Direction;
+use anchor_lang::prelude::*;
 
 #[account]
 pub struct Bet {
     pub game: Pubkey,
     pub player: Pubkey,
+    #[max_len(MAX_LINES_PER_GAME)]
     pub picks: Vec<Pick>,
     pub correct_count: u8,
     pub submitted_at: i64,
@@ -13,7 +14,7 @@ pub struct Bet {
 
 impl Bet {
     // Adjusted size for the new Pick structure
-    pub const MAX_SIZE: usize = 8 + 32 + 32 + (4 + 6 * (32 + 1)) + 1 + 8 + 1;
+    pub const MAX_SIZE: usize = 8 + 32 + 32 + (4 + MAX_LINES_PER_GAME * (32 + 1)) + 1 + 8 + 1;
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]

@@ -1,6 +1,6 @@
+use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
-use crate::constants::*;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -26,11 +26,9 @@ impl<'info> CreateLine<'info> {
         &mut self,
         line_seed: u64,
         stat_id: u16,
-        predicted_value: u64,
-        actual_value: u64,
-        athlete_id: Pubkey,
+        predicted_value: i64,
+        athlete_id: u64,
         starts_at: i64,
-        direction: Direction,
         bumps: &CreateLineBumps,
     ) -> Result<()> {
         let admin = &self.admin;
@@ -45,10 +43,7 @@ impl<'info> CreateLine<'info> {
 
         // Validate line start time is in the future
         let current_time = Clock::get()?.unix_timestamp;
-        require!(
-            starts_at > current_time,
-            RalliError::InvalidLineStartTime
-        );
+        require!(starts_at > current_time, RalliError::InvalidLineStartTime);
 
         // Validate predicted value is reasonable (prevent edge cases)
         require!(predicted_value > 0, RalliError::InvalidPredictedValue);
@@ -56,24 +51,14 @@ impl<'info> CreateLine<'info> {
         // Validate stat_id is reasonable
         require!(stat_id > 0, RalliError::InvalidStatId);
 
-        // this verifies that predicted vs actual reflects the direction passed
-        match direction {
-        Direction::Over => {
-            require!(actual_value > predicted_value, RalliError::DirectionMismatch);
-        }
-        Direction::Under => {
-            require!(actual_value < predicted_value, RalliError::DirectionMismatch);
-        }
-        }
-
         // Initialize the Line account
         line.set_inner(Line {
             stat_id,
             predicted_value,
-            actual_value,
+            actual_value: None,
             athlete_id,
             starts_at,
-            result: Some(direction),
+            result: None,
             should_refund_bettors: false,
             bump: bumps.line,
         });

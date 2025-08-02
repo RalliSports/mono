@@ -5,3 +5,4 @@ pub const ADMIN_PUBLIC_KEY: Pubkey = pubkey!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfr
 pub const MAX_USERS_LIMIT: u8 = 50;
 pub const MIN_USERS_REQUIRED: u8 = 2;
 pub const MAX_LINES_PER_GAME: u8 = 12;
+pub const MIN_LINES_PER_GAME: u8 = 2;

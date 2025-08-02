@@ -1,4 +1,5 @@
 [toolchain]
+solana = "2.4.0"
 
 [features]
 resolution = true

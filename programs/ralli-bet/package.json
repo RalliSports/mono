@@ -6,7 +6,7 @@
     "test": "mocha -t 1000000 -r ts-node/register tests/**/*.ts"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.30.1"
+    "@coral-xyz/anchor": "^0.31.1"
   },
   "devDependencies": {
     "@types/bn.js": "^5.2.0",

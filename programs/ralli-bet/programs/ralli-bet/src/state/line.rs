@@ -3,9 +3,9 @@ use anchor_lang::prelude::*;
 #[account]
 pub struct Line {
     pub stat_id: u16,
-    pub predicted_value: u64,
-    pub actual_value: u64,
-    pub athlete_id: Pubkey,
+    pub predicted_value: i64,
+    pub actual_value: Option<i64>,
+    pub athlete_id: u64,
     pub starts_at: i64,
     pub result: Option<Direction>,
     pub should_refund_bettors: bool,
@@ -13,11 +13,10 @@ pub struct Line {
 }
 
 impl Line {
-    pub const MAX_SIZE: usize = 8 + 2 + 8 + 32 + 8 + (1 + 1) + 1 + 1;
+    pub const MAX_SIZE: usize = 8 + 2 + + 8 + (1 + 8) + 8 + 8 + (1 + 1) + 1 + 1;
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
-#[derive(Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum Direction {
     Over,
     Under,
