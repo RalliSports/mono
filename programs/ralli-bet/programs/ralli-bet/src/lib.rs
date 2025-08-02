@@ -38,7 +38,6 @@ pub mod ralli_bet {
         actual_value: u64,
         athlete_id: Pubkey,
         starts_at: i64,
-        direction: state::Direction,
     ) -> Result<()> {
         ctx.accounts
             .create_line(line_seed, stat_id, predicted_value, actual_value, athlete_id, starts_at, direction, &ctx.bumps)
