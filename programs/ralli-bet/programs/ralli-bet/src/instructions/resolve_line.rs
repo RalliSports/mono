@@ -20,6 +20,7 @@ impl<'info> ResolveLine<'info> {
     pub fn resolve_line(
         &mut self,
         result: Direction,
+        actual_value: i64,
     ) -> Result<()> {
         let admin = &self.admin;
         let line = &mut self.line;
