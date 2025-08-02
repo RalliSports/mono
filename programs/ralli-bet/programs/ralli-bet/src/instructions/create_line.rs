@@ -26,7 +26,7 @@ impl<'info> CreateLine<'info> {
         &mut self,
         line_seed: u64,
         stat_id: u16,
-        predicted_value: i64,
+        predicted_value: f64,
         athlete_id: u64,
         starts_at: i64,
         bumps: &CreateLineBumps,
@@ -46,7 +46,7 @@ impl<'info> CreateLine<'info> {
         require!(starts_at > current_time, RalliError::InvalidLineStartTime);
 
         // Validate predicted value is reasonable (prevent edge cases)
-        require!(predicted_value > 0, RalliError::InvalidPredictedValue);
+        require!(predicted_value > 0.0, RalliError::InvalidPredictedValue);
 
         // Validate stat_id is reasonable
         require!(stat_id > 0, RalliError::InvalidStatId);

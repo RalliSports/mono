@@ -45,7 +45,8 @@ impl<'info> SubmitBet<'info> {
         );
         require!(!picks.is_empty(), RalliError::EmptyPicks);
         require!(
-            picks.len() >= MIN_LINES_PER_GAME && picks.len() <= MAX_LINES_PER_GAME,
+            picks.len() >= MIN_LINES_PER_GAME as usize
+                && picks.len() <= MAX_LINES_PER_GAME as usize,
             RalliError::InvalidPickCount
         );
 

@@ -36,7 +36,7 @@ pub mod ralli_bet {
         ctx: Context<CreateLine>,
         line_seed: u64,
         stat_id: u16,
-        predicted_value: i64,
+        predicted_value: f64,
         athlete_id: u64,
         starts_at: i64,
     ) -> Result<()> {
