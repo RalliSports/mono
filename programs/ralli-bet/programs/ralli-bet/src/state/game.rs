@@ -14,9 +14,8 @@ pub struct Game {
     pub status: GameStatus,
     pub created_at: i64,
     pub locked_at: Option<i64>,
-    #[max_len(12)]
-    pub lines: Vec<GameLine>,
-    #[max_len(12)]
+    pub number_of_lines: u8,
+    #[max_len(40)]
     pub involved_lines: Vec<Pubkey>,
     pub bump: u8,
 }

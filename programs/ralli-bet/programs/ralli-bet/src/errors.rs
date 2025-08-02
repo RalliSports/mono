@@ -171,4 +171,15 @@ pub enum RalliError {
     LineAlreadyStarted,
     #[msg("Invalid remaining accounts count")]
     InvalidRemainingAccountsCount,
+
+    #[msg("Invalid number of lines")]
+    InvalidNumberOfLines,
+
+    #[msg("Too few lines")]
+    TooFewLines,
+
+    #[msg("Too many lines")]
+    TooManyLines,
+    #[msg("Line mismatch")]
+    LineMismatch,
 }

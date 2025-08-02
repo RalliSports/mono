@@ -4,7 +4,6 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(picks: Vec<Direction>)]
 pub struct SubmitBet<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
@@ -28,7 +27,7 @@ pub struct SubmitBet<'info> {
 impl<'info> SubmitBet<'info> {
     pub fn submit_bet(
         &mut self,
-        picks: Vec<Direction>,
+        picks: Vec<Pick>,
         bumps: &SubmitBetBumps,
         remaining_accounts: &'info [AccountInfo<'info>],
     ) -> Result<()> {
@@ -39,14 +38,10 @@ impl<'info> SubmitBet<'info> {
 
         // Validation checks
         require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
-        require!(
-            game.users.contains(&user.key()) || game.creator == user.key(),
-            RalliError::UserNotInGame
-        );
+        require!(game.users.contains(&user.key()), RalliError::UserNotInGame);
         require!(!picks.is_empty(), RalliError::EmptyPicks);
         require!(
-            picks.len() >= MIN_LINES_PER_GAME as usize
-                && picks.len() <= MAX_LINES_PER_GAME as usize,
+            picks.len() == game.number_of_lines as usize,
             RalliError::InvalidPickCount
         );
 
@@ -84,11 +79,14 @@ impl<'info> SubmitBet<'info> {
                 line_account.result.is_none(),
                 RalliError::LineAlreadyResolved
             );
+            let line_pk = picks[i].line_id;
+            require_eq!(line_pk, line_pubkey, RalliError::LineMismatch);
+            let line_direction = picks[i].direction;
 
             // Create the pick struct
             pick_structs.push(Pick {
                 line_id: line_pubkey,
-                direction: picks[i],
+                direction: line_direction,
             });
         }
 
