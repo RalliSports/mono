@@ -68,7 +68,6 @@ impl<'info> CreateLine<'info> {
         line.set_inner(Line {
             stat_id,
             predicted_value,
-            actual_value,
             athlete_id,
             starts_at,
             result: Some(direction),
