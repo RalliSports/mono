@@ -1,0 +1,79 @@
+use crate::errors::RalliError;
+use crate::state::*;
+use crate::constants::*;
+use anchor_lang::prelude::*;
+
+#[derive(Accounts)]
+#[instruction(line_seed: u64)]
+pub struct CreateLine<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(
+        init,
+        payer = admin,
+        space = 8 + Line::MAX_SIZE,
+        seeds = [b"line", line_seed.to_le_bytes().as_ref()],
+        bump
+    )]
+    pub line: Account<'info, Line>,
+
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> CreateLine<'info> {
+    pub fn create_line(
+        &mut self,
+        line_seed: u64,
+        stat_id: u16,
+        threshold: u64,
+        athlete_id: Pubkey,
+        starts_at: i64,
+        bumps: &CreateLineBumps,
+    ) -> Result<()> {
+        let admin = &self.admin;
+        let line = &mut self.line;
+
+        // Only admin can create lines
+        require_eq!(
+            admin.key(),
+            ADMIN_PUBLIC_KEY,
+            RalliError::UnauthorizedLineCreation
+        );
+
+        // Validate line start time is in the future
+        let current_time = Clock::get()?.unix_timestamp;
+        require!(
+            starts_at > current_time,
+            RalliError::InvalidLineStartTime
+        );
+
+        // Validate threshold is reasonable (prevent edge cases)
+        require!(threshold > 0, RalliError::InvalidThreshold);
+
+        // Validate stat_id is reasonable
+        require!(stat_id > 0, RalliError::InvalidStatId);
+
+        // Initialize the Line account
+        line.set_inner(Line {
+            stat_id,
+            threshold,
+            athlete_id,
+            starts_at,
+            result: None,
+            should_refund_bettors: false,
+            bump: bumps.line,
+        });
+
+        msg!(
+            "Created independent line {} - Athlete: {}, Stat: {}, Threshold: {}, Starts: {}",
+            line.key(),
+            athlete_id,
+            stat_id,
+            threshold,
+            starts_at
+        );
+
+        Ok(())
+    }
+}
