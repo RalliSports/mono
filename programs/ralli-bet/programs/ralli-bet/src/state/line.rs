@@ -13,10 +13,10 @@ pub struct Line {
 }
 
 impl Line {
-    pub const MAX_SIZE: usize = 8 + 2 + + 8 + (1 + 8) + 8 + 8 + (1 + 1) + 1 + 1;
+    pub const MAX_SIZE: usize = 8 + 2 + 8 + (1 + 8) + 8 + 8 + (1 + 1) + 1 + 1;
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Copy, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Copy, Debug, InitSpace)]
 pub enum Direction {
     Over,
     Under,

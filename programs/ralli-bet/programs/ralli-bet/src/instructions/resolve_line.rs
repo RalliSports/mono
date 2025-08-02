@@ -36,16 +36,16 @@ impl<'info> ResolveLine<'info> {
         require!(current_time >= line.starts_at, RalliError::LineNotStarted);
 
         // this verifies that predicted vs actual reflects the direction passed
-        match direction {
+        match result {
             Direction::Over => {
                 require!(
-                    actual_value > predicted_value,
+                    actual_value > line.predicted_value,
                     RalliError::DirectionMismatch
                 );
             }
             Direction::Under => {
                 require!(
-                    actual_value < predicted_value,
+                    actual_value < line.predicted_value,
                     RalliError::DirectionMismatch
                 );
             }

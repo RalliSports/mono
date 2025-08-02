@@ -40,28 +40,28 @@ pub enum RalliError {
 
     #[msg("Unauthorized to create lines - admin only")]
     UnauthorizedLineCreation,
-    
+
     #[msg("Game is not open for line creation")]
     GameNotOpenforLine,
-    
+
     #[msg("Maximum lines per game reached")]
     MaxLinesReached,
 
     #[msg("Unauthorized to resolve line")]
     UnauthorizedLineResolution,
-    
+
     #[msg("Line has already been resolved")]
     LineAlreadyResolved,
-    
+
     #[msg("Line has not started yet")]
     LineNotStarted,
-    
+
     #[msg("Invalid predicted value - must be greater than 0")]
     InvalidPredictedValue,
 
     #[msg("Direction has a mismatch!")]
     DirectionMismatch,
-    
+
     #[msg("Invalid stat ID - must be greater than 0")]
     InvalidStatId,
 
@@ -169,8 +169,6 @@ pub enum RalliError {
     InvalidLineAccount,
     #[msg("Line already started")]
     LineAlreadyStarted,
-    #[msg("Line already resolved")]
-    LineAlreadyResolved,
     #[msg("Invalid remaining accounts count")]
     InvalidRemainingAccountsCount,
 }
