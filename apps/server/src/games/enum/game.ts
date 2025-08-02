@@ -12,3 +12,8 @@ export enum GameAccessStatus {
   WHITELISTED = 'whitelisted',
   BLACKLISTED = 'blacklisted',
 }
+
+export enum PredictionDirection {
+  HIGHT = 'higher',
+  LOWER = 'lower',
+}

@@ -22,7 +22,10 @@ import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
-import { GameResponseDto } from './dto/game-response-dto';
+import { GameResponseDto } from './dto/game-response.dto';
+import { BulkCreatePredictionsDto } from './dto/prediction.dto';
+import { UserPayload } from 'src/auth/auth.user.decorator';
+import { User } from 'src/user/dto/user-respons.dto';
 
 @Controller('')
 export class GamesController {
@@ -37,8 +40,8 @@ export class GamesController {
     type: GameResponseDto,
   })
   @Post('/create-game')
-  create(@Body() createGameDto: CreateGameDto) {
-    return this.gamesService.create(createGameDto);
+  create(@Body() createGameDto: CreateGameDto,  @UserPayload() user: User) {
+    return this.gamesService.create(createGameDto, user);
   }
 
   @ApiOperation({ summary: 'Get all games' })
@@ -73,8 +76,29 @@ export class GamesController {
     description: 'Games created by the user',
     type: [GameResponseDto],
   })
-  findByUser() {
-    return this.gamesService.findGamesCreateByUser();
+  findGamesByUser(@UserPayload() user: User) {
+    return this.gamesService.findGamesCreatedByUser(user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @Get('/games/user-joined')
+  @ApiOperation({ summary: 'Get all games a user has joined' })
+  @ApiResponse({
+    status: 200,
+    description: 'Games joined by user',
+    type: [GameResponseDto],
+  })
+  getJoinedGames( @UserPayload() user: User) {
+    return this.gamesService.getJoinedGames(user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Predict games' })
+  @Post('/game/predict')
+  predictGame(@Body() body: BulkCreatePredictionsDto) {
+    return this.gamesService.predictGames(body);
   }
 
   @ApiSecurity('x-para-session')
@@ -92,8 +116,8 @@ export class GamesController {
     status: 200,
     type: GameResponseDto,
   })
-  joinGame(@Param('id') id: string, @Query('gameCode') gameCode: string) {
-    return this.gamesService.joinGame(id, gameCode);
+  joinGame(@Param('id') id: string, @Query('gameCode') gameCode: string,  @UserPayload() user: User) {
+    return this.gamesService.joinGame(user, id, gameCode);
   }
 
   @ApiOperation({ summary: 'Get a game using its unique code' })
@@ -117,8 +141,8 @@ export class GamesController {
     type: GameResponseDto,
   })
   @Patch('/game/update/:id')
-  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
-    return this.gamesService.update(id, updateGameDto);
+  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto, @UserPayload() user: User) {
+    return this.gamesService.update(id, updateGameDto, user);
   }
 
   @ApiSecurity('x-para-session')
@@ -128,7 +152,7 @@ export class GamesController {
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 204, description: 'Game deleted successfully' })
   @Delete('/game/delete/:id')
-  remove(@Param('id') id: string) {
-    return this.gamesService.remove(id);
+  remove(@Param('id') id: string, @UserPayload() user: User) {
+    return this.gamesService.remove(id, user);
   }
 }

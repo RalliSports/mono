@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
-
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
-import { predictions } from "./predictions";
+import { lines } from "./lines";
 import { uuid } from "drizzle-orm/pg-core";
 
 export const stats = pgTable("stats", {
@@ -11,7 +10,6 @@ export const stats = pgTable("stats", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-
 export const statsRelations = relations(stats, ({ many }) => ({
-  predictions: many(predictions),
+  lines: many(lines),
 }));

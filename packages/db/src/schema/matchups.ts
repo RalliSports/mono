@@ -1,4 +1,3 @@
-
 import { uuid } from "drizzle-orm/pg-core";
 import {
   date,
@@ -7,6 +6,9 @@ import {
   varchar,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { lines } from "./lines";
+import { matchup_performance } from "./matchup_performance";
+import { relations } from "drizzle-orm";
 
 export const matchups = pgTable("matchups", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -18,3 +20,8 @@ export const matchups = pgTable("matchups", {
   scoreAway: integer("score_away"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const matchupsRelations = relations(matchups, ({ many }) => ({
+  lines: many(lines),
+  matchupPerformances: many(matchup_performance),
+}));
