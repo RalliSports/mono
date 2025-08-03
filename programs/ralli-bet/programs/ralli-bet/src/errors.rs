@@ -220,4 +220,10 @@ pub enum RalliError {
 
     #[msg("User account is not available")]
     UserAccountNotFound,
+
+    #[msg("Number of winners does not match length of winners array")]
+    NumberOfWinnersMismatch,
+
+    #[msg("Escrow not empty")]
+    EscrowNotEmpty,
 }
