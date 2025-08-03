@@ -10,14 +10,19 @@ pub struct ResolveLine<'info> {
 
     #[account(
         mut,
-        seeds = [b"line", line.key().as_ref()],
+        seeds = [b"line", line.seed.to_le_bytes().as_ref()],
         bump = line.bump
     )]
     pub line: Account<'info, Line>,
 }
 
 impl<'info> ResolveLine<'info> {
-    pub fn resolve_line(&mut self, result: Direction, actual_value: f64) -> Result<()> {
+    pub fn resolve_line(
+        &mut self,
+        result: Direction,
+        actual_value: f64,
+        should_refund_bettors: bool,
+    ) -> Result<()> {
         let admin = &self.admin;
         let line = &mut self.line;
 
@@ -30,6 +35,11 @@ impl<'info> ResolveLine<'info> {
 
         // Ensure line hasn't already been resolved
         require!(line.result.is_none(), RalliError::LineAlreadyResolved);
+
+        if should_refund_bettors {
+            line.should_refund_bettors = true;
+            return Ok(());
+        }
 
         // Ensure line has started (can only resolve after start time)
         let current_time = Clock::get()?.unix_timestamp;
@@ -50,6 +60,11 @@ impl<'info> ResolveLine<'info> {
                 );
             }
         }
+
+        require!(
+            line.should_refund_bettors == false,
+            RalliError::LineShouldBeRefunded
+        );
 
         // Update the result field
         line.result = Some(result.clone());

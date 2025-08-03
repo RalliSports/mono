@@ -59,6 +59,7 @@ impl<'info> CreateLine<'info> {
             athlete_id,
             starts_at,
             result: None,
+            seed: line_seed,
             should_refund_bettors: false,
             bump: bumps.line,
         });

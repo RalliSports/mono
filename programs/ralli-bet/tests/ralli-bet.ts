@@ -40,6 +40,7 @@ describe("RalliBet Comprehensive Tests", () => {
   let line3PK: PublicKey;
   let line4PK: PublicKey;
   let line5PK: PublicKey;
+  let line6PK: PublicKey;
   let game: PublicKey;
   let gameEscrow: PublicKey;
   let gameResult: PublicKey;
@@ -54,6 +55,7 @@ describe("RalliBet Comprehensive Tests", () => {
   let lineId3: BN = new BN(789);
   let lineId4: BN = new BN(1011);
   let lineId5: BN = new BN(1012);
+  let lineId6: BN = new BN(1013);
   let numberOfLines = 3;
   let lineIdError: BN = new BN(1000);
   let statIdError = 0;
@@ -62,11 +64,13 @@ describe("RalliBet Comprehensive Tests", () => {
   let statId3 = 3;
   let statId4 = 4;
   let statId5 = 5;
+  let statId6 = 6;
   let predictedValue1 = 17.5;
   let predictedValue2 = 22.5;
   let predictedValue3 = 57.5;
   let predictedValue4 = 100.5;
   let predictedValue5 = 10.5;
+  let predictedValue6 = 10.5;
   let predictedValueError = 0;
 
   let athleteId1: BN = new BN(10001);
@@ -74,6 +78,7 @@ describe("RalliBet Comprehensive Tests", () => {
   let athleteId3: BN = new BN(10003);
   let athleteId4: BN = new BN(10004);
   let athleteId5: BN = new BN(10005);
+  let athleteId6: BN = new BN(10006);
   let startsAt1: BN = new BN(
     Math.floor((Date.now() + 1000 * 60 * 60 * 24) / 1000)
   );
@@ -305,6 +310,11 @@ describe("RalliBet Comprehensive Tests", () => {
         program.programId
       );
 
+      const [line6] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), lineId6.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+
       const tx = await program.methods
         .createLine(lineId1, statId1, predictedValue1, athleteId1, startsAt1)
         .accountsPartial({
@@ -364,11 +374,22 @@ describe("RalliBet Comprehensive Tests", () => {
         })
         .signers([keypair])
         .rpc();
+
+      const tx6 = await program.methods
+        .createLine(lineId6, statId6, predictedValue6, athleteId6, startsAtSoon)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: line6,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
       line1PK = line1;
       line2PK = line2;
       line3PK = line3;
       line4PK = line4;
       line5PK = line5;
+      line6PK = line6;
     });
 
     it("should fail to create line with invalid parameters - not admin", async () => {
@@ -1265,6 +1286,150 @@ describe("RalliBet Comprehensive Tests", () => {
         expect.fail("Should have failed with LineAlreadyStarted");
       } catch (error) {
         expect(error.toString()).to.include("Error Code: LineAlreadyStarted");
+      }
+    });
+  });
+
+  describe("Resolve Line Tests", () => {
+    it("should prevent resolution with wrong direction", async () => {
+      try {
+        const tx = await program.methods
+          .resolveLine({ under: {} }, 19.0, false)
+          .accountsPartial({
+            admin: provider.wallet.publicKey,
+            line: line5PK,
+          })
+          .signers([keypair])
+          .rpc();
+        expect.fail("Should have failed with DirectionMismatch");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: DirectionMismatch");
+      }
+    });
+
+    it("should prevent resolution with wrong direction 2", async () => {
+      try {
+        const tx = await program.methods
+          .resolveLine({ over: {} }, 9.0, false)
+          .accountsPartial({
+            admin: provider.wallet.publicKey,
+            line: line5PK,
+          })
+          .signers([keypair])
+          .rpc();
+        expect.fail("Should have failed with DirectionMismatch");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: DirectionMismatch");
+      }
+    });
+
+    it("should allow admin to resolve line successfully", async () => {
+      const tx = await program.methods
+        .resolveLine({ over: {} }, 19.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: line5PK,
+        })
+        .signers([keypair])
+        .rpc();
+
+      const resolvedLine = await program.account.line.fetch(line5PK);
+      expect(resolvedLine.result).to.deep.equal({ over: {} });
+      expect(resolvedLine.actualValue).to.equal(19.0);
+      expect(resolvedLine.shouldRefundBettors).to.equal(false);
+    });
+
+    it("should prevent admin from resolving line that has already been resolved", async () => {
+      try {
+        const tx = await program.methods
+          .resolveLine({ over: {} }, 19.0, false)
+          .accountsPartial({
+            admin: provider.wallet.publicKey,
+            line: line5PK,
+          })
+          .signers([keypair])
+          .rpc();
+        expect.fail("Should have failed with LineAlreadyResolved");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: LineAlreadyResolved");
+      }
+    });
+
+    it("should prevent admin from resolving line that has not started yet", async () => {
+      try {
+        const tx = await program.methods
+          .resolveLine({ over: {} }, 19.0, false)
+          .accountsPartial({
+            admin: provider.wallet.publicKey,
+            line: line1PK,
+          })
+          .signers([keypair])
+          .rpc();
+        expect.fail("Should have failed with LineNotStarted");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: LineNotStarted");
+      }
+    });
+
+    it("should prevent non-admin from resolving line", async () => {
+      try {
+        const tx = await program.methods
+          .resolveLine({ over: {} }, 19.0, false)
+          .accountsPartial({
+            admin: user1.publicKey,
+            line: line1PK,
+          })
+          .signers([user1])
+          .rpc();
+        expect.fail("Should have failed with UnauthorizedLineResolution");
+      } catch (error) {
+        expect(error.toString()).to.include(
+          "Error Code: UnauthorizedLineResolution"
+        );
+      }
+    });
+
+    it("should allow admin to mark started line as refundable", async () => {
+      const tx = await program.methods
+        .resolveLine({ over: {} }, 19.0, true)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: line6PK,
+        })
+        .signers([keypair])
+        .rpc();
+
+      const resolvedLine = await program.account.line.fetch(line6PK);
+      expect(resolvedLine.shouldRefundBettors).to.equal(true);
+    });
+
+    it("should allow admin to mark not-started line as refundable", async () => {
+      const tx = await program.methods
+        .resolveLine({ over: {} }, 19.0, true)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: line1PK,
+        })
+        .signers([keypair])
+        .rpc();
+
+      const resolvedLine = await program.account.line.fetch(line1PK);
+      expect(resolvedLine.shouldRefundBettors).to.equal(true);
+    });
+
+    it("should prevent admin from resolving line marked as refundable", async () => {
+      try {
+        const tx = await program.methods
+          .resolveLine({ over: {} }, 19.0, false)
+          .accountsPartial({
+            admin: provider.wallet.publicKey,
+            line: line6PK,
+          })
+          .signers([keypair])
+          .rpc();
+        expect.fail("Should have failed with LineShouldBeRefunded");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: LineShouldBeRefunded");
       }
     });
   });

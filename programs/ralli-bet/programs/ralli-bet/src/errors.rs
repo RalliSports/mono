@@ -53,6 +53,9 @@ pub enum RalliError {
     #[msg("Line has already been resolved")]
     LineAlreadyResolved,
 
+    #[msg("Line should be refunded")]
+    LineShouldBeRefunded,
+
     #[msg("Line has not started yet")]
     LineNotStarted,
 
