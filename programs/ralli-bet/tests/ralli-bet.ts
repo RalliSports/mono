@@ -1710,8 +1710,11 @@ describe("RalliBet Comprehensive Tests", () => {
     let newBet1Game1: PublicKey;
     let newBet2Game1: PublicKey;
 
+    let newBet1Game2: PublicKey;
+    let newBet2Game2: PublicKey;
+
     before(async () => {
-      let newStartsSoonRaw = Date.now() + 6000;
+      let newStartsSoonRaw = Date.now() + 12000;
       let newStartsSoon = new BN(Math.floor(newStartsSoonRaw / 1000));
       const [newLine1] = PublicKey.findProgramAddressSync(
         [Buffer.from("line"), newLineId1.toArrayLike(Buffer, "le", 8)],
@@ -1845,7 +1848,7 @@ describe("RalliBet Comprehensive Tests", () => {
       newLine5PK = newLine5;
       newLine6PK = newLine6;
 
-      const newGameId1 = new BN(2006);
+      const newGameId1 = new BN(2001);
 
       const [newGame1] = PublicKey.findProgramAddressSync(
         [Buffer.from("game"), newGameId1.toArrayLike(Buffer, "le", 8)],
@@ -2005,6 +2008,168 @@ describe("RalliBet Comprehensive Tests", () => {
       newGame1PK = newGame1;
       newGameEscrow1PK = newGameEscrow1;
       newGameVault1PK = newGameVault1;
+
+      const newGameId2 = new BN(2002);
+
+      const [newGame2] = PublicKey.findProgramAddressSync(
+        [Buffer.from("game"), newGameId2.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+
+      const [newGameEscrow2] = PublicKey.findProgramAddressSync(
+        [Buffer.from("escrow"), newGame2.toBuffer()],
+        program.programId
+      );
+
+      const newGameVault2 = getAssociatedTokenAddressSync(mint, newGame2, true);
+
+      const txCreateGame2 = await program.methods
+        .createGame(
+          newGameId2,
+          maxUsers,
+          entryFee,
+          numberOfLines,
+          provider.wallet.publicKey
+        )
+        .accountsPartial({
+          creator: user1.publicKey,
+          game: newGame2,
+          gameEscrow: newGameEscrow2,
+          gameVault: newGameVault2,
+          mint: mint,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([user1])
+        .rpc();
+
+      const txJoinGame2User1 = await program.methods
+        .joinGame()
+        .accountsPartial({
+          user: user1.publicKey,
+          game: newGame2,
+          gameEscrow: newGameEscrow2,
+          gameVault: newGameVault2,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([user1])
+        .rpc();
+
+      [newBet1Game2] = PublicKey.findProgramAddressSync(
+        [Buffer.from("bet"), newGame2.toBuffer(), user1.publicKey.toBuffer()],
+        program.programId
+      );
+
+      const txSubmitBet1Game2 = await program.methods
+        .submitBet([
+          {
+            lineId: newLine1PK,
+            direction: { under: {} },
+          },
+          {
+            lineId: newLine2PK,
+            direction: { over: {} },
+          },
+          {
+            lineId: newLine3PK,
+            direction: { over: {} },
+          },
+        ])
+        .accountsPartial({
+          user: user1.publicKey,
+          game: newGame2,
+          bet: newBet1Game2,
+        })
+        .signers([user1])
+        .remainingAccounts([
+          {
+            pubkey: newLine1PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine2PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine3PK,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
+
+      const txJoinGame2User2 = await program.methods
+        .joinGame()
+        .accountsPartial({
+          user: user2.publicKey,
+          game: newGame2,
+          gameEscrow: newGameEscrow2,
+          gameVault: newGameVault2,
+          mint: mint,
+          userTokens: user2TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([user2])
+        .rpc();
+
+      [newBet2Game2] = PublicKey.findProgramAddressSync(
+        [Buffer.from("bet"), newGame2.toBuffer(), user2.publicKey.toBuffer()],
+        program.programId
+      );
+
+      const txSubmitBet2Game2 = await program.methods
+        .submitBet([
+          {
+            lineId: newLine1PK,
+            direction: { under: {} },
+          },
+          {
+            lineId: newLine2PK,
+            direction: { under: {} },
+          },
+          {
+            lineId: newLine3PK,
+            direction: { under: {} },
+          },
+        ])
+        .accountsPartial({
+          user: user2.publicKey,
+          game: newGame2,
+          bet: newBet2Game2,
+        })
+        .signers([user2])
+        .remainingAccounts([
+          {
+            pubkey: newLine1PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine2PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine3PK,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
+
+      newGame2PK = newGame2;
+      newGameEscrow2PK = newGameEscrow2;
+      newGameVault2PK = newGameVault2;
+
       const timeToWait = newStartsSoonRaw - Date.now();
 
       await new Promise((resolve) => setTimeout(resolve, timeToWait + 2000));
@@ -2160,6 +2325,103 @@ describe("RalliBet Comprehensive Tests", () => {
       expect(
         user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!
       ).to.equal(0);
+    });
+
+    it("should successfully resolve game between two users where there is as draw", async () => {
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user2BalanceBefore = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+
+      // Debug: Print all account addresses
+      const accounts = {
+        admin: provider.wallet.publicKey,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        mint: mint,
+        game: newGame2PK,
+        gameEscrow: newGameEscrow2PK,
+        gameVault: newGameVault2PK,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
+
+      const tx = await program.methods
+        .resolveGame(entryFeePercentage, 2)
+        .accountsPartial(accounts)
+        .signers([keypair])
+        .remainingAccounts([
+          {
+            pubkey: newBet1Game2,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: newBet2Game2,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: user1TokenAccount,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: user2TokenAccount,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine1PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine2PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine3PK,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
+
+      const gameAccount = await program.account.game.fetch(newGame1PK);
+      expect(gameAccount.status).to.deep.equal({ resolved: {} });
+      const gameEscrowAccount = await program.account.gameEscrow.fetch(
+        newGameEscrow1PK
+      );
+      expect(gameEscrowAccount.totalAmount.toNumber()).to.equal(0);
+
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      expect(
+        treasuryBalanceAfter.value.uiAmount! -
+          treasuryBalanceBefore.value.uiAmount!
+      ).to.equal(0);
+
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      expect(
+        user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!
+      ).to.equal(entryFeeRaw / 10 ** MINT_DECIMALS);
+      const user2BalanceAfter = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      expect(
+        user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!
+      ).to.equal(entryFeeRaw / 10 ** MINT_DECIMALS);
     });
   });
 });
