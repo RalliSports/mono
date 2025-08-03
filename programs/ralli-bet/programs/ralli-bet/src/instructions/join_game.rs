@@ -31,8 +31,6 @@ impl<'info> JoinGame<'info> {
         let game_escrow = &mut self.game_escrow;
         let user = &self.user;
 
-        // require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
-
         if game.status != GameStatus::Open {
             return Err(RalliError::GameNotOpen.into());
         }
@@ -52,10 +50,7 @@ impl<'info> JoinGame<'info> {
             to: game_escrow.to_account_info(),
         };
 
-        let cpi_ctx = CpiContext::new(
-            self.system_program.to_account_info(),
-            transfer_instruction,
-        );
+        let cpi_ctx = CpiContext::new(self.system_program.to_account_info(), transfer_instruction);
         transfer(cpi_ctx, game.entry_fee)?;
 
         // Adding The user to game

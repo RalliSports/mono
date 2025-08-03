@@ -7,7 +7,7 @@ use anchor_lang::prelude::*;
 pub struct Bet {
     pub game: Pubkey,
     pub player: Pubkey,
-    #[max_len(10)]
+    #[max_len(MAX_LINES_PER_GAME as usize)]
     pub picks: Vec<Pick>,
     pub correct_count: u8,
     pub submitted_at: i64,

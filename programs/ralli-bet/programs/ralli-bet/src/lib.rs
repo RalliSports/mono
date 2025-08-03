@@ -13,7 +13,7 @@ declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
 
 #[program]
 pub mod ralli_bet {
-    use crate::state::Direction;
+    use crate::state::{Direction, Pick};
 
     use super::*;
 
@@ -22,10 +22,17 @@ pub mod ralli_bet {
         game_id: u64,
         max_users: u8,
         entry_fee: u64,
+        number_of_lines: u8,
         admin: Option<Pubkey>,
     ) -> Result<()> {
-        ctx.accounts
-            .create_game(game_id, max_users, entry_fee, admin, &ctx.bumps)
+        ctx.accounts.create_game(
+            game_id,
+            max_users,
+            entry_fee,
+            number_of_lines,
+            admin,
+            &ctx.bumps,
+        )
     }
 
     pub fn join_game(ctx: Context<JoinGame>) -> Result<()> {
@@ -36,7 +43,7 @@ pub mod ralli_bet {
         ctx: Context<CreateLine>,
         line_seed: u64,
         stat_id: u16,
-        predicted_value: i64,
+        predicted_value: f64,
         athlete_id: u64,
         starts_at: i64,
     ) -> Result<()> {
@@ -63,7 +70,7 @@ pub mod ralli_bet {
 
     pub fn submit_bet<'info>(
         ctx: Context<'_, '_, 'info, 'info, SubmitBet<'info>>,
-        picks: Vec<Direction>,
+        picks: Vec<Pick>,
     ) -> Result<()> {
         let remaining_accounts = ctx.remaining_accounts;
         ctx.accounts

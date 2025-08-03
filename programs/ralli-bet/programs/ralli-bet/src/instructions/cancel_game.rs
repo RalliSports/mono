@@ -1,9 +1,8 @@
+use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
-use crate::constants::*;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
-
 
 #[derive(Accounts)]
 pub struct CancelGame<'info> {
@@ -81,13 +80,13 @@ impl<'info> CancelGame<'info> {
             // For admin cancellation of multi-player games, check should_refund_bettors on involved lines
             if is_admin {
                 let mut should_cancel = false;
-                
+
                 // Check involved_lines using remaining_accounts for Line PDAs
                 // Note: This assumes remaining_accounts contains Line accounts after user accounts
                 let user_count = game.users.len();
                 if remaining_accounts.len() > user_count {
                     let line_accounts = &remaining_accounts[user_count..];
-                    
+
                     for line_account in line_accounts {
                         // Try to cast AccountInfo to Account<Line> for type-safe access
                         match Account::<Line>::try_from(line_account) {
@@ -105,7 +104,7 @@ impl<'info> CancelGame<'info> {
                         }
                     }
                 }
-                
+
                 require!(should_cancel, RalliError::NoValidReasonToCancel);
             }
         }
@@ -246,7 +245,6 @@ impl<'info> CancelGame<'info> {
         game.users.clear();
 
         // Clear lines and involved_lines
-        game.lines.clear();
         game.involved_lines.clear();
 
         // Set game status to cancelled

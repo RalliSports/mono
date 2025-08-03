@@ -3,8 +3,8 @@ use anchor_lang::prelude::*;
 #[account]
 pub struct Line {
     pub stat_id: u16,
-    pub predicted_value: i64,
-    pub actual_value: Option<i64>,
+    pub predicted_value: f64,
+    pub actual_value: Option<f64>,
     pub athlete_id: u64,
     pub starts_at: i64,
     pub result: Option<Direction>,

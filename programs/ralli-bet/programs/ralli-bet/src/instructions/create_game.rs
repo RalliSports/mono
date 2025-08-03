@@ -1,4 +1,5 @@
 use crate::constants::ADMIN_PUBLIC_KEY;
+use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
@@ -36,12 +37,21 @@ impl<'info> CreateGame<'info> {
         game_id: u64,
         max_users: u8,
         entry_fee: u64,
+        number_of_lines: u8,
         admin: Option<Pubkey>,
         bumps: &CreateGameBumps,
     ) -> Result<()> {
         require!(max_users >= 2, RalliError::NotEnoughUsers);
         require!(max_users <= 50, RalliError::GameFull);
         require!(entry_fee > 0, RalliError::InvalidEntryFee);
+        require!(
+            number_of_lines >= MIN_LINES_PER_GAME,
+            RalliError::TooFewLines
+        );
+        require!(
+            number_of_lines <= MAX_LINES_PER_GAME,
+            RalliError::TooManyLines
+        );
 
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
@@ -57,8 +67,8 @@ impl<'info> CreateGame<'info> {
             entry_fee,
             status: GameStatus::Open,
             created_at: clock.unix_timestamp,
+            number_of_lines,
             locked_at: None,
-            lines: Vec::new(),          // Initialize empty lines vector
             involved_lines: Vec::new(), // Initialize empty involved_lines vector
             bump: bumps.game,
         });
