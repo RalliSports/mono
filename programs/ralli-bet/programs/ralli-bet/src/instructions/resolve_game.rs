@@ -2,7 +2,11 @@ use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::{transfer, Transfer};
+
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
+};
 
 #[derive(Accounts)]
 pub struct ResolveGame<'info> {
@@ -23,19 +27,44 @@ pub struct ResolveGame<'info> {
     )]
     pub game_escrow: Account<'info, GameEscrow>,
 
+    pub mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = game,
+    )]
+    pub game_vault: Box<InterfaceAccount<'info, TokenAccount>>,
+
     /// CHECK: Treasury account to receive fees (can be any account)
     #[account(mut)]
     pub treasury: AccountInfo<'info>,
 
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = treasury,
+    )]
+    pub treasury_vault: Box<InterfaceAccount<'info, TokenAccount>>,
+
     pub system_program: Program<'info, System>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 impl<'info> ResolveGame<'info> {
     pub fn resolve_game(
         &mut self,
         fee_percentage: u16,
+        number_of_winners_expected: u16,
         remaining_accounts: &'info [AccountInfo<'info>],
     ) -> Result<()> {
+        // Extract values we need before mutable borrow
+        let game_id = self.game.game_id;
+        let game_bump = self.game.bump;
+        let game_account_info = self.game.to_account_info();
+
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
         let admin = &self.admin;
@@ -60,7 +89,10 @@ impl<'info> ResolveGame<'info> {
         require!(fee_percentage <= 1000, RalliError::ExcessiveFee);
 
         let bet_accounts = &remaining_accounts[..game.users.len()];
-        let line_accounts = &remaining_accounts[game.users.len()..];
+        let winners_accounts = &remaining_accounts
+            [game.users.len()..game.users.len() + number_of_winners_expected as usize];
+        let line_accounts =
+            &remaining_accounts[game.users.len() + number_of_winners_expected as usize..];
 
         require_eq!(
             line_accounts.len(),
@@ -143,30 +175,35 @@ impl<'info> ResolveGame<'info> {
             RalliError::NumberOfWinnersMismatch
         );
 
-        let game_key = game.key();
+        let _game_key = game.key();
+
+        require!(
+            number_of_winners_expected == number_of_winners as u16,
+            RalliError::NumberOfWinnersExpectedMismatch
+        );
 
         // Handle edge case where everyone wins
         if number_of_winners == total_players {
             // Just return everyone's money, no fees
-            for user_key in &game.users {
-                let transfer_instruction = Transfer {
-                    from: game_escrow.to_account_info(),
-                    to: remaining_accounts
-                        .iter()
-                        .find(|acc| acc.key() == *user_key)
-                        .ok_or(RalliError::UserAccountNotFound)?
-                        .clone(),
-                };
-
-                let seeds = &[b"escrow", game_key.as_ref(), &[game_escrow.bump]];
-                let signer_seeds = &[&seeds[..]];
-
-                let cpi_ctx = CpiContext::new_with_signer(
-                    self.system_program.to_account_info(),
-                    transfer_instruction,
-                    signer_seeds,
-                );
-                transfer(cpi_ctx, game.entry_fee)?;
+            for (i, user_key) in game.users.iter().enumerate() {
+                if i < winners_accounts.len() {
+                    let cpi_program = self.token_program.to_account_info();
+                    let cpi_accounts = TransferChecked {
+                        from: self.game_vault.to_account_info(),
+                        to: winners_accounts[i].clone(),
+                        authority: game_account_info.clone(),
+                        mint: self.mint.to_account_info(),
+                    };
+                    // Set the seeds
+                    let seeds = &["game".as_bytes(), &game_id.to_le_bytes(), &[game_bump]];
+                    // Make them in the expected format
+                    let signer_seeds = &[&seeds[..]];
+                    // Set the cpi context
+                    let cpi_ctx =
+                        CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+                    // Transfer the tokens
+                    transfer_checked(cpi_ctx, game.entry_fee, self.mint.decimals)?;
+                }
             }
 
             game_escrow.total_amount = 0;
@@ -187,46 +224,44 @@ impl<'info> ResolveGame<'info> {
         let total_per_winner = game.entry_fee + winnings_per_winner;
 
         // Transfer winnings to each winner
-        for winner_key in &winners {
-            let winner_account = remaining_accounts
-                .iter()
-                .find(|acc| acc.key() == *winner_key)
-                .ok_or(RalliError::UserAccountNotFound)?;
-
-            let transfer_instruction = Transfer {
-                from: game_escrow.to_account_info(),
-                to: winner_account.to_account_info(),
-            };
-
-            let seeds = &[b"escrow", game_key.as_ref(), &[game_escrow.bump]];
-            let signer_seeds = &[&seeds[..]];
-
-            let cpi_ctx = CpiContext::new_with_signer(
-                self.system_program.to_account_info(),
-                transfer_instruction,
-                signer_seeds,
-            );
-            transfer(cpi_ctx, total_per_winner)?;
-            game_escrow.total_amount -= total_per_winner;
+        for (i, winner_key) in winners.iter().enumerate() {
+            if i < winners_accounts.len() {
+                let cpi_program = self.token_program.to_account_info();
+                let cpi_accounts = TransferChecked {
+                    from: self.game_vault.to_account_info(),
+                    to: winners_accounts[i].clone(),
+                    authority: game_account_info.clone(),
+                    mint: self.mint.to_account_info(),
+                };
+                // Set the seeds
+                let seeds = &["game".as_bytes(), &game_id.to_le_bytes(), &[game_bump]];
+                // Make them in the expected format
+                let signer_seeds = &[&seeds[..]];
+                // Set the cpi context
+                let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+                // Transfer the tokens
+                transfer_checked(cpi_ctx, total_per_winner, self.mint.decimals)?;
+            }
         }
 
         // Transfer fees and remainder to treasury if any
         let total_treasury_amount = fee_from_losers + remainder_to_treasury;
         if total_treasury_amount > 0 {
-            let transfer_instruction = Transfer {
-                from: game_escrow.to_account_info(),
-                to: self.treasury.to_account_info(),
+            let cpi_program = self.token_program.to_account_info();
+            let cpi_accounts = TransferChecked {
+                from: self.game_vault.to_account_info(),
+                to: self.treasury_vault.to_account_info(),
+                authority: game_account_info.clone(),
+                mint: self.mint.to_account_info(),
             };
-
-            let seeds = &[b"escrow", game_key.as_ref(), &[game_escrow.bump]];
+            // Set the seeds
+            let seeds = &["game".as_bytes(), &game_id.to_le_bytes(), &[game_bump]];
+            // Make them in the expected format
             let signer_seeds = &[&seeds[..]];
-
-            let cpi_ctx = CpiContext::new_with_signer(
-                self.system_program.to_account_info(),
-                transfer_instruction,
-                signer_seeds,
-            );
-            transfer(cpi_ctx, total_treasury_amount)?;
+            // Set the cpi context
+            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+            // Transfer the tokens
+            transfer_checked(cpi_ctx, total_treasury_amount, self.mint.decimals)?;
         }
 
         // Update escrow balance

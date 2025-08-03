@@ -4,6 +4,7 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct Game {
     pub game_id: u64,
+    pub mint: Pubkey,
     pub first_line_starts_at: i64,
     pub creator: Pubkey,
     pub admin: Pubkey,

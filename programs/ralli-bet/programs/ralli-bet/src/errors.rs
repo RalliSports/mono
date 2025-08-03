@@ -226,4 +226,7 @@ pub enum RalliError {
 
     #[msg("Escrow not empty")]
     EscrowNotEmpty,
+
+    #[msg("Number of winners expected does not match number of winners")]
+    NumberOfWinnersExpectedMismatch,
 }

@@ -11,6 +11,15 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
+
+import {
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+  getAssociatedTokenAddressSync,
+  createMint,
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { expect } from "chai";
 // type Direction = anchor.IdlTypes<RalliBet>["Pick"];
 
@@ -33,6 +42,7 @@ anchor.setProvider(provider);
 const program = anchor.workspace.RalliBet as Program<RalliBet>;
 
 describe("RalliBet Comprehensive Tests", () => {
+  const MINT_DECIMALS = 6;
   let gameId: BN;
   let createdGame: PublicKey;
   let line1PK: PublicKey;
@@ -43,12 +53,19 @@ describe("RalliBet Comprehensive Tests", () => {
   let line6PK: PublicKey;
   let game: PublicKey;
   let gameEscrow: PublicKey;
-  let gameResult: PublicKey;
+  let gameVault: PublicKey;
+  let mint: PublicKey;
+  let treasury: Keypair = Keypair.generate();
 
   // Test users
   let user1: Keypair;
   let user2: Keypair;
   let user3: Keypair;
+  let user1TokenAccount: PublicKey;
+  let user2TokenAccount: PublicKey;
+  let user3TokenAccount: PublicKey;
+  let providerTokenAccount: PublicKey;
+  let treasuryTokenAccount: PublicKey;
   let users: Keypair[];
   let lineId1: BN = new BN(123);
   let lineId2: BN = new BN(456);
@@ -83,12 +100,13 @@ describe("RalliBet Comprehensive Tests", () => {
     Math.floor((Date.now() + 1000 * 60 * 60 * 24) / 1000)
   );
 
-  let startsAtSoon: BN = new BN(Math.floor((Date.now() + 5000) / 1000));
+  let startsAtSoon: BN = new BN(Math.floor((Date.now() + 12000) / 1000));
   let startsAtInvalid: BN = new BN(
     Math.floor((Date.now() - 1000 * 60 * 60 * 24) / 1000)
   );
-
-  const entryFee = new BN(LAMPORTS_PER_SOL * 0.001); // 0.001 SOL
+  const entryFeeRaw = LAMPORTS_PER_SOL * 0.001;
+  const entryFee = new BN(entryFeeRaw); // 0.001 SOL
+  const entryFeePercentage = 100;
   const maxUsers = 5;
 
   before(async () => {
@@ -96,7 +114,7 @@ describe("RalliBet Comprehensive Tests", () => {
     user1 = Keypair.generate();
     user2 = Keypair.generate();
     user3 = Keypair.generate();
-    users = [user1, user2, user3];
+    users = [user1, user2, user3, treasury];
 
     // Airdrop SOL to test users
     for (const user of users) {
@@ -106,6 +124,98 @@ describe("RalliBet Comprehensive Tests", () => {
       );
       await connection.confirmTransaction(signature);
     }
+
+    // Create mint
+    mint = await createMint(
+      connection,
+      keypair,
+      keypair.publicKey,
+      null,
+      MINT_DECIMALS
+    );
+
+    // 600.000000 tokens
+    const MINT_AMOUNT = 6 * 10 ** (MINT_DECIMALS + 2);
+    user1TokenAccount = (
+      await getOrCreateAssociatedTokenAccount(
+        connection,
+        user1,
+        mint,
+        user1.publicKey
+      )
+    ).address;
+
+    await mintTo(
+      connection,
+      keypair,
+      mint,
+      user1TokenAccount,
+      keypair.publicKey,
+      MINT_AMOUNT
+    );
+
+    user2TokenAccount = (
+      await getOrCreateAssociatedTokenAccount(
+        connection,
+        user2,
+        mint,
+        user2.publicKey
+      )
+    ).address;
+
+    await mintTo(
+      connection,
+      keypair,
+      mint,
+      user2TokenAccount,
+      keypair.publicKey,
+      MINT_AMOUNT
+    );
+
+    user3TokenAccount = (
+      await getOrCreateAssociatedTokenAccount(
+        connection,
+        user3,
+        mint,
+        user3.publicKey
+      )
+    ).address;
+
+    await mintTo(
+      connection,
+      keypair,
+      mint,
+      user3TokenAccount,
+      keypair.publicKey,
+      MINT_AMOUNT
+    );
+
+    providerTokenAccount = (
+      await getOrCreateAssociatedTokenAccount(
+        connection,
+        keypair,
+        mint,
+        keypair.publicKey
+      )
+    ).address;
+
+    await mintTo(
+      connection,
+      keypair,
+      mint,
+      providerTokenAccount,
+      keypair.publicKey,
+      MINT_AMOUNT
+    );
+
+    treasuryTokenAccount = (
+      await getOrCreateAssociatedTokenAccount(
+        connection,
+        treasury,
+        mint,
+        treasury.publicKey
+      )
+    ).address;
   });
 
   beforeEach(async () => {
@@ -123,14 +233,22 @@ describe("RalliBet Comprehensive Tests", () => {
       program.programId
     );
 
-    [gameResult] = PublicKey.findProgramAddressSync(
-      [Buffer.from("game_result"), game.toBuffer()],
-      program.programId
-    );
+    gameVault = getAssociatedTokenAddressSync(mint, game, true);
   });
 
   describe("Create Game Tests", () => {
     it("should create a game successfully", async () => {
+      const accounts = {
+        creator: user1.publicKey,
+        game: game,
+        gameEscrow: gameEscrow,
+        mint: mint,
+        gameVault: gameVault,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
+
       const tx = await program.methods
         .createGame(
           gameId,
@@ -139,12 +257,7 @@ describe("RalliBet Comprehensive Tests", () => {
           numberOfLines,
           provider.wallet.publicKey
         )
-        .accountsPartial({
-          creator: user1.publicKey,
-          game: game,
-          gameEscrow: gameEscrow,
-          systemProgram: SystemProgram.programId,
-        })
+        .accountsPartial(accounts)
         .signers([user1])
         .rpc();
 
@@ -173,7 +286,11 @@ describe("RalliBet Comprehensive Tests", () => {
           creator: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          mint: mint,
+          gameVault: gameVault,
           systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         };
 
         await program.methods
@@ -207,7 +324,11 @@ describe("RalliBet Comprehensive Tests", () => {
             creator: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
             systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           })
           .signers([user1])
           .rpc();
@@ -231,7 +352,11 @@ describe("RalliBet Comprehensive Tests", () => {
             creator: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
             systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           })
           .signers([user1])
           .rpc();
@@ -249,7 +374,11 @@ describe("RalliBet Comprehensive Tests", () => {
             creator: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
             systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           })
           .signers([user1])
           .rpc();
@@ -272,7 +401,11 @@ describe("RalliBet Comprehensive Tests", () => {
             creator: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
             systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           })
           .signers([user1])
           .rpc();
@@ -527,15 +660,23 @@ describe("RalliBet Comprehensive Tests", () => {
           creator: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
           systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         })
         .signers([user1])
         .rpc();
     });
 
     it("should allow user to join game successfully", async () => {
-      const userBalanceBefore = await connection.getBalance(user1.publicKey);
-      const escrowBalanceBefore = await connection.getBalance(gameEscrow);
+      const userBalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const vaultBalanceBefore = await connection.getTokenAccountBalance(
+        gameVault
+      );
 
       const tx = await program.methods
         .joinGame()
@@ -543,21 +684,30 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
         .rpc();
 
       // Verify balances
-      const userBalanceAfter = await connection.getBalance(user1.publicKey);
-      const escrowBalanceAfter = await connection.getBalance(gameEscrow);
+      const userBalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const vaultBalanceAfter = await connection.getTokenAccountBalance(
+        gameVault
+      );
 
-      expect(userBalanceBefore - userBalanceAfter).to.equal(
-        entryFee.toNumber()
-      );
-      expect(escrowBalanceAfter - escrowBalanceBefore).to.equal(
-        entryFee.toNumber()
-      );
+      expect(
+        userBalanceBefore.value.uiAmount! - userBalanceAfter.value.uiAmount!
+      ).to.equal(entryFee.toNumber() / Math.pow(10, 6));
+      expect(
+        vaultBalanceAfter.value.uiAmount! - vaultBalanceBefore.value.uiAmount!
+      ).to.equal(entryFee.toNumber() / Math.pow(10, 6));
 
       // Verify game state
       const gameAccount = await program.account.game.fetch(game);
@@ -581,6 +731,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
@@ -593,6 +748,10 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user2.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          mint: mint,
+          userTokens: user2TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user2])
@@ -620,6 +779,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: provider.wallet.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: providerTokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([keypair])
@@ -634,6 +798,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
@@ -647,6 +816,11 @@ describe("RalliBet Comprehensive Tests", () => {
             user: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
+            userTokens: user1TokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([user1])
@@ -668,6 +842,11 @@ describe("RalliBet Comprehensive Tests", () => {
         [Buffer.from("escrow"), smallGame.toBuffer()],
         program.programId
       );
+      const smallGameVault = getAssociatedTokenAddressSync(
+        mint,
+        smallGame,
+        true
+      );
 
       await program.methods
         .createGame(
@@ -681,7 +860,11 @@ describe("RalliBet Comprehensive Tests", () => {
           creator: provider.wallet.publicKey,
           game: smallGame,
           gameEscrow: smallGameEscrow,
+          gameVault: smallGameVault,
+          mint: mint,
           systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         })
         .signers([keypair])
         .rpc();
@@ -693,6 +876,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user1.publicKey,
           game: smallGame,
           gameEscrow: smallGameEscrow,
+          gameVault: smallGameVault,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
@@ -704,6 +892,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user2.publicKey,
           game: smallGame,
           gameEscrow: smallGameEscrow,
+          gameVault: smallGameVault,
+          mint: mint,
+          userTokens: user2TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user2])
@@ -717,6 +910,11 @@ describe("RalliBet Comprehensive Tests", () => {
             user: user3.publicKey,
             game: smallGame,
             gameEscrow: smallGameEscrow,
+            gameVault: smallGameVault,
+            mint: mint,
+            userTokens: user3TokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([user3])
@@ -743,6 +941,10 @@ describe("RalliBet Comprehensive Tests", () => {
           creator: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
@@ -761,6 +963,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
@@ -849,6 +1056,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user1.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user1])
@@ -895,6 +1107,11 @@ describe("RalliBet Comprehensive Tests", () => {
           user: user2.publicKey,
           game: game,
           gameEscrow: gameEscrow,
+          gameVault: gameVault,
+          mint: mint,
+          userTokens: user2TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .signers([user2])
@@ -1031,6 +1248,11 @@ describe("RalliBet Comprehensive Tests", () => {
             user: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
+            userTokens: user1TokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([user1])
@@ -1104,6 +1326,11 @@ describe("RalliBet Comprehensive Tests", () => {
             user: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
+            userTokens: user1TokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([user1])
@@ -1172,6 +1399,11 @@ describe("RalliBet Comprehensive Tests", () => {
             user: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
+            userTokens: user1TokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([user1])
@@ -1238,6 +1470,11 @@ describe("RalliBet Comprehensive Tests", () => {
             user: user1.publicKey,
             game: game,
             gameEscrow: gameEscrow,
+            gameVault: gameVault,
+            mint: mint,
+            userTokens: user1TokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([user1])
@@ -1434,383 +1671,495 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  // describe("Cancel Game Tests", () => {
-  //   beforeEach(async () => {
-  //     // Create game and have users join
-  //     await program.methods
-  //       .createGame(gameId, maxUsers, entryFee)
-  //       .accountsPartial({
-  //         creator: provider.wallet.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([keypair])
-  //       .rpc();
+  describe("Resolve Game Tests", () => {
+    let newGame1PK: PublicKey;
+    let newGame2PK: PublicKey;
+    let newGame3PK: PublicKey;
+    let newGame4PK: PublicKey;
+    let newGame5PK: PublicKey;
+    let newGame6PK: PublicKey;
 
-  //     await program.methods
-  //       .joinGame()
-  //       .accountsPartial({
-  //         user: user1.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user1])
-  //       .rpc();
-  //   });
+    let newGameEscrow1PK: PublicKey;
+    let newGameEscrow2PK: PublicKey;
+    let newGameEscrow3PK: PublicKey;
+    let newGameEscrow4PK: PublicKey;
+    let newGameEscrow5PK: PublicKey;
+    let newGameEscrow6PK: PublicKey;
 
-  //   it("should allow user to cancel and get refund", async () => {
-  //     const userBalanceBefore = await connection.getBalance(user1.publicKey);
-  //     const escrowBalanceBefore = await connection.getBalance(gameEscrow);
+    let newGameVault1PK: PublicKey;
+    let newGameVault2PK: PublicKey;
+    let newGameVault3PK: PublicKey;
+    let newGameVault4PK: PublicKey;
+    let newGameVault5PK: PublicKey;
+    let newGameVault6PK: PublicKey;
 
-  //     const tx = await program.methods
-  //       .cancelGame()
-  //       .accountsPartial({
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         user: user1.publicKey,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user1])
-  //       .rpc();
+    let newLine1PK: PublicKey;
+    let newLine2PK: PublicKey;
+    let newLine3PK: PublicKey;
+    let newLine4PK: PublicKey;
+    let newLine5PK: PublicKey;
+    let newLine6PK: PublicKey;
 
-  //     const userBalanceAfter = await connection.getBalance(user1.publicKey);
-  //     const escrowBalanceAfter = await connection.getBalance(gameEscrow);
+    let newLineId1 = new BN(2000);
+    let newLineId2 = new BN(2001);
+    let newLineId3 = new BN(2002);
+    let newLineId4 = new BN(2003);
+    let newLineId5 = new BN(2004);
+    let newLineId6 = new BN(2005);
 
-  //     // User should get their entry fee back (minus transaction fees)
-  //     expect(userBalanceAfter - userBalanceBefore).to.be.greaterThan(
-  //       entryFee.toNumber() * 0.9
-  //     );
-  //     expect(escrowBalanceBefore - escrowBalanceAfter).to.equal(
-  //       entryFee.toNumber()
-  //     );
+    let newBet1Game1: PublicKey;
+    let newBet2Game1: PublicKey;
 
-  //     // Verify game state
-  //     const gameAccount = await program.account.game.fetch(game);
-  //     expect(gameAccount.users).to.have.length(0);
+    before(async () => {
+      let newStartsSoonRaw = Date.now() + 6000;
+      let newStartsSoon = new BN(Math.floor(newStartsSoonRaw / 1000));
+      const [newLine1] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), newLineId1.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  //     // Verify escrow state
-  //     const escrowAccount = await program.account.gameEscrow.fetch(gameEscrow);
-  //     expect(escrowAccount.totalAmount.toString()).to.equal("0");
-  //   });
-  // });
+      const [newLine2] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), newLineId2.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  // describe("Integration Tests", () => {
-  //   it("should handle complete game lifecycle", async () => {
-  //     // Create game
-  //     await program.methods
-  //       .createGame(gameId, 3, entryFee)
-  //       .accountsPartial({
-  //         creator: provider.wallet.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([keypair])
-  //       .rpc();
+      const [newLine3] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), newLineId3.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  //     // Multiple users join
-  //     await program.methods
-  //       .joinGame()
-  //       .accountsPartial({
-  //         user: user1.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user1])
-  //       .rpc();
+      const [newLine4] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), newLineId4.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  //     await program.methods
-  //       .joinGame()
-  //       .accountsPartial({
-  //         user: user2.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user2])
-  //       .rpc();
+      const [newLine5] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), newLineId5.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  //     // Verify final state
-  //     const gameAccount = await program.account.game.fetch(game);
-  //     expect(gameAccount.users).to.have.length(2);
-  //     expect(gameAccount.status).to.deep.equal({ open: {} });
+      const [newLine6] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), newLineId6.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  //     const escrowAccount = await program.account.gameEscrow.fetch(gameEscrow);
-  //     expect(escrowAccount.totalAmount.toString()).to.equal(
-  //       entryFee.mul(new BN(2)).toString()
-  //     );
+      const tx = await program.methods
+        .createLine(
+          newLineId1,
+          statId1,
+          predictedValue1,
+          athleteId1,
+          newStartsSoon
+        )
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine1,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     // One user cancels
-  //     await program.methods
-  //       .cancelGame()
-  //       .accountsPartial({
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         user: user1.publicKey,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user1])
-  //       .rpc();
+      const tx2 = await program.methods
+        .createLine(
+          newLineId2,
+          statId2,
+          predictedValue2,
+          athleteId2,
+          newStartsSoon
+        )
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine2,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     // Verify state after cancellation
-  //     const gameAccountAfterCancel = await program.account.game.fetch(game);
-  //     expect(gameAccountAfterCancel.users).to.have.length(1);
-  //     expect(gameAccountAfterCancel.users[0].toString()).to.equal(
-  //       user2.publicKey.toString()
-  //     );
+      const tx3 = await program.methods
+        .createLine(
+          newLineId3,
+          statId3,
+          predictedValue3,
+          athleteId3,
+          newStartsSoon
+        )
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine3,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     const escrowAccountAfterCancel = await program.account.gameEscrow.fetch(
-  //       gameEscrow
-  //     );
-  //     expect(escrowAccountAfterCancel.totalAmount.toString()).to.equal(
-  //       entryFee.toString()
-  //     );
-  //   });
+      const tx4 = await program.methods
+        .createLine(
+          newLineId4,
+          statId4,
+          predictedValue4,
+          athleteId4,
+          newStartsSoon
+        )
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine4,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //   it("should handle edge case with insufficient funds", async () => {
-  //     // Create a user with insufficient funds
-  //     const poorUser = Keypair.generate();
-  //     const signature = await connection.requestAirdrop(
-  //       poorUser.publicKey,
-  //       1000
-  //     ); // Very small amount
-  //     await connection.confirmTransaction(signature);
+      const tx5 = await program.methods
+        .createLine(
+          newLineId5,
+          statId5,
+          predictedValue5,
+          athleteId5,
+          newStartsSoon
+        )
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine5,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     // Create game
-  //     await program.methods
-  //       .createGame(gameId, maxUsers, entryFee)
-  //       .accountsPartial({
-  //         creator: provider.wallet.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([keypair])
-  //       .rpc();
+      const tx6 = await program.methods
+        .createLine(
+          newLineId6,
+          statId6,
+          predictedValue6,
+          athleteId6,
+          newStartsSoon
+        )
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine6,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([keypair])
+        .rpc();
+      newLine1PK = newLine1;
+      newLine2PK = newLine2;
+      newLine3PK = newLine3;
+      newLine4PK = newLine4;
+      newLine5PK = newLine5;
+      newLine6PK = newLine6;
 
-  //     // Try to join with insufficient funds
-  //     try {
-  //       await program.methods
-  //         .joinGame()
-  //         .accountsPartial({
-  //           user: poorUser.publicKey,
-  //           game: game,
-  //           gameEscrow: gameEscrow,
-  //           systemProgram: SystemProgram.programId,
-  //         })
-  //         .signers([poorUser])
-  //         .rpc();
-  //       expect.fail("Should have failed due to insufficient funds");
-  //     } catch (error) {
-  //       // This should fail due to insufficient lamports
-  //       expect(error).to.exist;
-  //     }
-  //   });
-  // });
+      const newGameId1 = new BN(2006);
 
-  // describe("Account State Verification", () => {
-  //   it("should maintain correct account relationships", async () => {
-  //     await program.methods
-  //       .createGame(gameId, maxUsers, entryFee)
-  //       .accountsPartial({
-  //         creator: provider.wallet.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([keypair])
-  //       .rpc();
+      const [newGame1] = PublicKey.findProgramAddressSync(
+        [Buffer.from("game"), newGameId1.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
 
-  //     const gameAccount = await program.account.game.fetch(game);
-  //     const escrowAccount = await program.account.gameEscrow.fetch(gameEscrow);
+      const [newGameEscrow1] = PublicKey.findProgramAddressSync(
+        [Buffer.from("escrow"), newGame1.toBuffer()],
+        program.programId
+      );
 
-  //     // Verify PDA relationships
-  //     expect(escrowAccount.game.toString()).to.equal(game.toString());
-  //     expect(gameAccount.creator.toString()).to.equal(
-  //       provider.wallet.publicKey.toString()
-  //     );
+      const newGameVault1 = getAssociatedTokenAddressSync(mint, newGame1, true);
 
-  //     // Verify initial state
-  //     expect(gameAccount.users).to.be.empty;
-  //     expect(escrowAccount.totalAmount.toString()).to.equal("0");
-  //   });
+      const txCreateGame1 = await program.methods
+        .createGame(
+          newGameId1,
+          maxUsers,
+          entryFee,
+          numberOfLines,
+          provider.wallet.publicKey
+        )
+        .accountsPartial({
+          creator: user1.publicKey,
+          game: newGame1,
+          gameEscrow: newGameEscrow1,
+          gameVault: newGameVault1,
+          mint: mint,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([user1])
+        .rpc();
 
-  //   it("should have correct bump values", async () => {
-  //     await program.methods
-  //       .createGame(gameId, maxUsers, entryFee)
-  //       .accountsPartial({
-  //         creator: provider.wallet.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([keypair])
-  //       .rpc();
+      const txJoinGame1User1 = await program.methods
+        .joinGame()
+        .accountsPartial({
+          user: user1.publicKey,
+          game: newGame1,
+          gameEscrow: newGameEscrow1,
+          gameVault: newGameVault1,
+          mint: mint,
+          userTokens: user1TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([user1])
+        .rpc();
 
-  //     const gameAccount = await program.account.game.fetch(game);
-  //     const escrowAccount = await program.account.gameEscrow.fetch(gameEscrow);
+      [newBet1Game1] = PublicKey.findProgramAddressSync(
+        [Buffer.from("bet"), newGame1.toBuffer(), user1.publicKey.toBuffer()],
+        program.programId
+      );
 
-  //     // Verify bumps are within valid range
-  //     expect(gameAccount.bump).to.be.greaterThan(0);
-  //     expect(gameAccount.bump).to.be.lessThan(256);
-  //     expect(escrowAccount.bump).to.be.greaterThan(0);
-  //     expect(escrowAccount.bump).to.be.lessThan(256);
-  //   });
-  // });
+      const txSubmitBet1Game1 = await program.methods
+        .submitBet([
+          {
+            lineId: newLine1PK,
+            direction: { over: {} },
+          },
+          {
+            lineId: newLine2PK,
+            direction: { under: {} },
+          },
+          {
+            lineId: newLine3PK,
+            direction: { over: {} },
+          },
+        ])
+        .accountsPartial({
+          user: user1.publicKey,
+          game: newGame1,
+          bet: newBet1Game1,
+        })
+        .signers([user1])
+        .remainingAccounts([
+          {
+            pubkey: newLine1PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine2PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine3PK,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
 
-  // describe("Error Handling", () => {
-  //   it("should handle invalid account scenarios", async () => {
-  //     // Try to join a game that doesn't exist
-  //     const fakeGameId = new BN(999999);
-  //     const [fakeGame] = PublicKey.findProgramAddressSync(
-  //       [Buffer.from("game"), fakeGameId.toArrayLike(Buffer, "le", 8)],
-  //       program.programId
-  //     );
-  //     const [fakeGameEscrow] = PublicKey.findProgramAddressSync(
-  //       [Buffer.from("escrow"), fakeGame.toBuffer()],
-  //       program.programId
-  //     );
+      const txJoinGame1User2 = await program.methods
+        .joinGame()
+        .accountsPartial({
+          user: user2.publicKey,
+          game: newGame1,
+          gameEscrow: newGameEscrow1,
+          gameVault: newGameVault1,
+          mint: mint,
+          userTokens: user2TokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([user2])
+        .rpc();
 
-  //     try {
-  //       await program.methods
-  //         .joinGame()
-  //         .accountsPartial({
-  //           user: user1.publicKey,
-  //           game: fakeGame,
-  //           gameEscrow: fakeGameEscrow,
-  //           systemProgram: SystemProgram.programId,
-  //         })
-  //         .signers([user1])
-  //         .rpc();
-  //       expect.fail("Should have failed with account not initialized");
-  //     } catch (error) {
-  //       expect(error).to.exist;
-  //     }
-  //   });
-  // });
+      [newBet2Game1] = PublicKey.findProgramAddressSync(
+        [Buffer.from("bet"), newGame1.toBuffer(), user2.publicKey.toBuffer()],
+        program.programId
+      );
 
-  // describe("Refund Entry Tests", () => {
-  //   beforeEach(async () => {
-  //     // Create game and have users join
-  //     await program.methods
-  //       .createGame(gameId, maxUsers, entryFee)
-  //       .accountsPartial({
-  //         creator: provider.wallet.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([keypair])
-  //       .rpc();
+      const txSubmitBet2Game1 = await program.methods
+        .submitBet([
+          {
+            lineId: newLine1PK,
+            direction: { under: {} },
+          },
+          {
+            lineId: newLine2PK,
+            direction: { over: {} },
+          },
+          {
+            lineId: newLine3PK,
+            direction: { under: {} },
+          },
+        ])
+        .accountsPartial({
+          user: user2.publicKey,
+          game: newGame1,
+          bet: newBet2Game1,
+        })
+        .signers([user2])
+        .remainingAccounts([
+          {
+            pubkey: newLine1PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine2PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine3PK,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
 
-  //     // Have users join
-  //     await program.methods
-  //       .joinGame()
-  //       .accountsPartial({
-  //         user: user1.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user1])
-  //       .rpc();
+      newGame1PK = newGame1;
+      newGameEscrow1PK = newGameEscrow1;
+      newGameVault1PK = newGameVault1;
+      const timeToWait = newStartsSoonRaw - Date.now();
 
-  //     await program.methods
-  //       .joinGame()
-  //       .accountsPartial({
-  //         user: user2.publicKey,
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .signers([user2])
-  //       .rpc();
-  //   });
+      await new Promise((resolve) => setTimeout(resolve, timeToWait + 2000));
 
-  //   it("should successfully refund all users when called by game creator", async () => {
-  //     const user1BalanceBefore = await connection.getBalance(user1.publicKey);
-  //     const user2BalanceBefore = await connection.getBalance(user2.publicKey);
+      const txResolveNewLine1 = await program.methods
+        .resolveLine({ over: {} }, 19.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine1PK,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     await program.methods
-  //       .refundEntry()
-  //       .accountsPartial({
-  //         game: game,
-  //         gameEscrow: gameEscrow,
-  //         gameResult: gameResult,
-  //         gameCreator: provider.wallet.publicKey,
-  //         systemProgram: SystemProgram.programId,
-  //       })
-  //       .remainingAccounts([
-  //         { pubkey: user1.publicKey, isWritable: true, isSigner: false },
-  //         { pubkey: user2.publicKey, isWritable: true, isSigner: false },
-  //       ])
-  //       .signers([keypair])
-  //       .rpc();
+      const txResolveNewLine2 = await program.methods
+        .resolveLine({ under: {} }, 10.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine2PK,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     // Verify users got refunded
-  //     const user1BalanceAfter = await connection.getBalance(user1.publicKey);
-  //     const user2BalanceAfter = await connection.getBalance(user2.publicKey);
+      const txResolveNewLine3 = await program.methods
+        .resolveLine({ over: {} }, 60.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine3PK,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     expect(user1BalanceAfter - user1BalanceBefore).to.equal(
-  //       entryFee.toNumber()
-  //     );
-  //     expect(user2BalanceAfter - user2BalanceBefore).to.equal(
-  //       entryFee.toNumber()
-  //     );
+      const txResolveNewLine4 = await program.methods
+        .resolveLine({ under: {} }, 19.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine4PK,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //     // Verify game state
-  //     const gameAccount = await program.account.game.fetch(game);
-  //     expect(gameAccount.users).to.have.length(0);
-  //     expect(gameAccount.status).to.deep.equal({ cancelled: {} });
-  //   });
+      const txResolveNewLine5 = await program.methods
+        .resolveLine({ over: {} }, 19.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine5PK,
+        })
+        .signers([keypair])
+        .rpc();
 
-  //   it("should fail when called by non-creator", async () => {
-  //     try {
-  //       await program.methods
-  //         .refundEntry()
-  //         .accountsPartial({
-  //           game: game,
-  //           gameEscrow: gameEscrow,
-  //           gameResult: gameResult,
-  //           gameCreator: user1.publicKey, // Not the creator
-  //           systemProgram: SystemProgram.programId,
-  //         })
-  //         .remainingAccounts([
-  //           { pubkey: user1.publicKey, isWritable: true, isSigner: false },
-  //           { pubkey: user2.publicKey, isWritable: true, isSigner: false },
-  //         ])
-  //         .signers([user1])
-  //         .rpc();
-  //       expect.fail("Should have failed with UnauthorizedRefund");
-  //     } catch (error) {
-  //       expect(error.toString()).to.include("Error Code: UnauthorizedRefund");
-  //     }
-  //   });
+      const txResolveNewLine6 = await program.methods
+        .resolveLine({ under: {} }, 9.0, false)
+        .accountsPartial({
+          admin: provider.wallet.publicKey,
+          line: newLine6PK,
+        })
+        .signers([keypair])
+        .rpc();
+    });
 
-  //   it("should fail when remaining accounts don't match game users", async () => {
-  //     try {
-  //       await program.methods
-  //         .refundEntry()
-  //         .accountsPartial({
-  //           game: game,
-  //           gameEscrow: gameEscrow,
-  //           gameResult: gameResult,
-  //           gameCreator: provider.wallet.publicKey,
-  //           systemProgram: SystemProgram.programId,
-  //         })
-  //         .remainingAccounts([
-  //           { pubkey: user1.publicKey, isWritable: true, isSigner: false },
-  //           { pubkey: user3.publicKey, isWritable: true, isSigner: false }, // Wrong user
-  //         ])
-  //         .signers([keypair])
-  //         .rpc();
-  //       expect.fail("Should have failed with AccountMismatch");
-  //     } catch (error) {
-  //       expect(error.toString()).to.include("Error Code: AccountMismatch");
-  //     }
-  //   });
-  // });
+    it("should successfully resolve game between two users where one wins", async () => {
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user2BalanceBefore = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+
+      // Debug: Print all account addresses
+      const accounts = {
+        admin: provider.wallet.publicKey,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        mint: mint,
+        game: newGame1PK,
+        gameEscrow: newGameEscrow1PK,
+        gameVault: newGameVault1PK,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
+
+      const tx = await program.methods
+        .resolveGame(entryFeePercentage, 1)
+        .accountsPartial(accounts)
+        .signers([keypair])
+        .remainingAccounts([
+          {
+            pubkey: newBet1Game1,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: newBet2Game1,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: user1TokenAccount,
+            isWritable: true,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine1PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine2PK,
+            isWritable: false,
+            isSigner: false,
+          },
+          {
+            pubkey: newLine3PK,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
+
+      const gameAccount = await program.account.game.fetch(newGame1PK);
+      expect(gameAccount.status).to.deep.equal({ resolved: {} });
+      const gameEscrowAccount = await program.account.gameEscrow.fetch(
+        newGameEscrow1PK
+      );
+      expect(gameEscrowAccount.totalAmount.toNumber()).to.equal(0);
+
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      expect(
+        treasuryBalanceAfter.value.uiAmount! -
+          treasuryBalanceBefore.value.uiAmount!
+      ).to.equal(
+        (entryFeeRaw * (entryFeePercentage / 10000)) / 10 ** MINT_DECIMALS
+      );
+
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      expect(
+        user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!
+      ).to.be.closeTo(
+        (entryFeeRaw + entryFeeRaw * (1 - entryFeePercentage / 10000)) /
+          10 ** MINT_DECIMALS,
+        0.000001
+      );
+      const user2BalanceAfter = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      expect(
+        user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!
+      ).to.equal(0);
+    });
+  });
 });
