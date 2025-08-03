@@ -37,7 +37,6 @@ impl<'info> JoinGame<'info> {
             return Err(RalliError::GameNotOpen.into());
         }
 
-        require_neq!(game.creator, user.key(), RalliError::CannotJoinOwnGame);
         require!(
             !game.users.contains(&user.key()),
             RalliError::UserAlreadyJoined

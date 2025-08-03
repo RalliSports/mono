@@ -1,6 +1,6 @@
+use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
-use crate::constants::*;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -26,8 +26,8 @@ impl<'info> CreateLine<'info> {
         &mut self,
         line_seed: u64,
         stat_id: u16,
-        threshold: u64,
-        athlete_id: Pubkey,
+        predicted_value: i64,
+        athlete_id: u64,
         starts_at: i64,
         bumps: &CreateLineBumps,
     ) -> Result<()> {
@@ -43,13 +43,10 @@ impl<'info> CreateLine<'info> {
 
         // Validate line start time is in the future
         let current_time = Clock::get()?.unix_timestamp;
-        require!(
-            starts_at > current_time,
-            RalliError::InvalidLineStartTime
-        );
+        require!(starts_at > current_time, RalliError::InvalidLineStartTime);
 
-        // Validate threshold is reasonable (prevent edge cases)
-        require!(threshold > 0, RalliError::InvalidThreshold);
+        // Validate predicted value is reasonable (prevent edge cases)
+        require!(predicted_value > 0, RalliError::InvalidPredictedValue);
 
         // Validate stat_id is reasonable
         require!(stat_id > 0, RalliError::InvalidStatId);
@@ -57,7 +54,8 @@ impl<'info> CreateLine<'info> {
         // Initialize the Line account
         line.set_inner(Line {
             stat_id,
-            threshold,
+            predicted_value,
+            actual_value: None,
             athlete_id,
             starts_at,
             result: None,
@@ -66,11 +64,11 @@ impl<'info> CreateLine<'info> {
         });
 
         msg!(
-            "Created independent line {} - Athlete: {}, Stat: {}, Threshold: {}, Starts: {}",
+            "Created independent line {} - Athlete: {}, Stat: {}, Predicted Value: {}, Starts: {}",
             line.key(),
             athlete_id,
             stat_id,
-            threshold,
+            predicted_value,
             starts_at
         );
 

@@ -31,7 +31,7 @@ impl<'info> SubmitBet<'info> {
         bumps: &SubmitBetBumps,
         remaining_accounts: &'info [AccountInfo<'info>],
     ) -> Result<()> {
-        let game = &self.game;
+        let game = &mut self.game;
         let bet = &mut self.bet;
         let user = &self.user;
         let clock = Clock::get()?;
@@ -67,8 +67,8 @@ impl<'info> SubmitBet<'info> {
 
             // Check if this line is part of the game
             let line_pubkey = line_account_info.key();
-            if(!game.involved_lines.contains(&line_pubkey)) {
-            game.involved_lines.push(&line_pubkey);
+            if (!game.involved_lines.contains(&line_pubkey)) {
+                game.involved_lines.push(line_pubkey);
             }
 
             // Check if the line hasn't started yet (can still bet on it)
@@ -93,7 +93,7 @@ impl<'info> SubmitBet<'info> {
         // Initialize the bet
         bet.set_inner(Bet {
             game: game.key(),
-            user: user.key(),
+            player: user.key(),
             picks: pick_structs,
             correct_count: 0, // Will be updated when lines are resolved
             submitted_at: clock.unix_timestamp,
