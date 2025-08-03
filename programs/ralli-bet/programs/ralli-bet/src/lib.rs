@@ -56,6 +56,17 @@ pub mod ralli_bet {
             &ctx.bumps,
         )
     }
+
+    pub fn resolve_line(
+        ctx: Context<ResolveLine>,
+        result: Direction,
+        actual_value: f64,
+        should_refund_bettors: bool,
+    ) -> Result<()> {
+        ctx.accounts
+            .resolve_line(result, actual_value, should_refund_bettors)
+    }
+
     pub fn withdraw_submission(
         ctx: Context<WithdrawSubmission>,
         new_first_line_starts_at: Option<i64>,

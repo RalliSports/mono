@@ -7,13 +7,14 @@ pub struct Line {
     pub actual_value: Option<f64>,
     pub athlete_id: u64,
     pub starts_at: i64,
+    pub seed: u64,
     pub result: Option<Direction>,
     pub should_refund_bettors: bool,
     pub bump: u8,
 }
 
 impl Line {
-    pub const MAX_SIZE: usize = 8 + 2 + 8 + (1 + 8) + 8 + 8 + (1 + 1) + 1 + 1;
+    pub const MAX_SIZE: usize = 8 + 2 + 8 + (1 + 8) + 8 + 8 + 8 + (1 + 1) + 1 + 1;
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Copy, Debug, InitSpace)]
