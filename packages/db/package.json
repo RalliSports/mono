@@ -39,6 +39,7 @@
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/seeds/index.ts",
+    "fetch:athletes": "tsx src/seeds/data/athletes/index.ts",
     "prepare": "pnpm db:generate && pnpm db:migrate && pnpm build",
     "studio": "drizzle-kit studio"
   },
