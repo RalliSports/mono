@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "id": "984030e4-d5af-4208-9faf-0a143085d2d1",
-=======
-  "id": "29cae41e-7474-4216-979f-4600195f3790",
->>>>>>> origin/main
+  "id": "b48e804a-7de3-433d-9bac-54dea010cf18",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -540,11 +536,13 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "varchar",
+        "role_type": {
+          "name": "role_type",
+          "type": "role_type",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'user'"
         },
         "created_at": {
           "name": "created_at",
@@ -619,15 +617,6 @@
         },
         "email_address": {
           "name": "email_address",
-<<<<<<< HEAD
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "wallet_address": {
-          "name": "wallet_address",
-=======
->>>>>>> origin/main
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -638,18 +627,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "role_id": {
+          "name": "role_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
-        },
-        "role_id": {
-          "name": "role_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -790,11 +779,7 @@
         },
         "user_id": {
           "name": "user_id",
-<<<<<<< HEAD
-          "type": "text",
-=======
           "type": "uuid",
->>>>>>> origin/main
           "primaryKey": false,
           "notNull": false
         },
@@ -847,11 +832,7 @@
         },
         "referee_id": {
           "name": "referee_id",
-<<<<<<< HEAD
-          "type": "text",
-=======
           "type": "uuid",
->>>>>>> origin/main
           "primaryKey": false,
           "notNull": false
         },
@@ -927,6 +908,15 @@
       "values": [
         "higher",
         "lower"
+      ]
+    },
+    "public.role_type": {
+      "name": "role_type",
+      "schema": "public",
+      "values": [
+        "admin",
+        "user",
+        "moderator"
       ]
     },
     "public.referral_status": {

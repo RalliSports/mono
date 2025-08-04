@@ -2,6 +2,7 @@ CREATE TYPE "public"."access_status" AS ENUM('whitelisted', 'blacklisted');--> s
 CREATE TYPE "public"."type" AS ENUM('1v1', 'limited', 'unlimited');--> statement-breakpoint
 CREATE TYPE "public"."user_control_type" AS ENUM('whitelist', 'blacklist', 'none');--> statement-breakpoint
 CREATE TYPE "public"."predicted_direction" AS ENUM('higher', 'lower');--> statement-breakpoint
+CREATE TYPE "public"."role_type" AS ENUM('admin', 'user', 'moderator');--> statement-breakpoint
 CREATE TYPE "public"."referral_status" AS ENUM('pending', 'completed');--> statement-breakpoint
 CREATE TABLE "athletes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -84,7 +85,7 @@ CREATE TABLE "predictions" (
 --> statement-breakpoint
 CREATE TABLE "roles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar,
+	"role_type" "role_type" DEFAULT 'user',
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
@@ -97,16 +98,11 @@ CREATE TABLE "stats" (
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-<<<<<<<< HEAD:packages/db/src/migrations/0000_flippant_adam_destine.sql
-	"username" varchar,
-	"email_address" varchar,
-========
->>>>>>>> origin/main:packages/db/src/migrations/0000_unique_silverclaw.sql
 	"wallet_address" varchar,
 	"email_address" varchar,
 	"para_user_id" text,
-	"created_at" timestamp with time zone DEFAULT now(),
-	"role_id" uuid
+	"role_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "lines" (
@@ -122,11 +118,7 @@ CREATE TABLE "lines" (
 --> statement-breakpoint
 CREATE TABLE "referral_codes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-<<<<<<<< HEAD:packages/db/src/migrations/0000_flippant_adam_destine.sql
-	"user_id" text,
-========
 	"user_id" uuid,
->>>>>>>> origin/main:packages/db/src/migrations/0000_unique_silverclaw.sql
 	"code" varchar(12) NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	CONSTRAINT "referral_codes_code_unique" UNIQUE("code")
@@ -135,11 +127,7 @@ CREATE TABLE "referral_codes" (
 CREATE TABLE "referrals" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"referrer_code" varchar(12) NOT NULL,
-<<<<<<<< HEAD:packages/db/src/migrations/0000_flippant_adam_destine.sql
-	"referee_id" text,
-========
 	"referee_id" uuid,
->>>>>>>> origin/main:packages/db/src/migrations/0000_unique_silverclaw.sql
 	"status" "referral_status" DEFAULT 'pending',
 	"created_at" timestamp DEFAULT now()
 );
