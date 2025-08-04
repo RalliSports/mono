@@ -3,6 +3,8 @@ import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { ReferralService } from './referral.service';
 import { Referral, ReferralCode } from './dto/referral.dto';
+import { User } from 'src/user/dto/user-respons.dto';
+import { UserPayload } from 'src/auth/auth.user.decorator';
 
 @Controller('')
 export class ReferralController {
@@ -16,8 +18,8 @@ export class ReferralController {
     type: ReferralCode,
   })
   @Post('/referral/generate-referral-code')
-  generateReferralCode() {
-    return this.referralService.generateReferralCode();
+  generateReferralCode(@UserPayload() user: User) {
+    return this.referralService.generateReferralCode(user);
   }
 
   @ApiSecurity('x-para-session')
@@ -28,8 +30,8 @@ export class ReferralController {
     type: Referral,
   })
   @Post('/referral/apply-referral-code/:code')
-  applyReferralCode(@Param('code') code: string) {
-    return this.referralService.applyReferralCode(code);
+  applyReferralCode(@Param('code') code: string, @UserPayload() user: User) {
+    return this.referralService.applyReferralCode(code, user);
   }
 
   @ApiSecurity('x-para-session')
@@ -40,8 +42,8 @@ export class ReferralController {
     type: [Referral],
   })
   @Get('/referral/referred-users')
-  findAllReferredUsers() {
-    return this.referralService.findAllReferredUsers();
+  findAllReferredUsers(@UserPayload() user: User) {
+    return this.referralService.findAllReferredUsers(user);
   }
 
   @ApiSecurity('x-para-session')
@@ -52,7 +54,7 @@ export class ReferralController {
     type: ReferralCode,
   })
   @Get('/referral/fetch-referral-code')
-  fetchUserReferralCode() {
-    return this.referralService.fetchUserReferralCode();
+  fetchUserReferralCode(@UserPayload() user: User) {
+    return this.referralService.fetchUserReferralCode(user);
   }
 }

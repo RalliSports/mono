@@ -1,69 +1,105 @@
-use anchor_lang::prelude::*;
-use anchor_lang::system_program;
-use crate::state::*;
+use crate::constants::*;
 use crate::errors::RalliError;
-use std::collections::HashSet;
+use crate::state::*;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct SubmitBet<'info> {
-    #[account(mut, seeds = [b"game", game.game_id.to_le_bytes().as_ref()], bump = game.bump)]
-    pub game: Account<'info, Game>,
-
-    #[account(mut, seeds = [b"escrow", game.key().as_ref()], bump = game_escrow.bump)]
-    pub game_escrow: Account<'info, GameEscrow>,
-
-    #[account(init, payer = player, space = Bet::MAX_SIZE, seeds = [b"bet", game.key().as_ref(), player.key().as_ref()], bump)]
-    pub bet: Account<'info, Bet>,
-
     #[account(mut)]
-    pub player: Signer<'info>,
+    pub user: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"game", game.game_id.to_le_bytes().as_ref()],
+        bump = game.bump
+    )]
+    pub game: Account<'info, Game>,
+    #[account(
+        init,
+        payer = user,
+        space = 8 + Bet::MAX_SIZE,
+        seeds = [b"bet", game.key().as_ref(), user.key().as_ref()],
+        bump
+    )]
+    pub bet: Account<'info, Bet>,
     pub system_program: Program<'info, System>,
-    // Remaining accounts are for the lines being bet on
-    // In a real scenario, you'd pass these accounts in the instruction
 }
 
-pub fn handler(ctx: Context<SubmitBet>, picks: Vec<Pick>) -> Result<()> {
-    let game = &mut ctx.accounts.game;
-    let game_escrow = &mut ctx.accounts.game_escrow;
-    let bet = &mut ctx.accounts.bet;
-    let player = &ctx.accounts.player;
-    let clock = Clock::get()?;
+impl<'info> SubmitBet<'info> {
+    pub fn submit_bet(
+        &mut self,
+        picks: Vec<Pick>,
+        bumps: &SubmitBetBumps,
+        remaining_accounts: &'info [AccountInfo<'info>],
+    ) -> Result<()> {
+        let game = &mut self.game;
+        let bet = &mut self.bet;
+        let user = &self.user;
+        let clock = Clock::get()?;
 
-    require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
-    require!(picks.len() >= 2 && picks.len() <= 6, RalliError::InvalidPickCount);
+        // Validation checks
+        require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
+        require!(game.users.contains(&user.key()), RalliError::UserNotInGame);
+        require!(!picks.is_empty(), RalliError::EmptyPicks);
+        require!(
+            picks.len() == game.number_of_lines as usize,
+            RalliError::InvalidPickCount
+        );
 
-    let is_player_in_game = game.players.contains(&player.key()) || game.creator == player.key();
-    require!(is_player_in_game, RalliError::PlayerNotInGame);
+        // Validate remaining accounts (these should be the Line accounts)
+        let line_accounts = remaining_accounts;
 
-    // Check for duplicate line picks
-    let mut line_set = HashSet::new();
-    for pick in &picks {
-        require!(line_set.insert(pick.line_id), RalliError::DuplicateLineInPicks);
+        require_eq!(
+            picks.len(),
+            line_accounts.len(),
+            RalliError::PicksLinesMismatch
+        );
+
+        // Validate all lines exist and are part of the game
+        let mut pick_structs: Vec<Pick> = Vec::new();
+        for (i, line_account_info) in line_accounts.iter().enumerate() {
+            // Deserialize the line account to validate it exists and get its data
+
+            let line_account = Account::<Line>::try_from(line_account_info)
+                .map_err(|_| error!(RalliError::InvalidLineAccount))?;
+
+            // Check if this line is part of the game
+            let line_pubkey = line_account_info.key();
+            if (!game.involved_lines.contains(&line_pubkey)) {
+                game.involved_lines.push(line_pubkey);
+            }
+
+            // Check if the line hasn't started yet (can still bet on it)
+            require!(
+                clock.unix_timestamp < line_account.starts_at,
+                RalliError::LineAlreadyStarted
+            );
+
+            // Check if the line doesn't have a result yet
+            require!(
+                line_account.result.is_none(),
+                RalliError::LineAlreadyResolved
+            );
+            let line_pk = picks[i].line_id;
+            require_eq!(line_pk, line_pubkey, RalliError::LineMismatch);
+            let line_direction = picks[i].direction;
+
+            // Create the pick struct
+            pick_structs.push(Pick {
+                line_id: line_pubkey,
+                direction: line_direction,
+            });
+        }
+
+        // Initialize the bet
+        bet.set_inner(Bet {
+            game: game.key(),
+            player: user.key(),
+            picks: pick_structs,
+            correct_count: 0, // Will be updated when lines are resolved
+            submitted_at: clock.unix_timestamp,
+            bump: bumps.bet,
+        });
+
+        Ok(())
     }
-    
-    // In a real implementation, you would validate each line account passed in `ctx.remaining_accounts`
-    // to ensure it is a valid, open line for this game.
-
-    if game.creator == player.key() && !game.players.contains(&player.key()) {
-        let cpi_accounts = system_program::Transfer {
-            from: player.to_account_info(),
-            to: game_escrow.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.system_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        system_program::transfer(cpi_ctx, game.entry_fee)?;
-        
-        game.players.push(player.key());
-        game_escrow.total_amount += game.entry_fee;
-    }
-
-    bet.game = game.key();
-    bet.player = player.key();
-    bet.picks = picks;
-    bet.correct_count = 0;
-    bet.submitted_at = clock.unix_timestamp;
-    bet.bump = ctx.bumps.bet;
-    
-    msg!("Bet submitted by player {} for game {}", player.key(), game.game_id);
-    Ok(())
 }

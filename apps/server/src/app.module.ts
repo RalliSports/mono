@@ -8,6 +8,7 @@ import { GamesModule } from './games/games.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { LinesModule } from './lines/lines.module';
 import { ReferralModule } from './referral/referral.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ReferralModule } from './referral/referral.module';
     GamesModule,
     LinesModule,
     ReferralModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

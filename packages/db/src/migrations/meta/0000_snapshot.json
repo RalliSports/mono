@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "id": "984030e4-d5af-4208-9faf-0a143085d2d1",
+=======
+  "id": "29cae41e-7474-4216-979f-4600195f3790",
+>>>>>>> origin/main
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -86,7 +90,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -171,7 +175,7 @@
         },
         "creator_id": {
           "name": "creator_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -400,7 +404,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -607,21 +611,30 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "username": {
-          "name": "username",
+        "wallet_address": {
+          "name": "wallet_address",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
         "email_address": {
           "name": "email_address",
+<<<<<<< HEAD
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
         "wallet_address": {
           "name": "wallet_address",
+=======
+>>>>>>> origin/main
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "para_user_id": {
+          "name": "para_user_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -629,7 +642,8 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         },
         "role_id": {
           "name": "role_id",
@@ -776,7 +790,11 @@
         },
         "user_id": {
           "name": "user_id",
+<<<<<<< HEAD
           "type": "text",
+=======
+          "type": "uuid",
+>>>>>>> origin/main
           "primaryKey": false,
           "notNull": false
         },
@@ -829,7 +847,11 @@
         },
         "referee_id": {
           "name": "referee_id",
+<<<<<<< HEAD
           "type": "text",
+=======
+          "type": "uuid",
+>>>>>>> origin/main
           "primaryKey": false,
           "notNull": false
         },

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from 'src/user/dto/user-respons.dto';
 
 export class GameMode {
   @ApiProperty()
@@ -13,7 +14,6 @@ export class GameMode {
   @ApiProperty()
   createdAt: string;
 }
-
 
 export class GameResponseDto {
   @ApiProperty()
@@ -63,5 +63,7 @@ export class GameResponseDto {
 
   @ApiProperty()
   gameMode: GameMode;
-}
 
+  @ApiProperty()
+  creator: User;
+}

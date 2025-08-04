@@ -15,6 +15,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
 import { GameStatus } from './enum/game';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
+import { User } from 'src/user/dto/user-respons.dto';
 
 @Injectable()
 export class GamesService {
@@ -23,15 +24,14 @@ export class GamesService {
     private readonly authService: AuthService,
   ) {}
 
-  async create(createGameDto: CreateGameDto) {
-    const para = await this.authService.getPara();
+  async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
 
     const [game] = await this.db
       .insert(games)
       .values({
         ...createGameDto,
-        creatorId: (para.getUserId() as string) ?? '',
+        creatorId: user.id,
         gameCode,
         status: GameStatus.WAITING,
       })
@@ -44,12 +44,9 @@ export class GamesService {
     return this.db.query.games.findMany({ with: { gameMode: true } });
   }
 
-  async getJoinedGames() {
-    const para = await this.authService.getPara();
-    const userId = para.getUserId() ?? '';
-
+  async getJoinedGames(user: User) {
     return this.db.query.participants.findMany({
-      where: eq(participants.userId, userId),
+      where: eq(participants.userId, user.id),
       with: {
         game: true,
         predictions: true,
@@ -63,6 +60,7 @@ export class GamesService {
       with: {
         gameMode: true,
         participants: true,
+        creator: true,
       },
     });
 
@@ -71,9 +69,7 @@ export class GamesService {
     return game;
   }
 
-  async joinGame(gameId: string, gameCode?: string) {
-    const para = await this.authService.getPara();
-    const userId = para.getUserId() ?? '';
+  async joinGame( user: User, gameId: string, gameCode?: string,) {
 
     const game = await this.db.query.games.findFirst({
       where: eq(games.id, gameId),
@@ -81,12 +77,12 @@ export class GamesService {
 
     if (!game) throw new NotFoundException('Game not found');
 
-    await this.validateGameAccess({ game, userId, providedCode: gameCode });
+    await this.validateGameAccess({ game, userId: user.id, providedCode: gameCode });
 
     const existing = await this.db.query.participants.findFirst({
       where: and(
         eq(participants.gameId, gameId),
-        eq(participants.userId, userId),
+        eq(participants.userId, user.id),
       ),
     });
 
@@ -109,7 +105,7 @@ export class GamesService {
 
     await this.db.insert(participants).values({
       gameId,
-      userId,
+      userId: user.id,
     });
 
     return { success: true, message: 'Joined game successfully' };
@@ -132,6 +128,7 @@ export class GamesService {
       with: {
         gameMode: true,
         participants: true,
+        creator: true,
       },
     });
 
@@ -139,20 +136,19 @@ export class GamesService {
     return game;
   }
 
-  async findGamesCreatedByUser() {
-    const para = await this.authService.getPara();
+  async findGamesCreatedByUser(user: User) {
 
     const result = await this.db.query.games.findMany({
-      where: eq(games.creatorId, para.getUserId() ?? ''),
+      where: eq(games.creatorId, user.id),
     });
 
     if (!result.length) throw new NotFoundException('Games not found');
     return result;
   }
 
-  async update(id: string, updateGameDto: UpdateGameDto) {
-        await this.ensureUserOwnsGame(id)
-        
+  async update(id: string, updateGameDto: UpdateGameDto, user: User) {
+    await this.ensureUserOwnsGame(id, user.id);
+
     const [updated] = await this.db
       .update(games)
       .set(updateGameDto)
@@ -163,8 +159,8 @@ export class GamesService {
     return updated;
   }
 
-  async remove(id: string) {
-    await this.ensureUserOwnsGame(id)
+  async remove(id: string, user: User) {
+    await this.ensureUserOwnsGame(id, user.id);
     const [deleted] = await this.db
       .delete(games)
       .where(eq(games.id, id))
@@ -174,15 +170,13 @@ export class GamesService {
     return deleted;
   }
 
-  async ensureUserOwnsGame(gameId: string) {
-    const para = await this.authService.getPara();
-
+  async ensureUserOwnsGame(gameId: string, userId: string) {
     const game = await this.db.query.games.findFirst({
       where: (g, { eq }) => eq(g.id, gameId),
     });
 
     if (!game) throw new NotFoundException('Game not found');
-    if (game.creatorId !== para.getUserId()) {
+    if (game.creatorId !== userId) {
       throw new ForbiddenException('You do not own this game');
     }
 
@@ -211,7 +205,6 @@ export class GamesService {
     return code; // Return the unique code
   }
 
-  
   async validateGameAccess({
     game,
     userId,
