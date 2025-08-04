@@ -9,6 +9,8 @@ import { WebsocketModule } from './websocket/websocket.module';
 import { LinesModule } from './lines/lines.module';
 import { ReferralModule } from './referral/referral.module';
 import { UserModule } from './user/user.module';
+import { AthletesModule } from './athletes/athletes.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { UserModule } from './user/user.module';
     LinesModule,
     ReferralModule,
     UserModule,
+    AthletesModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
