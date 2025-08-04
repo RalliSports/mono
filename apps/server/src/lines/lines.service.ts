@@ -23,8 +23,8 @@ export class LinesService {
         statId: dto.statId,
         matchupId: dto.matchupId,
         predictedValue: dto.predictedValue.toString(),
-        actualValue: dto.actualValue?.toString() ?? null,
-        isHigher: dto.isHigher ?? null,
+        actualValue: null,
+        isHigher: null,
       })
       .returning();
     return inserted;
@@ -48,8 +48,6 @@ export class LinesService {
         statId: dto.statId,
         matchupId: dto.matchupId,
         predictedValue: dto.predictedValue?.toString(),
-        actualValue: dto.actualValue?.toString() ?? null,
-        isHigher: dto.isHigher ?? null,
       })
       .where(eq(lines.id, id))
       .returning();
@@ -64,16 +62,15 @@ export class LinesService {
   }
 
   async resolveLine(id: string, dto: ResolveLineDto) {
-    // Update actualValue, isHigher, and possibly predictedValue if included
     const res = await this.db
       .update(lines)
       .set({
+        predictedValue: dto.predictedValue?.toString(),
         actualValue: dto.actualValue?.toString(),
-        isHigher: dto.isHigher,
-        // optional update predictedValue if passed
-        ...(dto.predictedValue !== undefined && {
-          predictedValue: dto.predictedValue.toString(),
-        }),
+        isHigher:
+          dto.actualValue && dto.predictedValue
+            ? dto.actualValue > dto.predictedValue
+            : null,
       })
       .where(eq(lines.id, id))
       .returning();
