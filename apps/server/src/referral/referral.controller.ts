@@ -3,7 +3,7 @@ import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { ReferralService } from './referral.service';
 import { Referral, ReferralCode } from './dto/referral.dto';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 
 @Controller('')

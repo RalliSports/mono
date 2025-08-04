@@ -17,7 +17,6 @@ export class CreatePredictionDto {
   predictedDirection: PredictionDirection;
 }
 
-
 export class BulkCreatePredictionsDto {
   @ApiProperty({ type: CreatePredictionDto, isArray: true })
   @ValidateNested({ each: true })

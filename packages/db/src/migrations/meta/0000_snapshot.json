@@ -1,5 +1,5 @@
 {
-  "id": "29cae41e-7474-4216-979f-4600195f3790",
+  "id": "b48e804a-7de3-433d-9bac-54dea010cf18",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -536,11 +536,13 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "varchar",
+        "role_type": {
+          "name": "role_type",
+          "type": "role_type",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'user'"
         },
         "created_at": {
           "name": "created_at",
@@ -564,10 +566,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "serial",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -626,18 +627,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "role_id": {
+          "name": "role_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
-        },
-        "role_id": {
-          "name": "role_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -681,9 +682,9 @@
         },
         "stat_id": {
           "name": "stat_id",
-          "type": "uuid",
+          "type": "serial",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "matchup_id": {
           "name": "matchup_id",
@@ -907,6 +908,15 @@
       "values": [
         "higher",
         "lower"
+      ]
+    },
+    "public.role_type": {
+      "name": "role_type",
+      "schema": "public",
+      "values": [
+        "admin",
+        "user",
+        "moderator"
       ]
     },
     "public.referral_status": {

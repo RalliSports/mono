@@ -6,7 +6,7 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
 import { ReferralStatus } from './enum/referral';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 
 @Injectable()
 export class ReferralService {
@@ -35,7 +35,6 @@ export class ReferralService {
   }
 
   async findAllReferredUsers(user: User) {
-
     const referredUsers = await this.db.query.referrals.findMany({
       where: eq(referralCodes.userId, user.id),
     });
@@ -56,7 +55,6 @@ export class ReferralService {
   }
 
   async applyReferralCode(code: string, user: User) {
-   
     // Check if code exists
     const codeEntry = await this.db.query.referralCodes.findFirst({
       where: eq(referralCodes.code, code),

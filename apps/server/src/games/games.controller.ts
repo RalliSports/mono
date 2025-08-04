@@ -25,7 +25,7 @@ import { GamesService } from './games.service';
 import { GameResponseDto } from './dto/game-response.dto';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 
 @Controller('')
 export class GamesController {
@@ -40,7 +40,7 @@ export class GamesController {
     type: GameResponseDto,
   })
   @Post('/create-game')
-  create(@Body() createGameDto: CreateGameDto,  @UserPayload() user: User) {
+  create(@Body() createGameDto: CreateGameDto, @UserPayload() user: User) {
     return this.gamesService.create(createGameDto, user);
   }
 
@@ -89,7 +89,7 @@ export class GamesController {
     description: 'Games joined by user',
     type: [GameResponseDto],
   })
-  getJoinedGames( @UserPayload() user: User) {
+  getJoinedGames(@UserPayload() user: User) {
     return this.gamesService.getJoinedGames(user);
   }
 
@@ -116,7 +116,11 @@ export class GamesController {
     status: 200,
     type: GameResponseDto,
   })
-  joinGame(@Param('id') id: string, @Query('gameCode') gameCode: string,  @UserPayload() user: User) {
+  joinGame(
+    @Param('id') id: string,
+    @Query('gameCode') gameCode: string,
+    @UserPayload() user: User,
+  ) {
     return this.gamesService.joinGame(user, id, gameCode);
   }
 
@@ -141,7 +145,11 @@ export class GamesController {
     type: GameResponseDto,
   })
   @Patch('/game/update/:id')
-  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto, @UserPayload() user: User) {
+  update(
+    @Param('id') id: string,
+    @Body() updateGameDto: UpdateGameDto,
+    @UserPayload() user: User,
+  ) {
     return this.gamesService.update(id, updateGameDto, user);
   }
 

@@ -9,7 +9,7 @@ export class GameModeResponseDto {
 
   @ApiProperty()
   description: string;
-  
+
   @ApiProperty()
   createdAt: Date;
 }
