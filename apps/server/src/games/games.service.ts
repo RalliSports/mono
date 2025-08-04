@@ -16,16 +16,23 @@ import { Database } from 'src/database/database.provider';
 import { GameStatus } from './enum/game';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { User } from 'src/user/dto/user-respons.dto';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class GamesService {
+  private anchor: ParaAnchor;
+
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
-  ) {}
+  ) {
+    this.anchor = new ParaAnchor(this.authService.getPara());
+  }
 
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
+  
+
 
     const [game] = await this.db
       .insert(games)
@@ -41,7 +48,9 @@ export class GamesService {
   }
 
   async findAll() {
-    return this.db.query.games.findMany({ with: { gameMode: true } });
+    return this.db.query.games.findMany({
+      with: { gameMode: true, creator: true, participants: true },
+    });
   }
 
   async getJoinedGames(user: User) {
@@ -69,15 +78,18 @@ export class GamesService {
     return game;
   }
 
-  async joinGame( user: User, gameId: string, gameCode?: string,) {
-
+  async joinGame(user: User, gameId: string, gameCode?: string) {
     const game = await this.db.query.games.findFirst({
       where: eq(games.id, gameId),
     });
 
     if (!game) throw new NotFoundException('Game not found');
 
-    await this.validateGameAccess({ game, userId: user.id, providedCode: gameCode });
+    await this.validateGameAccess({
+      game,
+      userId: user.id,
+      providedCode: gameCode,
+    });
 
     const existing = await this.db.query.participants.findFirst({
       where: and(
@@ -137,7 +149,6 @@ export class GamesService {
   }
 
   async findGamesCreatedByUser(user: User) {
-
     const result = await this.db.query.games.findMany({
       where: eq(games.creatorId, user.id),
     });

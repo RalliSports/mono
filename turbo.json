@@ -18,7 +18,8 @@
       "persistent": true
     },
      "db:generate": {
-      "cache": false
+      "cache": false,
+      "persistent": true
     },
     "db:migrate": {
       "cache": false
