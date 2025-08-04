@@ -2,6 +2,7 @@ CREATE TYPE "public"."access_status" AS ENUM('whitelisted', 'blacklisted');--> s
 CREATE TYPE "public"."type" AS ENUM('1v1', 'limited', 'unlimited');--> statement-breakpoint
 CREATE TYPE "public"."user_control_type" AS ENUM('whitelist', 'blacklist', 'none');--> statement-breakpoint
 CREATE TYPE "public"."predicted_direction" AS ENUM('higher', 'lower');--> statement-breakpoint
+CREATE TYPE "public"."role_type" AS ENUM('admin', 'user', 'moderator');--> statement-breakpoint
 CREATE TYPE "public"."referral_status" AS ENUM('pending', 'completed');--> statement-breakpoint
 CREATE TABLE "athletes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -84,12 +85,12 @@ CREATE TABLE "predictions" (
 --> statement-breakpoint
 CREATE TABLE "roles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar,
+	"role_type" "role_type" DEFAULT 'user',
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "stats" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar,
 	"description" varchar,
 	"created_at" timestamp DEFAULT now()
@@ -100,14 +101,14 @@ CREATE TABLE "users" (
 	"wallet_address" varchar,
 	"email_address" varchar,
 	"para_user_id" text,
-	"created_at" timestamp with time zone DEFAULT now(),
-	"role_id" uuid
+	"role_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "lines" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"athlete_id" uuid,
-	"stat_id" uuid,
+	"stat_id" serial NOT NULL,
 	"matchup_id" uuid,
 	"predicted_value" numeric,
 	"actual_value" numeric,

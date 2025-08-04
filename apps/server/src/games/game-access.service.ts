@@ -47,7 +47,6 @@ export class GameAccessService {
     return access;
   }
 
-
   async update(id: string, dto: UpdateGameAccessDto) {
     const [updated] = await this.db
       .update(game_access)
@@ -59,7 +58,7 @@ export class GameAccessService {
     return updated;
   }
 
-   async remove(gameId: string, userId: string) {
+  async remove(gameId: string, userId: string) {
     const [deleted] = await this.db
       .delete(game_access)
       .where(

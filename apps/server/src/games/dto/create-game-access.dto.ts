@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { GameAccessStatus } from '../enum/game';
 import { ApiProperty } from '@nestjs/swagger';
 

@@ -1,7 +1,12 @@
+use crate::constants::ADMIN_PUBLIC_KEY;
+use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
-
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{Mint, TokenAccount, TokenInterface},
+};
 #[derive(Accounts)]
 #[instruction(game_id: u64)]
 pub struct CreateGame<'info> {
@@ -26,7 +31,20 @@ pub struct CreateGame<'info> {
     )]
     pub game_escrow: Account<'info, GameEscrow>,
 
+    pub mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(
+        init,
+        payer = creator,
+        associated_token::mint = mint,
+        associated_token::authority = game,
+    )]
+    pub game_vault: Box<InterfaceAccount<'info, TokenAccount>>,
+
     pub system_program: Program<'info, System>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 impl<'info> CreateGame<'info> {
@@ -35,31 +53,39 @@ impl<'info> CreateGame<'info> {
         game_id: u64,
         max_users: u8,
         entry_fee: u64,
-        admin: Option<Pubkey>,
+        number_of_lines: u8,
+        _admin: Option<Pubkey>,
         bumps: &CreateGameBumps,
     ) -> Result<()> {
         require!(max_users >= 2, RalliError::NotEnoughUsers);
         require!(max_users <= 50, RalliError::GameFull);
         require!(entry_fee > 0, RalliError::InvalidEntryFee);
+        require!(
+            number_of_lines >= MIN_LINES_PER_GAME,
+            RalliError::TooFewLines
+        );
+        require!(
+            number_of_lines <= MAX_LINES_PER_GAME,
+            RalliError::TooManyLines
+        );
 
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
         let clock = Clock::get()?;
 
-        let admin_key = admin.unwrap_or(self.creator.key());
-
         game.set_inner(Game {
             game_id,
+            mint: self.mint.key(),
             first_line_starts_at: i64::MAX, // Initialize to max value (no lines yet)
             creator: self.creator.key(),
-            admin: admin_key,
+            admin: ADMIN_PUBLIC_KEY,
             users: Vec::new(),
             max_users,
             entry_fee,
             status: GameStatus::Open,
             created_at: clock.unix_timestamp,
+            number_of_lines,
             locked_at: None,
-            lines: Vec::new(), // Initialize empty lines vector
             involved_lines: Vec::new(), // Initialize empty involved_lines vector
             bump: bumps.game,
         });

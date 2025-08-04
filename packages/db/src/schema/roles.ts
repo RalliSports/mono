@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
-
-import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, uuid, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { uuid } from "drizzle-orm/pg-core";
+
+export const roleTypeEnum = pgEnum("role_type", ["admin", "user", "moderator"]);
 
 export const roles = pgTable("roles", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name"),
+  type: roleTypeEnum("role_type").default("user"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

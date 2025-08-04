@@ -4,9 +4,10 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct Game {
     pub game_id: u64,
+    pub mint: Pubkey,
     pub first_line_starts_at: i64,
     pub creator: Pubkey,
-    pub admin: Pubkey, // Added admin field for authorization
+    pub admin: Pubkey,
     #[max_len(10)]
     pub users: Vec<Pubkey>,
     pub max_users: u8,
@@ -14,10 +15,9 @@ pub struct Game {
     pub status: GameStatus,
     pub created_at: i64,
     pub locked_at: Option<i64>,
-    #[max_len(12)] // Adjust max length as needed
-    pub lines: Vec<GameLine>,
-    #[max_len(12)] // this can also be adjusted as needs
-    pub involved_lines: Vec<Pubkey>, 
+    pub number_of_lines: u8,
+    #[max_len(40)]
+    pub involved_lines: Vec<Pubkey>,
     pub bump: u8,
 }
 
@@ -27,8 +27,7 @@ pub struct GameLine {
     pub is_active: bool,
 }
 
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace, Copy)]
 pub enum GameStatus {
     Open,
     Locked,
@@ -46,4 +45,3 @@ impl core::fmt::Display for GameStatus {
         }
     }
 }
-

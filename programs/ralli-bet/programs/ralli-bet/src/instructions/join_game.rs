@@ -1,8 +1,11 @@
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::{transfer, Transfer};
 
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
+};
 #[derive(Accounts)]
 pub struct JoinGame<'info> {
     #[account(mut)]
@@ -22,7 +25,26 @@ pub struct JoinGame<'info> {
     )]
     pub game_escrow: Account<'info, GameEscrow>,
 
+    pub mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = user,
+    )]
+    pub user_tokens: Box<InterfaceAccount<'info, TokenAccount>>,
+
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = game,
+    )]
+    pub game_vault: Box<InterfaceAccount<'info, TokenAccount>>,
+
     pub system_program: Program<'info, System>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 impl<'info> JoinGame<'info> {
@@ -31,13 +53,10 @@ impl<'info> JoinGame<'info> {
         let game_escrow = &mut self.game_escrow;
         let user = &self.user;
 
-        // require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
-
         if game.status != GameStatus::Open {
             return Err(RalliError::GameNotOpen.into());
         }
 
-        require_neq!(game.creator, user.key(), RalliError::CannotJoinOwnGame);
         require!(
             !game.users.contains(&user.key()),
             RalliError::UserAlreadyJoined
@@ -47,17 +66,15 @@ impl<'info> JoinGame<'info> {
             RalliError::GameFull
         );
 
-        // Transfer The entry fee to escrow (in game-escrow)
-        let transfer_instruction = Transfer {
-            from: user.to_account_info(),
-            to: game_escrow.to_account_info(),
+        let cpi_program = self.token_program.to_account_info();
+        let cpi_accounts = TransferChecked {
+            from: self.user_tokens.to_account_info(),
+            to: self.game_vault.to_account_info(),
+            authority: self.user.to_account_info(),
+            mint: self.mint.to_account_info(),
         };
-
-        let cpi_ctx = CpiContext::new(
-            self.system_program.to_account_info(),
-            transfer_instruction,
-        );
-        transfer(cpi_ctx, game.entry_fee)?;
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        transfer_checked(cpi_ctx, game.entry_fee, self.mint.decimals)?;
 
         // Adding The user to game
         game.users.push(user.key());

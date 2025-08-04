@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -26,3 +27,23 @@ export class SessionAuthGuard implements CanActivate {
     return true;
   }
 }
+
+// @Injectable()
+// export class AdminRoleGuard implements CanActivate {
+//   constructor(private readonly authService: AuthService) {}
+//   async canActivate(context: ExecutionContext): Promise<boolean> {
+//     const req = context.switchToHttp().getRequest();
+//     const sessionId = req.headers['x-para-session'];
+
+//     if (!sessionId || typeof sessionId !== 'string') {
+//       throw new UnauthorizedException('Session ID missing');
+//     }
+
+//     const user = await this.authService.validateSession(sessionId);
+//     // if (user.role?.type !== 'admin') {
+//     //   throw new ForbiddenException('Admin role required');
+//     // }
+//     req.user = user;
+//     return true;
+//   }
+// }

@@ -227,6 +227,9 @@ importers:
       argon2:
         specifier: ^0.43.0
         version: 0.43.0
+      axios:
+        specifier: ^1.11.0
+        version: 1.11.0
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0

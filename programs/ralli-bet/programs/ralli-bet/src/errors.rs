@@ -31,13 +31,42 @@ pub enum RalliError {
 
     #[msg("Invalid line start time - must be in the future")]
     InvalidLineStartTime,
-    
+
     #[msg("Line start time does not match provided line account")]
     LineStartTimeMismatch,
-    
+
     #[msg("Line is not part of this game")]
     LineNotInGame,
 
+    #[msg("Unauthorized to create lines - admin only")]
+    UnauthorizedLineCreation,
+
+    #[msg("Game is not open for line creation")]
+    GameNotOpenforLine,
+
+    #[msg("Maximum lines per game reached")]
+    MaxLinesReached,
+
+    #[msg("Unauthorized to resolve line")]
+    UnauthorizedLineResolution,
+
+    #[msg("Line has already been resolved")]
+    LineAlreadyResolved,
+
+    #[msg("Line should be refunded")]
+    LineShouldBeRefunded,
+
+    #[msg("Line has not started yet")]
+    LineNotStarted,
+
+    #[msg("Invalid predicted value - must be greater than 0")]
+    InvalidPredictedValue,
+
+    #[msg("Direction has a mismatch!")]
+    DirectionMismatch,
+
+    #[msg("Invalid stat ID - must be greater than 0")]
+    InvalidStatId,
 
     #[msg("Not enough users to lock game")]
     NotEnoughUsers,
@@ -134,4 +163,70 @@ pub enum RalliError {
 
     #[msg("Treasury is not empty")]
     TreasuryNotEmpty,
+
+    #[msg("Empty picks provided")]
+    EmptyPicks,
+
+    #[msg("Picks do not match the expected line")]
+    PicksLinesMismatch,
+
+    #[msg("Invalid line account provided")]
+    InvalidLineAccount,
+
+    #[msg("Line already started")]
+    LineAlreadyStarted,
+
+    #[msg("Invalid remaining accounts count")]
+    InvalidRemainingAccountsCount,
+
+    #[msg("Invalid number of lines")]
+    InvalidNumberOfLines,
+
+    #[msg("Too few lines")]
+    TooFewLines,
+
+    #[msg("Too many lines")]
+    TooManyLines,
+
+    #[msg("Line mismatch")]
+    LineMismatch,
+
+    #[msg("Only admin can resolve games")]
+    UnauthorizedGameResolution,
+
+    #[msg("Game does not have any lines")]
+    NoLinesInGame,
+
+    #[msg("Line accounts are missing")]
+    MissingLineAccounts,
+
+    #[msg("Line is yet to be resolved")]
+    LineNotResolved,
+
+    #[msg("Unrealistic fees")]
+    ExcessiveFee,
+
+    #[msg("Bet account should be valid")]
+    InvalidBetAccount,
+
+    #[msg("This bet is not involved in thisgame")]
+    BetNotInGame,
+
+    #[msg("This bet does not belong to this user")]
+    InvalidBetPlayer,
+
+    #[msg("No users in the game")]
+    NoPlayersInGame,
+
+    #[msg("User account is not available")]
+    UserAccountNotFound,
+
+    #[msg("Number of winners does not match length of winners array")]
+    NumberOfWinnersMismatch,
+
+    #[msg("Escrow not empty")]
+    EscrowNotEmpty,
+
+    #[msg("Number of winners expected does not match number of winners")]
+    NumberOfWinnersExpectedMismatch,
 }

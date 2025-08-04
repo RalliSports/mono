@@ -30,10 +30,7 @@ pub struct WithdrawSubmission<'info> {
 }
 
 impl<'info> WithdrawSubmission<'info> {
-    pub fn withdraw_submission(
-        &mut self, 
-        new_first_line_starts_at: Option<i64>
-    ) -> Result<()> {
+    pub fn withdraw_submission(&mut self, new_first_line_starts_at: Option<i64>) -> Result<()> {
         let game = &mut self.game;
         let game_escrow = &mut self.game_escrow;
         let user = &self.user;
@@ -147,11 +144,10 @@ impl<'info> WithdrawSubmission<'info> {
         if game.users.is_empty() {
             game.status = GameStatus::Cancelled;
             game.locked_at = Some(Clock::get()?.unix_timestamp);
-            
+
             // Clear lines and involved_lines when game is cancelled
-            game.lines.clear();
             game.involved_lines.clear();
-            
+
             // Reset first_line_starts_at when no users left
             game.first_line_starts_at = i64::MAX;
 

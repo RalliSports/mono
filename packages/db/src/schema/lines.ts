@@ -5,11 +5,12 @@ import { stats } from "./stats";
 import { matchups } from "./matchups";
 import { relations } from "drizzle-orm";
 import { predictions } from "./predictions";
+import { serial } from "drizzle-orm/pg-core";
 
 export const lines = pgTable("lines", {
   id: uuid("id").primaryKey().defaultRandom(),
   athleteId: uuid("athlete_id").references(() => athletes.id),
-  statId: uuid("stat_id").references(() => stats.id),
+  statId: serial("stat_id").references(() => stats.id),
   matchupId: uuid("matchup_id").references(() => matchups.id),
   predictedValue: decimal("predicted_value"),
   actualValue: decimal("actual_value"),

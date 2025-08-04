@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 
 export class GameMode {
   @ApiProperty()

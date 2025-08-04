@@ -8,7 +8,7 @@ import { users } from '@repo/db';
 import { eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
-import { Role, User } from 'src/user/dto/user-respons.dto';
+import { Role, User } from 'src/user/dto/user-response.dto';
 
 @Injectable()
 export class AuthService {

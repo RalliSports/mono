@@ -4,7 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
+  // IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
