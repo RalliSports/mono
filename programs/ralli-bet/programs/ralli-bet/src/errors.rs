@@ -166,12 +166,16 @@ pub enum RalliError {
 
     #[msg("Empty picks provided")]
     EmptyPicks,
+
     #[msg("Picks do not match the expected line")]
     PicksLinesMismatch,
+
     #[msg("Invalid line account provided")]
     InvalidLineAccount,
+
     #[msg("Line already started")]
     LineAlreadyStarted,
+
     #[msg("Invalid remaining accounts count")]
     InvalidRemainingAccountsCount,
 
@@ -183,6 +187,46 @@ pub enum RalliError {
 
     #[msg("Too many lines")]
     TooManyLines,
+
     #[msg("Line mismatch")]
     LineMismatch,
+
+    #[msg("Only admin can resolve games")]
+    UnauthorizedGameResolution,
+
+    #[msg("Game does not have any lines")]
+    NoLinesInGame,
+
+    #[msg("Line accounts are missing")]
+    MissingLineAccounts,
+
+    #[msg("Line is yet to be resolved")]
+    LineNotResolved,
+
+    #[msg("Unrealistic fees")]
+    ExcessiveFee,
+
+    #[msg("Bet account should be valid")]
+    InvalidBetAccount,
+
+    #[msg("This bet is not involved in thisgame")]
+    BetNotInGame,
+
+    #[msg("This bet does not belong to this user")]
+    InvalidBetPlayer,
+
+    #[msg("No users in the game")]
+    NoPlayersInGame,
+
+    #[msg("User account is not available")]
+    UserAccountNotFound,
+
+    #[msg("Number of winners does not match length of winners array")]
+    NumberOfWinnersMismatch,
+
+    #[msg("Escrow not empty")]
+    EscrowNotEmpty,
+
+    #[msg("Number of winners expected does not match number of winners")]
+    NumberOfWinnersExpectedMismatch,
 }

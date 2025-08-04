@@ -43,6 +43,12 @@ impl<'info> ResolveLine<'info> {
 
         // Ensure line has started (can only resolve after start time)
         let current_time = Clock::get()?.unix_timestamp;
+        msg!("current_time: {}", current_time);
+        msg!("line.starts_at: {}", line.starts_at);
+        msg!(
+            "current_time - line.starts_at: {}",
+            current_time - line.starts_at
+        );
         require!(current_time >= line.starts_at, RalliError::LineNotStarted);
 
         // this verifies that predicted vs actual reflects the direction passed

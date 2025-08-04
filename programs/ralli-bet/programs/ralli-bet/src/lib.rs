@@ -88,6 +88,18 @@ pub mod ralli_bet {
             .submit_bet(picks, &ctx.bumps, remaining_accounts)
     }
 
+    pub fn resolve_game<'info>(
+        ctx: Context<'_, '_, 'info, 'info, ResolveGame<'info>>,
+        fee_percentage: u16,
+        number_of_winners_expected: u16,
+    ) -> Result<()> {
+        ctx.accounts.resolve_game(
+            fee_percentage,
+            number_of_winners_expected,
+            ctx.remaining_accounts,
+        )
+    }
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }

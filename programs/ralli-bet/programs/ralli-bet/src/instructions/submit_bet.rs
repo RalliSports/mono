@@ -1,4 +1,3 @@
-use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
@@ -64,7 +63,7 @@ impl<'info> SubmitBet<'info> {
 
             // Check if this line is part of the game
             let line_pubkey = line_account_info.key();
-            if (!game.involved_lines.contains(&line_pubkey)) {
+            if !game.involved_lines.contains(&line_pubkey) {
                 game.involved_lines.push(line_pubkey);
             }
 

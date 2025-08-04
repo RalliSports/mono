@@ -3,7 +3,10 @@ use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
 use anchor_lang::prelude::*;
-
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{Mint, TokenAccount, TokenInterface},
+};
 #[derive(Accounts)]
 #[instruction(game_id: u64)]
 pub struct CreateGame<'info> {
@@ -28,7 +31,20 @@ pub struct CreateGame<'info> {
     )]
     pub game_escrow: Account<'info, GameEscrow>,
 
+    pub mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(
+        init,
+        payer = creator,
+        associated_token::mint = mint,
+        associated_token::authority = game,
+    )]
+    pub game_vault: Box<InterfaceAccount<'info, TokenAccount>>,
+
     pub system_program: Program<'info, System>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 impl<'info> CreateGame<'info> {
@@ -38,7 +54,7 @@ impl<'info> CreateGame<'info> {
         max_users: u8,
         entry_fee: u64,
         number_of_lines: u8,
-        admin: Option<Pubkey>,
+        _admin: Option<Pubkey>,
         bumps: &CreateGameBumps,
     ) -> Result<()> {
         require!(max_users >= 2, RalliError::NotEnoughUsers);
@@ -59,6 +75,7 @@ impl<'info> CreateGame<'info> {
 
         game.set_inner(Game {
             game_id,
+            mint: self.mint.key(),
             first_line_starts_at: i64::MAX, // Initialize to max value (no lines yet)
             creator: self.creator.key(),
             admin: ADMIN_PUBLIC_KEY,
