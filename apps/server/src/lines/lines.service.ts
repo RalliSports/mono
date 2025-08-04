@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { lines } from '@repo/db/';
+import { lines } from '@repo/db';
 import { eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';

@@ -14,7 +14,7 @@ import { LinesService } from './lines.service';
 import { CreateLineDto } from './dto/create-line.dto';
 import { UpdateLineDto } from './dto/update-line.dto';
 import { ResolveLineDto } from './dto/resolve-line.dto';
-import { AdminRoleGuard } from 'src/auth/auth.session.guard';
+import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import {
   ApiOperation,
   ApiParam,
@@ -28,7 +28,7 @@ export class LinesController {
   constructor(private readonly linesService: LinesService) {}
 
   @ApiSecurity('x-para-session')
-  @UseGuards(AdminRoleGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Create a new line' })
   @ApiResponse({
     status: 201,
@@ -67,7 +67,7 @@ export class LinesController {
 
   @ApiOperation({ summary: 'Update a line' })
   @ApiSecurity('x-para-session')
-  @UseGuards(AdminRoleGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({
     status: 200,
@@ -88,7 +88,7 @@ export class LinesController {
     description: 'Line deleted successfully',
   })
   @ApiSecurity('x-para-session')
-  @UseGuards(AdminRoleGuard)
+  @UseGuards(SessionAuthGuard)
   @Delete('/line/delete/:id')
   async deleteLine(@Param('id', ParseUUIDPipe) id: string) {
     return this.linesService.deleteLine(id);
@@ -101,7 +101,7 @@ export class LinesController {
     type: LineResponseDto,
   })
   @ApiSecurity('x-para-session')
-  @UseGuards(AdminRoleGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/line/resolve/:id')
   async resolveLine(
     @Param('id', ParseUUIDPipe) id: string,
