@@ -15,6 +15,20 @@
       "when": 1754102585672,
       "tag": "0001_glorious_mariko_yashida",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754326061853,
+      "tag": "0002_loving_lady_bullseye",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754326404673,
+      "tag": "0003_silky_manta",
+      "breakpoints": true
     }
   ]
 }

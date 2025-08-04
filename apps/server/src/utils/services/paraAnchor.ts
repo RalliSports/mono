@@ -3,6 +3,11 @@ import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import ParaServer from '@getpara/server-sdk';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
+import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync,
+} from '@solana/spl-token';
 import {
   Cluster,
   clusterApiUrl,
@@ -13,15 +18,10 @@ import {
   Transaction,
   VersionedTransaction,
 } from '@solana/web3.js';
+import { BulkCreatePredictionsDto } from 'src/games/dto/prediction.dto';
+import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
 import { RalliBet } from '../idl/type';
-import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
-import { BulkCreatePredictionsDto } from 'src/games/dto/prediction.dto';
-import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddressSync,
-} from '@solana/spl-token';
-import { PredictionDirection } from 'src/games/enum/game';
 
 export class ParaAnchor {
   private solanaConnection: Connection;
@@ -72,9 +72,9 @@ export class ParaAnchor {
   /**
    * Returns an Anchor Program instance
    */
-  async getProgram(): Promise<Program<RalliBet>> {
+  async getProgram(): Promise<Program<Idl>> {
     const provider = await this.getProvider();
-    return new Program<RalliBet>(IDL, provider);
+    return new Program<Idl>(IDL, provider);
   }
 
   /**
@@ -84,7 +84,7 @@ export class ParaAnchor {
     return this.solanaConnection;
   }
 
-  async createGame(
+  async createGameInstruction(
     gameId: string,
     depositAmount: number,
     maxBet: number,
@@ -93,116 +93,147 @@ export class ParaAnchor {
     mint: PublicKey,
   ): Promise<string> {
     const program = await this.getProgram();
+    const gamePDA = await this.getGamePDA(gameId, program.programId);
+    const gameEscrowPDA = await this.getGameEscrowPDA(
+      gamePDA,
+      program.programId,
+    );
 
-    const txn = await program.methods
-      .create_game(
-        new BN(gameId),
-        maxParticipants,
-        new BN(depositAmount),
-        maxBet,
-        creator,
-      )
-      .accounts({
-        mint,
-        creator,
-        token_program: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    const gameVault = await this.getGameVault(mint, gamePDA);
 
-    return txn;
+    try {
+      const txn = await program.methods
+        .createGame(
+          new BN(parseInt(gameId)),
+          maxParticipants,
+          new BN(depositAmount),
+          maxBet,
+          creator,
+        )
+        .accountsStrict({
+          mint,
+          creator,
+          game: gamePDA,
+          gameEscrow: gameEscrowPDA,
+          gameVault: gameVault,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      return txn;
+    } catch (error) {
+      console.log(error, 'cannot create game');
+      return '';
+    }
   }
 
-  async joinGame(mint: PublicKey, user: PublicKey): Promise<string> {
+  async joinGameInstruction(mint: PublicKey, user: PublicKey): Promise<string> {
     const program = await this.getProgram();
     const txn = await program.methods
-      .join_game()
+      .joinGame()
       .accounts({
         mint,
         user,
-        token_program: TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
 
     return txn;
   }
 
-  async submitBets(
+  async submitBetsInstruction(
     gameId: string,
     user: PublicKey,
     bets: BulkCreatePredictionsDto,
   ): Promise<string> {
     const program = await this.getProgram();
-    const gamePDA = await this.getGamePDa(new BN(gameId), program.programId);
-    const betPDA = await this.getBetPDa(gamePDA, user, program.programId);
+    const gamePDA = await this.getGamePDA(gameId, program.programId);
+    const betPDA = await this.getBetPDA(gamePDA, user, program.programId);
 
     const picks = await Promise.all(
       bets.predictions.map(async (prediction) => {
-        const linePDA = await this.getLinePDa(
-          new BN(prediction.lineId),
+        const linePDA = await this.getLinePDA(
+          prediction.lineId,
           program.programId,
         );
-
+        
         return {
           line_id: linePDA,
           direction:
             prediction.predictedDirection === PredictionDirection.HIGHER
-              ? { over:  {}}
-              : { under: {} },
+              ? { Over: {} }
+              : { Under: {} },
         };
       }),
     );
 
     const txn = await program.methods
-      .submit_bet([])
+      .submitBet(picks)
       .accountsStrict({
         user,
         game: gamePDA,
         bet: betPDA,
-        system_program: program.programId,
+        systemProgram: program.programId,
       })
       .rpc();
 
     return txn;
   }
 
-  async resolveGame(gameId: string, mint: PublicKey) {
+  async resolveGameInstruction(gameId: string, mint: PublicKey) {
     const program = await this.getProgram();
     const percentage = 100;
 
-    const gamePDA = await this.getGamePDa(new BN(gameId), program.programId);
-    const gameEscrow = await this.getGameEscrowPDa(gamePDA, program.programId);
+    const gamePDA = await this.getGamePDA(gameId, program.programId);
+    const gameEscrow = await this.getGameEscrowPDA(gamePDA, program.programId);
     const gameVault = await this.getGameVault(mint, gamePDA);
 
     const txn = await program.methods
-      .resolve_game(percentage, 1)
+      .resolveGame(percentage, 1)
       .accountsStrict({
         admin: this.admin.publicKey,
         game: gamePDA,
         game_escrow: gameEscrow,
         mint,
-        game_vault: gameVault,
-        system_program: SystemProgram.programId,
-        associated_token_program: ASSOCIATED_TOKEN_PROGRAM_ID,
-        token_program: TOKEN_PROGRAM_ID,
+        gameVault: gameVault,
+        systemProgram: SystemProgram.programId,
+        associatedToken_program: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
         treasury: this.treasury.publicKey,
-        treasury_vault: this.treasuryTokenAccount,
+        treasuryVault: this.treasuryTokenAccount,
       })
       .rpc();
 
     return txn;
   }
 
-  async cancelGame() {
+  async cancelGameInstruction(gameId: string, mint: PublicKey, user: PublicKey) {
     const program = await this.getProgram();
 
-    const txn = await program.methods.cancel_game;
+    const gamePDA = await this.getGamePDA(gameId, program.programId);
+    const gameEscrow = await this.getGameEscrowPDA(gamePDA, program.programId);
+    const gameVault = await this.getGameVault(mint, gamePDA);
+
+    const txn = await program.methods
+      .cancelGame()
+      .accountsStrict({
+        adminOrUser: user,
+        game: gamePDA,
+        gameEscrow: gameEscrow,
+        gameResult: gameVault,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
 
     return txn;
   }
 
-  async getGamePDa(gameId: BN, programId: PublicKey): Promise<PublicKey> {
+  async getGamePDA(gameId: string, programId: PublicKey): Promise<PublicKey> {
+  
     const [gamePDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from('game'), gameId.toBuffer()],
+      [Buffer.from('game'), Buffer.from(parseInt(gameId).toString())],
       programId,
     );
 
@@ -213,7 +244,7 @@ export class ParaAnchor {
     return getAssociatedTokenAddressSync(mint, gamePDA, true);
   }
 
-  async getBetPDa(
+  async getBetPDA(
     gamePDA: PublicKey,
     user: PublicKey,
     programId: PublicKey,
@@ -226,16 +257,16 @@ export class ParaAnchor {
     return user1BetPDA;
   }
 
-  async getLinePDa(lineId: BN, programId: PublicKey): Promise<PublicKey> {
+  async getLinePDA(lineId: string, programId: PublicKey): Promise<PublicKey> {
     const [line1PDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from('line'), lineId.toBuffer()],
+      [Buffer.from('line'), Buffer.from(parseInt(lineId).toString())],
       programId,
     );
 
     return line1PDA;
   }
 
-  async getGameEscrowPDa(
+  async getGameEscrowPDA(
     gamePDA: PublicKey,
     programId: PublicKey,
   ): Promise<PublicKey> {

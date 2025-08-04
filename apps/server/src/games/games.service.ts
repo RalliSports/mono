@@ -17,6 +17,7 @@ import { GameStatus } from './enum/game';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { User } from 'src/user/dto/user-respons.dto';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { PublicKey } from '@solana/web3.js';
 
 @Injectable()
 export class GamesService {
@@ -28,23 +29,60 @@ export class GamesService {
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
   }
-
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
-  
 
+    const gameData = await this.db.transaction(async (tx) => {
+      const [game] = await tx
+        .insert(games)
+        .values({
+          ...createGameDto,
+          creatorId: user.id,
+          gameCode,
+          maxBet: createGameDto.maxBets,
+          status: GameStatus.WAITING,
+        })
+        .returning();
 
-    const [game] = await this.db
-      .insert(games)
-      .values({
-        ...createGameDto,
-        creatorId: user.id,
-        gameCode,
-        status: GameStatus.WAITING,
-      })
-      .returning();
+      // Ensure createGameInstruction throws if it fails
+      let txn: string;
 
-    return game;
+      try {
+        txn = await this.anchor.createGameInstruction(
+          game.id.toString(),
+          Number(game.depositAmount),
+          Number(game.maxBet),
+          Number(game.maxParticipants),
+          new PublicKey(user.walletAddress),
+          new PublicKey(game.depositToken as string),
+        );
+
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from createGameInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        // Throw to rollback DB transaction
+        throw error;
+      }
+
+      const [updatedGame] = await tx
+        .update(games)
+        .set({
+          txnId: txn,
+        })
+        .where(eq(games.id, game.id))
+        .returning();
+
+      return updatedGame;
+    });
+
+    return gameData;
   }
 
   async findAll() {
