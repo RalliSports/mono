@@ -1,126 +1,83 @@
-import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { lines } from '@repo/db';
-import type { InferInsertModel } from 'drizzle-orm';
-import { EspnScoreboardResponse } from './types/espn-odds.types';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { lines } from '@repo/db/';
+import { eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
+import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
-type LineInsert = InferInsertModel<typeof lines>;
+import { CreateLineDto } from './dto/create-line.dto';
+import { ResolveLineDto } from './dto/resolve-line.dto';
+import { UpdateLineDto } from './dto/update-line.dto';
 
 @Injectable()
 export class LinesService {
-  private readonly logger = new Logger(LinesService.name);
+  constructor(
+    @Drizzle() private readonly db: Database,
+    private readonly authService: AuthService,
+  ) {}
 
-  constructor(@Drizzle() private readonly db: Database) {}
-
-  @Cron(CronExpression.EVERY_12_HOURS)
-  async fetchAndStoreNFLBettingLines(): Promise<void> {
-    try {
-      this.logger.log('Fetching NFL betting lines from ESPN...');
-      const scoreboardUrl =
-        'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
-
-      const { data } = await axios.get<EspnScoreboardResponse>(scoreboardUrl);
-
-      const events = data.events ?? [];
-
-      for (const event of events) {
-        const competition = event.competitions?.[0];
-        if (!competition || !competition.odds) continue;
-
-        const matchupId = event.id;
-
-        for (const odds of competition.odds) {
-          const providerId = odds.provider?.id ?? 'default';
-
-          // Skip if neither spread nor overUnder available
-          if (odds.spread == null && odds.overUnder == null) continue;
-
-          const upsertLines: Promise<void>[] = [];
-
-          // Handle spread lines (home and away)
-          if (odds.spread != null) {
-            // Home spread line (value is spread)
-            upsertLines.push(
-              this.upsertLine({
-                id: `espn-${matchupId}-${providerId}-spread-home`,
-                athleteId: null,
-                statId: 69, // "spread" stat ID
-                matchupId,
-                predictedValue: odds.spread.toString(),
-                actualValue: null,
-                isHigher: null,
-                createdAt: new Date(event.date),
-              }),
-            );
-
-            // Away spread line (value is negative spread)
-            upsertLines.push(
-              this.upsertLine({
-                id: `espn-${matchupId}-${providerId}-spread-away`,
-                athleteId: null,
-                statId: 13,
-                matchupId,
-                predictedValue: (-odds.spread).toString(),
-                actualValue: null,
-                isHigher: null,
-                createdAt: new Date(event.date),
-              }),
-            );
-          }
-
-          // Handle over/under total lines
-          if (odds.overUnder != null) {
-            upsertLines.push(
-              this.upsertLine({
-                id: `espn-${matchupId}-${providerId}-total-over`,
-                athleteId: null,
-                statId: 7, // "total_over" stat ID
-                matchupId,
-                predictedValue: odds.overUnder.toString(),
-                actualValue: null,
-                isHigher: true,
-                createdAt: new Date(event.date),
-              }),
-            );
-
-            upsertLines.push(
-              this.upsertLine({
-                id: `espn-${matchupId}-${providerId}-total-under`,
-                athleteId: null,
-                statId: 9,
-                matchupId,
-                predictedValue: odds.overUnder.toString(),
-                actualValue: null,
-                isHigher: false,
-                createdAt: new Date(event.date),
-              }),
-            );
-          }
-
-          await Promise.all(upsertLines);
-        }
-      }
-
-      this.logger.log('✅ NFL betting lines ingested successfully');
-    } catch (error) {
-      this.logger.error('Failed to ingest NFL betting lines:', error);
-    }
+  async createLine(dto: CreateLineDto) {
+    const [inserted] = await this.db
+      .insert(lines)
+      .values({
+        athleteId: dto.athleteId,
+        statId: dto.statId,
+        matchupId: dto.matchupId,
+        predictedValue: dto.predictedValue.toString(),
+        actualValue: dto.actualValue?.toString() ?? null,
+        isHigher: dto.isHigher ?? null,
+      })
+      .returning();
+    return inserted;
   }
 
-  private async upsertLine(line: LineInsert): Promise<void> {
-    await this.db
-      .insert(lines)
-      .values(line)
-      .onConflictDoUpdate({
-        target: lines.id,
-        set: {
-          predictedValue: line.predictedValue,
-          actualValue: line.actualValue,
-          isHigher: line.isHigher,
-          createdAt: line.createdAt,
-        },
-      });
+  async getAllLines() {
+    return this.db.query.lines.findMany();
+  }
+
+  async getLineById(id: string) {
+    return this.db.query.lines.findFirst({
+      where: eq(lines.id, id),
+    });
+  }
+
+  async updateLine(id: string, dto: UpdateLineDto) {
+    const res = await this.db
+      .update(lines)
+      .set({
+        athleteId: dto.athleteId,
+        statId: dto.statId,
+        matchupId: dto.matchupId,
+        predictedValue: dto.predictedValue?.toString(),
+        actualValue: dto.actualValue?.toString() ?? null,
+        isHigher: dto.isHigher ?? null,
+      })
+      .where(eq(lines.id, id))
+      .returning();
+    if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
+    return res[0];
+  }
+
+  async deleteLine(id: string) {
+    const res = await this.db.delete(lines).where(eq(lines.id, id)).returning();
+    if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
+    return { success: true };
+  }
+
+  async resolveLine(id: string, dto: ResolveLineDto) {
+    // Update actualValue, isHigher, and possibly predictedValue if included
+    const res = await this.db
+      .update(lines)
+      .set({
+        actualValue: dto.actualValue?.toString(),
+        isHigher: dto.isHigher,
+        // optional update predictedValue if passed
+        ...(dto.predictedValue !== undefined && {
+          predictedValue: dto.predictedValue.toString(),
+        }),
+      })
+      .where(eq(lines.id, id))
+      .returning();
+    if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
+    return res[0];
   }
 }

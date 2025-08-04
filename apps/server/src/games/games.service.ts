@@ -69,15 +69,18 @@ export class GamesService {
     return game;
   }
 
-  async joinGame( user: User, gameId: string, gameCode?: string,) {
-
+  async joinGame(user: User, gameId: string, gameCode?: string) {
     const game = await this.db.query.games.findFirst({
       where: eq(games.id, gameId),
     });
 
     if (!game) throw new NotFoundException('Game not found');
 
-    await this.validateGameAccess({ game, userId: user.id, providedCode: gameCode });
+    await this.validateGameAccess({
+      game,
+      userId: user.id,
+      providedCode: gameCode,
+    });
 
     const existing = await this.db.query.participants.findFirst({
       where: and(
@@ -137,7 +140,6 @@ export class GamesService {
   }
 
   async findGamesCreatedByUser(user: User) {
-
     const result = await this.db.query.games.findMany({
       where: eq(games.creatorId, user.id),
     });

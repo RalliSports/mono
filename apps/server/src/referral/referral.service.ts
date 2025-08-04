@@ -35,7 +35,6 @@ export class ReferralService {
   }
 
   async findAllReferredUsers(user: User) {
-
     const referredUsers = await this.db.query.referrals.findMany({
       where: eq(referralCodes.userId, user.id),
     });
@@ -56,7 +55,6 @@ export class ReferralService {
   }
 
   async applyReferralCode(code: string, user: User) {
-   
     // Check if code exists
     const codeEntry = await this.db.query.referralCodes.findFirst({
       where: eq(referralCodes.code, code),

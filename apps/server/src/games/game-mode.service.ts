@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Database } from 'src/database/database.provider';
 import { Drizzle } from 'src/database/database.decorator';
 import { game_mode } from '@repo/db';

@@ -1,34 +1,59 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  NotFoundException,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { LinesService } from './lines.service';
 import { CreateLineDto } from './dto/create-line.dto';
 import { UpdateLineDto } from './dto/update-line.dto';
+import { ResolveLineDto } from './dto/resolve-line.dto';
 
 @Controller('lines')
 export class LinesController {
   constructor(private readonly linesService: LinesService) {}
 
-  // @Post()
-  // create(@Body() createLineDto: CreateLineDto) {
-  //   return this.linesService.create(createLineDto);
-  // }
+  @Post()
+  async createLine(@Body() dto: CreateLineDto) {
+    return this.linesService.createLine(dto);
+  }
 
-  // @Get()
-  // findAll() {
-  //   return this.linesService.findAll();
-  // }
+  @Get()
+  async getAllLines() {
+    return this.linesService.getAllLines();
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.linesService.findOne(+id);
-  // }
+  @Get(':id')
+  async getLine(@Param('id', ParseUUIDPipe) id: string) {
+    const line = await this.linesService.getLineById(id);
+    if (!line) throw new NotFoundException(`Line ${id} not found`);
+    return line;
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateLineDto: UpdateLineDto) {
-  //   return this.linesService.update(+id, updateLineDto);
-  // }
+  @Patch(':id')
+  async updateLine(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateLineDto,
+  ) {
+    return this.linesService.updateLine(id, dto);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.linesService.remove(+id);
-  // }
+  @Delete(':id')
+  async deleteLine(@Param('id', ParseUUIDPipe) id: string) {
+    return this.linesService.deleteLine(id);
+  }
+
+  // Resolve line (update predictedValue, actualValue, isHigher)
+  @Patch(':id/resolve')
+  async resolveLine(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveLineDto,
+  ) {
+    return this.linesService.resolveLine(id, dto);
+  }
 }
