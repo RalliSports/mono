@@ -6,7 +6,7 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
 import { ReferralStatus } from './enum/referral';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 
 @Injectable()
 export class ReferralService {

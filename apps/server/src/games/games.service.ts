@@ -15,7 +15,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
 import { GameStatus } from './enum/game';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 
 @Injectable()
 export class GamesService {

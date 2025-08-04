@@ -25,7 +25,7 @@ import { GamesService } from './games.service';
 import { GameResponseDto } from './dto/game-response.dto';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 
 @Controller('')
 export class GamesController {
