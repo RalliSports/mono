@@ -17,7 +17,7 @@ export class StatsService {
   }
   async getStatById(id: number) {
     const stat = await this.db.query.stats.findFirst({
-      where: eq(stats.id, id),
+      where: eq(stats.id, String(id)),
     });
 
     if (!stat) throw new NotFoundException('Stat not found');

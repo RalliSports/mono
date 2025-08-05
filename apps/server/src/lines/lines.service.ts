@@ -20,7 +20,7 @@ export class LinesService {
       .insert(lines)
       .values({
         athleteId: dto.athleteId,
-        statId: dto.statId,
+        statId: String( dto.statId),
         matchupId: dto.matchupId,
         predictedValue: dto.predictedValue.toString(),
         actualValue: null,
@@ -45,7 +45,7 @@ export class LinesService {
       .update(lines)
       .set({
         athleteId: dto.athleteId,
-        statId: dto.statId,
+        statId: String(dto.statId),
         matchupId: dto.matchupId,
         predictedValue: dto.predictedValue?.toString(),
       })

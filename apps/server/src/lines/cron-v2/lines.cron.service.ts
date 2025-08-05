@@ -46,7 +46,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-spread-home`,
                 athleteId: null,
-                statId: 69, // "spread" stat ID
+                statId: String(69), // "spread" stat ID
                 matchupId,
                 predictedValue: odds.spread.toString(),
                 actualValue: null,
@@ -60,7 +60,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-spread-away`,
                 athleteId: null,
-                statId: 13,
+                statId: String(13),
                 matchupId,
                 predictedValue: (-odds.spread).toString(),
                 actualValue: null,
@@ -76,7 +76,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-total-over`,
                 athleteId: null,
-                statId: 7, // "total_over" stat ID
+                statId: String(7), // "total_over" stat ID
                 matchupId,
                 predictedValue: odds.overUnder.toString(),
                 actualValue: null,
@@ -89,7 +89,7 @@ export class LinesService {
               this.upsertLine({
                 id: `espn-${matchupId}-${providerId}-total-under`,
                 athleteId: null,
-                statId: 9,
+                statId: String(9),
                 matchupId,
                 predictedValue: odds.overUnder.toString(),
                 actualValue: null,

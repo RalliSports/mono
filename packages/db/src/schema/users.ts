@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   walletAddress: varchar("wallet_address"),
   emailAddress: varchar("email_address"),
   paraUserId: text("para_user_id"),
-  roleId: uuid("role_id").references(() => roles.id),
+  // roleId: uuid("role_id").references(() => roles.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

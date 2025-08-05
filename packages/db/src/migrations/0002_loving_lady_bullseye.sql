@@ -1,1 +1,0 @@
-ALTER TABLE "games" ADD COLUMN "max_bet" integer;
