@@ -9,7 +9,7 @@ pub mod state;
 use instructions::*;
 use state::*;
 
-declare_id!("9EM9kPnP6wtHXDWhW8eKr7WNKW1QVjohfroCb1Mtz9rp");
+declare_id!("3P2wnyoxACHcnUg3sVfSQA1Fwz4ssGKcQ9b6XXZC2vcG");
 
 #[program]
 pub mod ralli_bet {
