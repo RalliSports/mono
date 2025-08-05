@@ -11,14 +11,13 @@ import { and, count, eq } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
-import { User } from 'src/user/dto/user-respons.dto';
+import { User } from 'src/user/dto/user-response.dto';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus } from './enum/game';
-import { GameResponseDto } from './dto/game-response.dto';
 
 
 @Injectable()
