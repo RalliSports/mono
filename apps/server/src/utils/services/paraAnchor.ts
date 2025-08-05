@@ -3,25 +3,35 @@ import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import ParaServer from '@getpara/server-sdk';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
-import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
+  createMint,
   getAssociatedTokenAddressSync,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+  TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
   Cluster,
   clusterApiUrl,
   Connection,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
+  Signer,
   SystemProgram,
   Transaction,
+  TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
 import { BulkCreatePredictionsDto } from 'src/games/dto/prediction.dto';
 import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
-import { RalliBet } from '../idl/type';
+import { RalliBet } from '../idl/ralli_bet';
+import { GameResponseDto } from 'src/games/dto/game-response.dto';
+import { BadRequestException } from '@nestjs/common';
+
+const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 
 export class ParaAnchor {
   private solanaConnection: Connection;
@@ -29,16 +39,16 @@ export class ParaAnchor {
   private admin: Keypair;
   private treasury: Keypair;
   private treasuryTokenAccount: PublicKey;
+  private mint: PublicKey;
 
   constructor(paraServer: ParaServer) {
     this.paraServer = paraServer;
 
     this.admin = new Keypair();
+    this.mint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
     this.treasury = new Keypair();
 
-    this.solanaConnection = new Connection(
-      clusterApiUrl(process.env.SOLANA_CLUSTER as Cluster),
-    );
+    this.solanaConnection = new Connection(clusterApiUrl(CLUSTER), 'confirmed');
   }
 
   // Get provider
@@ -72,9 +82,10 @@ export class ParaAnchor {
   /**
    * Returns an Anchor Program instance
    */
-  async getProgram(): Promise<Program<Idl>> {
+  async getProgram(): Promise<Program<RalliBet>> {
     const provider = await this.getProvider();
-    return new Program<Idl>(IDL, provider);
+
+    return new Program<RalliBet>(IDL as Idl, provider);
   }
 
   /**
@@ -99,19 +110,22 @@ export class ParaAnchor {
       program.programId,
     );
 
-    const gameVault = await this.getGameVault(mint, gamePDA);
+    const gameVault = await this.getGameVault(this.mint, gamePDA);
+
+    const gameIdBigInt = BigInt(gameId.replace(/\D/g, '')) % 2n ** 64n;
+    const gameIdBuffer = new BN(gameIdBigInt.toString());
 
     try {
-      const txn = await program.methods
+      const ix = await program.methods
         .createGame(
-          new BN(parseInt(gameId)),
+          gameIdBuffer,
           maxParticipants,
-          new BN(depositAmount),
+          new BN(depositAmount * Math.pow(10, 6)),
           maxBet,
           creator,
         )
         .accountsStrict({
-          mint,
+          mint: this.mint,
           creator,
           game: gamePDA,
           gameEscrow: gameEscrowPDA,
@@ -120,27 +134,137 @@ export class ParaAnchor {
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
-        .rpc();
+        .instruction();
 
-      return txn;
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
     } catch (error) {
-      console.log(error, 'cannot create game');
+      console.error('Transaction Error:', error);
       return '';
     }
   }
 
-  async joinGameInstruction(mint: PublicKey, user: PublicKey): Promise<string> {
+  async joinGameInstruction({
+    gameId,
+    depositAmount,
+  }: {
+    gameId: string;
+    depositAmount: number;
+  }): Promise<string> {
     const program = await this.getProgram();
-    const txn = await program.methods
-      .joinGame()
-      .accounts({
-        mint,
-        user,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    const gamePDA = await this.getGamePDA(gameId, program.programId);
+    const gameEscrowPDA = await this.getGameEscrowPDA(
+      gamePDA,
+      program.programId,
+    );
+    const gameVault = await this.getGameVault(this.mint, gamePDA);
 
-    return txn;
+    const userAta = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      program.provider.wallet?.payer as Signer,
+      this.mint,
+      program.provider.wallet?.publicKey as PublicKey,
+    );
+
+    const userBalance =
+      await program.provider.connection.getTokenAccountBalance(userAta.address);
+    const userTokenAmount = userBalance.value.uiAmount as number;
+    const deposit = depositAmount * Math.pow(10, 6);
+    console.log(deposit, depositAmount, 'deposit');
+
+    // Check if balance is sufficient
+    if (deposit < userTokenAmount) {
+      throw new BadRequestException(
+        'User does not have enough SPL tokens to join the game.',
+      );
+    }
+
+    try {
+      const ix = await program.methods
+        .joinGame()
+        .accountsStrict({
+          mint: this.mint,
+          user: program.provider.wallet?.publicKey as PublicKey,
+          game: gamePDA,
+          gameEscrow: gameEscrowPDA,
+          gameVault,
+          userTokens: userAta.address,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
+
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {
+      console.error('Transaction Error:', error);
+      return '';
+    }
   }
 
   async submitBetsInstruction(
@@ -158,28 +282,65 @@ export class ParaAnchor {
           prediction.lineId,
           program.programId,
         );
-        
+
         return {
-          line_id: linePDA,
+          lineId: linePDA,
           direction:
             prediction.predictedDirection === PredictionDirection.HIGHER
-              ? { Over: {} }
-              : { Under: {} },
+              ? { over: {} }
+              : { under: {} },
         };
       }),
     );
 
-    const txn = await program.methods
-      .submitBet(picks)
-      .accountsStrict({
-        user,
-        game: gamePDA,
-        bet: betPDA,
-        systemProgram: program.programId,
-      })
-      .rpc();
+    try {
+      const ix = await program.methods
+        .submitBet(picks)
+        .accountsStrict({
+          user,
+          game: gamePDA,
+          bet: betPDA,
+          systemProgram: program.programId,
+        })
+        .instruction();
 
-    return txn;
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {
+      return '';
+    }
   }
 
   async resolveGameInstruction(gameId: string, mint: PublicKey) {
@@ -190,50 +351,130 @@ export class ParaAnchor {
     const gameEscrow = await this.getGameEscrowPDA(gamePDA, program.programId);
     const gameVault = await this.getGameVault(mint, gamePDA);
 
-    const txn = await program.methods
-      .resolveGame(percentage, 1)
-      .accountsStrict({
-        admin: this.admin.publicKey,
-        game: gamePDA,
-        game_escrow: gameEscrow,
-        mint,
-        gameVault: gameVault,
-        systemProgram: SystemProgram.programId,
-        associatedToken_program: ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        treasury: this.treasury.publicKey,
-        treasuryVault: this.treasuryTokenAccount,
-      })
-      .rpc();
+    try {
+      const ix = await program.methods
+        .resolveGame(percentage, 1)
+        .accountsStrict({
+          admin: this.admin.publicKey,
+          game: gamePDA,
+          gameEscrow: gameEscrow,
+          mint: this.mint,
+          gameVault: gameVault,
+          systemProgram: SystemProgram.programId,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          treasury: this.treasury.publicKey,
+          treasuryVault: this.treasuryTokenAccount,
+        })
+        .instruction();
 
-    return txn;
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {}
   }
 
-  async cancelGameInstruction(gameId: string, mint: PublicKey, user: PublicKey) {
+  async cancelGameInstruction(
+    gameId: string,
+    mint: PublicKey,
+    user: PublicKey,
+  ) {
     const program = await this.getProgram();
 
     const gamePDA = await this.getGamePDA(gameId, program.programId);
     const gameEscrow = await this.getGameEscrowPDA(gamePDA, program.programId);
-    const gameVault = await this.getGameVault(mint, gamePDA);
+    const gameVault = await this.getGameVault(this.mint, gamePDA);
 
-    const txn = await program.methods
-      .cancelGame()
-      .accountsStrict({
-        adminOrUser: user,
-        game: gamePDA,
-        gameEscrow: gameEscrow,
-        gameResult: gameVault,
-        systemProgram: SystemProgram.programId,
-      })
-      .rpc();
+    try {
+      const ix = await program.methods
+        .cancelGame()
+        .accountsStrict({
+          adminOrUser: user,
+          game: gamePDA,
+          gameEscrow: gameEscrow,
+          gameResult: gameVault,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
 
-    return txn;
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {}
   }
 
   async getGamePDA(gameId: string, programId: PublicKey): Promise<PublicKey> {
-  
+    const gameIdBigInt = BigInt(gameId.replace(/\D/g, '')) % 2n ** 64n;
+    const gameIdBuffer = new BN(gameIdBigInt.toString()).toArrayLike(
+      Buffer,
+      'le',
+      8,
+    );
+
     const [gamePDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from('game'), Buffer.from(parseInt(gameId).toString())],
+      [Buffer.from('game'), gameIdBuffer],
       programId,
     );
 
@@ -241,7 +482,7 @@ export class ParaAnchor {
   }
 
   async getGameVault(mint: PublicKey, gamePDA: PublicKey): Promise<PublicKey> {
-    return getAssociatedTokenAddressSync(mint, gamePDA, true);
+    return await getAssociatedTokenAddressSync(mint, gamePDA, true);
   }
 
   async getBetPDA(

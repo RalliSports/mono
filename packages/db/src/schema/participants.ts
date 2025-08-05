@@ -5,6 +5,7 @@ import { predictions } from "./predictions";
 
 import { uuid } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { text } from "drizzle-orm/pg-core";
 
 export const participants = pgTable("participants", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -12,6 +13,7 @@ export const participants = pgTable("participants", {
   gameId: uuid("game_id").references(() => games.id),
   joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
   isWinner: boolean("is_winner"),
+  txnId: text("txn_id"),
 });
 
 export const participantsRelations = relations(
