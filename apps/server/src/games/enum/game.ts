@@ -14,6 +14,6 @@ export enum GameAccessStatus {
 }
 
 export enum PredictionDirection {
-  HIGHT = 'higher',
+  HIGHER = 'higher',
   LOWER = 'lower',
 }

@@ -1,5 +1,5 @@
 {
-  "id": "b48e804a-7de3-433d-9bac-54dea010cf18",
+  "id": "3261e3ec-d909-4228-83e4-5227d0e3bd64",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -206,6 +206,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "max_bet": {
+          "name": "max_bet",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "game_code": {
           "name": "game_code",
           "type": "varchar",
@@ -247,6 +253,12 @@
         "game_mode_id": {
           "name": "game_mode_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "txn_id": {
+          "name": "txn_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -422,6 +434,12 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
+        },
+        "txn_id": {
+          "name": "txn_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -566,9 +584,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
@@ -627,12 +646,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "role_id": {
-          "name": "role_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -642,21 +655,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "users_role_id_roles_id_fk": {
-          "name": "users_role_id_roles_id_fk",
-          "tableFrom": "users",
-          "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -682,9 +681,9 @@
         },
         "stat_id": {
           "name": "stat_id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "matchup_id": {
           "name": "matchup_id",

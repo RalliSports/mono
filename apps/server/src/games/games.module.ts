@@ -8,10 +8,11 @@ import { GameAccessController } from './game-access.controller';
 import { GameModeController } from './game-mode.controller';
 import { GameModeService } from './game-mode.service';
 import { UserModule } from 'src/user/user.module';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Module({
   imports: [DatabaseModule, AuthModule, UserModule],
   controllers: [GamesController, GameAccessController, GameModeController],
-  providers: [GamesService, GameAccessService, GameModeService],
+  providers: [GamesService, GameAccessService, GameModeService, ParaAnchor],
 })
 export class GamesModule {}

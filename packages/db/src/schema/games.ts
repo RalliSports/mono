@@ -13,6 +13,7 @@ import { participants } from "./participants";
 import { users } from "./users";
 
 import { uuid } from "drizzle-orm/pg-core";
+import { text } from "drizzle-orm/pg-core";
 
 export const gameTypeEnum = pgEnum("type", ["1v1", "limited", "unlimited"]);
 export const userControlTypeEnum = pgEnum("user_control_type", [
@@ -30,6 +31,7 @@ export const games = pgTable("games", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   status: varchar("status"),
   maxParticipants: integer("max_participants"),
+  maxBet: integer("max_bet"),
   gameCode: varchar("game_code"),
   matchupGroup: varchar("matchup_group"),
   depositToken: varchar("deposit_token"),
@@ -37,6 +39,7 @@ export const games = pgTable("games", {
   type: gameTypeEnum("type"),
   userControlType: userControlTypeEnum("user_control_type"),
   gameModeId: uuid("game_mode_id"),
+  txnId: text("txn_id"),
 });
 
 export const gamesRelations = relations(games, ({ many, one }) => ({

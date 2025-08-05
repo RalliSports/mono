@@ -20,7 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
     "@getpara/server-sdk": "^1.18.0",
+    "@getpara/solana-web3.js-v1-integration": "1.18.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -30,6 +32,8 @@
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/websockets": "^11.1.4",
     "@repo/db": "workspace:*",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.98.4",
     "@types/pg": "^8.15.4",
     "axios": "^1.11.0",
     "class-transformer": "^0.5.1",

@@ -5,43 +5,95 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateGameDto } from './dto/create-game.dto';
-import { UpdateGameDto } from './dto/update-game.dto';
-import { generateRandonCode } from 'src/utils/generateRandonCode';
 import { game_access, games, participants, predictions } from '@repo/db';
+import { PublicKey } from '@solana/web3.js';
 import { and, count, eq } from 'drizzle-orm';
-import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
+import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
-import { GameStatus } from './enum/game';
-import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { User } from 'src/user/dto/user-response.dto';
+import { generateRandonCode } from 'src/utils/generateRandonCode';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { CreateGameDto } from './dto/create-game.dto';
+import { BulkCreatePredictionsDto } from './dto/prediction.dto';
+import { UpdateGameDto } from './dto/update-game.dto';
+import { GameStatus } from './enum/game';
+
 
 @Injectable()
 export class GamesService {
+  private anchor: ParaAnchor;
+
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
-  ) {}
-
+  ) {
+    this.anchor = new ParaAnchor(this.authService.getPara());
+  }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
+    const para = this.authService.getPara();
 
-    const [game] = await this.db
-      .insert(games)
-      .values({
-        ...createGameDto,
-        creatorId: user.id,
-        gameCode,
-        status: GameStatus.WAITING,
-      })
-      .returning();
+    const gameData = await this.db.transaction(async (tx) => {
+      const [game] = await tx
+        .insert(games)
+        .values({
+          ...createGameDto,
+          creatorId: user.id,
+          gameCode,
+          maxBet: createGameDto.maxBets,
+          status: GameStatus.WAITING,
+        })
+        .returning();
 
-    return game;
+      // Ensure createGameInstruction throws if it fails
+      let txn: string;
+
+      try {
+        txn = await this.anchor.createGameInstruction(
+          game.id.toString(),
+          Number(game.depositAmount),
+          Number(game.maxBet),
+          Number(game.maxParticipants),
+          new PublicKey(user.walletAddress),
+          new PublicKey(game.depositToken as string),
+        );
+
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from createGameInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back game creation",
+          error,
+        );
+      }
+
+      const [updatedGame] = await tx
+        .update(games)
+        .set({
+          txnId: txn,
+        })
+        .where(eq(games.id, game.id))
+        .returning();
+
+      return updatedGame;
+    });
+
+    return gameData;
   }
 
   async findAll() {
-    return this.db.query.games.findMany({ with: { gameMode: true } });
+    return this.db.query.games.findMany({
+      with: { gameMode: true, creator: true, participants: {with: {user: true}} },
+    });
   }
 
   async getJoinedGames(user: User) {
@@ -70,48 +122,67 @@ export class GamesService {
   }
 
   async joinGame(user: User, gameId: string, gameCode?: string) {
-    const game = await this.db.query.games.findFirst({
-      where: eq(games.id, gameId),
+    return await this.db.transaction(async (tx) => {
+      const game = await tx.query.games.findFirst({
+        where: eq(games.id, gameId),
+      });
+
+      if (!game) throw new NotFoundException('Game not found');
+
+      await this.validateGameAccess({
+        game,
+        userId: user.id,
+        providedCode: gameCode,
+      });
+
+      const existing = await tx.query.participants.findFirst({
+        where: and(
+          eq(participants.gameId, gameId),
+          eq(participants.userId, user.id),
+        ),
+      });
+
+      if (existing) {
+        throw new ConflictException('User already joined this game');
+      }
+
+      const [{ count: currentCount }] = await tx
+        .select({ count: count() })
+        .from(participants)
+        .where(eq(participants.gameId, gameId));
+
+      if (currentCount >= (game.maxParticipants as number)) {
+        throw new BadRequestException('Game is already full');
+      }
+
+      if (game.status !== GameStatus.WAITING) {
+        throw new BadRequestException('Game is not open for joining');
+      }
+
+      // Call Anchor join instruction (must succeed else rollback DB)
+      const joinTxSig = await this.anchor.joinGameInstruction({
+        gameId: game.id.toString(),
+        depositAmount: game.depositAmount as number,
+      });
+      if (!joinTxSig) {
+        throw new BadRequestException(
+          'Failed to execute join game instruction on-chain',
+        );
+      }
+
+      await tx.insert(participants).values({
+        gameId,
+        userId: user.id,
+        txnId: joinTxSig,
+      });
+
+      // Transaction will auto-commit if no error is thrown
+      return {
+        success: true,
+        message: 'Joined game successfully',
+        txSig: joinTxSig,
+      };
     });
-
-    if (!game) throw new NotFoundException('Game not found');
-
-    await this.validateGameAccess({
-      game,
-      userId: user.id,
-      providedCode: gameCode,
-    });
-
-    const existing = await this.db.query.participants.findFirst({
-      where: and(
-        eq(participants.gameId, gameId),
-        eq(participants.userId, user.id),
-      ),
-    });
-
-    if (existing) {
-      throw new ConflictException('User already joined this game');
-    }
-
-    const [{ count: currentCount }] = await this.db
-      .select({ count: count() })
-      .from(participants)
-      .where(eq(participants.gameId, gameId));
-
-    if (currentCount >= (game.maxParticipants as number)) {
-      throw new BadRequestException('Game is already full');
-    }
-
-    if (game.status !== GameStatus.WAITING) {
-      throw new BadRequestException('Game is not open for joining');
-    }
-
-    await this.db.insert(participants).values({
-      gameId,
-      userId: user.id,
-    });
-
-    return { success: true, message: 'Joined game successfully' };
   }
 
   async predictGames(dto: BulkCreatePredictionsDto) {

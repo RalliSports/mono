@@ -84,7 +84,7 @@ export class AuthService {
     }
   }
 
-  async getPara(): Promise<ParaServer> {
-    return await this.paraServer;
+  getPara(): ParaServer {
+    return this.paraServer;
   }
 }
