@@ -8,6 +8,13 @@
       "when": 1754435574010,
       "tag": "0000_woozy_captain_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754438419143,
+      "tag": "0001_brief_outlaw_kid",
+      "breakpoints": true
     }
   ]
 }

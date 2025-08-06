@@ -5,10 +5,8 @@ import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  createMint,
   getAssociatedTokenAddressSync,
   getOrCreateAssociatedTokenAccount,
-  mintTo,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
@@ -16,7 +14,6 @@ import {
   clusterApiUrl,
   Connection,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   Signer,
   SystemProgram,
@@ -28,7 +25,6 @@ import { BulkCreatePredictionsDto } from 'src/games/dto/prediction.dto';
 import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
 import { RalliBet } from '../idl/ralli_bet';
-import { GameResponseDto } from 'src/games/dto/game-response.dto';
 import { BadRequestException } from '@nestjs/common';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
@@ -52,9 +48,9 @@ export class ParaAnchor {
   }
 
   // Get provider
-  async getProvider(): Promise<AnchorProvider> {
+  getProvider(): AnchorProvider {
     const solanaSigner = new ParaSolanaWeb3Signer(
-      this.paraServer,
+      this.paraServer as any,
       this.solanaConnection,
     );
 
