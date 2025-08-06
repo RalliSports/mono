@@ -91,6 +91,74 @@ export class ParaAnchor {
     return this.solanaConnection;
   }
 
+  async createLineInstruction(
+    lineId: number,
+    statId: number,
+    predictedValue: number,
+    athleteId: number,
+    startsAt: number,
+    creator: PublicKey,
+  ): Promise<string> {
+    const program = await this.getProgram();
+    const _lineId = new BN(lineId);
+    const _athleteId = new BN(athleteId);
+    const _startsAt = new BN(startsAt);
+
+    const [lineAccount] = PublicKey.findProgramAddressSync(
+      [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+      program.programId,
+    );
+
+    try {
+      const ix = await program.methods
+        .createLine(_lineId, statId, predictedValue, _athleteId, _startsAt)
+        .accountsPartial({
+          admin: creator,
+          line: lineAccount,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
+
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {
+      console.error('Transaction Error:', error);
+      return '';
+    }
+  }
+
   async createGameInstruction(
     gameId: string,
     depositAmount: number,
