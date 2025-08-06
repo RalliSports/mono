@@ -32,6 +32,19 @@ export class AthletesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get active athletes with unresolved lines' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of active athletes with unresolved lines',
+    type: [AthleteResponseDto],
+  })
+  @Get('/athletes/active')
+  async getActiveAthletesWithUnresolvedLines() {
+    return this.athletesService.getActiveAthletesWithUnresolvedLines();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Create a new athlete' })
   @ApiResponse({
     status: 201,
