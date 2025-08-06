@@ -1,8 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { StatResponseDto } from './dto/stat-response.dto';
+import { CreateStatDto } from './dto/create-stat.dto';
 
 @Controller('stats')
 export class StatsController {
@@ -32,5 +33,18 @@ export class StatsController {
   @Get(':id')
   async getStatById(@Param('id') id: number) {
     return this.statsService.getStatById(id);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Create a new line' })
+  @ApiResponse({
+    status: 201,
+    description: 'Line created successfully',
+    type: StatResponseDto,
+  })
+  @Post('/create')
+  async createStat(@Body() dto: CreateStatDto) {
+    return this.statsService.createStat(dto);
   }
 }
