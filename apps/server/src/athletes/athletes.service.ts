@@ -4,6 +4,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
 import { eq } from 'drizzle-orm';
 import { athletes } from '@repo/db';
+import { CreateAthleteDto } from './dto/create-athlete.dto';
 
 @Injectable()
 export class AthletesService {
@@ -14,6 +15,22 @@ export class AthletesService {
 
   async getAllAthletes() {
     return this.db.query.athletes.findMany();
+  }
+
+  async createAthlete(dto: CreateAthleteDto) {
+    const [inserted] = await this.db
+      .insert(athletes)
+      .values({
+        name: dto.name,
+        team: dto.team,
+        position: dto.position,
+        jerseyNumber: dto.jerseyNumber,
+        age: dto.age,
+        picture: dto.picture || null,
+      })
+      .returning();
+
+    return inserted;
   }
 
   async getAthlete(id: string) {

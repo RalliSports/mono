@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
   Param,
   ParseUUIDPipe,
   UseGuards,
@@ -9,8 +11,9 @@ import { AthletesService } from './athletes.service';
 import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { AthleteResponseDto } from './dto/athlete-response.dto';
+import { CreateAthleteDto } from './dto/create-athlete.dto';
 
-@Controller('athletes')
+@Controller('')
 export class AthletesController {
   constructor(private readonly athletesService: AthletesService) {}
 
@@ -22,9 +25,22 @@ export class AthletesController {
     description: 'List of all athletes',
     type: [AthleteResponseDto],
   })
-  @Get()
+  @Get('/athletes')
   async getAllAthletes() {
     return this.athletesService.getAllAthletes();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Create a new athlete' })
+  @ApiResponse({
+    status: 201,
+    description: 'Athlete created successfully',
+    type: AthleteResponseDto,
+  })
+  @Post('/create-athlete')
+  async createAthlete(@Body() dto: CreateAthleteDto) {
+    return this.athletesService.createAthlete(dto);
   }
 
   @ApiSecurity('x-para-session')
@@ -35,7 +51,7 @@ export class AthletesController {
     description: 'Athlete fetch successfully',
     type: AthleteResponseDto,
   })
-  @Get(':id')
+  @Get('/athletes/:id')
   async getAthlete(@Param('id', ParseUUIDPipe) id: string) {
     return this.athletesService.getAthlete(id);
   }

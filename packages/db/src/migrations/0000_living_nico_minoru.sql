@@ -94,6 +94,7 @@ CREATE TABLE "roles" (
 --> statement-breakpoint
 CREATE TABLE "stats" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"custom_id" integer NOT NULL,
 	"name" varchar,
 	"description" varchar,
 	"created_at" timestamp DEFAULT now()
