@@ -1,11 +1,4 @@
-import {
-  IsUUID,
-  IsDecimal,
-  IsBoolean,
-  IsOptional,
-  IsNumber,
-  IsDefined,
-} from 'class-validator';
+import { IsUUID, IsNumber, IsDefined, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLineDto {
@@ -14,8 +7,8 @@ export class CreateLineDto {
   athleteId: string;
 
   @ApiProperty()
-  @IsNumber()
-  statId: number;
+  @IsUUID()
+  statId: string;
 
   @ApiProperty()
   @IsUUID()
@@ -23,16 +16,7 @@ export class CreateLineDto {
 
   @ApiProperty()
   @IsDefined()
-  @IsDecimal()
+  @IsNumber()
+  @Min(0)
   predictedValue: number;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsDecimal()
-  actualValue?: number | null;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsBoolean()
-  isHigher?: boolean | null;
 }

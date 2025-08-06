@@ -22,6 +22,8 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 import { LineResponseDto } from './dto/line-response.dto';
+import { UserPayload } from 'src/auth/auth.user.decorator';
+import { User } from 'src/user/dto/user-response.dto';
 
 @Controller('')
 export class LinesController {
@@ -36,8 +38,8 @@ export class LinesController {
     type: LineResponseDto,
   })
   @Post('/create-line')
-  async createLine(@Body() dto: CreateLineDto) {
-    return this.linesService.createLine(dto);
+  async createLine(@Body() dto: CreateLineDto, @UserPayload() user: User) {
+    return this.linesService.createLine(dto, user);
   }
 
   @ApiOperation({ summary: 'Get all lines' })
@@ -106,7 +108,8 @@ export class LinesController {
   async resolveLine(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ResolveLineDto,
+    @UserPayload() user: User,
   ) {
-    return this.linesService.resolveLine(id, dto);
+    return this.linesService.resolveLine(id, dto, user);
   }
 }

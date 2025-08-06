@@ -32,7 +32,6 @@ export class GamesService {
   }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
-    const para = this.authService.getPara();
 
     const gameData = await this.db.transaction(async (tx) => {
       const [game] = await tx
