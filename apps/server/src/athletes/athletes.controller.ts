@@ -38,7 +38,7 @@ export class AthletesController {
     description: 'Athlete created successfully',
     type: AthleteResponseDto,
   })
-  @Post('/create-athletes')
+  @Post('/create-athlete')
   async createAthlete(@Body() dto: CreateAthleteDto) {
     return this.athletesService.createAthlete(dto);
   }

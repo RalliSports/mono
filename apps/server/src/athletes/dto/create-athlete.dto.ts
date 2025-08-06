@@ -17,7 +17,7 @@ export class CreateAthleteDto {
   @ApiProperty({
     description: 'Jersey number',
     minimum: 0,
-    maximum: 99,
+    maximum: 100,
     example: 0,
   })
   @IsNumber()
