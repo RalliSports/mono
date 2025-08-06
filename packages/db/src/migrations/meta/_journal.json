@@ -15,6 +15,13 @@
       "when": 1754438419143,
       "tag": "0001_brief_outlaw_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754519356013,
+      "tag": "0002_little_miracleman",
+      "breakpoints": true
     }
   ]
 }
