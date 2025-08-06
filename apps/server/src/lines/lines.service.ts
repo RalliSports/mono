@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
@@ -45,11 +46,11 @@ export class LinesService {
 
     try {
       txn = await this.anchor.createLineInstruction(
-        2,
+        3,
         1001,
         dto.predictedValue,
         12,
-        Date.now(),
+        (Date.now() + 30000) / 1000,
         new PublicKey(user.walletAddress),
       );
 
@@ -103,20 +104,56 @@ export class LinesService {
     return { success: true };
   }
 
-  async resolveLine(id: string, dto: ResolveLineDto) {
+  async resolveLine(id: string, dto: ResolveLineDto, user: User) {
+    const line = await this.getLineById(id);
+    if (!line) throw new NotFoundException(`Line ${id} not found`);
+    if (line.actualValue)
+      throw new BadRequestException(`Line ${id} already resolved`);
+    if (!line.predictedValue)
+      throw new BadRequestException(`Line ${id} not predicted`);
+    const predictedValue = Number(line.predictedValue);
+
     const res = await this.db
       .update(lines)
       .set({
-        predictedValue: dto.predictedValue?.toString(),
         actualValue: dto.actualValue?.toString(),
         isHigher:
-          dto.actualValue && dto.predictedValue
-            ? dto.actualValue > dto.predictedValue
+          dto.actualValue && line.predictedValue
+            ? dto.actualValue > Number(line.predictedValue)
             : null,
       })
       .where(eq(lines.id, id))
       .returning();
     if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
+
+    // Ensure createGameInstruction throws if it fails
+    let txn: string;
+
+    try {
+      txn = await this.anchor.resolveLineInstruction(
+        3,
+        predictedValue,
+        dto.actualValue!,
+        false,
+        new PublicKey(user.walletAddress),
+      );
+
+      if (!txn || typeof txn !== 'string') {
+        throw new Error(
+          'Invalid transaction ID returned from createGameInstruction',
+        );
+      }
+    } catch (error) {
+      console.error(
+        'Anchor instruction failed, rolling back transaction:',
+        error,
+      );
+      // Throw to rollback DB transaction
+      throw new BadRequestException(
+        "'Anchor instruction failed, rolling back game creation",
+        error,
+      );
+    }
     return res[0];
   }
 }

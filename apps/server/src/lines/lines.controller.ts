@@ -108,7 +108,8 @@ export class LinesController {
   async resolveLine(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ResolveLineDto,
+    @UserPayload() user: User,
   ) {
-    return this.linesService.resolveLine(id, dto);
+    return this.linesService.resolveLine(id, dto, user);
   }
 }

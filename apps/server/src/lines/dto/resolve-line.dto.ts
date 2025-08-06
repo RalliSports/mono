@@ -1,14 +1,14 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateLineDto } from './create-line.dto';
-import { IsDecimal, IsBoolean } from 'class-validator';
+import { IsNumber, IsUUID, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ResolveLineDto extends PartialType(CreateLineDto) {
+export class ResolveLineDto {
   @ApiProperty()
-  @IsDecimal()
-  actualValue?: number | null;
+  @IsNumber()
+  @IsNotEmpty()
+  actualValue?: number;
+
 
   @ApiProperty()
-  @IsBoolean()
-  isHigher?: boolean | null;
+  @IsUUID()
+  lineId: string;
 }
