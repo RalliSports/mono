@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { GamesModule } from './games/games.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { LinesModule } from './lines/lines.module';
+import { MatchupsModule } from './matchups/matchups.module';
 import { ReferralModule } from './referral/referral.module';
 import { UserModule } from './user/user.module';
 import { AthletesModule } from './athletes/athletes.module';
@@ -20,6 +21,7 @@ import { StatsModule } from './stats/stats.module';
     WebsocketModule,
     GamesModule,
     LinesModule,
+    MatchupsModule,
     ReferralModule,
     UserModule,
     AthletesModule,

@@ -23,11 +23,11 @@ export class AuthService {
 
   async validateSession(session: string): Promise<User | null> {
     try {
-      console.log('importing session', session);
+      // console.log('importing session', session);
       await this.paraServer.importSession(session);
       const isActive = await this.paraServer.isSessionActive();
 
-      console.log('started');
+      // console.log('started');
       if (!isActive) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNAUTHORIZED,
