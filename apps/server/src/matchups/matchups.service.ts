@@ -29,9 +29,9 @@ export class MatchupsService {
     const matchup = await this.db
       .insert(matchups)
       .values({
-        homeTeam: dto.homeTeam,
-        awayTeam: dto.awayTeam,
-        gameDate: dto.gameDate.toISOString(),
+        homeTeam: dto.homeTeamId,
+        awayTeam: dto.awayTeamId,
+        gameDate: dto.gameDate,
         status: 'pending',
         scoreHome: 0,
         scoreAway: 0,
