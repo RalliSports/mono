@@ -4,7 +4,7 @@ import { lines } from "./lines";
 
 export const stats = pgTable("stats", {
   id: uuid("id").primaryKey().defaultRandom(),
-  customId: integer("custom_id").notNull(),
+  customId: integer("custom_id").notNull().unique(),
   name: varchar("name"),
   description: varchar("description"),
   createdAt: timestamp("created_at").defaultNow(),

@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { lines } from '@repo/db';
+import { athletes, lines, matchups, stats } from '@repo/db';
 import { eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
@@ -38,18 +38,37 @@ export class LinesService {
         predictedValue: dto.predictedValue.toString(),
         actualValue: null,
         isHigher: null,
+        startsAt: new Date(dto.startsAtTimestamp),
       })
       .returning();
 
     // Ensure createGameInstruction throws if it fails
     let txn: string;
+    const createdAt = inserted.createdAt;
+    if (!createdAt) throw new BadRequestException('Line not created');
+    const timestamp = new Date(createdAt).getTime();
+    const statCustomId = await this.db.query.stats.findFirst({
+      where: eq(stats.id, dto.statId),
+    }).then((stat) => stat?.customId);
+
+    const athleteCustomId = await this.db.query.athletes.findFirst({
+      where: eq(athletes.id, dto.athleteId),
+    }).then((athlete) => athlete?.customId);
+
+    if (!statCustomId) throw new BadRequestException('Stat not found');
+    if (!athleteCustomId) throw new BadRequestException('Athlete not found');
+
+    console.log('timestamp', timestamp);
+    console.log('startsAt', dto.startsAtTimestamp);
+
+    const adjustedTimestamp = dto.startsAtTimestamp /1000;
 
     try {
       txn = await this.anchor.createLineInstruction(
-        3,
-        1001,
+        timestamp,
+        statCustomId,
         dto.predictedValue,
-        12,
+        athleteCustomId,
         (Date.now() + 30000) / 1000,
         new PublicKey(user.walletAddress),
       );
@@ -74,7 +93,14 @@ export class LinesService {
   }
 
   async getAllLines() {
-    return this.db.query.lines.findMany();
+    const lines = await this.db.query.lines.findMany({
+      with: {
+        stat: true,
+        matchup: true,
+        athlete: true,
+      },
+    });
+    return lines;
   }
 
   async getLineById(id: string) {
@@ -105,10 +131,11 @@ export class LinesService {
   }
 
   async resolveLine(id: string, dto: ResolveLineDto, user: User) {
+    console.log('resolveLine', id, dto, user);
     const line = await this.getLineById(id);
     if (!line) throw new NotFoundException(`Line ${id} not found`);
-    if (line.actualValue)
-      throw new BadRequestException(`Line ${id} already resolved`);
+    // if (line.actualValue)
+    //   throw new BadRequestException(`Line ${id} already resolved`);
     if (!line.predictedValue)
       throw new BadRequestException(`Line ${id} not predicted`);
     const predictedValue = Number(line.predictedValue);
@@ -125,6 +152,9 @@ export class LinesService {
       .where(eq(lines.id, id))
       .returning();
     if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
+    const lineCreatedAt = line.createdAt;
+    if (!lineCreatedAt) throw new BadRequestException('Line not created');
+    const lineTimestamp = new Date(lineCreatedAt).getTime();
 
     // Ensure createGameInstruction throws if it fails
     let txn: string;

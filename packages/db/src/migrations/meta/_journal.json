@@ -8,6 +8,20 @@
       "when": 1754514709425,
       "tag": "0000_living_nico_minoru",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754519356013,
+      "tag": "0002_little_miracleman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754525737658,
+      "tag": "0003_colorful_lucky_pierre",
+      "breakpoints": true
     }
   ]
 }

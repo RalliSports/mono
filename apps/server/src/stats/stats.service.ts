@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
+import { CreateStatDto } from './dto/create-stat.dto';
 
 @Injectable()
 export class StatsService {
@@ -21,6 +22,18 @@ export class StatsService {
     });
 
     if (!stat) throw new NotFoundException('Stat not found');
+    return stat;
+  }
+
+  async createStat(dto: CreateStatDto) {
+    const stat = await this.db
+      .insert(stats)
+      .values({
+        customId: dto.customId,
+        name: dto.name,
+        description: dto.description,
+      })
+      .returning();
     return stat;
   }
 }

@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { StatsService } from './stats.service';
+import { MatchupsService } from './matchups.service';
 import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
-import { StatResponseDto } from './dto/stat-response.dto';
-import { CreateStatDto } from './dto/create-stat.dto';
+import { MatchupResponseDto } from './dto/matchup-response.dto';
+import { CreateMatchupDto } from './dto/create-matchup.dto';
 
-@Controller('stats')
-export class StatsController {
-  constructor(private readonly statsService: StatsService) {}
+@Controller('matchups')
+export class MatchupsController {
+  constructor(private readonly matchupsService: MatchupsService) {}
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
@@ -15,11 +15,11 @@ export class StatsController {
   @ApiResponse({
     status: 200,
     description: 'List of all stats',
-    type: [StatResponseDto],
+    type: [MatchupResponseDto],
   })
   @Get()
   async getAllStats() {
-    return this.statsService.getAllStats();
+    return this.matchupsService.getAllMatchups();
   }
 
   @ApiSecurity('x-para-session')
@@ -28,11 +28,11 @@ export class StatsController {
   @ApiResponse({
     status: 200,
     description: 'Stat fetch successfully',
-    type: StatResponseDto,
+    type: MatchupResponseDto,
   })
   @Get(':id')
-  async getStatById(@Param('id') id: number) {
-    return this.statsService.getStatById(id);
+  async getMatchupById(@Param('id') id: string) {
+    return this.matchupsService.getMatchupById(id);
   }
 
   @ApiSecurity('x-para-session')
@@ -41,10 +41,10 @@ export class StatsController {
   @ApiResponse({
     status: 201,
     description: 'Line created successfully',
-    type: StatResponseDto,
+    type: MatchupResponseDto,
   })
   @Post('/create')
-  async createStat(@Body() dto: CreateStatDto) {
-    return this.statsService.createStat(dto);
+  async createMatchup(@Body() dto: CreateMatchupDto) {
+    return this.matchupsService.createMatchup(dto);
   }
 }

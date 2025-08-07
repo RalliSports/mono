@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, varchar, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, varchar, integer, timestamp, serial } from "drizzle-orm/pg-core";
 import { lines } from "./lines";
 import { matchup_performance } from "./matchup_performance";
 import { uuid } from "drizzle-orm/pg-core";
@@ -12,6 +12,7 @@ export const athletes = pgTable("athletes", {
   jerseyNumber: integer("jersey_number"),
   age: integer("age"),
   picture: varchar("picture"),
+  customId: serial("custom_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
