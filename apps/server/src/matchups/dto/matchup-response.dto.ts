@@ -1,29 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class AthleteResponseDto {
+export class MatchupResponseDto {
   @ApiProperty()
   id: string;
 
   @ApiProperty()
-  name: string;
+  homeTeam: string;
 
   @ApiProperty()
-  team: string;
+  awayTeam: string;
 
   @ApiProperty()
-  position: string;
+  gameDate: Date;
 
   @ApiProperty()
-  jerseyNumber: number;
+  status: string;
 
   @ApiProperty()
-  age: number;
+  scoreHome: number;
 
   @ApiProperty()
-  picture: string;
-
-  @ApiProperty()
-  customId: number;
+  scoreAway: number;
 
   @ApiProperty()
   createdAt: Date;

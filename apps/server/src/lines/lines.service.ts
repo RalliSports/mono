@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { lines } from '@repo/db';
+import { lines, matchups, stats } from '@repo/db';
 import { eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
@@ -43,11 +43,19 @@ export class LinesService {
 
     // Ensure createGameInstruction throws if it fails
     let txn: string;
+    const createdAt = inserted.createdAt;
+    if (!createdAt) throw new BadRequestException('Line not created');
+    const timestamp = new Date(createdAt).getTime() / 1000;
+    const statCustomId = await this.db.query.stats.findFirst({
+      where: eq(stats.id, dto.statId),
+    }).then((stat) => stat?.customId);
+
+    if (!statCustomId) throw new BadRequestException('Stat not found');
 
     try {
       txn = await this.anchor.createLineInstruction(
-        3,
-        1001,
+        timestamp,
+        statCustomId,
         dto.predictedValue,
         12,
         (Date.now() + 30000) / 1000,
@@ -74,7 +82,13 @@ export class LinesService {
   }
 
   async getAllLines() {
-    return this.db.query.lines.findMany();
+    return this.db.query.lines.findMany({
+      with: {
+        stat: true,
+        matchup: true,
+        athlete: true,
+      }
+    });
   }
 
   async getLineById(id: string) {

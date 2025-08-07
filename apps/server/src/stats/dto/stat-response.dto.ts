@@ -1,8 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsUUID } from 'class-validator';
 
 export class StatResponseDto {
   @ApiProperty()
-  id: number;
+  @IsUUID()
+  id: string;
+
+  @ApiProperty()
+  customId: number;
 
   @ApiProperty()
   name: string;
