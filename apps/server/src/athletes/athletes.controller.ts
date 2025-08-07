@@ -12,6 +12,7 @@ import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { AthleteResponseDto } from './dto/athlete-response.dto';
 import { CreateAthleteDto } from './dto/create-athlete.dto';
+import { AthleteResponseWithLinesDto } from './dto/athlete-response-with-lines.dto';
 
 @Controller('')
 export class AthletesController {
@@ -28,6 +29,19 @@ export class AthletesController {
   @Get('/athletes')
   async getAllAthletes() {
     return this.athletesService.getAllAthletes();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get active athletes with unresolved lines' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of active athletes with unresolved lines',
+    type: [AthleteResponseWithLinesDto],
+  })
+  @Get('/athletes/active')
+  async getActiveAthletesWithUnresolvedLines() {
+    return this.athletesService.getActiveAthletesWithUnresolvedLines();
   }
 
   @ApiSecurity('x-para-session')

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { athletes } from '@repo/db';
 import { CreateAthleteDto } from './dto/create-athlete.dto';
 
@@ -15,6 +15,32 @@ export class AthletesService {
 
   async getAllAthletes() {
     return this.db.query.athletes.findMany();
+  }
+
+  async getActiveAthletesWithUnresolvedLines() {
+    const athletes = await this.db.query.athletes.findMany({
+      with: {
+        lines: {
+          with: {
+            stat: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+          where: (lines) => isNull(lines.actualValue),
+          columns: {
+            id: true,
+            predictedValue: true,
+          },
+        },
+      },
+    });
+    const filteredAthletes = athletes.filter(
+      (athlete) => athlete.lines.length > 0,
+    );
+    return filteredAthletes;
   }
 
   async createAthlete(dto: CreateAthleteDto) {
