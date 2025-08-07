@@ -41,6 +41,9 @@ export class GameResponseDto {
   maxParticipants: number;
 
   @ApiProperty()
+  maxBet: number;
+
+  @ApiProperty()
   gameCode: string;
 
   @ApiProperty()

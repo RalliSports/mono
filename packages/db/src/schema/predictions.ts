@@ -7,8 +7,8 @@ import { games } from "./games";
 import { users } from "./users";
 
 export const predictedDirectionEnum = pgEnum("predicted_direction", [
-  "higher",
-  "lower",
+  "over",
+  "under",
 ]);
 
 export const predictions = pgTable("predictions", {

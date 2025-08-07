@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754594798669,
-      "tag": "0000_concerned_hellcat",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1754595686891,
-      "tag": "0001_crazy_typhoid_mary",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1754596363699,
-      "tag": "0002_productive_stick",
+      "when": 1754603771107,
+      "tag": "0000_warm_northstar",
       "breakpoints": true
     }
   ]
