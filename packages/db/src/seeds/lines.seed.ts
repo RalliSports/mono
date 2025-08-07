@@ -12,6 +12,7 @@ export const linesData: (typeof lines.$inferInsert)[] = [
     actualValue: "6",
     isHigher: true,
     createdAt: new Date("2025-08-05T10:00:00Z"),
+    startsAt: new Date("2025-08-05T10:00:00Z"),
   },
   {
     id: "b7d4e9c3-5678-4e9f-8c75-222222222222",
@@ -22,6 +23,7 @@ export const linesData: (typeof lines.$inferInsert)[] = [
     actualValue: "1",
     isHigher: true,
     createdAt: new Date("2025-08-05T10:00:00Z"),
+    startsAt: new Date("2025-08-05T10:00:00Z"),
   },
   {
     id: "c62f0b74-9abc-463d-81a3-333333333333",
@@ -32,6 +34,7 @@ export const linesData: (typeof lines.$inferInsert)[] = [
     actualValue: "261",
     isHigher: true,
     createdAt: new Date("2025-08-05T11:00:00Z"),
+    startsAt: new Date("2025-08-05T11:00:00Z"),
   },
   {
     id: "d94caf85-3456-4fef-90d1-444444444444",
@@ -42,6 +45,7 @@ export const linesData: (typeof lines.$inferInsert)[] = [
     actualValue: null,
     isHigher: null,
     createdAt: new Date("2025-08-05T11:00:00Z"),
+    startsAt: new Date("2025-08-05T11:00:00Z"),
   },
   {
     id: "e374c296-7890-4edb-91af-555555555555",
@@ -52,6 +56,7 @@ export const linesData: (typeof lines.$inferInsert)[] = [
     actualValue: null,
     isHigher: null,
     createdAt: new Date("2025-08-05T12:00:00Z"),
+    startsAt: new Date("2025-08-05T12:00:00Z"),
   },
 ];
 

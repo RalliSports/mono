@@ -15,6 +15,7 @@ export const lines = pgTable("lines", {
   actualValue: decimal("actual_value"),
   isHigher: boolean("is_higher"),
   createdAt: timestamp("created_at").defaultNow(),
+  startsAt: timestamp("starts_at"),
 });
 
 export const linesRelations = relations(lines, ({ one, many }) => ({
