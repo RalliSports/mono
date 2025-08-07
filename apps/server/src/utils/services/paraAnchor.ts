@@ -26,6 +26,7 @@ import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
 import { RalliBet } from '../idl/ralli_bet';
 import { BadRequestException } from '@nestjs/common';
+import { predictions } from '@repo/db';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 
@@ -333,7 +334,6 @@ export class ParaAnchor {
       await program.provider.connection.getTokenAccountBalance(userAta.address);
     const userTokenAmount = userBalance.value.uiAmount as number;
     const deposit = depositAmount * Math.pow(10, 6);
-    console.log(deposit, depositAmount, 'deposit');
 
     // Check if balance is sufficient
     if (deposit < userTokenAmount) {
@@ -400,15 +400,18 @@ export class ParaAnchor {
 
   async submitBetsInstruction(
     gameId: string,
-    user: PublicKey,
-    bets: BulkCreatePredictionsDto,
+    bets: { lineId: number; direction: PredictionDirection }[],
   ): Promise<string> {
     const program = await this.getProgram();
     const gamePDA = await this.getGamePDA(gameId, program.programId);
-    const betPDA = await this.getBetPDA(gamePDA, user, program.programId);
+    const betPDA = await this.getBetPDA(
+      gamePDA,
+      program.provider.wallet?.publicKey as PublicKey,
+      program.programId,
+    );
 
     const picks = await Promise.all(
-      bets.predictions.map(async (prediction) => {
+      bets.map(async (prediction) => {
         const linePDA = await this.getLinePDA(
           prediction.lineId,
           program.programId,
@@ -417,7 +420,7 @@ export class ParaAnchor {
         return {
           lineId: linePDA,
           direction:
-            prediction.predictedDirection === PredictionDirection.HIGHER
+            prediction.direction === PredictionDirection.HIGHER
               ? { over: {} }
               : { under: {} },
         };
@@ -428,7 +431,7 @@ export class ParaAnchor {
       const ix = await program.methods
         .submitBet(picks)
         .accountsStrict({
-          user,
+          user: program.provider.wallet?.publicKey as PublicKey,
           game: gamePDA,
           bet: betPDA,
           systemProgram: program.programId,
@@ -470,6 +473,7 @@ export class ParaAnchor {
 
       return txSig;
     } catch (error) {
+      console.log(error, "erro from submitBetsInstruction")
       return '';
     }
   }
@@ -629,9 +633,9 @@ export class ParaAnchor {
     return user1BetPDA;
   }
 
-  async getLinePDA(lineId: string, programId: PublicKey): Promise<PublicKey> {
+  async getLinePDA(lineId: number, programId: PublicKey): Promise<PublicKey> {
     const [line1PDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from('line'), Buffer.from(parseInt(lineId).toString())],
+      [Buffer.from('line'), new BN(lineId).toArrayLike(Buffer, 'le', 8)],
       programId,
     );
 
