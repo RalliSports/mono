@@ -69,7 +69,7 @@ export class LinesService {
         statCustomId,
         dto.predictedValue,
         athleteCustomId,
-        (Date.now() + 30000) / 1000,
+        adjustedTimestamp,
         new PublicKey(user.walletAddress),
       );
 
@@ -154,7 +154,6 @@ export class LinesService {
     if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
     const lineCreatedAt = line.createdAt;
     if (!lineCreatedAt) throw new BadRequestException('Line not created');
-    const lineTimestamp = new Date(lineCreatedAt).getTime();
 
     // Ensure createGameInstruction throws if it fails
     let txn: string;
