@@ -1,1 +1,0 @@
-ALTER TABLE "stats" ADD COLUMN "custom_id" integer NOT NULL;
