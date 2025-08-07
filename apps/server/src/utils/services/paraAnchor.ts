@@ -410,6 +410,8 @@ export class ParaAnchor {
       program.programId,
     );
 
+    const extraAccounts: any[] = [];
+
     const picks = await Promise.all(
       bets.map(async (prediction) => {
         const linePDA = await this.getLinePDA(
@@ -417,14 +419,21 @@ export class ParaAnchor {
           program.programId,
         );
 
+        extraAccounts.push({
+          pubkey: linePDA,
+          isWritable: true,
+          isSigner: false,
+        });
+
         return {
           lineId: linePDA,
           direction:
-            prediction.direction === PredictionDirection.HIGHER
+            prediction.direction === PredictionDirection.OVER
               ? { over: {} }
               : { under: {} },
         };
       }),
+    
     );
 
     try {
@@ -434,8 +443,9 @@ export class ParaAnchor {
           user: program.provider.wallet?.publicKey as PublicKey,
           game: gamePDA,
           bet: betPDA,
-          systemProgram: program.programId,
+          systemProgram: SystemProgram.programId,
         })
+        .remainingAccounts(extraAccounts)
         .instruction();
 
       // Get latest blockhash

@@ -28,6 +28,14 @@ export class AthletesService {
                 name: true,
               },
             },
+            matchup: {
+              columns: {
+                id: true,
+                gameDate: true,
+                homeTeam: true,
+                awayTeam: true,
+              },
+            },
           },
           where: (lines) => isNull(lines.actualValue),
           columns: {

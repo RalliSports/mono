@@ -1,5 +1,5 @@
 {
-  "id": "2b0ee666-b43b-423b-8c3f-f3f3f2ee17af",
+  "id": "c3dd0473-a810-4e3a-a752-ff27c30c05a6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -489,6 +489,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "participant_id": {
           "name": "participant_id",
           "type": "uuid",
@@ -530,6 +536,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "predictions_user_id_users_id_fk": {
+          "name": "predictions_user_id_users_id_fk",
+          "tableFrom": "predictions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "predictions_participant_id_participants_id_fk": {
           "name": "predictions_participant_id_participants_id_fk",
           "tableFrom": "predictions",
@@ -958,8 +977,8 @@
       "name": "predicted_direction",
       "schema": "public",
       "values": [
-        "higher",
-        "lower"
+        "over",
+        "under"
       ]
     },
     "public.role_type": {
