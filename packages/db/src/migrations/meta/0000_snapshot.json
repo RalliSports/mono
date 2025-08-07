@@ -1,5 +1,5 @@
 {
-  "id": "ce5063ef-3fea-4bfc-a43b-a0cc2300f3e9",
+  "id": "2b0ee666-b43b-423b-8c3f-f3f3f2ee17af",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -51,6 +51,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "custom_id": {
+          "name": "custom_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -62,7 +68,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "athletes_custom_id_unique": {
+          "name": "athletes_custom_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "custom_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -487,6 +501,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "game_id": {
+          "name": "game_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "predicted_direction": {
           "name": "predicted_direction",
           "type": "predicted_direction",
@@ -529,6 +549,19 @@
           "tableTo": "lines",
           "columnsFrom": [
             "line_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "predictions_game_id_games_id_fk": {
+          "name": "predictions_game_id_games_id_fk",
+          "tableFrom": "predictions",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game_id"
           ],
           "columnsTo": [
             "id"
@@ -618,7 +651,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "stats_custom_id_unique": {
+          "name": "stats_custom_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "custom_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -721,6 +762,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

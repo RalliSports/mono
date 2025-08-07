@@ -95,34 +95,34 @@ export class GamesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Predict games' })
-  @Post('/game/predict')
-  predictGame(@Body() body: BulkCreatePredictionsDto) {
-    return this.gamesService.predictGames(body);
+  @ApiOperation({ summary: 'Submit bets' })
+  @Post('/submit-bets')
+  predictGame(@Body() body: BulkCreatePredictionsDto,  @UserPayload() user: User) {
+    return this.gamesService.submitBets(user, body);
   }
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @Post('/game/join/:id')
-  @ApiOperation({ summary: 'Join a game' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiQuery({
-    name: 'gameCode',
-    required: false,
-    type: String,
-    description: 'Game code if required',
-  })
-  @ApiResponse({
-    status: 200,
-    type: GameResponseDto,
-  })
-  joinGame(
-    @Param('id') id: string,
-    @Query('gameCode') gameCode: string,
-    @UserPayload() user: User,
-  ) {
-    return this.gamesService.joinGame(user, id, gameCode);
-  }
+  // @ApiSecurity('x-para-session')
+  // @UseGuards(SessionAuthGuard)
+  // @Post('/game/join/:id')
+  // @ApiOperation({ summary: 'Join a game' })
+  // @ApiParam({ name: 'id', type: String })
+  // @ApiQuery({
+  //   name: 'gameCode',
+  //   required: false,
+  //   type: String,
+  //   description: 'Game code if required',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   type: GameResponseDto,
+  // })
+  // joinGame(
+  //   @Param('id') id: string,
+  //   @Query('gameCode') gameCode: string,
+  //   @UserPayload() user: User,
+  // ) {
+  //   return this.gamesService.joinGame(user, id, gameCode);
+  // }
 
   @ApiOperation({ summary: 'Get a game using its unique code' })
   @ApiResponse({

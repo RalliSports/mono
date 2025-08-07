@@ -1,6 +1,6 @@
 {
-  "id": "8b5eaf8a-42c0-4147-9104-44f7af9ca8b9",
-  "prevId": "2a25aca5-b373-423e-9573-13550b3ae5b7",
+  "id": "0c072fb0-c60d-487d-aef7-f22434b59637",
+  "prevId": "a878aca8-6728-47ae-acea-f8096563e98f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -51,6 +51,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "custom_id": {
+          "name": "custom_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -62,7 +68,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "athletes_custom_id_unique": {
+          "name": "athletes_custom_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "custom_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -475,6 +489,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "participant_id": {
           "name": "participant_id",
           "type": "uuid",
@@ -483,6 +503,12 @@
         },
         "line_id": {
           "name": "line_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_id": {
+          "name": "game_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -510,6 +536,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "predictions_user_id_users_id_fk": {
+          "name": "predictions_user_id_users_id_fk",
+          "tableFrom": "predictions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "predictions_participant_id_participants_id_fk": {
           "name": "predictions_participant_id_participants_id_fk",
           "tableFrom": "predictions",
@@ -529,6 +568,19 @@
           "tableTo": "lines",
           "columnsFrom": [
             "line_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "predictions_game_id_games_id_fk": {
+          "name": "predictions_game_id_games_id_fk",
+          "tableFrom": "predictions",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game_id"
           ],
           "columnsTo": [
             "id"
@@ -729,6 +781,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
