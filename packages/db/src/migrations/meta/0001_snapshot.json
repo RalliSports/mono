@@ -1,6 +1,6 @@
 {
-  "id": "870ed631-d823-455c-9ae3-1d5e9e5462ae",
-  "prevId": "12f14374-ea9e-4d69-a1ce-2d8afee6e2a1",
+  "id": "a878aca8-6728-47ae-acea-f8096563e98f",
+  "prevId": "2b0ee666-b43b-423b-8c3f-f3f3f2ee17af",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -489,14 +489,20 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "participant_id": {
-          "name": "participant_id",
+        "user_id": {
+          "name": "user_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "line_id": {
           "name": "line_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_id": {
+          "name": "game_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -524,12 +530,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "predictions_participant_id_participants_id_fk": {
-          "name": "predictions_participant_id_participants_id_fk",
+        "predictions_user_id_users_id_fk": {
+          "name": "predictions_user_id_users_id_fk",
           "tableFrom": "predictions",
-          "tableTo": "participants",
+          "tableTo": "users",
           "columnsFrom": [
-            "participant_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -543,6 +549,19 @@
           "tableTo": "lines",
           "columnsFrom": [
             "line_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "predictions_game_id_games_id_fk": {
+          "name": "predictions_game_id_games_id_fk",
+          "tableFrom": "predictions",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game_id"
           ],
           "columnsTo": [
             "id"

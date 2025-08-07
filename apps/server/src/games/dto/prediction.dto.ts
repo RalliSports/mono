@@ -1,12 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsEnum, IsUUID, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsEnum, IsOptional, IsUUID, ValidateNested } from 'class-validator';
 import { PredictionDirection } from '../enum/game';
 
 export class CreatePredictionDto {
-  @ApiProperty()
-  @IsUUID()
-  participantId: string;
 
   @ApiProperty()
   @IsUUID()
@@ -23,4 +20,12 @@ export class BulkCreatePredictionsDto {
   @Type(() => CreatePredictionDto)
   @ArrayMinSize(1)
   predictions: CreatePredictionDto[];
+
+  @ApiProperty()
+  @IsUUID()
+  gameId: string;
+
+  // @ApiProperty()
+  // @IsOptional()
+  // gameCode: string;
 }

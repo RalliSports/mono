@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { game_access, games, participants, predictions } from '@repo/db';
+import { game_access, games, lines, participants, predictions } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
 import { and, count, eq } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
@@ -17,8 +17,7 @@ import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreatePredictionsDto } from './dto/prediction.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
-import { GameStatus } from './enum/game';
-
+import { GameStatus, PredictionDirection } from './enum/game';
 
 @Injectable()
 export class GamesService {
@@ -91,7 +90,11 @@ export class GamesService {
 
   async findAll() {
     return this.db.query.games.findMany({
-      with: { gameMode: true, creator: true, participants: {with: {user: true}} },
+      with: {
+        gameMode: true,
+        creator: true,
+        participants: { with: { user: true } },
+      },
     });
   }
 
@@ -110,7 +113,7 @@ export class GamesService {
       where: eq(games.id, id),
       with: {
         gameMode: true,
-        participants: true,
+        participants: { with: { user: true, predictions: true } },
         creator: true,
       },
     });
@@ -120,23 +123,23 @@ export class GamesService {
     return game;
   }
 
-  async joinGame(user: User, gameId: string, gameCode?: string) {
+  async submitBets(user: User, dto: BulkCreatePredictionsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
-        where: eq(games.id, gameId),
+        where: eq(games.id, dto.gameId),
       });
 
       if (!game) throw new NotFoundException('Game not found');
 
-      await this.validateGameAccess({
-        game,
-        userId: user.id,
-        providedCode: gameCode,
-      });
+      // await this.validateGameAccess({
+      //   game,
+      //   userId: user.id,
+      //   providedCode: dto.gameCode,
+      // });
 
       const existing = await tx.query.participants.findFirst({
         where: and(
-          eq(participants.gameId, gameId),
+          eq(participants.gameId, dto.gameId),
           eq(participants.userId, user.id),
         ),
       });
@@ -148,7 +151,7 @@ export class GamesService {
       const [{ count: currentCount }] = await tx
         .select({ count: count() })
         .from(participants)
-        .where(eq(participants.gameId, gameId));
+        .where(eq(participants.gameId, dto.gameId));
 
       if (currentCount >= (game.maxParticipants as number)) {
         throw new BadRequestException('Game is already full');
@@ -169,30 +172,58 @@ export class GamesService {
         );
       }
 
-      await tx.insert(participants).values({
-        gameId,
+      const [insertedParticipant] = await tx
+        .insert(participants)
+        .values({
+          gameId: dto.gameId,
+          userId: user.id,
+          txnId: joinTxSig,
+        })
+        .returning();
+
+      const values = dto.predictions.map((p) => ({
+        participantId: insertedParticipant.id,
         userId: user.id,
-        txnId: joinTxSig,
+        lineId: p.lineId,
+        predictedDirection: p.predictedDirection,
+        gameId: dto.gameId,
+      }));
+
+      const predictionRes = await tx
+        .insert(predictions)
+        .values(values)
+        .returning();
+
+      const picks = predictionRes.flatMap(async (res) => {
+        const line = await tx.query.lines.findFirst({
+          where: eq(lines.id, res.lineId ?? ''),
+        });
+
+        return {
+          lineId: new Date(line?.createdAt ?? '').getTime(),
+          direction: res.predictedDirection as PredictionDirection,
+        };
       });
+
+      const submitTxnSig = await this.anchor.submitBetsInstruction(
+        dto.gameId,
+        await Promise.all(picks),
+      );
+
+      if (!submitTxnSig) {
+        throw new BadRequestException(
+          'Failed to execute submit bets instruction on-chain',
+        );
+      }
 
       // Transaction will auto-commit if no error is thrown
       return {
         success: true,
         message: 'Joined game successfully',
-        txSig: joinTxSig,
+        joinTxSig,
+        submitTxnSig,
       };
     });
-  }
-
-  async predictGames(dto: BulkCreatePredictionsDto) {
-    const values = dto.predictions.map((p) => ({
-      participantId: p.participantId,
-      lineId: p.lineId,
-      predictedDirection: p.predictedDirection,
-    }));
-
-    await this.db.insert(predictions).values(values);
-    return { message: `${values.length} predictions added.` };
   }
 
   async findByGameCode(code: string) {
