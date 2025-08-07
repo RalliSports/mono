@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --no-frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm build", "cd packages/db && pnpm db:migrate"]
+
+[start]
+cmd = "cd apps/server && pnpm start:prod"

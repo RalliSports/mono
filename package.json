@@ -10,11 +10,11 @@
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:seed": "turbo run db:seed",
-    "fetch:athletes": "turbo run fetch:athletes"
+    "fetch:athletes": "turbo run fetch:athletes",
+    "postinstall": "cd packages/db && pnpm db:migrate"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
-    "supabase": "^2.33.9",
     "turbo": "^2.5.4",
     "typescript": "5.8.2"
   },
