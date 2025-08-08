@@ -5,9 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { game_access, games, lines, participants, predictions } from '@repo/db';
+import { game_access, games, lines, participants, predictions, users } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, inArray, sql } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -94,6 +94,16 @@ export class GamesService {
         gameMode: true,
         creator: true,
         participants: { with: { user: true } },
+      },
+    });
+  }
+  async findAllOpen() {
+    return this.db.query.games.findMany({
+      where: eq(games.status, GameStatus.WAITING),
+      with: {
+        gameMode: true,
+        participants: { with: { user: true } },
+        creator: true,
       },
     });
   }
@@ -262,6 +272,134 @@ export class GamesService {
     if (!updated) throw new NotFoundException('Game not found');
     return updated;
   }
+
+  async resolveGame(id: string) {
+    console.log('resolveGame', id);
+    return await this.db.transaction(async (tx) => {
+      const game = await tx.query.games.findFirst({
+        where: eq(games.id, id),
+        with: {
+          gameMode: true,
+          participants: { 
+            with: { 
+              user: true, 
+              predictions: {
+                with: {
+                  line: true
+                }
+              } 
+            } 
+          },
+          creator: true,
+        },
+      });
+
+      if (!game) throw new NotFoundException('Game not found');
+
+      // Update all predictions for this game in one batch
+      const predictionUpdates: Array<{ id: string; isCorrect: boolean }> = [];
+      
+      // Now calculate winners with updated data
+      let winners: string[] = [];
+      let betsToWin = 0;
+      const allLinesIds = new Set<number>();
+      for (const participant of game.participants) {
+        let correctPredictions = 0;
+
+        for (const prediction of participant.predictions) {
+          const line = prediction.line;
+          allLinesIds.add((line?.createdAt!).getTime());
+
+          if (!line || line.actualValue === null || line.predictedValue === null) {
+            throw new BadRequestException(`Line not found or not resolved for prediction ${prediction.id}`);
+          }
+
+          // Determine if prediction is correct based on direction and actual vs predicted
+          const isCorrect = this.determinePredictionCorrectness(
+            prediction.predictedDirection || 'over',
+            Number(line.actualValue),
+            Number(line.predictedValue)
+          );
+
+          predictionUpdates.push({
+            id: prediction.id || '',
+            isCorrect
+          });
+
+          if (isCorrect) {
+            correctPredictions++;
+          }
+        }
+
+
+        console.log('correctPredictions', correctPredictions);
+        console.log('betsToWin', betsToWin);
+        console.log('participant.user?.walletAddress!', participant.user?.walletAddress!);
+        if (correctPredictions === betsToWin) {
+          winners.push(participant.user?.walletAddress!);
+        } else if (correctPredictions > betsToWin) {
+          betsToWin = correctPredictions;
+          winners = [participant.user?.walletAddress!];
+        }
+      }
+
+      const allWallets = game.participants.map(p => p.user?.walletAddress!);
+      
+
+
+
+
+      // Update all predictions in batches
+      if (predictionUpdates.length > 0) {
+        // Use Promise.all to update all predictions concurrently
+        await Promise.all(
+          predictionUpdates.map(update =>
+            tx
+              .update(predictions)
+              .set({ isCorrect: update.isCorrect })
+              .where(eq(predictions.id, update.id))
+          )
+        );
+      }
+
+      tx.update(games).set({ status: GameStatus.COMPLETED }).where(eq(games.id, id));
+
+      const resolveTxnSig = await this.anchor.resolveGameInstruction(id, winners, allWallets, Array.from(allLinesIds));
+
+      // if (!resolveTxnSig) {
+      //   tx.rollback();
+      //   throw new BadRequestException('Failed to execute resolve game instruction on-chain');
+      // }
+
+      
+
+      return {
+        game,
+        winners,
+        betsToWin,
+        updatedPredictions: predictionUpdates.length
+      };
+    });
+  }
+
+  private determinePredictionCorrectness(
+    predictedDirection: string,
+    actualValue: number,
+    predictedValue: number
+  ): boolean {
+    if (predictedDirection === 'over') {
+      return actualValue > predictedValue;
+    } else if (predictedDirection === 'under') {
+      return actualValue < predictedValue;
+    }
+    return false;
+  }
+  
+    
+
+
+
+  
 
   async remove(id: string, user: User) {
     await this.ensureUserOwnsGame(id, user.id);

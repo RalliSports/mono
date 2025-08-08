@@ -15,6 +15,24 @@ export class GameMode {
   createdAt: string;
 }
 
+export class Participant {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  user: User;
+
+  @ApiProperty()
+  isWinner: boolean;
+
+  @ApiProperty()
+  txnId: string;
+
+  @ApiProperty()
+  joinedAt: Date;
+
+}
+
 export class GameResponseDto {
   @ApiProperty()
   id: string;
@@ -69,4 +87,7 @@ export class GameResponseDto {
 
   @ApiProperty()
   creator: User;
+
+  @ApiProperty()
+  participants: Participant[];
 }

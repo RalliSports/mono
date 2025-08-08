@@ -33,17 +33,18 @@ const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 export class ParaAnchor {
   private solanaConnection: Connection;
   private paraServer: ParaServer;
-  private admin: Keypair;
-  private treasury: Keypair;
+  private admin: PublicKey;
+  private treasury: PublicKey;
   private treasuryTokenAccount: PublicKey;
   private mint: PublicKey;
 
   constructor(paraServer: ParaServer) {
     this.paraServer = paraServer;
 
-    this.admin = new Keypair();
+    this.admin = new PublicKey('2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk');
     this.mint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
-    this.treasury = new Keypair();
+    this.treasury = new PublicKey('BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs');
+    this.treasuryTokenAccount = getAssociatedTokenAddressSync(this.mint, this.treasury);
 
     this.solanaConnection = new Connection(clusterApiUrl(CLUSTER), 'confirmed');
   }
@@ -488,19 +489,60 @@ export class ParaAnchor {
     }
   }
 
-  async resolveGameInstruction(gameId: string, mint: PublicKey) {
+  async resolveGameInstruction(gameId: string, winners: string[], userWallets: string[], winningLines: number[]) {
     const program = await this.getProgram();
     const percentage = 100;
 
     const gamePDA = await this.getGamePDA(gameId, program.programId);
+
+    const gameAccount = await program.account.game.fetch(gamePDA);
+    console.log('gameAccount', gameAccount);
     const gameEscrow = await this.getGameEscrowPDA(gamePDA, program.programId);
-    const gameVault = await this.getGameVault(mint, gamePDA);
+    const gameVault = await this.getGameVault(this.mint, gamePDA);
+
+    const betAccounts = await Promise.all(
+      userWallets.map(async (winner) => {
+        const betPDA = await this.getBetPDA(gamePDA, new PublicKey(winner), program.programId);
+        return {
+          pubkey: betPDA,
+          isWritable: true,
+          isSigner: false,
+        };
+      }),
+    );
+
+    const tokenAccounts = await Promise.all(
+      winners.map(async (winner) => {
+        const tokenAccount = await getAssociatedTokenAddressSync(this.mint, new PublicKey(winner), true);
+        return {
+          pubkey: tokenAccount,
+          isWritable: true,
+          isSigner: false,
+        };
+      }),
+    );
+
+    const lineAccounts = await Promise.all(
+      winningLines.map(async (line) => {
+        const linePDA = await this.getLinePDA(line, program.programId);
+        return {
+          pubkey: linePDA,
+          isWritable: true,
+          isSigner: false,
+        };
+      }),
+    );
+
+
+
+    const remainingAccounts = [...betAccounts,  ...tokenAccounts, ...lineAccounts];
+
 
     try {
       const ix = await program.methods
-        .resolveGame(percentage, 1)
+        .resolveGame(percentage, winners.length)
         .accountsStrict({
-          admin: this.admin.publicKey,
+          admin: this.admin,
           game: gamePDA,
           gameEscrow: gameEscrow,
           mint: this.mint,
@@ -508,9 +550,10 @@ export class ParaAnchor {
           systemProgram: SystemProgram.programId,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           tokenProgram: TOKEN_PROGRAM_ID,
-          treasury: this.treasury.publicKey,
+          treasury: this.treasury,
           treasuryVault: this.treasuryTokenAccount,
         })
+        .remainingAccounts(remainingAccounts)
         .instruction();
 
       // Get latest blockhash
@@ -547,7 +590,10 @@ export class ParaAnchor {
       console.log(txSig, 'transaction signature');
 
       return txSig;
-    } catch (error) {}
+    } catch (error) {
+      console.error('Transaction Error:', error);
+      throw error;
+    }
   }
 
   async cancelGameInstruction(
@@ -635,21 +681,21 @@ export class ParaAnchor {
     user: PublicKey,
     programId: PublicKey,
   ): Promise<PublicKey> {
-    const [user1BetPDA] = PublicKey.findProgramAddressSync(
+    const [betPDA] = PublicKey.findProgramAddressSync(
       [Buffer.from('bet'), gamePDA.toBuffer(), user.toBuffer()],
       programId,
     );
 
-    return user1BetPDA;
+    return betPDA;
   }
 
   async getLinePDA(lineId: number, programId: PublicKey): Promise<PublicKey> {
-    const [line1PDA] = PublicKey.findProgramAddressSync(
+    const [linePDA] = PublicKey.findProgramAddressSync(
       [Buffer.from('line'), new BN(lineId).toArrayLike(Buffer, 'le', 8)],
       programId,
     );
 
-    return line1PDA;
+    return linePDA;
   }
 
   async getGameEscrowPDA(

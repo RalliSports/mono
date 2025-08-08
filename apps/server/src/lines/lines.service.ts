@@ -154,13 +154,14 @@ export class LinesService {
     if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
     const lineCreatedAt = line.createdAt;
     if (!lineCreatedAt) throw new BadRequestException('Line not created');
+    const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
 
     // Ensure createGameInstruction throws if it fails
     let txn: string;
 
     try {
       txn = await this.anchor.resolveLineInstruction(
-        3,
+        lineCreatedAtTimestamp,
         predictedValue,
         dto.actualValue!,
         false,

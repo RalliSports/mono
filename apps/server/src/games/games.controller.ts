@@ -55,6 +55,17 @@ export class GamesController {
     return this.gamesService.findAll();
   }
 
+  @ApiOperation({ summary: 'Get all games' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all games',
+    type: [GameResponseDto],
+  })
+  @Get('/games/open')
+  findAllOpen() {
+    return this.gamesService.findAllOpen();
+  }
+
   @ApiResponse({
     status: 200,
     description: 'Game fetch successfully',
@@ -151,6 +162,22 @@ export class GamesController {
     @UserPayload() user: User,
   ) {
     return this.gamesService.update(id, updateGameDto, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Update a game' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Game updated successfully',
+    type: GameResponseDto,
+  })
+  @Patch('/game/resolve/:id')
+  resolve(
+    @Param('id') id: string,
+  ) {
+    return this.gamesService.resolveGame(id);
   }
 
   @ApiSecurity('x-para-session')
