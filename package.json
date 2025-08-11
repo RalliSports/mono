@@ -10,8 +10,7 @@
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:seed": "turbo run db:seed",
-    "fetch:athletes": "turbo run fetch:athletes",
-    "postinstall": "cd packages/db && pnpm db:migrate"
+    "fetch:athletes": "turbo run fetch:athletes"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
