@@ -1,8 +1,0 @@
-{
-    "projects": [
-      {
-        "source": "apps/web",
-        "framework": "nextjs"
-      }
-    ]
-  }
