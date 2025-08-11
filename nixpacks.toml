@@ -2,10 +2,17 @@
 nixPkgs = ["nodejs", "pnpm"]
 
 [phases.install]
-cmds = ["pnpm install --no-frozen-lockfile --ignore-workspace"]
+cmds = [
+    "cd apps/server && pnpm install --no-frozen-lockfile --ignore-workspace",
+    "cd packages/db && pnpm install --no-frozen-lockfile --ignore-workspace",
+]
 
 [phases.build]
-cmds = ["pnpm build", "cd packages/db && pnpm db:migrate"]
+cmds = [
+    "pnpm build",
+    "cd packages/db && pnpm db:migrate",
+    "cd apps/server && pnpm build",
+]
 
 [start]
 cmd = "cd apps/server && pnpm start:prod"
