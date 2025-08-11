@@ -2,7 +2,7 @@
 nixPkgs = ["nodejs", "pnpm"]
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile --filter=server --filter=db"]
+cmds = ["pnpm install --no-frozen-lockfile --filter=server --filter=db"]
 
 [phases.build]
 cmds = [
