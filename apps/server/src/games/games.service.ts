@@ -119,7 +119,6 @@ export class GamesService {
   }
 
   async findOne(id: string) {
-    console.log('findOne', id);
     const game = await this.db.query.games.findFirst({
       where: eq(games.id, id),
       with: {
@@ -274,7 +273,6 @@ export class GamesService {
   }
 
   async resolveGame(id: string) {
-    console.log('resolveGame', id);
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, id),
@@ -332,9 +330,6 @@ export class GamesService {
         }
 
 
-        console.log('correctPredictions', correctPredictions);
-        console.log('betsToWin', betsToWin);
-        console.log('participant.user?.walletAddress!', participant.user?.walletAddress!);
         if (correctPredictions === betsToWin) {
           winners.push(participant.user?.walletAddress!);
         } else if (correctPredictions > betsToWin) {
