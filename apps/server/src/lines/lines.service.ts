@@ -58,10 +58,8 @@ export class LinesService {
     if (!statCustomId) throw new BadRequestException('Stat not found');
     if (!athleteCustomId) throw new BadRequestException('Athlete not found');
 
-    console.log('timestamp', timestamp);
-    console.log('startsAt', dto.startsAtTimestamp);
 
-    const adjustedTimestamp = dto.startsAtTimestamp /1000;
+    const adjustedTimestamp = dto.startsAtTimestamp / 1000;
 
     try {
       txn = await this.anchor.createLineInstruction(
