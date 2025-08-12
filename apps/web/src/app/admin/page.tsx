@@ -424,7 +424,7 @@ function AdminPageContent() {
   }
 
   const handleCreateLine = async () => {
-    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.gameId || !newLine.gameDate) {
+    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.gameId) {
       addToast('Please fill in all fields', 'error')
       return
     }
@@ -509,7 +509,7 @@ function AdminPageContent() {
     const apiData = {
       homeTeamId: newMatchUp.homeTeam,
       awayTeamId: newMatchUp.awayTeam,
-      gameDate: matchDate.toISOString(), // Convert to ISO string for API
+      startsAtTimestamp: matchDate.getTime(),
     }
 
     await fetch('/api/create-matchup', {
@@ -918,6 +918,8 @@ function AdminPageContent() {
                               <Image
                                 src={player.picture}
                                 alt={player.name}
+                                width={48}
+                                height={48}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   // Fallback to initials if image fails to load
@@ -1010,7 +1012,9 @@ function AdminPageContent() {
                       searchable={true}
                     />
                   </div>
+                </div>
 
+                <div className="space-y-4">
                   <div>
                     <label className="block text-white font-semibold mb-2">Line Value</label>
                     <input
@@ -1022,19 +1026,6 @@ function AdminPageContent() {
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-70  0/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-white font-semibold mb-2">Game Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      value={newLine.gameDate}
-                      onChange={(e) => setNewLine({ ...newLine, gameDate: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                    />
-                  </div>
-
                   <div>
                     <label className="block text-white font-semibold mb-2">Select Game</label>
                     <select
@@ -1449,7 +1440,7 @@ function AdminPageContent() {
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Date</label>
                       <input
-                        type="date"
+                        type="datetime-local"
                         value={newMatchUp.date}
                         onChange={(e) => setNewMatchUp({ ...newMatchUp, date: e.target.value })}
                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"

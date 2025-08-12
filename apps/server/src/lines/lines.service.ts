@@ -29,6 +29,11 @@ export class LinesService {
   }
 
   async createLine(dto: CreateLineDto, user: User) {
+    const matchup = await this.db.query.matchups.findFirst({
+      where: eq(matchups.id, dto.matchupId),
+    });
+    if (!matchup) throw new BadRequestException('Matchup not found');
+
     const [inserted] = await this.db
       .insert(lines)
       .values({
@@ -38,7 +43,7 @@ export class LinesService {
         predictedValue: dto.predictedValue.toString(),
         actualValue: null,
         isHigher: null,
-        startsAt: new Date(dto.startsAtTimestamp),
+        startsAt: matchup.startsAt,
       })
       .returning();
 
@@ -47,19 +52,22 @@ export class LinesService {
     const createdAt = inserted.createdAt;
     if (!createdAt) throw new BadRequestException('Line not created');
     const timestamp = new Date(createdAt).getTime();
-    const statCustomId = await this.db.query.stats.findFirst({
-      where: eq(stats.id, dto.statId),
-    }).then((stat) => stat?.customId);
+    const statCustomId = await this.db.query.stats
+      .findFirst({
+        where: eq(stats.id, dto.statId),
+      })
+      .then((stat) => stat?.customId);
 
-    const athleteCustomId = await this.db.query.athletes.findFirst({
-      where: eq(athletes.id, dto.athleteId),
-    }).then((athlete) => athlete?.customId);
+    const athleteCustomId = await this.db.query.athletes
+      .findFirst({
+        where: eq(athletes.id, dto.athleteId),
+      })
+      .then((athlete) => athlete?.customId);
 
     if (!statCustomId) throw new BadRequestException('Stat not found');
     if (!athleteCustomId) throw new BadRequestException('Athlete not found');
 
-
-    const adjustedTimestamp = dto.startsAtTimestamp / 1000;
+    const adjustedTimestamp = matchup.startsAt!.getTime() / 1000;
 
     try {
       txn = await this.anchor.createLineInstruction(

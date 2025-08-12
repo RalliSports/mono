@@ -31,7 +31,8 @@ export class MatchupsService {
       .values({
         homeTeam: dto.homeTeamId,
         awayTeam: dto.awayTeamId,
-        gameDate: dto.gameDate,
+        startsAt: new Date(dto.startsAtTimestamp),
+        gameDate: new Date(dto.startsAtTimestamp).toISOString(),
         status: 'pending',
         scoreHome: 0,
         scoreAway: 0,

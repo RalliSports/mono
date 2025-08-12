@@ -1,0 +1,1 @@
+ALTER TABLE "matchups" ADD COLUMN "starts_at" timestamp;

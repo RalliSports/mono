@@ -19,9 +19,4 @@ export class CreateLineDto {
   @IsNumber()
   @Min(0)
   predictedValue: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Min(0)
-  startsAtTimestamp: number;
 }

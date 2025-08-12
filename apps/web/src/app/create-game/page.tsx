@@ -4,24 +4,40 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSessionToken } from '@/hooks/use-session'
 import { toast, ToastContainer } from 'react-toastify'
-import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
-import { useRouter } from 'next/navigation';
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { useRouter } from 'next/navigation'
 
 //check if para is connected else kick back to /signin
 
 export default function CreateGame() {
-  const router = useRouter();
+  const router = useRouter()
 
   // Para wallet balance hook
-  const { isConnected } = useParaWalletBalance();
-  const { session } = useSessionToken();
+  const { isConnected } = useParaWalletBalance()
+  const { session } = useSessionToken()
+  const [mounted, setMounted] = useState(false)
 
+  // Fix hydration issues
   useEffect(() => {
-    if (!isConnected) {
-      // Redirect to sign-in page with a callback to return to /create-game
-      router.push(`/signin?callbackUrl=/create-game`);
+    setMounted(true)
+  }, [])
+
+  // Handle wallet connection redirect with better logic for Para integration
+  useEffect(() => {
+    if (!mounted) return
+
+    // Wait for Para connection to establish - sometimes it takes a moment after signin
+    const timeoutId = setTimeout(() => {
+      // Only redirect if definitely not connected and not loading
+      if (!isConnected) {
+        router.push('/signin')
+      }
+    }, 1000) // Wait 5 seconds to give Para plenty of time to connect
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [isConnected, router]);
+  }, [mounted, isConnected, router])
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   const [gameSettings, setGameSettings] = useState({
@@ -65,82 +81,82 @@ export default function CreateGame() {
   }
 
   const handleCreateContest = async () => {
-  const errors = validateForm()
-  setFormErrors(errors)
+    const errors = validateForm()
+    setFormErrors(errors)
 
-  if (Object.keys(errors).length > 0) {
-    Object.entries(errors).forEach(([field, message]) => {
-      toast.error(message)
-    })
-    return
-  }
-
-  const apiData = {
-    title: gameSettings.title,
-    depositAmount: gameSettings.depositAmount,
-    currency: 'USD',
-    maxParticipants: gameSettings.maxParticipants,
-    maxBets: gameSettings.maxBets,
-    matchupGroup: gameSettings.matchupGroup,
-    //TODO: Update depositToken when live
-    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-    isPrivate: gameSettings.isPrivate,
-    type: gameSettings.type,
-    userControlType: gameSettings.userControlType,
-    gameModeId: gameSettings.gameMode,
-  }
-
-  try {
-    const response = await fetch('/api/create-game', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-para-session': session || '',
-      },
-      body: JSON.stringify(apiData),
-    })
-
-    const result = await response.json()
-
-    if (response.ok) {
-      toast.success(
-        <div>
-          Contest created successfully! Transaction ID: 
-          <a 
-            href={`https://explorer.solana.com/tx/${result.txnId}?cluster=devnet`} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            style={{ color: '#00CED1', textDecoration: 'underline', marginLeft: '5px' }}
-          >
-            View Transaction
-          </a>
-        </div>
-      );
-      setGameSettings({
-        title: '',
-        depositAmount: 25,
-        maxParticipants: 8,
-        matchupGroup: '',
-        isPrivate: false,
-        //TODO: Update depositToken when live
-        depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-        type: 'limited',
-        userControlType: 'none',
-        gameMode: '550e8400-e29b-41d4-a716-446655440020',
-        maxBets: 10,
+    if (Object.keys(errors).length > 0) {
+      Object.entries(errors).forEach(([field, message]) => {
+        toast.error(message)
       })
-    } else {
-      if (Array.isArray(result.message)) {
-        result.message.forEach((msg: string) => toast.error(msg))
-      } else {
-        toast.error(result.message || 'Failed to create contest.')
-      }
+      return
     }
-  } catch (err) {
-    console.error('Unexpected error:', err)
-    toast.error('Unexpected error. Please try again.')
+
+    const apiData = {
+      title: gameSettings.title,
+      depositAmount: gameSettings.depositAmount,
+      currency: 'USD',
+      maxParticipants: gameSettings.maxParticipants,
+      maxBets: gameSettings.maxBets,
+      matchupGroup: gameSettings.matchupGroup,
+      //TODO: Update depositToken when live
+      depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+      isPrivate: gameSettings.isPrivate,
+      type: gameSettings.type,
+      userControlType: gameSettings.userControlType,
+      gameModeId: gameSettings.gameMode,
+    }
+
+    try {
+      const response = await fetch('/api/create-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-para-session': session || '',
+        },
+        body: JSON.stringify(apiData),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        toast.success(
+          <div>
+            Contest created successfully! Transaction ID:
+            <a
+              href={`https://explorer.solana.com/tx/${result.txnId}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#00CED1', textDecoration: 'underline', marginLeft: '5px' }}
+            >
+              View Transaction
+            </a>
+          </div>,
+        )
+        setGameSettings({
+          title: '',
+          depositAmount: 25,
+          maxParticipants: 8,
+          matchupGroup: '',
+          isPrivate: false,
+          //TODO: Update depositToken when live
+          depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+          type: 'limited',
+          userControlType: 'none',
+          gameMode: '550e8400-e29b-41d4-a716-446655440020',
+          maxBets: 10,
+        })
+      } else {
+        if (Array.isArray(result.message)) {
+          result.message.forEach((msg: string) => toast.error(msg))
+        } else {
+          toast.error(result.message || 'Failed to create contest.')
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      toast.error('Unexpected error. Please try again.')
+    }
   }
-}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 p-4">
