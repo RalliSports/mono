@@ -1,5 +1,5 @@
 {
-  "name": "legacy-next-tailwind",
+  "name": "web",
   "description": "Next.js, Tailwind, @solana/web3.js, Wallet Adapter",
   "keywords": [
     "legacy",
@@ -31,6 +31,7 @@
     "@getpara/solana-wallet-connectors": "alpha",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.39",
     "@headlessui/react": "^2.2.0",
+    "@repo/db": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-label": "^2.1.7",
