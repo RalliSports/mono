@@ -57,6 +57,13 @@
       "when": 1755024810502,
       "tag": "0007_wise_vargas",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1755026390161,
+      "tag": "0008_legal_alex_power",
+      "breakpoints": true
     }
   ]
 }

@@ -28,6 +28,7 @@ export class Participant {
 
   @ApiProperty()
   joinedAt: Date;
+  
   @ApiProperty()
   predictions: PredictionResponseDto[];
 }

@@ -12,6 +12,7 @@ import { ReferralModule } from './referral/referral.module';
 import { UserModule } from './user/user.module';
 import { AthletesModule } from './athletes/athletes.module';
 import { StatsModule } from './stats/stats.module';
+import { TeamModule } from './team/team.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { StatsModule } from './stats/stats.module';
     UserModule,
     AthletesModule,
     StatsModule,
+    TeamModule,
   ],
   controllers: [AppController],
   providers: [AppService],

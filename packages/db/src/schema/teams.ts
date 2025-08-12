@@ -7,6 +7,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { athletes } from "./athletes";
 import { relations } from "drizzle-orm";
+import { matchups } from "./matchups";
 
 // Teams Table
 export const teams = pgTable("teams", {
@@ -23,4 +24,6 @@ export const teams = pgTable("teams", {
 // Relations
 export const teamsRelations = relations(teams, ({ many }) => ({
   athletes: many(athletes),
+  homeMatchups: many(matchups),
+  awayMatchups: many(matchups),
 }));
