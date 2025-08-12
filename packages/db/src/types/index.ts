@@ -13,6 +13,7 @@ import {
   roles,
   stats,
   users,
+  teams,
 } from "../schema";
 
 export type User = InferSelectModel<typeof users>;
@@ -28,3 +29,4 @@ export type Bet = InferSelectModel<typeof bets>;
 export type Referral = InferSelectModel<typeof referrals>;
 export type Role = InferSelectModel<typeof roles>;
 export type Stat = InferSelectModel<typeof stats>;
+export type Team = InferSelectModel<typeof teams>;
