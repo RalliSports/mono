@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { AnchorProvider, BN, Idl, Program } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import ParaServer from '@getpara/server-sdk';
@@ -5,14 +6,18 @@ import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
+  createMint,
   getAssociatedTokenAddressSync,
   getOrCreateAssociatedTokenAccount,
+  mintTo,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
   Cluster,
   clusterApiUrl,
   Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   Signer,
   SystemProgram,
@@ -26,6 +31,9 @@ import { RalliBet } from '../idl/ralli_bet';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 
+const secretKey = Uint8Array.from(JSON.parse(process.env.ADMIN_KEYPAIR_JSON!));
+const adminKeypair = Keypair.fromSecretKey(secretKey);
+
 export class ParaAnchor {
   private solanaConnection: Connection;
   private paraServer: ParaServer;
@@ -33,12 +41,14 @@ export class ParaAnchor {
   private treasury: PublicKey;
   private treasuryTokenAccount: PublicKey;
   private mint: PublicKey;
+  private paraProvider: AnchorProvider;
+  private adminProvider: AnchorProvider;
 
   constructor(paraServer: ParaServer) {
     this.paraServer = paraServer;
 
-    this.admin = new PublicKey('2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk');
-    this.mint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
+    this.admin = adminKeypair.publicKey;
+    this.mint = new PublicKey('HGRipUjDcXvQ1w1NfQ2DJ33A6V8Vz5T2jU1RaTvzfqFA');
     this.treasury = new PublicKey(
       'BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs',
     );
@@ -51,7 +61,8 @@ export class ParaAnchor {
   }
 
   // Get provider
-  getProvider(): AnchorProvider {
+  getProvider(useAdminSigner = false): AnchorProvider {
+    // Initialize Para signer
     const solanaSigner = new ParaSolanaWeb3Signer(
       this.paraServer as any,
       this.solanaConnection,
@@ -73,25 +84,92 @@ export class ParaAnchor {
       },
     } as NodeWallet;
 
-    return new AnchorProvider(this.solanaConnection, anchorWallet, {
-      commitment: 'confirmed',
-    });
+    this.paraProvider = new AnchorProvider(
+      this.solanaConnection,
+      anchorWallet,
+      {
+        commitment: 'confirmed',
+      },
+    );
+
+    // Initialize Admin signer provider
+    this.adminProvider = new AnchorProvider(
+      this.solanaConnection,
+      new NodeWallet(adminKeypair),
+      { commitment: 'confirmed' },
+    );
+
+    // returnig provider based on useAdminSigner flag
+    return useAdminSigner ? this.adminProvider : this.paraProvider;
   }
 
-  /**
-   * Returns an Anchor Program instance
-   */
-  async getProgram(): Promise<Program<RalliBet>> {
-    const provider = await this.getProvider();
+  // Returns an Anchor Program instance
+
+  async getProgram(useAdminSigner = false): Promise<Program<RalliBet>> {
+    const provider = await this.getProvider(useAdminSigner);
 
     return new Program<RalliBet>(IDL as Idl, provider);
   }
 
-  /**
-   * Returns the Solana Connection
-   */
+  //Returns the Solana Connection
+
   async getConnection(): Promise<Connection> {
     return this.solanaConnection;
+  }
+
+  async createMint() {
+    const mint = await createMint(
+      this.solanaConnection,
+      adminKeypair,
+      adminKeypair.publicKey,
+      null,
+      6,
+    );
+
+    console.log('mint', mint);
+  }
+
+  async faucetSol(user: PublicKey) {
+    const provider = this.getProvider(true); // Use admin signer
+
+    // Create transfer instruction
+    const transferInstruction = SystemProgram.transfer({
+      fromPubkey: this.admin,
+      toPubkey: user,
+      lamports: (LAMPORTS_PER_SOL / 100) * 10, // Transfer 1 SOL
+    });
+
+    // Create transaction
+    const transaction = new Transaction().add(transferInstruction);
+
+    // Get latest blockhash
+    const { blockhash } = await this.solanaConnection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = this.admin;
+
+    // Sign and send transaction
+    const signature = await provider.sendAndConfirm(transaction);
+
+    return signature;
+  }
+
+  async faucetTokens(user: PublicKey) {
+    const userTokenAccount = await getOrCreateAssociatedTokenAccount(
+      this.solanaConnection,
+      adminKeypair,
+      this.mint,
+      user,
+    );
+    const tx = await mintTo(
+      this.solanaConnection,
+      adminKeypair,
+      this.mint,
+      userTokenAccount.address,
+      adminKeypair.publicKey,
+      10 ** (6 + 2),
+    );
+
+    console.log('minted tokens', tx);
   }
 
   async createLineInstruction(
@@ -102,7 +180,7 @@ export class ParaAnchor {
     startsAt: number,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram();
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
     const _athleteId = new BN(athleteId);
     const _startsAt = new BN(startsAt);
@@ -169,7 +247,7 @@ export class ParaAnchor {
     shouldRefundBettors: boolean,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram();
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
 
     const [lineAccount] = PublicKey.findProgramAddressSync(
@@ -326,7 +404,7 @@ export class ParaAnchor {
       gamePDA,
       program.programId,
     );
-    
+
     const gameVault = await this.getGameVault(this.mint, gamePDA);
 
     const userAta = await getOrCreateAssociatedTokenAccount(

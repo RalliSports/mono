@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
@@ -26,5 +34,11 @@ export class UserController {
   @Patch('update-user')
   updateUser(@Body() dto: UpdateUserDto, @UserPayload() user: User) {
     return this.userService.updateUser(dto, user);
+  }
+  @UseGuards(SessionAuthGuard)
+  @Post('faucet-tokens')
+  faucetTokens(@UserPayload() user: User) {
+    console.log('user', user);
+    return this.userService.faucetTokens(user);
   }
 }

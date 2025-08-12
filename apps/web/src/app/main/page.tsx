@@ -283,7 +283,7 @@ export default function MainFeedPage() {
               }}
               title={
                 isConnected
-                  ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nUSDC: $${formatBalance(balances.usdc)}`
+                  ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nRALLI: $${formatBalance(balances.ralli)}`
                   : 'Connect wallet to view balance'
               }
             >
@@ -307,7 +307,7 @@ export default function MainFeedPage() {
                       ? 'Loading...'
                       : balanceError
                         ? '$0.00'
-                        : `$${formatBalance(balances.usdc)}`
+                        : `$${formatBalance(balances.ralli)}`
                     : '$0.00'}
                 </span>
               </div>
