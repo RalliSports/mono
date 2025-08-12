@@ -16,6 +16,7 @@ export default function CreateGame() {
   const { isConnected } = useParaWalletBalance()
   const { session } = useSessionToken()
   const [mounted, setMounted] = useState(false)
+  const [creatingGameState, setCreatingGameState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   // Fix hydration issues
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function CreateGame() {
     title: '',
     depositAmount: 25,
     maxParticipants: 8,
-    matchupGroup: '',
+    matchupGroup: 'TEST',
     isPrivate: false,
     //TODO: Update depositToken when live
     depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
@@ -81,6 +82,7 @@ export default function CreateGame() {
   }
 
   const handleCreateContest = async () => {
+    setCreatingGameState('loading')
     const errors = validateForm()
     setFormErrors(errors)
 
@@ -119,6 +121,7 @@ export default function CreateGame() {
       const result = await response.json()
 
       if (response.ok) {
+        setCreatingGameState('success')
         toast.success(
           <div>
             Contest created successfully! Transaction ID:
@@ -132,20 +135,11 @@ export default function CreateGame() {
             </a>
           </div>,
         )
-        setGameSettings({
-          title: '',
-          depositAmount: 25,
-          maxParticipants: 8,
-          matchupGroup: '',
-          isPrivate: false,
-          //TODO: Update depositToken when live
-          depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-          type: 'limited',
-          userControlType: 'none',
-          gameMode: '550e8400-e29b-41d4-a716-446655440020',
-          maxBets: 10,
-        })
+        setTimeout(() => {
+          router.push(`/join-game?id=${result.id}`)
+        }, 1000)
       } else {
+        setCreatingGameState('error')
         if (Array.isArray(result.message)) {
           result.message.forEach((msg: string) => toast.error(msg))
         } else {
@@ -367,7 +361,7 @@ export default function CreateGame() {
                 type="range"
                 value={gameSettings.maxBets}
                 onChange={(e) => handleInputChange('maxBets', parseInt(e.target.value))}
-                min="1"
+                min="2"
                 max="50"
                 step="1"
                 className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
@@ -375,153 +369,8 @@ export default function CreateGame() {
               <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">{gameSettings.maxBets}</span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
-              <span>1</span>
+              <span>2</span>
               <span>50</span>
-            </div>
-          </div>
-
-          {/* Matchup Group */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-cyan-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/20">
-                <span className="text-lg">📅</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold">Matchup Group</h3>
-                <p className="text-slate-400 text-xs">Contest time period</p>
-              </div>
-            </div>
-            <input
-              type="text"
-              value={gameSettings.matchupGroup}
-              onChange={(e) => handleInputChange('matchupGroup', e.target.value)}
-              placeholder="Enter matchup group (e.g. Week 3)"
-              className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-200"
-            />
-          </div>
-
-          {/* Type */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-amber-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-5">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-amber-400/10 rounded-lg flex items-center justify-center border border-amber-400/20">
-                <span className="text-lg">⚡</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold">Type</h3>
-                <p className="text-slate-400 text-xs">Contest entry type</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleInputChange('type', 'limited')}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.type === 'limited'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-xl block mb-1">🚪</span>
-                  <div className="text-white font-semibold text-sm">Limited</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('type', 'unlimited')}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.type === 'unlimited'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-xl block mb-1">🌐</span>
-                  <div className="text-white font-semibold text-sm">Unlimited</div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* User Control Type */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-indigo-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-5">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-indigo-400/10 rounded-lg flex items-center justify-center border border-indigo-400/20">
-                <span className="text-lg">🛡️</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold">User Control Type</h3>
-                <p className="text-slate-400 text-xs">Access control method</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleInputChange('userControlType', 'none')}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.userControlType === 'none'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-xl block mb-1">🔓</span>
-                  <div className="text-white font-semibold text-sm">None</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('userControlType', 'whitelist')}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.userControlType === 'whitelist'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-xl block mb-1">📋</span>
-                  <div className="text-white font-semibold text-sm">Whitelist</div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Privacy Setting */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-purple-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-5">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/20">
-                <span className="text-lg">🔒</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold">Privacy Setting</h3>
-                <p className="text-slate-400 text-xs">Who can join this contest</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleInputChange('isPrivate', false)}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.isPrivate === false
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-xl block mb-1">🌍</span>
-                  <div className="text-white font-semibold text-sm">Public</div>
-                  <div className="text-slate-400 text-xs">Anyone can join</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('isPrivate', true)}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.isPrivate === true
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-xl block mb-1">🔒</span>
-                  <div className="text-white font-semibold text-sm">Private</div>
-                  <div className="text-slate-400 text-xs">Invite only</div>
-                </div>
-              </button>
             </div>
           </div>
         </div>
@@ -534,21 +383,16 @@ export default function CreateGame() {
               <p className="text-slate-400 text-sm">Total prize pool and details</p>
             </div>
             <div className="text-right">
+              <div className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-orange-400 bg-clip-text text-transparent">
+                {gameSettings.maxParticipants}
+              </div>
+              <div className="text-xs text-slate-400">Max Participants</div>
+            </div>
+            <div className="text-right">
               <div className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-blue-400 bg-clip-text text-transparent">
                 ${gameSettings.depositAmount * gameSettings.maxParticipants}
               </div>
               <div className="text-xs text-slate-400">Total prize pool</div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-center mb-6">
-            <div className="bg-slate-700/30 rounded-lg p-3">
-              <div className="text-orange-400 font-bold text-lg">{gameSettings.maxParticipants}</div>
-              <div className="text-slate-400 text-xs">Max Participants</div>
-            </div>
-            <div className="bg-slate-700/30 rounded-lg p-3">
-              <div className="text-pink-400 font-bold text-lg">{gameSettings.gameMode}</div>
-              <div className="text-slate-400 text-xs">Game Mode</div>
             </div>
           </div>
 
@@ -559,7 +403,15 @@ export default function CreateGame() {
             <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
             <span className="relative z-10 flex items-center justify-center space-x-2">
               <span>🚀</span>
-              <span>Create Contest</span>
+              <span>
+                {creatingGameState === 'loading'
+                  ? 'Creating Contest...'
+                  : creatingGameState === 'success'
+                    ? 'Contest Created!'
+                    : creatingGameState === 'error'
+                      ? 'Error Creating Contest'
+                      : 'Create Contest'}
+              </span>
             </span>
           </button>
         </div>

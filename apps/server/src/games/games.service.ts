@@ -5,9 +5,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { game_access, games, lines, participants, bets, users } from '@repo/db';
+import {
+  bets,
+  game_access,
+  games,
+  lines,
+  participants
+} from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, count, eq, inArray } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -119,11 +125,27 @@ export class GamesService {
   }
 
   async findOne(id: string) {
+    console.log('findOne', id);
     const game = await this.db.query.games.findFirst({
       where: eq(games.id, id),
       with: {
         gameMode: true,
-        participants: { with: { user: true, bets: true } },
+        participants: {
+          with: {
+            user: true,
+            bets: {
+              with: {
+                line: {
+                  with: {
+                    athlete: true,
+                    matchup: true,
+                    stat: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         creator: true,
       },
     });
@@ -279,6 +301,7 @@ export class GamesService {
   }
 
   async resolveGame(id: string) {
+    console.log('resolveGame', id);
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, id),
@@ -312,7 +335,10 @@ export class GamesService {
 
         for (const prediction of participant.bets) {
           const line = prediction.line;
-          allLinesIds.add(line?.createdAt!.getTime() ?? 0);
+          if (!line?.createdAt) {
+            throw new BadRequestException('Line or createdAt not found');
+          }
+          allLinesIds.add(line.createdAt.getTime());
 
           if (
             !line ||

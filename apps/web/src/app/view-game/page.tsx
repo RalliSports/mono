@@ -96,7 +96,7 @@ interface Game {
   participants: Participant[]
 }
 
-function JoinGameContent() {
+function ViewGameContent() {
   const searchParams = useSearchParams()
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
 
@@ -152,14 +152,6 @@ function JoinGameContent() {
   }
 
   if (!lobby) return <div>Loading...</div>
-
-  const spotsLeft = lobby?.maxParticipants - lobby?.participants.length
-
-  // Handle join game flow - go directly to picks
-  const handleJoinGame = () => {
-    // Navigate directly to picks page with game parameters
-    window.location.href = `/picks?gameId=${lobbyId}`
-  }
 
   return (
     <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
@@ -242,42 +234,6 @@ function JoinGameContent() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Enhanced Join Button Section */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-[#00CED1]/30 rounded-2xl p-6 shadow-2xl shadow-[#00CED1]/10">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-white font-bold text-xl">Ready to Join?</h3>
-                <p className="text-slate-400">
-                  {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} remaining in this lobby
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-white">${lobby.depositAmount}</div>
-                <div className="text-sm text-slate-400">Buy-in required</div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleJoinGame}
-              className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group"
-            >
-              {/* Shimmer effect */}
-              <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-              <span className="relative z-10">
-                Make Your Picks • {spotsLeft} Spot{spotsLeft !== 1 ? 's' : ''} Left
-              </span>
-            </button>
-
-            {spotsLeft <= 3 && (
-              <p className="text-amber-400 text-sm text-center mt-3 font-medium">
-                ⚡ Filling up fast! Only {spotsLeft} spot
-                {spotsLeft !== 1 ? 's' : ''} remaining
-              </p>
-            )}
           </div>
         </div>
 
@@ -448,7 +404,7 @@ export default function JoinGamePage() {
         </div>
       }
     >
-      <JoinGameContent />
+      <ViewGameContent />
     </Suspense>
   )
 }
