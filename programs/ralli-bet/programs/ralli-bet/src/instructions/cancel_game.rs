@@ -59,7 +59,7 @@ impl<'info> CancelGame<'info> {
         require!(!game.users.is_empty(), RalliError::NoUsersToRefund);
 
         // Check authorization: Admin can always cancel, or single user can cancel their own game
-        let is_admin = admin_or_user.key() == ADMIN_PUBLIC_KEY;
+        let is_admin = ADMIN_PUBKEYS.iter().any(|&admin| admin_or_user.key() == admin);
         let is_single_user_game = game.users.len() == 1 && game.users[0] == admin_or_user.key();
 
         require!(

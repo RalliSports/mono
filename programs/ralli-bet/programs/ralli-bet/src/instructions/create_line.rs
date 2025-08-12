@@ -35,9 +35,8 @@ impl<'info> CreateLine<'info> {
         let line = &mut self.line;
 
         // Only admin can create lines
-        require_eq!(
-            admin.key(),
-            ADMIN_PUBLIC_KEY,
+        require!(
+            is_admin(&admin.key()),
             RalliError::UnauthorizedLineCreation
         );
 
