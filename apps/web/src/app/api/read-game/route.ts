@@ -18,6 +18,23 @@ interface Creator {
   createdAt: string
 }
 
+interface Line {
+  id: string
+  athleteId: string
+  statId: string
+  matchupId: string
+  predictedValue: number
+  actualValue: number
+}
+interface Prediction {
+  id: string
+  participantId: string
+  lineId: string
+  gameId: string
+  predictedDirection: string
+  isCorrect: boolean
+  line: Line
+}
 interface Participant {
   id: string
   userId: string
@@ -26,6 +43,7 @@ interface Participant {
   isWinner: boolean
   txnId: string | null
   user: Creator
+  predictions: Prediction[]
 }
 
 interface Game {
@@ -57,7 +75,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 })
     }
 
-    const gameId = request.nextUrl.searchParams.get('gameId')
+    const gameId = request.nextUrl.searchParams.get('id')
 
     if (!gameId) {
       return NextResponse.json({ error: 'Game ID is required' }, { status: 400 })

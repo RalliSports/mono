@@ -178,7 +178,7 @@ function PicksContent() {
   useEffect(() => {
     const fetchGame = async () => {
       try {
-        const response = await fetch(`/api/read-game?gameId=${gameId}`, {
+        const response = await fetch(`/api/read-game?id=${gameId}`, {
           method: 'GET',
           headers: {
             'x-para-session': session || '',
@@ -255,6 +255,9 @@ function PicksContent() {
     const result = await response.json()
     console.log(result, 'result')
     addToast('Bets submitted successfully!', 'success')
+    setTimeout(() => {
+      window.location.href = `/view-game?id=${gameId}`
+    }, 1000)
   }
 
   const handlePaymentCancel = () => {
@@ -324,7 +327,9 @@ function PicksContent() {
               </div>
               <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 text-center">
                 <div className="text-slate-400 text-xs">Potential</div>
-                <div className="text-emerald-400 font-bold text-lg">~${Math.round(buyIn * 7.2)}</div>
+                <div className="text-emerald-400 font-bold text-lg">
+                  ~${Math.round(buyIn * game!.maxParticipants || 0)}
+                </div>
               </div>
             </div>
           </div>
@@ -485,7 +490,9 @@ function PicksContent() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Potential Payout</span>
-                    <span className="text-emerald-400 font-bold">${Math.round(buyIn * 3.6)}</span>
+                    <span className="text-emerald-400 font-bold">
+                      ~${Math.round(buyIn * game!.maxParticipants || 0)}
+                    </span>
                   </div>
                 </div>
 
