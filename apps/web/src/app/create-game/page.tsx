@@ -136,7 +136,7 @@ export default function CreateGame() {
           </div>,
         )
         setTimeout(() => {
-          router.push(`/join-game?gameId=${result.id}`)
+          router.push(`/join-game?id=${result.id}`)
         }, 1000)
       } else {
         setCreatingGameState('error')
