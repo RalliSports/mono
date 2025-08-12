@@ -35,12 +35,8 @@ function validateCreateGameData(data: any): data is CreateGameRequest {
 
 export async function POST(request: NextRequest) {
   try {
-
     if (!backendUrl) {
-      return NextResponse.json(
-        { error: 'Backend URL not configured' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 })
     }
 
     // Parse the request body
@@ -49,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Validate the data structure
     if (!validateCreateGameData(body)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid data format',
           required: {
             title: 'string',
@@ -62,10 +58,10 @@ export async function POST(request: NextRequest) {
             isPrivate: 'boolean',
             type: 'string',
             userControlType: 'string',
-            gameModeId: 'string'
-          }
+            gameModeId: 'string',
+          },
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -77,9 +73,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Session ID missing',
-          message: 'Unauthorized access. Please provide a valid session ID.'
+          message: 'Unauthorized access. Please provide a valid session ID.',
         },
-        { status: 401 }
+        { status: 401 },
       )
     }
 
@@ -88,7 +84,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(tokenString && { 'x-para-session': tokenString })
+        ...(tokenString && { 'x-para-session': tokenString }),
       },
       body: JSON.stringify(body),
     })
@@ -97,27 +93,26 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.text()
       return NextResponse.json(
-        { 
+        {
           error: 'Backend request failed',
           details: errorData,
-          status: response.status
+          status: response.status,
         },
-        { status: response.status }
+        { status: response.status },
       )
     }
 
     // Parse and return the backend response
     const data = await response.json()
     return NextResponse.json(data, { status: 200 })
-
   } catch (error) {
     console.error('Create game API error:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

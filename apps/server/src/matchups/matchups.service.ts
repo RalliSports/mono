@@ -34,6 +34,7 @@ export class MatchupsService {
         startsAt: new Date(dto.startsAtTimestamp),
         gameDate: new Date(dto.startsAtTimestamp).toISOString(),
         status: 'pending',
+
         scoreHome: 0,
         scoreAway: 0,
       })
