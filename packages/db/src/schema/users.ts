@@ -6,6 +6,10 @@ import { participants } from "./participants";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  userName: text("user_name"),
+  avatar: text("avatar"),
   walletAddress: varchar("wallet_address"),
   emailAddress: varchar("email_address"),
   paraUserId: text("para_user_id"),

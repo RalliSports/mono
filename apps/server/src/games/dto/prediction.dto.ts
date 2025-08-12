@@ -19,7 +19,7 @@ export class BulkCreatePredictionsDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePredictionDto)
   @ArrayMinSize(1)
-  predictions: CreatePredictionDto[];
+  bets: CreatePredictionDto[];
 
   @ApiProperty()
   @IsUUID()

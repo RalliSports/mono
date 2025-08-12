@@ -45,6 +45,7 @@ export class AuthService {
           id: userExisted.id,
           paraUserId: userExisted.paraUserId as string,
           walletAddress: userExisted.walletAddress as string,
+          
           // role: userExisted.role as Role,
         };
       } else {

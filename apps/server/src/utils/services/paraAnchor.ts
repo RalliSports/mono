@@ -13,7 +13,6 @@ import {
   Cluster,
   clusterApiUrl,
   Connection,
-  Keypair,
   PublicKey,
   Signer,
   SystemProgram,
@@ -21,12 +20,9 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
-import { BulkCreatePredictionsDto } from 'src/games/dto/prediction.dto';
 import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
 import { RalliBet } from '../idl/ralli_bet';
-import { BadRequestException } from '@nestjs/common';
-import { predictions } from '@repo/db';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 
@@ -43,8 +39,13 @@ export class ParaAnchor {
 
     this.admin = new PublicKey('2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk');
     this.mint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
-    this.treasury = new PublicKey('BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs');
-    this.treasuryTokenAccount = getAssociatedTokenAddressSync(this.mint, this.treasury);
+    this.treasury = new PublicKey(
+      'BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs',
+    );
+    this.treasuryTokenAccount = getAssociatedTokenAddressSync(
+      this.mint,
+      this.treasury,
+    );
 
     this.solanaConnection = new Connection(clusterApiUrl(CLUSTER), 'confirmed');
   }
@@ -234,7 +235,7 @@ export class ParaAnchor {
     maxBet: number,
     maxParticipants: number,
     creator: PublicKey,
-    mint: PublicKey,
+    // mint: PublicKey,
   ): Promise<string> {
     const program = await this.getProgram();
     const gamePDA = await this.getGamePDA(gameId, program.programId);
@@ -309,96 +310,6 @@ export class ParaAnchor {
     }
   }
 
-  async joinGameInstruction({
-    gameId,
-    depositAmount,
-  }: {
-    gameId: string;
-    depositAmount: number;
-  }): Promise<string> {
-    const program = await this.getProgram();
-    const gamePDA = await this.getGamePDA(gameId, program.programId);
-    const gameEscrowPDA = await this.getGameEscrowPDA(
-      gamePDA,
-      program.programId,
-    );
-    const gameVault = await this.getGameVault(this.mint, gamePDA);
-
-    const userAta = await getOrCreateAssociatedTokenAccount(
-      program.provider.connection,
-      program.provider.wallet?.payer as Signer,
-      this.mint,
-      program.provider.wallet?.publicKey as PublicKey,
-    );
-
-    const userBalance =
-      await program.provider.connection.getTokenAccountBalance(userAta.address);
-    const userTokenAmount = userBalance.value.uiAmount as number;
-    const deposit = depositAmount * Math.pow(10, 6);
-
-    // Check if balance is sufficient
-    if (deposit < userTokenAmount) {
-      throw new BadRequestException(
-        'User does not have enough SPL tokens to join the game.',
-      );
-    }
-
-    try {
-      const ix = await program.methods
-        .joinGame()
-        .accountsStrict({
-          mint: this.mint,
-          user: program.provider.wallet?.publicKey as PublicKey,
-          game: gamePDA,
-          gameEscrow: gameEscrowPDA,
-          gameVault,
-          userTokens: userAta.address,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-        })
-        .instruction();
-
-      // Get latest blockhash
-      const { blockhash, lastValidBlockHeight } =
-        await program.provider.connection.getLatestBlockhash('finalized');
-
-      // Build TransactionMessage for VersionedTransaction
-      const messageV0 = new TransactionMessage({
-        payerKey: program.provider.publicKey as PublicKey,
-        recentBlockhash: blockhash,
-        instructions: [ix],
-      }).compileToV0Message();
-
-      // Create VersionedTransaction
-      const transaction = new VersionedTransaction(messageV0);
-
-      // Sign transaction
-      await program.provider.wallet?.signTransaction(transaction);
-
-      // Send transaction
-      const txSig =
-        await program.provider.connection.sendTransaction(transaction);
-
-      // Confirm transaction
-      await program.provider.connection.confirmTransaction(
-        {
-          signature: txSig,
-          blockhash: blockhash,
-          lastValidBlockHeight: lastValidBlockHeight,
-        },
-        'confirmed',
-      );
-
-      console.log(txSig, 'transaction signature');
-
-      return txSig;
-    } catch (error) {
-      console.error('Transaction Error:', error);
-      return '';
-    }
-  }
-
   async submitBetsInstruction(
     gameId: string,
     bets: { lineId: number; direction: PredictionDirection }[],
@@ -409,6 +320,20 @@ export class ParaAnchor {
       gamePDA,
       program.provider.wallet?.publicKey as PublicKey,
       program.programId,
+    );
+
+    const gameEscrowPDA = await this.getGameEscrowPDA(
+      gamePDA,
+      program.programId,
+    );
+    
+    const gameVault = await this.getGameVault(this.mint, gamePDA);
+
+    const userAta = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      program.provider.wallet?.payer as Signer,
+      this.mint,
+      program.provider.wallet?.publicKey as PublicKey,
     );
 
     const extraAccounts: any[] = [];
@@ -434,11 +359,25 @@ export class ParaAnchor {
               : { under: {} },
         };
       }),
-    
     );
 
     try {
-      const ix = await program.methods
+      const joinIx = await program.methods
+        .joinGame()
+        .accountsStrict({
+          mint: this.mint,
+          user: program.provider.wallet?.publicKey as PublicKey,
+          game: gamePDA,
+          gameEscrow: gameEscrowPDA,
+          gameVault,
+          userTokens: userAta.address,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
+
+      const submitIx = await program.methods
         .submitBet(picks)
         .accountsStrict({
           user: program.provider.wallet?.publicKey as PublicKey,
@@ -457,7 +396,7 @@ export class ParaAnchor {
       const messageV0 = new TransactionMessage({
         payerKey: program.provider.publicKey as PublicKey,
         recentBlockhash: blockhash,
-        instructions: [ix],
+        instructions: [joinIx, submitIx],
       }).compileToV0Message();
 
       // Create VersionedTransaction
@@ -484,12 +423,17 @@ export class ParaAnchor {
 
       return txSig;
     } catch (error) {
-      console.log(error, "erro from submitBetsInstruction")
+      console.log(error, 'erro from submitBetsInstruction');
       return '';
     }
   }
 
-  async resolveGameInstruction(gameId: string, winners: string[], userWallets: string[], winningLines: number[]) {
+  async resolveGameInstruction(
+    gameId: string,
+    winners: string[],
+    userWallets: string[],
+    winningLines: number[],
+  ) {
     const program = await this.getProgram();
     const percentage = 100;
 
@@ -502,7 +446,11 @@ export class ParaAnchor {
 
     const betAccounts = await Promise.all(
       userWallets.map(async (winner) => {
-        const betPDA = await this.getBetPDA(gamePDA, new PublicKey(winner), program.programId);
+        const betPDA = await this.getBetPDA(
+          gamePDA,
+          new PublicKey(winner),
+          program.programId,
+        );
         return {
           pubkey: betPDA,
           isWritable: true,
@@ -513,7 +461,11 @@ export class ParaAnchor {
 
     const tokenAccounts = await Promise.all(
       winners.map(async (winner) => {
-        const tokenAccount = await getAssociatedTokenAddressSync(this.mint, new PublicKey(winner), true);
+        const tokenAccount = await getAssociatedTokenAddressSync(
+          this.mint,
+          new PublicKey(winner),
+          true,
+        );
         return {
           pubkey: tokenAccount,
           isWritable: true,
@@ -533,10 +485,11 @@ export class ParaAnchor {
       }),
     );
 
-
-
-    const remainingAccounts = [...betAccounts,  ...tokenAccounts, ...lineAccounts];
-
+    const remainingAccounts = [
+      ...betAccounts,
+      ...tokenAccounts,
+      ...lineAccounts,
+    ];
 
     try {
       const ix = await program.methods

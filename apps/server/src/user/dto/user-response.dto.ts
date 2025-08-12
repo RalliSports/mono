@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class Role {
   @ApiProperty()
@@ -25,6 +25,22 @@ export class User {
 
   @ApiProperty()
   paraUserId: string;
+
+  @ApiProperty()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  userName?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  avatar?: string;
 
   // @ApiProperty()
   // role: Role;

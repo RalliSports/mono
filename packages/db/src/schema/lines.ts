@@ -1,10 +1,16 @@
-import { pgTable, decimal, boolean, timestamp } from "drizzle-orm/pg-core";
-import { uuid } from "drizzle-orm/pg-core";
-import { athletes } from "./athletes";
-import { stats } from "./stats";
-import { matchups } from "./matchups";
 import { relations } from "drizzle-orm";
-import { predictions } from "./predictions";
+import {
+  boolean,
+  decimal,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { athletes } from "./athletes";
+import { bets } from "./bets";
+import { matchups } from "./matchups";
+import { stats } from "./stats";
 
 export const lines = pgTable("lines", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -16,6 +22,8 @@ export const lines = pgTable("lines", {
   isHigher: boolean("is_higher"),
   createdAt: timestamp("created_at").defaultNow(),
   startsAt: timestamp("starts_at"),
+  createdTxnSignature: text("created_txn_signature"),
+  resolvedTxnSignature: text("resolved_txn_signature"),
 });
 
 export const linesRelations = relations(lines, ({ one, many }) => ({
@@ -31,5 +39,5 @@ export const linesRelations = relations(lines, ({ one, many }) => ({
     fields: [lines.matchupId],
     references: [matchups.id],
   }),
-  predictions: many(predictions),
+  bets: many(bets),
 }));
