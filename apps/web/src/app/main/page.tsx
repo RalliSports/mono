@@ -7,7 +7,6 @@ import AthleteCard from '@/components/main-feed/athlete-card'
 import SelectionBar from '@/components/main-feed/selection-bar'
 import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
 import SidebarNav from '@/components/ui/sidebar-nav'
-import { ParaButton } from '@/components/para-modal'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useAccount } from '@getpara/react-sdk'
 import { fetchGames } from '@/hooks/get-games'
@@ -279,7 +278,9 @@ export default function MainFeedPage() {
           <div className="flex items-center space-x-3">
             <div
               className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-4 py-2 backdrop-blur-sm cursor-pointer hover:from-[#00CED1]/30 hover:to-[#FFAB91]/30 transition-all duration-200"
-              onClick={() => isConnected && refetchBalance()}
+              onClick={() => {
+                router.push('/add-funds')
+              }}
               title={
                 isConnected
                   ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nUSDC: $${formatBalance(balances.usdc)}`
@@ -306,7 +307,7 @@ export default function MainFeedPage() {
                       ? 'Loading...'
                       : balanceError
                         ? '$0.00'
-                        : `$${formatBalance(balances.totalUsd)}`
+                        : `$${formatBalance(balances.usdc)}`
                     : '$0.00'}
                 </span>
               </div>
@@ -314,8 +315,6 @@ export default function MainFeedPage() {
 
             {/* Profile Dropdown */}
             <div className="relative profile-dropdown">
-              <ParaButton />
-
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 top-12 w-48 bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl z-50">

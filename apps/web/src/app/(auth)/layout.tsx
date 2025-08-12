@@ -1,10 +1,6 @@
-import Logo from "@/components/ui/logo";
+import Logo from '@/components/ui/logo'
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] via-white to-[#FFAB91]/10 relative overflow-hidden">
@@ -56,9 +52,7 @@ export default function AuthLayout({
                     <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     <div className="flex-1 text-center">
-                      <span className="text-sm font-medium text-gray-600">
-                        ralli.pro
-                      </span>
+                      <span className="text-sm font-medium text-gray-600">ralli.pro</span>
                     </div>
                   </div>
 
@@ -76,9 +70,7 @@ export default function AuthLayout({
 
                   {/* Activity feed */}
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-gray-700">
-                      Recent Activity
-                    </h3>
+                    <h3 className="font-semibold text-gray-700">Recent Activity</h3>
                     <div className="space-y-2 max-h-32 overflow-hidden">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <div
@@ -86,12 +78,8 @@ export default function AuthLayout({
                           className="flex items-center justify-between text-sm animate-pulse"
                           style={{ animationDelay: `${i * 200}ms` }}
                         >
-                          <span className="text-gray-600">
-                            Win streak +{i + 1}
-                          </span>
-                          <span className="text-green-600 font-medium">
-                            +${Math.floor(Math.random() * 500) + 100}
-                          </span>
+                          <span className="text-gray-600">Win streak +{i + 1}</span>
+                          <span className="text-green-600 font-medium">+${Math.floor(Math.random() * 500) + 100}</span>
                         </div>
                       ))}
                     </div>
@@ -117,5 +105,5 @@ export default function AuthLayout({
         </main>
       </div>
     </>
-  );
+  )
 }
