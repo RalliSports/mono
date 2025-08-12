@@ -6,8 +6,10 @@ import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
+  createMint,
   getAssociatedTokenAddressSync,
   getOrCreateAssociatedTokenAccount,
+  mintTo,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
@@ -15,6 +17,7 @@ import {
   clusterApiUrl,
   Connection,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   Signer,
   SystemProgram,
@@ -47,8 +50,8 @@ export class ParaAnchor {
   constructor(paraServer: ParaServer) {
     this.paraServer = paraServer;
 
-    this.admin = new PublicKey('2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk');
-    this.mint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
+    this.admin = adminKeypair.publicKey;
+    this.mint = new PublicKey('HGRipUjDcXvQ1w1NfQ2DJ33A6V8Vz5T2jU1RaTvzfqFA');
     this.treasury = new PublicKey(
       'BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs',
     );
@@ -115,6 +118,61 @@ export class ParaAnchor {
 
   async getConnection(): Promise<Connection> {
     return this.solanaConnection;
+  }
+
+  async createMint() {
+    const mint = await createMint(
+      this.solanaConnection,
+      adminKeypair,
+      adminKeypair.publicKey,
+      null,
+      6,
+    );
+
+    console.log('mint', mint);
+  }
+
+  async faucetSol(user: PublicKey) {
+    const provider = this.getProvider(true); // Use admin signer
+
+    // Create transfer instruction
+    const transferInstruction = SystemProgram.transfer({
+      fromPubkey: this.admin,
+      toPubkey: user,
+      lamports: (LAMPORTS_PER_SOL / 100) * 10, // Transfer 1 SOL
+    });
+
+    // Create transaction
+    const transaction = new Transaction().add(transferInstruction);
+
+    // Get latest blockhash
+    const { blockhash } = await this.solanaConnection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = this.admin;
+
+    // Sign and send transaction
+    const signature = await provider.sendAndConfirm(transaction);
+
+    return signature;
+  }
+
+  async faucetTokens(user: PublicKey) {
+    const userTokenAccount = await getOrCreateAssociatedTokenAccount(
+      this.solanaConnection,
+      adminKeypair,
+      this.mint,
+      user,
+    );
+    const tx = await mintTo(
+      this.solanaConnection,
+      adminKeypair,
+      this.mint,
+      userTokenAccount.address,
+      adminKeypair.publicKey,
+      10 ** (6 + 2),
+    );
+
+    console.log('minted tokens', tx);
   }
 
   async createLineInstruction(
