@@ -24,7 +24,7 @@
   "dependencies": {
     "@getpara/core-sdk": "alpha",
     "@getpara/react-sdk": "alpha",
-    "@getpara/react-common": "2.0.0",
+    "@getpara/react-common": "alpha",
     "@coral-xyz/anchor": "^0.31.1",
     "@farcaster/miniapp-wagmi-connector": "1.0.0",
     "@farcaster/mini-app-solana": "1.0.7",
