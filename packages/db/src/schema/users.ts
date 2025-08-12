@@ -20,7 +20,7 @@ export const users = pgTable("users", {
   walletAddress: varchar("wallet_address"),
   emailAddress: varchar("email_address"),
   paraUserId: text("para_user_id"),
-  hasBeenFaucetdSol: boolean("has_been_faucetd_sol"),
+  hasBeenFaucetedSol: boolean("has_been_fauceted_sol"),
   // roleId: uuid("role_id").references(() => roles.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
