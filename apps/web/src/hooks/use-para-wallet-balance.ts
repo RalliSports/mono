@@ -60,6 +60,8 @@ export function useParaWalletBalance() {
           mint: new PublicKey(USDC_MINT),
         })
 
+        console.log('tokenAccounts', tokenAccounts)
+
         if (tokenAccounts.value.length === 0) return 0
 
         const balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount
