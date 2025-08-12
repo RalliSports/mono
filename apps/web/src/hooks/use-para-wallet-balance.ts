@@ -5,7 +5,7 @@ import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { USDC_MINT } from '@/constants'
+import { RALLI_TOKEN, USDC_MINT } from '@/constants'
 
 function useSolPrice() {
   return useQuery({
@@ -73,6 +73,28 @@ export function useParaWalletBalance() {
     refetchInterval: 30000,
   })
 
+  const ralliBalanceQuery = useQuery({
+    queryKey: ['para-ralli-balance', walletAddress?.toString()],
+    queryFn: async () => {
+      if (!walletAddress) return 0
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(walletAddress, {
+          mint: new PublicKey(RALLI_TOKEN),
+        })
+
+        if (tokenAccounts.value.length === 0) return 0
+
+        const balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount
+        return balance || 0
+      } catch (error) {
+        console.error('Error fetching USDC balance:', error)
+        return 0
+      }
+    },
+    enabled: !!walletAddress && !!account?.isConnected,
+    refetchInterval: 30000,
+  })
+
   const totalUsdBalance = useMemo(() => {
     const solBalance = solBalanceQuery.data || 0
     const usdcBalance = usdcBalanceQuery.data || 0
@@ -86,6 +108,7 @@ export function useParaWalletBalance() {
       sol: solBalanceQuery.data || 0,
       usdc: usdcBalanceQuery.data || 0,
       totalUsd: totalUsdBalance,
+      ralli: ralliBalanceQuery.data || 0,
     },
     isLoading: solBalanceQuery.isLoading || usdcBalanceQuery.isLoading || isPriceLoading,
     error: solBalanceQuery.error || usdcBalanceQuery.error || priceError,

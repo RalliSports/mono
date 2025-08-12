@@ -41,6 +41,7 @@ export class GamesController {
   })
   @Post('/create-game')
   create(@Body() createGameDto: CreateGameDto, @UserPayload() user: User) {
+    console.log('user', user);
     return this.gamesService.create(createGameDto, user);
   }
 
@@ -108,7 +109,10 @@ export class GamesController {
   @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Submit bets' })
   @Post('/submit-bets')
-  predictGame(@Body() body: BulkCreatePredictionsDto,  @UserPayload() user: User) {
+  predictGame(
+    @Body() body: BulkCreatePredictionsDto,
+    @UserPayload() user: User,
+  ) {
     return this.gamesService.submitBets(user, body);
   }
 
@@ -174,9 +178,7 @@ export class GamesController {
     type: GameResponseDto,
   })
   @Patch('/game/resolve/:id')
-  resolve(
-    @Param('id') id: string,
-  ) {
+  resolve(@Param('id') id: string) {
     return this.gamesService.resolveGame(id);
   }
 

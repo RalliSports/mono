@@ -1,6 +1,9 @@
 // Client-side constants (for browser use)
 export const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? ''
 
+const RALLI_TOKEN_DEVNET = 'HGRipUjDcXvQ1w1NfQ2DJ33A6V8Vz5T2jU1RaTvzfqFA'
+const RALLI_TOKEN_MAINNET = 'HGRipUjDcXvQ1w1NfQ2DJ33A6V8Vz5T2jU1RaTvzfqFA'
+export const RALLI_TOKEN = process.env.NEXT_IS_MAINNET ? RALLI_TOKEN_MAINNET : RALLI_TOKEN_DEVNET
 const MAINNET_USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 const DEVNET_USDC_MINT = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
 
