@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { AnchorProvider, BN, Idl, Program } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import ParaServer from '@getpara/server-sdk';
@@ -30,6 +31,9 @@ import { predictions } from '@repo/db';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 
+const secretKey = Uint8Array.from(JSON.parse(process.env.ADMIN_KEYPAIR_JSON!));
+const adminKeypair = Keypair.fromSecretKey(secretKey);
+
 export class ParaAnchor {
   private solanaConnection: Connection;
   private paraServer: ParaServer;
@@ -37,20 +41,28 @@ export class ParaAnchor {
   private treasury: PublicKey;
   private treasuryTokenAccount: PublicKey;
   private mint: PublicKey;
+  private paraProvider: AnchorProvider;
+  private adminProvider: AnchorProvider;
 
   constructor(paraServer: ParaServer) {
     this.paraServer = paraServer;
 
     this.admin = new PublicKey('2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk');
     this.mint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
-    this.treasury = new PublicKey('BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs');
-    this.treasuryTokenAccount = getAssociatedTokenAddressSync(this.mint, this.treasury);
+    this.treasury = new PublicKey(
+      'BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs',
+    );
+    this.treasuryTokenAccount = getAssociatedTokenAddressSync(
+      this.mint,
+      this.treasury,
+    );
 
     this.solanaConnection = new Connection(clusterApiUrl(CLUSTER), 'confirmed');
   }
 
   // Get provider
-  getProvider(): AnchorProvider {
+  getProvider(useAdminSigner = false): AnchorProvider {
+    // Initialize Para signer
     const solanaSigner = new ParaSolanaWeb3Signer(
       this.paraServer as any,
       this.solanaConnection,
@@ -72,23 +84,35 @@ export class ParaAnchor {
       },
     } as NodeWallet;
 
-    return new AnchorProvider(this.solanaConnection, anchorWallet, {
-      commitment: 'confirmed',
-    });
+    this.paraProvider = new AnchorProvider(
+      this.solanaConnection,
+      anchorWallet,
+      {
+        commitment: 'confirmed',
+      },
+    );
+
+    // Initialize Admin signer provider
+    this.adminProvider = new AnchorProvider(
+      this.solanaConnection,
+      new NodeWallet(adminKeypair),
+      { commitment: 'confirmed' },
+    );
+
+    // returnig provider based on useAdminSigner flag
+    return useAdminSigner ? this.adminProvider : this.paraProvider;
   }
 
-  /**
-   * Returns an Anchor Program instance
-   */
-  async getProgram(): Promise<Program<RalliBet>> {
-    const provider = await this.getProvider();
+  // Returns an Anchor Program instance
+
+  async getProgram(useAdminSigner = false): Promise<Program<RalliBet>> {
+    const provider = await this.getProvider(useAdminSigner);
 
     return new Program<RalliBet>(IDL as Idl, provider);
   }
 
-  /**
-   * Returns the Solana Connection
-   */
+  //Returns the Solana Connection
+
   async getConnection(): Promise<Connection> {
     return this.solanaConnection;
   }
@@ -101,7 +125,7 @@ export class ParaAnchor {
     startsAt: number,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram();
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
     const _athleteId = new BN(athleteId);
     const _startsAt = new BN(startsAt);
@@ -168,7 +192,7 @@ export class ParaAnchor {
     shouldRefundBettors: boolean,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram();
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
 
     const [lineAccount] = PublicKey.findProgramAddressSync(
@@ -434,7 +458,6 @@ export class ParaAnchor {
               : { under: {} },
         };
       }),
-    
     );
 
     try {
@@ -484,12 +507,17 @@ export class ParaAnchor {
 
       return txSig;
     } catch (error) {
-      console.log(error, "erro from submitBetsInstruction")
+      console.log(error, 'erro from submitBetsInstruction');
       return '';
     }
   }
 
-  async resolveGameInstruction(gameId: string, winners: string[], userWallets: string[], winningLines: number[]) {
+  async resolveGameInstruction(
+    gameId: string,
+    winners: string[],
+    userWallets: string[],
+    winningLines: number[],
+  ) {
     const program = await this.getProgram();
     const percentage = 100;
 
@@ -502,7 +530,11 @@ export class ParaAnchor {
 
     const betAccounts = await Promise.all(
       userWallets.map(async (winner) => {
-        const betPDA = await this.getBetPDA(gamePDA, new PublicKey(winner), program.programId);
+        const betPDA = await this.getBetPDA(
+          gamePDA,
+          new PublicKey(winner),
+          program.programId,
+        );
         return {
           pubkey: betPDA,
           isWritable: true,
@@ -513,7 +545,11 @@ export class ParaAnchor {
 
     const tokenAccounts = await Promise.all(
       winners.map(async (winner) => {
-        const tokenAccount = await getAssociatedTokenAddressSync(this.mint, new PublicKey(winner), true);
+        const tokenAccount = await getAssociatedTokenAddressSync(
+          this.mint,
+          new PublicKey(winner),
+          true,
+        );
         return {
           pubkey: tokenAccount,
           isWritable: true,
@@ -533,10 +569,11 @@ export class ParaAnchor {
       }),
     );
 
-
-
-    const remainingAccounts = [...betAccounts,  ...tokenAccounts, ...lineAccounts];
-
+    const remainingAccounts = [
+      ...betAccounts,
+      ...tokenAccounts,
+      ...lineAccounts,
+    ];
 
     try {
       const ix = await program.methods
