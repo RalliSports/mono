@@ -11,8 +11,9 @@ import { seedStats } from "./stats.seed";
 import { seedMatchups } from "./matchups.seed";
 import { seedGames } from "./games.seed";
 import { seedParticipants } from "./participants.seed";
-import { seedPredictions } from "./predictions.seed";
+import { seedBets } from "./bets.seed";
 import { seedLines } from "./lines.seed";
+import { seedTeams } from "./teams.seed";
 
 config();
 
@@ -25,16 +26,17 @@ const db = drizzle(pool, { schema });
 async function seed(db: NodePgDatabase<typeof schema>) {
   console.log("🌱 Starting database seeding...");
   try {
-    await seedRoles(db);
+    // await seedRoles(db);
     await seedUsers(db);
     await seedGameModes(db);
+    await seedTeams(db);
     await seedAthletes(db);
     await seedStats(db);
     await seedMatchups(db);
     await seedGames(db);
     await seedParticipants(db);
     await seedLines(db);
-    await seedPredictions(db);
+    await seedBets(db);
     console.log("🎉 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Seeding data failed:", error);

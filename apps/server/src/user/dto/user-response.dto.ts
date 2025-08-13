@@ -42,6 +42,10 @@ export class User {
   @IsOptional()
   avatar?: string;
 
+  @ApiProperty()
+  @IsOptional()
+  hasBeenFaucetedSol?: boolean;
+
   // @ApiProperty()
   // role: Role;
 }

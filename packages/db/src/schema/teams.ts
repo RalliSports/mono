@@ -19,6 +19,7 @@ export const teams = pgTable("teams", {
   coachName: varchar("coach_name", { length: 100 }),
   avatar: varchar("avatar"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  abbreviation: varchar("abbreviation", { length: 3 }),
 });
 
 // Relations

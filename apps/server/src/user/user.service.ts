@@ -52,11 +52,15 @@ export class UserService {
     const balance = await connection.getBalance(userPK);
 
     // If balance is less than 0.01 SOL (10,000,000 lamports), faucet SOL first
-    if (balance < 100_000) {
+    if (balance < 100_000 && !user.hasBeenFaucetedSol) {
       console.log(
         `User ${user.walletAddress} has low SOL balance (${balance} lamports), fauceting SOL first`,
       );
       await this.anchor.faucetSol(userPK);
+      await this.db
+        .update(users)
+        .set({ hasBeenFaucetedSol: true })
+        .where(eq(users.id, user.id));
     }
 
     // Then faucet tokens

@@ -14,14 +14,12 @@ import { teams } from "./teams";
 export const athletes = pgTable("athletes", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name"),
-  team: varchar("team"),
   position: varchar("position"),
   jerseyNumber: integer("jersey_number"),
   age: integer("age"),
   picture: varchar("picture"),
   customId: serial("custom_id").unique(),
   teamId: uuid("team_id").references(() => teams.id),
-
   createdAt: timestamp("created_at").defaultNow(),
 });
 

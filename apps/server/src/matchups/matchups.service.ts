@@ -29,12 +29,11 @@ export class MatchupsService {
     const matchup = await this.db
       .insert(matchups)
       .values({
-        homeTeam: dto.homeTeamId,
-        awayTeam: dto.awayTeamId,
+        homeTeamId: dto.homeTeamId,
+        awayTeamId: dto.awayTeamId,
         startsAt: new Date(dto.startsAtTimestamp),
         gameDate: new Date(dto.startsAtTimestamp).toISOString(),
         status: 'pending',
-
         scoreHome: 0,
         scoreAway: 0,
       })

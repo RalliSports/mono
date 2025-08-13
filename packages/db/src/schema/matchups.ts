@@ -15,8 +15,6 @@ export const matchups = pgTable("matchups", {
   id: uuid("id").primaryKey().defaultRandom(),
   gameDate: date("game_date"),
   startsAt: timestamp("starts_at"),
-  homeTeam: varchar("home_team"),
-  awayTeam: varchar("away_team"),
   status: varchar("status"),
   scoreHome: integer("score_home"),
   scoreAway: integer("score_away"),

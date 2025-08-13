@@ -6,47 +6,47 @@ export const matchupsData: (typeof matchups.$inferInsert)[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440050",
     gameDate: "2024-09-08", // ✅ String format, not Date object
-    homeTeam: "Kansas City Chiefs",
-    awayTeam: "Baltimore Ravens",
     status: "finished",
     scoreHome: 27,
     scoreAway: 20,
+    homeTeamId: "550e8400-e29b-41d4-b132-446655440001",
+    awayTeamId: "550e8400-e29b-41d4-b132-446655440002",
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440051",
     gameDate: "2024-09-08", // ✅ String format
-    homeTeam: "Buffalo Bills",
-    awayTeam: "Miami Dolphins",
     status: "finished",
     scoreHome: 31,
     scoreAway: 17,
+    homeTeamId: "550e8400-e29b-41d4-b132-446655440003",
+    awayTeamId: "550e8400-e29b-41d4-b132-446655440004",
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440052",
     gameDate: "2024-09-15", // ✅ String format
-    homeTeam: "San Francisco 49ers",
-    awayTeam: "Los Angeles Rams",
     status: "in_progress",
-    scoreHome: 14,
-    scoreAway: 7,
+    scoreHome: 41,
+    scoreAway: 3,
+    homeTeamId: "550e8400-e29b-41d4-b132-446655440005",
+    awayTeamId: "550e8400-e29b-41d4-b132-446655440006",
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440053",
     gameDate: "2024-09-22", // ✅ String format
-    homeTeam: "Miami Dolphins",
-    awayTeam: "Kansas City Chiefs",
     status: "scheduled",
     scoreHome: null,
     scoreAway: null,
+    homeTeamId: "550e8400-e29b-41d4-b132-446655440007",
+    awayTeamId: "550e8400-e29b-41d4-b132-446655440008",
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440060",
     gameDate: "2025-08-05",
-    homeTeam: "Indianapolis Colts",
-    awayTeam: "Houston Texans",
     status: "finished",
     scoreHome: 30,
     scoreAway: 24,
+    homeTeamId: "550e8400-e29b-41d4-b132-446655440009",
+    awayTeamId: "550e8400-e29b-41d4-b132-446655440010",
   },
 ];
 
@@ -91,9 +91,9 @@ export const matchupPerformanceData = [
 
 export const seedMatchups = async (db: NodePgDatabase<typeof schema>) => {
   await db.insert(matchups).values(matchupsData).onConflictDoNothing();
-  await db
-    .insert(matchup_performance)
-    .values(matchupPerformanceData)
-    .onConflictDoNothing();
+  // await db
+  //   .insert(matchup_performance)
+  //   .values(matchupPerformanceData)
+  //   .onConflictDoNothing();
   console.log("✅ Matchups and performances seeded");
 };

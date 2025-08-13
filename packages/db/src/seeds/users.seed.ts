@@ -8,7 +8,11 @@ export const usersData: (typeof users.$inferInsert)[] = [
     emailAddress: "admin@example.com",
     walletAddress: "0x742d35Cc691C0532925a3b8D7c57B6e8D4C4CE89",
     paraUserId: "550e8400-e29b-41d4-a716-446655440001",
-    roleId: "550e8400-e29b-41d4-a716-446655440001",
+    firstName: "Admin",
+    lastName: "Person",
+    userName: "IamAdmin",
+    avatar:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-01-15T10:00:00Z"),
   },
   {
@@ -16,7 +20,11 @@ export const usersData: (typeof users.$inferInsert)[] = [
     emailAddress: "fantasy@example.com",
     walletAddress: "0x8ba1f109551bD432803012645Hac136c9",
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
-    roleId: "550e8400-e29b-41d4-a716-446655440002",
+    firstName: "Fantasy",
+    lastName: "Lover",
+    userName: "fantasylover12",
+    avatar:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-10T14:30:00Z"),
   },
   {
@@ -24,7 +32,11 @@ export const usersData: (typeof users.$inferInsert)[] = [
     emailAddress: "nfl@example.com",
     walletAddress: "0x1234567890abcdef1234567890abcdef12345678",
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
-    roleId: "550e8400-e29b-41d4-a716-446655440002",
+    firstName: "NFL",
+    lastName: "Fan",
+    userName: "NFLfan987",
+    avatar:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-12T09:15:00Z"),
   },
   {
@@ -32,7 +44,11 @@ export const usersData: (typeof users.$inferInsert)[] = [
     emailAddress: "touchdown_master@example.com",
     walletAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
-    roleId: "550e8400-e29b-41d4-a716-446655440002",
+    firstName: "Touchdown",
+    lastName: "Master",
+    userName: "TouchdownMaster",
+    avatar:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-14T16:45:00Z"),
   },
   {
@@ -40,7 +56,11 @@ export const usersData: (typeof users.$inferInsert)[] = [
     emailAddress: "draft_genius@example.com",
     walletAddress: "0xfedcba0987654321fedcba0987654321fedcba09",
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
-    roleId: "550e8400-e29b-41d4-a716-446655440002",
+    firstName: "Draft",
+    lastName: "Genius",
+    userName: "DraftGenius",
+    avatar:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-16T11:20:00Z"),
   },
 ];

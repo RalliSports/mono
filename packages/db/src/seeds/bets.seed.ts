@@ -2,7 +2,7 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { bets } from "@repo/db";
 import * as schema from "@repo/db";
 
-export const predictionsData: (typeof bets.$inferInsert)[] = [
+export const betsData: (typeof bets.$inferInsert)[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440100",
     participantId: "550e8400-e29b-41d4-a716-446655440090",
@@ -45,7 +45,7 @@ export const predictionsData: (typeof bets.$inferInsert)[] = [
   },
 ];
 
-export const seedPredictions = async (db: NodePgDatabase<typeof schema>) => {
-  await db.insert(bets).values(predictionsData).onConflictDoNothing();
-  console.log("✅ Predictions seeded");
+export const seedBets = async (db: NodePgDatabase<typeof schema>) => {
+  await db.insert(bets).values(betsData).onConflictDoNothing();
+  console.log("✅ Bets seeded");
 };

@@ -1,1 +1,0 @@
-ALTER TABLE "participants" DROP COLUMN "txn_id";
