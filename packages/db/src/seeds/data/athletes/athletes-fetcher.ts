@@ -2,7 +2,41 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 
-export const TEAMS = [11, 13, 26, 33];
+export const TEAMS = [1];
+// [
+//   22, // Arizona Cardinals
+//   1, // Atlanta Falcons
+//   33, // Baltimore Ravens
+//   2, // Buffalo Bills
+//   29, // Carolina Panthers
+//   3, // Chicago Bears
+//   4, // Cincinnati Bengals
+//   5, // Cleveland Browns
+//   6, // Dallas Cowboys
+//   7, // Denver Broncos
+//   8, // Detroit Lions
+//   9, // Green Bay Packers
+//   34, // Houston Texans
+//   11, // Indianapolis Colts
+//   30, // Jacksonville Jaguars
+//   12, // Kansas City Chiefs
+//   13, // Las Vegas Raiders
+//   24, // Los Angeles Chargers
+//   14, // Los Angeles Rams
+//   15, // Miami Dolphins
+//   16, // Minnesota Vikings
+//   17, // New England Patriots
+//   18, // New Orleans Saints
+//   19, // New York Giants
+//   20, // New York Jets
+//   21, // Philadelphia Eagles
+//   23, // Pittsburgh Steelers
+//   25, // San Francisco 49ers
+//   26, // Seattle Seahawks
+//   27, // Tampa Bay Buccaneers
+//   10, // Tennessee Titans
+//   28, // Washington Commanders
+// ];
 //Indianapolis colts, Las Vegas raiders, Seattle Seahawks, Baltimore ravens
 export const BASE_URL =
   "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl";
@@ -11,7 +45,9 @@ export const REGION = "us";
 
 export interface SeederAthlete {
   name: string;
+  espnAthleteId: string;
   team: string;
+  espnTeamId: string;
   position: string;
   jerseyNumber: number;
   age: number | null;
@@ -61,11 +97,13 @@ export async function fetchAthleteDetails(
       `${data.firstName} ${data.lastName}` ||
       "Unknown Name",
     team: data.team?.displayName || "Unknown Team",
+    espnTeamId: data.team?.id || "Unknown espnTeamId",
     position:
       data.position?.name || data.position?.displayName || "Unknown Position",
     jerseyNumber: data.jersey ? parseInt(data.jersey) : 0,
     age,
     picture,
+    espnAthleteId: data.id,
   };
 }
 
@@ -95,6 +133,7 @@ export const fetchAthletes = async () => {
         try {
           const athlete = await fetchAthleteDetails(athleteRef);
           athlete.team = teamName;
+          athlete.espnTeamId = teamId.toString();
           allAthletes.push(athlete);
           console.log(`Fetched athlete: ${JSON.stringify(athlete)}`);
         } catch (err) {

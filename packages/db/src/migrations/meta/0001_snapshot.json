@@ -1,6 +1,6 @@
 {
-  "id": "00309f99-f32f-45fa-9e59-a642ab766c83",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "a700f6fe-bdbc-42e0-b54a-c51694c10a1f",
+  "prevId": "00309f99-f32f-45fa-9e59-a642ab766c83",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -60,12 +60,6 @@
         "team_id": {
           "name": "team_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "espn_team_id": {
-          "name": "espn_team_id",
-          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
