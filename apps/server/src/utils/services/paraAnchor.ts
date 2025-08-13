@@ -27,10 +27,12 @@ import {
 import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
 import { RalliBet } from '../idl/ralli_bet';
+import 'dotenv/config';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
+const ADMIN_KEYPAIR_JSON = process.env.ADMIN_KEYPAIR_JSON;
 
-const secretKey = Uint8Array.from(JSON.parse(process.env.ADMIN_KEYPAIR_JSON!));
+const secretKey = Uint8Array.from(JSON.parse(ADMIN_KEYPAIR_JSON!));
 const adminKeypair = Keypair.fromSecretKey(secretKey);
 
 export class ParaAnchor {
@@ -179,7 +181,7 @@ export class ParaAnchor {
     startsAt: number,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(true); // useAdminSigner
+    const program = await this.getProgram(false); // useAdminSigner
     const _lineId = new BN(lineId);
     const _athleteId = new BN(athleteId);
     const _startsAt = new BN(startsAt);

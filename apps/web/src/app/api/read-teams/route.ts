@@ -1,48 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-interface Pick {
-  lineId: string
-  predictedDirection: 'over' | 'under'
-}
-
-interface CreateBetRequest {
-  gameId: string
-  bets: Pick[]
-}
-
-// Validation function
-function validateCreateBetData(data: CreateBetRequest): data is CreateBetRequest {
-  return (
-    typeof data.gameId === 'string' &&
-    Array.isArray(data.bets) &&
-    data.bets.every((pick: Pick) => typeof pick.lineId === 'string' && typeof pick.predictedDirection === 'string')
-  )
-}
-
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Get the backend URL from environment variables
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL
 
     if (!backendUrl) {
       return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 })
-    }
-
-    // Parse the request body
-    const body = await request.json()
-
-    // Validate the data structure
-    if (!validateCreateBetData(body)) {
-      return NextResponse.json(
-        {
-          error: 'Invalid data format',
-          required: {
-            gameId: 'string',
-            bets: 'array',
-          },
-        },
-        { status: 400 },
-      )
     }
 
     // Extract the JWT token from the request headers
@@ -60,13 +24,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}/api/v1/submit-bets`, {
-      method: 'POST',
+    const response = await fetch(`${backendUrl}/api/v1/teams`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...(tokenString && { 'x-para-session': tokenString }),
       },
-      body: JSON.stringify(body),
     })
 
     console.log(response, 'response')
@@ -86,6 +49,16 @@ export async function POST(request: NextRequest) {
 
     // Parse and return the backend response
     const data = await response.json()
+    if (data.error) {
+      return NextResponse.json(
+        {
+          error: 'Backend request failed',
+          details: data.error,
+          status: response.status,
+        },
+        { status: response.status },
+      )
+    }
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('Create game API error:', error)

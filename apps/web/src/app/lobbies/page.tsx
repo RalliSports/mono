@@ -6,13 +6,11 @@ import LobbyCard from '@/components/main-feed/lobby-card'
 import SidebarNav from '@/components/ui/sidebar-nav'
 import { ParaButton } from '@/components/para-modal'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
-import { useAccount } from '@getpara/react-sdk'
 import { fetchGames } from '@/hooks/get-games'
 import type { Lobby } from '@/hooks/get-games'
 
 export default function LobbiesPage() {
   const router = useRouter()
-  const account = useAccount()
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [mounted, setMounted] = useState(false)
@@ -89,7 +87,7 @@ export default function LobbiesPage() {
     const matchesSearch =
       lobby.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lobby.sport.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lobby.host.name.toLowerCase().includes(searchQuery.toLowerCase())
+      lobby.host.username.toLowerCase().includes(searchQuery.toLowerCase())
 
     return matchesFilter && matchesSearch
   })
@@ -406,7 +404,7 @@ export default function LobbiesPage() {
             <div className="bg-[#FFAB91]/20 border border-[#FFAB91]/30 rounded-xl px-4 py-2 flex items-center space-x-2">
               <span className="text-[#FFAB91]">🔍</span>
               <span className="text-[#FFAB91] font-semibold text-sm">
-                Found {filteredLobbies.length} results for "{searchQuery}"
+                Found {filteredLobbies.length} results for &quot;{searchQuery}&quot;
               </span>
               {searchQuery && (
                 <button

@@ -111,7 +111,7 @@ CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"first_name" text,
 	"last_name" text,
-	"user_name" text,
+	"username" text,
 	"avatar" text,
 	"wallet_address" varchar,
 	"email_address" varchar,

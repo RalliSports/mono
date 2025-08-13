@@ -36,7 +36,7 @@ export class UserService {
       .set({
         firstName: dto.firstName,
         lastName: dto.lastName,
-        userName: dto.userName,
+        username: dto.username,
         avatar: dto.avatar,
       })
       .where(eq(users.id, user.id))

@@ -70,4 +70,8 @@ export class TeamService {
   async remove(teamId: string) {
     return await this.db.delete(teams).where(eq(teams.id, teamId));
   }
+
+  async getAllTeams() {
+    return await this.db.query.teams.findMany();
+  }
 }

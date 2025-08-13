@@ -15,7 +15,7 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   firstName: text("first_name"),
   lastName: text("last_name"),
-  userName: text("user_name"),
+  username: text("username"),
   avatar: text("avatar"),
   walletAddress: varchar("wallet_address"),
   emailAddress: varchar("email_address"),
