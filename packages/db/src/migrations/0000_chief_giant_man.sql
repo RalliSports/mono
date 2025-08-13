@@ -15,7 +15,6 @@ CREATE TABLE "athletes" (
 	"age" integer,
 	"picture" varchar,
 	"team_id" uuid,
-	"espn_team_id" varchar,
 	"created_at" timestamp DEFAULT now(),
 	CONSTRAINT "athletes_custom_id_unique" UNIQUE("custom_id")
 );

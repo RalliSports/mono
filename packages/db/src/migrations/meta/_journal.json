@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1755125728270,
-      "tag": "0000_steep_grandmaster",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1755126376172,
-      "tag": "0001_chief_hydra",
+      "when": 1755128434777,
+      "tag": "0000_chief_giant_man",
       "breakpoints": true
     }
   ]

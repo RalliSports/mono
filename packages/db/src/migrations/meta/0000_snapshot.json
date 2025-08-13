@@ -1,5 +1,5 @@
 {
-  "id": "00309f99-f32f-45fa-9e59-a642ab766c83",
+  "id": "48cc6638-a33a-4b08-a138-e8c2e08a9cb4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -60,12 +60,6 @@
         "team_id": {
           "name": "team_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "espn_team_id": {
-          "name": "espn_team_id",
-          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },

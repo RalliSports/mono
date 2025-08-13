@@ -1,1 +1,0 @@
-ALTER TABLE "athletes" DROP COLUMN "espn_team_id";
