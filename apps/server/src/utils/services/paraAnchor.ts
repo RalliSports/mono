@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { AnchorProvider, BN, Idl, Program } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import ParaServer from '@getpara/server-sdk';
