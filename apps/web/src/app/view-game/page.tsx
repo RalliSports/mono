@@ -15,6 +15,7 @@ interface GameMode {
 interface Creator {
   id: string
   walletAddress: string
+  username: string
   emailAddress: string | null
   paraUserId: string
   createdAt: string
@@ -70,7 +71,7 @@ interface Participant {
   isWinner: boolean
   txnId: string | null
   user: Creator
-  predictions: Prediction[]
+  bets: Prediction[]
 }
 
 interface Game {
@@ -82,7 +83,7 @@ interface Game {
   createdAt: string
   status: string
   maxParticipants: number
-  maxBet: number | null
+  numBets: number | null
   gameCode: string
   matchupGroup: string
   depositToken: string
@@ -188,7 +189,7 @@ function ViewGameContent() {
                       className="w-16 h-16 object-cover rounded-xl"
                       onError={(e) => {
                         e.currentTarget.onerror = null
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator.walletAddress)}&background=0D8ABC&color=fff&size=128`
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator.username)}&background=0D8ABC&color=fff&size=128`
                       }}
                     />
                   ) : (
@@ -209,7 +210,7 @@ function ViewGameContent() {
                       {lobby.participants.length}/{lobby.maxParticipants} players
                     </span>
                     <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
-                    <span className="text-slate-400 text-sm">{lobby.maxBet} legs</span>
+                    <span className="text-slate-400 text-sm">{lobby.numBets} legs</span>
                   </div>
                 </div>
               </div>
@@ -261,27 +262,27 @@ function ViewGameContent() {
                       <div className="flex items-center gap-4">
                         <div className="relative">
                           <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
-                            {participant.user.walletAddress ? (
+                            {participant.user.username ? (
                               <img
-                                src={`/users/${participant.user.walletAddress.toLowerCase().replace(/\s+/g, '-')}.png`}
-                                alt={participant.user.walletAddress}
+                                src={`/users/${participant.user.username.toLowerCase().replace(/\s+/g, '-')}.png`}
+                                alt={participant.user.username}
                                 className="w-14 h-14 object-cover rounded-xl"
                                 onError={(e) => {
                                   e.currentTarget.onerror = null
-                                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user.walletAddress)}&background=0D8ABC&color=fff&size=128`
+                                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user.username)}&background=0D8ABC&color=fff&size=128`
                                 }}
                               />
                             ) : (
-                              <span className="text-white font-bold text-2xl">{participant.user.walletAddress}</span>
+                              <span className="text-white font-bold text-2xl">{participant.user.username}</span>
                             )}
                           </div>
-                          {participant.user.walletAddress === lobby.creator.walletAddress && (
+                          {participant.user.username === lobby.creator.username && (
                             <div className="absolute -top-1 -left-1 text-sm">👑</div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="text-white font-bold text-base leading-tight truncate">
-                            {participant.user.walletAddress}
+                            {participant.user.username}
                           </h4>
                           <p className="text-slate-400 text-sm mt-1">
                             Joined {new Date(participant.joinedAt).toLocaleDateString()} • ${lobby.depositAmount}
@@ -291,9 +292,7 @@ function ViewGameContent() {
 
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="text-sm text-slate-300 font-medium">
-                            {participant.predictions.length} picks
-                          </div>
+                          <div className="text-sm text-slate-300 font-medium">{participant.bets.length} picks</div>
                           <div className="text-xs text-slate-500">Ready to play</div>
                         </div>
                         <div
@@ -309,7 +308,7 @@ function ViewGameContent() {
                     {/* Enhanced Quick Picks Preview */}
                     <div className="mt-4">
                       <div className="flex gap-1.5">
-                        {participant.predictions.slice(0, 4).map((pick, index) => (
+                        {participant.bets.slice(0, 4).map((pick, index) => (
                           <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-blue-400 to-blue-500"
@@ -326,12 +325,12 @@ function ViewGameContent() {
                 {isParticipantExpanded(participant.id) && (
                   <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden animate-in slide-in-from-top-2 duration-300 shadow-2xl shadow-[#00CED1]/10">
                     <div className="p-4 border-b border-slate-700/50">
-                      <h5 className="text-white font-bold truncate">{participant.user.walletAddress}'s Picks</h5>
-                      <p className="text-slate-400 text-sm">{participant.predictions.length} legs selected</p>
+                      <h5 className="text-white font-bold truncate">{participant.user.username}'s Picks</h5>
+                      <p className="text-slate-400 text-sm">{participant.bets.length} legs selected</p>
                     </div>
 
                     <div className="divide-y divide-slate-700/30">
-                      {participant.predictions.map((pick) => (
+                      {participant.bets.map((pick) => (
                         <div key={pick.id} className="p-4 hover:bg-slate-700/20 transition-all duration-200">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 min-w-0 flex-1">

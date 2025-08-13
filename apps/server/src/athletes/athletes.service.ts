@@ -14,7 +14,15 @@ export class AthletesService {
   ) {}
 
   async getAllAthletes() {
-    return this.db.query.athletes.findMany();
+    return this.db.query.athletes.findMany({
+      with: {
+        team: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+    });
   }
 
   async getActiveAthletesWithUnresolvedLines() {
@@ -40,11 +48,17 @@ export class AthletesService {
                     name: true,
                     city: true,
                     avatar: true,
+                    abbreviation: true,
                   },
                 },
                 awayTeam: {
                   columns: {
                     id: true,
+
+                    name: true,
+                    city: true,
+                    avatar: true,
+                    abbreviation: true,
                   },
                 },
               },

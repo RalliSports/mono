@@ -78,4 +78,15 @@ export class TeamController {
   remove(@Param('teamId') teamId: string) {
     return this.teamService.remove(teamId);
   }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiResponse({
+    status: 200,
+    type: [TeamResponseDto],
+  })
+  @Get('/teams')
+  getAllTeams() {
+    return this.teamService.getAllTeams();
+  }
 }

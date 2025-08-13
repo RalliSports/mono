@@ -28,8 +28,16 @@ interface Line {
   }
   matchup: {
     id: string
-    homeTeam: string
-    awayTeam: string
+    homeTeam: {
+      id: string
+      name: string
+      abbreviation: string
+    }
+    awayTeam: {
+      id: string
+      name: string
+      abbreviation: string
+    }
     gameDate: Date
     status: string
     scoreHome: number
@@ -78,7 +86,7 @@ interface Game {
   status: string
 
   maxParticipants: number
-  maxBet: number
+  numBets: number
 
   gameCode: string
 
@@ -242,7 +250,7 @@ function PicksContent() {
   const handlePaymentConfirm = async () => {
     const apiData = {
       gameId: gameId,
-      predictions: selectedPicks,
+      bets: selectedPicks,
     }
     const response = await fetch('/api/create-bet', {
       method: 'POST',
@@ -271,7 +279,11 @@ function PicksContent() {
     return null
   }
 
-  const legsRequired = game?.maxBet || 4
+  if (!game) {
+    return <div>Loading...</div>
+  }
+
+  const legsRequired = game?.numBets || 4
   const buyIn = game?.depositAmount || 25
   const gameName = game?.title || 'Game'
   return (
@@ -599,8 +611,8 @@ function AthletePickCard({
               <div className="flex items-center space-x-2">
                 <span className="text-slate-300 font-semibold text-sm">{athlete.team}</span>
                 <div className="text-slate-400 font-medium text-sm">
-                  {athlete.lines[currentStatIndex].matchup.homeTeam} vs{' '}
-                  {athlete.lines[currentStatIndex].matchup.awayTeam}
+                  {athlete.lines[currentStatIndex].matchup.homeTeam.abbreviation} vs{' '}
+                  {athlete.lines[currentStatIndex].matchup.awayTeam.abbreviation}
                 </div>
               </div>
             </div>

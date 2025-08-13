@@ -14,7 +14,20 @@ export class MatchupsService {
   ) {}
 
   async getAllMatchups() {
-    return this.db.query.matchups.findMany();
+    return this.db.query.matchups.findMany({
+      with: {
+        homeTeam: {
+          columns: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+    });
   }
   async getMatchupById(id: string) {
     const matchup = await this.db.query.matchups.findFirst({

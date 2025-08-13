@@ -15,7 +15,7 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  userName: string;
+  username: string;
 
   @ApiProperty({
     description: 'User avatar URL',

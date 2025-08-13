@@ -10,7 +10,7 @@ export const usersData: (typeof users.$inferInsert)[] = [
     paraUserId: "550e8400-e29b-41d4-a716-446655440001",
     firstName: "Admin",
     lastName: "Person",
-    userName: "IamAdmin",
+    username: "IamAdmin",
     avatar:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-01-15T10:00:00Z"),
@@ -22,7 +22,7 @@ export const usersData: (typeof users.$inferInsert)[] = [
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
     firstName: "Fantasy",
     lastName: "Lover",
-    userName: "fantasylover12",
+    username: "fantasylover12",
     avatar:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-10T14:30:00Z"),
@@ -34,7 +34,7 @@ export const usersData: (typeof users.$inferInsert)[] = [
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
     firstName: "NFL",
     lastName: "Fan",
-    userName: "NFLfan987",
+    username: "NFLfan987",
     avatar:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-12T09:15:00Z"),
@@ -46,7 +46,7 @@ export const usersData: (typeof users.$inferInsert)[] = [
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
     firstName: "Touchdown",
     lastName: "Master",
-    userName: "TouchdownMaster",
+    username: "TouchdownMaster",
     avatar:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-14T16:45:00Z"),
@@ -58,7 +58,7 @@ export const usersData: (typeof users.$inferInsert)[] = [
     paraUserId: "550e8400-e29b-41d4-a716-446655440002",
     firstName: "Draft",
     lastName: "Genius",
-    userName: "DraftGenius",
+    username: "DraftGenius",
     avatar:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kansas_City_Chiefs_logo.svg/1200px-Kansas_City_Chiefs_logo.svg.png",
     createdAt: new Date("2024-02-16T11:20:00Z"),

@@ -109,6 +109,7 @@ function JoinGameContent() {
     const fetchGame = async () => {
       const response = await fetch(`/api/read-game?id=${lobbyId}`)
       const data = await response.json()
+      console.log('data', data)
       setLobby(data)
     }
     if (lobbyId) {
@@ -353,7 +354,7 @@ function JoinGameContent() {
                     {/* Enhanced Quick Picks Preview */}
                     <div className="mt-4">
                       <div className="flex gap-1.5">
-                        {participant.predictions.slice(0, 4).map((pick, index) => (
+                        {participant.predictions.slice(0, 4).map((pick) => (
                           <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-blue-400 to-blue-500"
@@ -370,7 +371,7 @@ function JoinGameContent() {
                 {isParticipantExpanded(participant.id) && (
                   <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden animate-in slide-in-from-top-2 duration-300 shadow-2xl shadow-[#00CED1]/10">
                     <div className="p-4 border-b border-slate-700/50">
-                      <h5 className="text-white font-bold truncate">{participant.user.walletAddress}'s Picks</h5>
+                      <h5 className="text-white font-bold truncate">{participant.user.walletAddress}&apos;s Picks</h5>
                       <p className="text-slate-400 text-sm">{participant.predictions.length} legs selected</p>
                     </div>
 

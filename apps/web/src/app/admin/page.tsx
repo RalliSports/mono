@@ -17,10 +17,20 @@ interface Stat {
   createdAt: string
 }
 
+interface Team {
+  id: string
+  name: string
+  city: string
+  country: string
+  createdAt: Date
+}
+
 interface Player {
   id: string
   name: string
-  team: string
+  team: {
+    name: string
+  }
   jerseyNumber: number
   position: string
   age: number
@@ -48,8 +58,8 @@ interface Line {
   }
   matchup: {
     id: string
-    homeTeam: string
-    awayTeam: string
+    homeTeam: Team
+    awayTeam: Team
     gameDate: Date
     status: string
     scoreHome: number
@@ -131,8 +141,8 @@ interface Game {
 
 interface MatchUp {
   id: string
-  homeTeam: string
-  awayTeam: string
+  homeTeam: Team
+  awayTeam: Team
   date: Date
 }
 
@@ -144,6 +154,21 @@ function AdminPageContent() {
   const { session } = useSessionToken()
 
   const { addToast } = useToast()
+  const [teams, setTeams] = useState<Team[]>([])
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      const response = await fetch('/api/read-teams', {
+        method: 'GET',
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      const data = await response.json()
+      setTeams(data)
+    }
+    fetchTeams()
+  }, [session])
   const [activeTab, setActiveTab] = useState<
     'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games' | 'matchups'
   >('stats')
@@ -330,9 +355,20 @@ function AdminPageContent() {
 
   // New matchup form state
   const [newMatchUp, setNewMatchUp] = useState({
-    homeTeam: '',
-    awayTeam: '',
-    sport: '',
+    homeTeam: {
+      id: '',
+      name: '',
+      city: '',
+      country: '',
+      createdAt: new Date(),
+    },
+    awayTeam: {
+      id: '',
+      name: '',
+      city: '',
+      country: '',
+      createdAt: new Date(),
+    },
     date: '',
   })
 
@@ -507,12 +543,12 @@ function AdminPageContent() {
     }
 
     const apiData = {
-      homeTeamId: newMatchUp.homeTeam,
-      awayTeamId: newMatchUp.awayTeam,
+      homeTeamId: newMatchUp.homeTeam.id,
+      awayTeamId: newMatchUp.awayTeam.id,
       startsAtTimestamp: matchDate.getTime(),
     }
 
-    await fetch('/api/create-matchup', {
+    const response = await fetch('/api/create-matchup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -521,12 +557,9 @@ function AdminPageContent() {
       body: JSON.stringify(apiData),
     })
 
-    setNewMatchUp({
-      homeTeam: '',
-      awayTeam: '',
-      sport: '',
-      date: '',
-    })
+    const result = await response.json()
+    console.log('result', result)
+
     addToast('Match-up created successfully!', 'success')
   }
 
@@ -535,7 +568,7 @@ function AdminPageContent() {
     const matchesSearch =
       line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       line.stat.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSport = selectedSport === 'all' || line.matchup.homeTeam === selectedSport
+    const matchesSport = selectedSport === 'all' || line.matchup.homeTeam.name === selectedSport
     return matchesSearch && matchesSport
   })
 
@@ -983,7 +1016,7 @@ function AdminPageContent() {
                         { value: '', label: 'Select a player', disabled: true },
                         ...players.map((player) => ({
                           value: player.id,
-                          label: `${player.name} (${player.team})`,
+                          label: `${player.name} (${player.team.name})`,
                           icon: '👤',
                         })),
                       ]}
@@ -1036,7 +1069,7 @@ function AdminPageContent() {
                       <option value="">Select a game</option>
                       {matchUps.map((matchUp) => (
                         <option key={matchUp.id} value={matchUp.id}>
-                          {matchUp.homeTeam} vs {matchUp.awayTeam}
+                          {matchUp.homeTeam.name} vs {matchUp.awayTeam.name}
                         </option>
                       ))}
                     </select>
@@ -1408,33 +1441,41 @@ function AdminPageContent() {
                   <h4 className="text-lg font-semibold text-white mb-4">Create New Match-up</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Home Team</label>
-                      <input
-                        type="text"
-                        value={newMatchUp.homeTeam}
-                        onChange={(e) =>
-                          setNewMatchUp({
-                            ...newMatchUp,
-                            homeTeam: e.target.value,
-                          })
+                      <label className="block text-white font-semibold mb-2">Select Player</label>
+                      <Dropdown
+                        value={newMatchUp.homeTeam.id}
+                        onChange={(value) =>
+                          setNewMatchUp({ ...newMatchUp, homeTeam: { ...newMatchUp.homeTeam, id: value } })
                         }
-                        placeholder="e.g., Los Angeles Lakers"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                        placeholder="Select the home team"
+                        options={[
+                          { value: '', label: 'Select the home team', disabled: true },
+                          ...teams.map((team) => ({
+                            value: team.id,
+                            label: `${team.name}`,
+                            icon: '👤',
+                          })),
+                        ]}
+                        searchable={true}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Away Team</label>
-                      <input
-                        type="text"
-                        value={newMatchUp.awayTeam}
-                        onChange={(e) =>
-                          setNewMatchUp({
-                            ...newMatchUp,
-                            awayTeam: e.target.value,
-                          })
+                      <label className="block text-white font-semibold mb-2">Select Player</label>
+                      <Dropdown
+                        value={newMatchUp.awayTeam.id}
+                        onChange={(value) =>
+                          setNewMatchUp({ ...newMatchUp, awayTeam: { ...newMatchUp.awayTeam, id: value } })
                         }
-                        placeholder="e.g., Golden State Warriors"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                        placeholder="Select the away team"
+                        options={[
+                          { value: '', label: 'Select the away team', disabled: true },
+                          ...teams.map((team) => ({
+                            value: team.id,
+                            label: `${team.name}`,
+                            icon: '👤',
+                          })),
+                        ]}
+                        searchable={true}
                       />
                     </div>
                     <div>
@@ -1481,7 +1522,7 @@ function AdminPageContent() {
                           </div>
                           <div className="ml-6">
                             <h4 className="text-xl font-bold text-white mb-1">
-                              {matchUp.homeTeam} vs {matchUp.awayTeam}
+                              {matchUp.homeTeam.name} vs {matchUp.awayTeam.name}
                             </h4>
                             {/* <div className="flex items-center space-x-2 mb-1">
                               <span className="text-lg">{sports.find((s) => s.name === matchUp.sport)?.icon}</span>

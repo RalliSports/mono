@@ -6,6 +6,7 @@ import { useSessionToken } from '@/hooks/use-session'
 import { toast, ToastContainer } from 'react-toastify'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
+import { RALLI_TOKEN } from '@/constants'
 
 //check if para is connected else kick back to /signin
 
@@ -48,11 +49,11 @@ export default function CreateGame() {
     matchupGroup: 'TEST',
     isPrivate: false,
     //TODO: Update depositToken when live
-    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+    depositToken: RALLI_TOKEN,
     type: 'limited',
     userControlType: 'none',
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
-    maxBets: 10, // Default max bets
+    numBets: 10, // Default Number of Bets
   })
 
   const isValidUUID = (uuid: string) =>
@@ -67,7 +68,8 @@ export default function CreateGame() {
       errors.depositAmount = 'Deposit must be between $5 and $500.'
     if (gameSettings.maxParticipants < 2 || gameSettings.maxParticipants > 20)
       errors.maxParticipants = 'Participants must be between 2 and 20.'
-    if (gameSettings.maxBets < 1 || gameSettings.maxBets > 50) errors.maxBets = 'Max bets must be between 1 and 50.'
+    if (gameSettings.numBets < 1 || gameSettings.numBets > 50)
+      errors.numBets = 'Number of Bets must be between 2 and 50.'
     if (!['1v1', 'limited', 'unlimited'].includes(gameSettings.type)) errors.type = 'Invalid contest type.'
     if (!['none', 'whitelist', 'blacklist'].includes(gameSettings.userControlType))
       errors.userControlType = 'Invalid user control type.'
@@ -98,7 +100,7 @@ export default function CreateGame() {
       depositAmount: gameSettings.depositAmount,
       currency: 'USD',
       maxParticipants: gameSettings.maxParticipants,
-      maxBets: gameSettings.maxBets,
+      numBets: gameSettings.numBets,
       matchupGroup: gameSettings.matchupGroup,
       //TODO: Update depositToken when live
       depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
@@ -140,6 +142,7 @@ export default function CreateGame() {
         }, 1000)
       } else {
         setCreatingGameState('error')
+        console.log('result', result)
         if (Array.isArray(result.message)) {
           result.message.forEach((msg: string) => toast.error(msg))
         } else {
@@ -278,7 +281,7 @@ export default function CreateGame() {
             </div>
             {gameSettings.title.length > 0 && (
               <div className="mt-3 p-3 bg-[#00CED1]/5 border border-[#00CED1]/20 rounded-lg">
-                <p className="text-[#00CED1] text-sm font-medium">Preview: "{gameSettings.title}"</p>
+                <p className="text-[#00CED1] text-sm font-medium">Preview: &quot;{gameSettings.title}&quot;</p>
               </div>
             )}
           </div>
@@ -345,28 +348,28 @@ export default function CreateGame() {
             </div>
           </div>
 
-          {/* Max Bets */}
+          {/* Number of Bets */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-teal-400/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-teal-500/20 to-teal-400/10 rounded-lg flex items-center justify-center border border-teal-400/20">
                 <span className="text-lg">🎲</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Max Bets</h3>
+                <h3 className="text-white font-bold">Number of Bets</h3>
                 <p className="text-slate-400 text-xs">Maximum bets allowed per participant</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 mb-2">
               <input
                 type="range"
-                value={gameSettings.maxBets}
-                onChange={(e) => handleInputChange('maxBets', parseInt(e.target.value))}
+                value={gameSettings.numBets}
+                onChange={(e) => handleInputChange('numBets', parseInt(e.target.value))}
                 min="2"
                 max="50"
                 step="1"
                 className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
               />
-              <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">{gameSettings.maxBets}</span>
+              <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">{gameSettings.numBets}</span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
               <span>2</span>

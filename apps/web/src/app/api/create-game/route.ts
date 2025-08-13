@@ -7,7 +7,7 @@ interface CreateGameRequest {
   depositAmount: number
   currency: string
   maxParticipants: number
-  maxBets: number
+  numBets: number
   matchupGroup: string
   depositToken: string
   isPrivate: boolean
@@ -23,7 +23,7 @@ function validateCreateGameData(data: any): data is CreateGameRequest {
     typeof data.depositAmount === 'number' &&
     typeof data.currency === 'string' &&
     typeof data.maxParticipants === 'number' &&
-    typeof data.maxBets === 'number' &&
+    typeof data.numBets === 'number' &&
     typeof data.matchupGroup === 'string' &&
     typeof data.depositToken === 'string' &&
     typeof data.isPrivate === 'boolean' &&
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
             depositAmount: 'number',
             currency: 'string',
             maxParticipants: 'number',
-            maxBets: 'number',
+            numBets: 'number',
             matchupGroup: 'string',
             depositToken: 'string',
             isPrivate: 'boolean',

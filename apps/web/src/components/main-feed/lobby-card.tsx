@@ -14,7 +14,7 @@ interface LobbyCardProps {
   legs: number
   timeLeft: string
   host: {
-    name: string
+    username: string
     avatar: string
   }
   isUrgent?: boolean
@@ -47,14 +47,14 @@ export default function LobbyCard({
         {/* Host Info Header */}
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-            {host.name ? (
+            {host.avatar ? (
               <img
-                src={`/users/${host.name.toLowerCase().replace(/\s+/g, '-')}.png`}
-                alt={host.name}
+                src={host.avatar}
+                alt={host.username}
                 className="w-12 h-12 object-cover rounded-full"
                 onError={(e) => {
                   e.currentTarget.onerror = null
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(host.name)}&background=0D8ABC&color=fff&size=128`
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(host.username)}&background=0D8ABC&color=fff&size=128`
                 }}
               />
             ) : (
@@ -63,7 +63,7 @@ export default function LobbyCard({
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <h4 className="text-white font-bold text-base">{host.name}</h4>
+              <h4 className="text-white font-bold text-base">{host.username}</h4>
               <span className="text-slate-400 text-sm">created a lobby</span>
             </div>
             <p className="text-slate-300 text-xs">
