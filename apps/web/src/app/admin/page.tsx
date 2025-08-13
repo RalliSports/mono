@@ -981,7 +981,7 @@ function AdminPageContent() {
                           <div className="flex-1">
                             <h4 className="text-white font-semibold">{player.name}</h4>
                             <div className="flex items-center space-x-2 text-sm">
-                              <span className="text-slate-300">{player.team}</span>
+                              <span className="text-slate-300">{player.team.name}</span>
                               <span className="text-slate-400">#{player.jerseyNumber}</span>
                               <span className="text-slate-400">{player.position}</span>
                               <span className="text-slate-400">Age: {player.age}</span>
@@ -1187,7 +1187,7 @@ function AdminPageContent() {
                         <div>
                           <div className="text-sm text-slate-400">Game</div>
                           <div className="text-white font-semibold">
-                            {line.matchup.homeTeam} vs {line.matchup.awayTeam}
+                            {line.matchup.homeTeam.name} vs {line.matchup.awayTeam.name}
                           </div>
                         </div>
                       </div>
