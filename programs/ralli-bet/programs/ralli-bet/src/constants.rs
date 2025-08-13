@@ -5,8 +5,9 @@ pub const ADMIN_PUBKEYS: [Pubkey; 4] = [
     pubkey!("BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs"), // Jack
     pubkey!("GkiKqSVfnU2y4TeUW7up2JS9Z8g1yjGYJ8x2QNf4K6Y"), // Prakhar
     pubkey!("MNG3SoboXMyjse4ggiyBWJreNhfxyni5VJFxSLmXM5n"), // Ahindra
+
     // please add your ProgramIDs and update the array size please
-    // also after increasing the array size do increace the max_len in games.rs state too
+    
 ];
 
 pub fn is_admin(pubkey: &Pubkey) -> bool {

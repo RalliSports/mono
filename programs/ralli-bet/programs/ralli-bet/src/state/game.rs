@@ -7,8 +7,6 @@ pub struct Game {
     pub mint: Pubkey,
     pub first_line_starts_at: i64,
     pub creator: Pubkey,
-    #[max_len(4)]
-    pub admin: Vec<Pubkey>,
     #[max_len(10)]
     pub users: Vec<Pubkey>,
     pub max_users: u8,
