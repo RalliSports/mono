@@ -9,11 +9,15 @@ import {
 } from 'class-validator';
 
 export class CreateAthleteDto {
+  @ApiProperty({ description: 'ESPN athlete ID' })
+  @IsString()
+  espnAthleteId: string;
+
   @ApiProperty({ description: 'Athlete name' })
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Team name' })
+  @ApiProperty({ description: 'Team ID' })
   @IsUUID()
   teamId: string;
 

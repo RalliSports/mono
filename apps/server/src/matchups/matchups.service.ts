@@ -5,6 +5,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { CreateMatchupDto } from './dto/create-matchup.dto';
+import { MatchupStatus } from './enum/matchups';
 
 @Injectable()
 export class MatchupsService {
@@ -42,11 +43,12 @@ export class MatchupsService {
     const matchup = await this.db
       .insert(matchups)
       .values({
+        espnEventId: dto.espnEventId,
         homeTeamId: dto.homeTeamId,
         awayTeamId: dto.awayTeamId,
         startsAt: new Date(dto.startsAtTimestamp),
         gameDate: new Date(dto.startsAtTimestamp).toISOString(),
-        status: 'pending',
+        status: MatchupStatus.SCHEDULED,
         scoreHome: 0,
         scoreAway: 0,
       })

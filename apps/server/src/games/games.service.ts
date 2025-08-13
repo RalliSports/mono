@@ -5,13 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  bets,
-  game_access,
-  games,
-  lines,
-  participants
-} from '@repo/db';
+import { bets, game_access, games, lines, participants } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
 import { and, count, eq, inArray } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
@@ -252,14 +246,12 @@ export class GamesService {
         )
         .returning();
 
-      
-
       // Transaction will auto-commit if no error is thrown
       return {
         success: true,
         message: 'Joined game successfully',
         txnSignature: submitTxnSig,
-        bets: updateedBets
+        bets: updateedBets,
       };
     });
   }

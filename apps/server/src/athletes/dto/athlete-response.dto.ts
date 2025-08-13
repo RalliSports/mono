@@ -5,10 +5,13 @@ export class AthleteResponseDto {
   id: string;
 
   @ApiProperty()
+  espnAthleteId: string;
+
+  @ApiProperty()
   name: string;
 
   @ApiProperty()
-  team: string;
+  teamId: string;
 
   @ApiProperty()
   position: string;

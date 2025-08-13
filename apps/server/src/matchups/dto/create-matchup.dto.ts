@@ -4,6 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateMatchupDto {
   @ApiProperty()
   @IsString()
+  espnEventId: string;
+
+  @ApiProperty()
+  @IsString()
   homeTeamId: string;
 
   @ApiProperty()

@@ -1,17 +1,19 @@
 CREATE TYPE "public"."access_status" AS ENUM('whitelisted', 'blacklisted');--> statement-breakpoint
 CREATE TYPE "public"."type" AS ENUM('1v1', 'limited', 'unlimited');--> statement-breakpoint
 CREATE TYPE "public"."user_control_type" AS ENUM('whitelist', 'blacklist', 'none');--> statement-breakpoint
+CREATE TYPE "public"."matchup_status" AS ENUM('scheduled', 'in_progress', 'finished', 'cancelled');--> statement-breakpoint
 CREATE TYPE "public"."predicted_direction" AS ENUM('over', 'under');--> statement-breakpoint
 CREATE TYPE "public"."role_type" AS ENUM('admin', 'user', 'moderator');--> statement-breakpoint
 CREATE TYPE "public"."referral_status" AS ENUM('pending', 'completed');--> statement-breakpoint
 CREATE TABLE "athletes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"custom_id" serial NOT NULL,
+	"espn_athlete_id" varchar,
 	"name" varchar,
 	"position" varchar,
 	"jersey_number" integer,
 	"age" integer,
 	"picture" varchar,
-	"custom_id" serial NOT NULL,
 	"team_id" uuid,
 	"created_at" timestamp DEFAULT now(),
 	CONSTRAINT "athletes_custom_id_unique" UNIQUE("custom_id")
@@ -62,9 +64,10 @@ CREATE TABLE "matchup_performance" (
 --> statement-breakpoint
 CREATE TABLE "matchups" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"espn_event_id" varchar,
 	"game_date" date,
 	"starts_at" timestamp,
-	"status" varchar,
+	"status" "matchup_status",
 	"score_home" integer,
 	"score_away" integer,
 	"home_team_id" uuid,
@@ -152,6 +155,7 @@ CREATE TABLE "referrals" (
 --> statement-breakpoint
 CREATE TABLE "teams" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"espn_team_id" varchar,
 	"name" varchar(100) NOT NULL,
 	"city" varchar(100) NOT NULL,
 	"country" varchar(100) NOT NULL,
