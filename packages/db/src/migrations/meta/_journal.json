@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754603771107,
-      "tag": "0000_warm_northstar",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1754961426980,
-      "tag": "0001_strange_gideon",
+      "when": 1755046556467,
+      "tag": "0000_jazzy_domino",
       "breakpoints": true
     }
   ]

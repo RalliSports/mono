@@ -1,5 +1,5 @@
 {
-  "id": "c3dd0473-a810-4e3a-a752-ff27c30c05a6",
+  "id": "d8adb942-93a9-4a03-b812-4713ca8d2056",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -17,12 +17,6 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "team": {
-          "name": "team",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -57,6 +51,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -66,7 +66,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "athletes_team_id_teams_id_fk": {
+          "name": "athletes_team_id_teams_id_fk",
+          "tableFrom": "athletes",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "athletes_custom_id_unique": {
@@ -220,8 +234,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "max_bet": {
-          "name": "max_bet",
+        "num_bets": {
+          "name": "num_bets",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -270,8 +284,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "txn_id": {
-          "name": "txn_id",
+        "created_txn_signature": {
+          "name": "created_txn_signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolved_txn_signature": {
+          "name": "resolved_txn_signature",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -367,15 +387,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "home_team": {
-          "name": "home_team",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "away_team": {
-          "name": "away_team",
-          "type": "varchar",
+        "starts_at": {
+          "name": "starts_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -397,6 +411,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "home_team_id": {
+          "name": "home_team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "away_team_id": {
+          "name": "away_team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -406,7 +432,34 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "matchups_home_team_id_teams_id_fk": {
+          "name": "matchups_home_team_id_teams_id_fk",
+          "tableFrom": "matchups",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "home_team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "matchups_away_team_id_teams_id_fk": {
+          "name": "matchups_away_team_id_teams_id_fk",
+          "tableFrom": "matchups",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "away_team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -448,12 +501,6 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
-        },
-        "txn_id": {
-          "name": "txn_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -478,8 +525,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.predictions": {
-      "name": "predictions",
+    "public.bets": {
+      "name": "bets",
       "schema": "",
       "columns": {
         "id": {
@@ -532,13 +579,19 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "created_txn_signature": {
+          "name": "created_txn_signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "predictions_user_id_users_id_fk": {
-          "name": "predictions_user_id_users_id_fk",
-          "tableFrom": "predictions",
+        "bets_user_id_users_id_fk": {
+          "name": "bets_user_id_users_id_fk",
+          "tableFrom": "bets",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -549,9 +602,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "predictions_participant_id_participants_id_fk": {
-          "name": "predictions_participant_id_participants_id_fk",
-          "tableFrom": "predictions",
+        "bets_participant_id_participants_id_fk": {
+          "name": "bets_participant_id_participants_id_fk",
+          "tableFrom": "bets",
           "tableTo": "participants",
           "columnsFrom": [
             "participant_id"
@@ -562,9 +615,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "predictions_line_id_lines_id_fk": {
-          "name": "predictions_line_id_lines_id_fk",
-          "tableFrom": "predictions",
+        "bets_line_id_lines_id_fk": {
+          "name": "bets_line_id_lines_id_fk",
+          "tableFrom": "bets",
           "tableTo": "lines",
           "columnsFrom": [
             "line_id"
@@ -575,9 +628,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "predictions_game_id_games_id_fk": {
-          "name": "predictions_game_id_games_id_fk",
-          "tableFrom": "predictions",
+        "bets_game_id_games_id_fk": {
+          "name": "bets_game_id_games_id_fk",
+          "tableFrom": "bets",
           "tableTo": "games",
           "columnsFrom": [
             "game_id"
@@ -694,6 +747,30 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_name": {
+          "name": "user_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatar": {
+          "name": "avatar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "wallet_address": {
           "name": "wallet_address",
           "type": "varchar",
@@ -709,6 +786,12 @@
         "para_user_id": {
           "name": "para_user_id",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_been_fauceted_sol": {
+          "name": "has_been_fauceted_sol",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
@@ -785,6 +868,18 @@
         "starts_at": {
           "name": "starts_at",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_txn_signature": {
+          "name": "created_txn_signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolved_txn_signature": {
+          "name": "resolved_txn_signature",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -939,6 +1034,75 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.teams": {
+      "name": "teams",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "founded_year": {
+          "name": "founded_year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coach_name": {
+          "name": "coach_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatar": {
+          "name": "avatar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "abbreviation": {
+          "name": "abbreviation",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

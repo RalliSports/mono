@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsNumber,
+  IsOptional,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CreateAthleteDto {
   @ApiProperty({ description: 'Athlete name' })
@@ -7,8 +14,8 @@ export class CreateAthleteDto {
   name: string;
 
   @ApiProperty({ description: 'Team name' })
-  @IsString()
-  team: string;
+  @IsUUID()
+  teamId: string;
 
   @ApiProperty({ description: 'Player position' })
   @IsString()

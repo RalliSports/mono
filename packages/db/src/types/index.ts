@@ -8,11 +8,12 @@ import {
   matchup_performance,
   matchups,
   participants,
-  predictions,
+  bets,
   referrals,
   roles,
   stats,
   users,
+  teams,
 } from "../schema";
 
 export type User = InferSelectModel<typeof users>;
@@ -24,7 +25,8 @@ export type Line = InferSelectModel<typeof lines>;
 export type Matchup = InferSelectModel<typeof matchups>;
 export type MatchupPerformance = InferSelectModel<typeof matchup_performance>;
 export type Participant = InferSelectModel<typeof participants>;
-export type Prediction = InferSelectModel<typeof predictions>;
+export type Bet = InferSelectModel<typeof bets>;
 export type Referral = InferSelectModel<typeof referrals>;
 export type Role = InferSelectModel<typeof roles>;
 export type Stat = InferSelectModel<typeof stats>;
+export type Team = InferSelectModel<typeof teams>;

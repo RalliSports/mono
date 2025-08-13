@@ -7,12 +7,12 @@ CREATE TYPE "public"."referral_status" AS ENUM('pending', 'completed');--> state
 CREATE TABLE "athletes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar,
-	"team" varchar,
 	"position" varchar,
 	"jersey_number" integer,
 	"age" integer,
 	"picture" varchar,
 	"custom_id" serial NOT NULL,
+	"team_id" uuid,
 	"created_at" timestamp DEFAULT now(),
 	CONSTRAINT "athletes_custom_id_unique" UNIQUE("custom_id")
 );
@@ -41,7 +41,7 @@ CREATE TABLE "games" (
 	"created_at" timestamp with time zone DEFAULT now(),
 	"status" varchar,
 	"max_participants" integer,
-	"max_bet" integer,
+	"num_bets" integer,
 	"game_code" varchar,
 	"matchup_group" varchar,
 	"deposit_token" varchar,
@@ -49,7 +49,8 @@ CREATE TABLE "games" (
 	"type" "type",
 	"user_control_type" "user_control_type",
 	"game_mode_id" uuid,
-	"txn_id" text
+	"created_txn_signature" text,
+	"resolved_txn_signature" text
 );
 --> statement-breakpoint
 CREATE TABLE "matchup_performance" (
@@ -62,11 +63,12 @@ CREATE TABLE "matchup_performance" (
 CREATE TABLE "matchups" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"game_date" date,
-	"home_team" varchar,
-	"away_team" varchar,
+	"starts_at" timestamp,
 	"status" varchar,
 	"score_home" integer,
 	"score_away" integer,
+	"home_team_id" uuid,
+	"away_team_id" uuid,
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
@@ -75,11 +77,10 @@ CREATE TABLE "participants" (
 	"user_id" uuid,
 	"game_id" uuid,
 	"joined_at" timestamp with time zone DEFAULT now(),
-	"is_winner" boolean,
-	"txn_id" text
+	"is_winner" boolean
 );
 --> statement-breakpoint
-CREATE TABLE "predictions" (
+CREATE TABLE "bets" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid,
 	"participant_id" uuid,
@@ -87,7 +88,8 @@ CREATE TABLE "predictions" (
 	"game_id" uuid,
 	"predicted_direction" "predicted_direction",
 	"is_correct" boolean,
-	"created_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now(),
+	"created_txn_signature" text
 );
 --> statement-breakpoint
 CREATE TABLE "roles" (
@@ -107,9 +109,14 @@ CREATE TABLE "stats" (
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"first_name" text,
+	"last_name" text,
+	"user_name" text,
+	"avatar" text,
 	"wallet_address" varchar,
 	"email_address" varchar,
 	"para_user_id" text,
+	"has_been_fauceted_sol" boolean,
 	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
@@ -122,7 +129,9 @@ CREATE TABLE "lines" (
 	"actual_value" numeric,
 	"is_higher" boolean,
 	"created_at" timestamp DEFAULT now(),
-	"starts_at" timestamp
+	"starts_at" timestamp,
+	"created_txn_signature" text,
+	"resolved_txn_signature" text
 );
 --> statement-breakpoint
 CREATE TABLE "referral_codes" (
@@ -141,13 +150,28 @@ CREATE TABLE "referrals" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "teams" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"city" varchar(100) NOT NULL,
+	"country" varchar(100) NOT NULL,
+	"founded_year" integer,
+	"coach_name" varchar(100),
+	"avatar" varchar,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"abbreviation" varchar(3)
+);
+--> statement-breakpoint
+ALTER TABLE "athletes" ADD CONSTRAINT "athletes_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matchup_performance" ADD CONSTRAINT "matchup_performance_matchup_id_matchups_id_fk" FOREIGN KEY ("matchup_id") REFERENCES "public"."matchups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matchup_performance" ADD CONSTRAINT "matchup_performance_athlete_id_athletes_id_fk" FOREIGN KEY ("athlete_id") REFERENCES "public"."athletes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "matchups" ADD CONSTRAINT "matchups_home_team_id_teams_id_fk" FOREIGN KEY ("home_team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "matchups" ADD CONSTRAINT "matchups_away_team_id_teams_id_fk" FOREIGN KEY ("away_team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "participants" ADD CONSTRAINT "participants_game_id_games_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."games"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "predictions" ADD CONSTRAINT "predictions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "predictions" ADD CONSTRAINT "predictions_participant_id_participants_id_fk" FOREIGN KEY ("participant_id") REFERENCES "public"."participants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "predictions" ADD CONSTRAINT "predictions_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "predictions" ADD CONSTRAINT "predictions_game_id_games_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."games"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "bets" ADD CONSTRAINT "bets_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "bets" ADD CONSTRAINT "bets_participant_id_participants_id_fk" FOREIGN KEY ("participant_id") REFERENCES "public"."participants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "bets" ADD CONSTRAINT "bets_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "bets" ADD CONSTRAINT "bets_game_id_games_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."games"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lines" ADD CONSTRAINT "lines_athlete_id_athletes_id_fk" FOREIGN KEY ("athlete_id") REFERENCES "public"."athletes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lines" ADD CONSTRAINT "lines_stat_id_stats_id_fk" FOREIGN KEY ("stat_id") REFERENCES "public"."stats"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lines" ADD CONSTRAINT "lines_matchup_id_matchups_id_fk" FOREIGN KEY ("matchup_id") REFERENCES "public"."matchups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

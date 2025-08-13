@@ -7,10 +7,11 @@ import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
-import { CreateGameDto } from 'src/games/dto/create-game.dto';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { PublicKey } from '@solana/web3.js';
+import { CreateGameDto } from 'src/games/dto/create-game.dto';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,20 @@ export class UserService {
     });
   }
 
+  async updateUser(dto: UpdateUserDto, user: User) {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        userName: dto.userName,
+        avatar: dto.avatar,
+      })
+      .where(eq(users.id, user.id))
+      .returning();
+
+    return updatedUser;
+  }
   async faucetTokens(user: User) {
     const userPK = new PublicKey(user.walletAddress);
 
@@ -37,11 +52,15 @@ export class UserService {
     const balance = await connection.getBalance(userPK);
 
     // If balance is less than 0.01 SOL (10,000,000 lamports), faucet SOL first
-    if (balance < 100_000) {
+    if (balance < 100_000 && !user.hasBeenFaucetedSol) {
       console.log(
         `User ${user.walletAddress} has low SOL balance (${balance} lamports), fauceting SOL first`,
       );
       await this.anchor.faucetSol(userPK);
+      await this.db
+        .update(users)
+        .set({ hasBeenFaucetedSol: true })
+        .where(eq(users.id, user.id));
     }
 
     // Then faucet tokens

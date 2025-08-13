@@ -31,7 +31,7 @@ export const games = pgTable("games", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   status: varchar("status"),
   maxParticipants: integer("max_participants"),
-  maxBet: integer("max_bet"),
+  numBets: integer("num_bets"),
   gameCode: varchar("game_code"),
   matchupGroup: varchar("matchup_group"),
   depositToken: varchar("deposit_token"),
@@ -39,7 +39,8 @@ export const games = pgTable("games", {
   type: gameTypeEnum("type"),
   userControlType: userControlTypeEnum("user_control_type"),
   gameModeId: uuid("game_mode_id"),
-  txnId: text("txn_id"),
+  createdTxnSignature: text("created_txn_signature"),
+  resolvedTxnSignature: text("resolved_txn_signature"),
 });
 
 export const gamesRelations = relations(games, ({ many, one }) => ({

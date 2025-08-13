@@ -33,7 +33,7 @@ export class CreateGameDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  maxBets: number;
+  numBets: number;
 
   @ApiProperty()
   @IsNotEmpty()

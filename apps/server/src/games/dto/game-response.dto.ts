@@ -27,11 +27,8 @@ export class Participant {
   isWinner: boolean;
 
   @ApiProperty()
-  txnId: string;
-
-  @ApiProperty()
   joinedAt: Date;
-
+  
   @ApiProperty()
   predictions: PredictionResponseDto[];
 }
@@ -62,7 +59,7 @@ export class GameResponseDto {
   maxParticipants: number;
 
   @ApiProperty()
-  maxBet: number;
+  numBets: number;
 
   @ApiProperty()
   gameCode: string;
@@ -72,6 +69,12 @@ export class GameResponseDto {
 
   @ApiProperty()
   depositToken: string;
+
+  @ApiProperty()
+  createdTxnSignature: string;
+
+  @ApiProperty()
+  resolvedTxnSignature: string;
 
   @ApiProperty()
   isPrivate: boolean;

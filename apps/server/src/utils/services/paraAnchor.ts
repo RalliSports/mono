@@ -25,12 +25,9 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
-import { BulkCreatePredictionsDto } from 'src/games/dto/prediction.dto';
 import { PredictionDirection } from 'src/games/enum/game';
 import { IDL } from '../idl';
 import { RalliBet } from '../idl/ralli_bet';
-import { BadRequestException } from '@nestjs/common';
-import { predictions } from '@repo/db';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 
@@ -316,7 +313,7 @@ export class ParaAnchor {
     maxBet: number,
     maxParticipants: number,
     creator: PublicKey,
-    mint: PublicKey,
+    // mint: PublicKey,
   ): Promise<string> {
     const program = await this.getProgram();
     const gamePDA = await this.getGamePDA(gameId, program.programId);
@@ -391,96 +388,6 @@ export class ParaAnchor {
     }
   }
 
-  async joinGameInstruction({
-    gameId,
-    depositAmount,
-  }: {
-    gameId: string;
-    depositAmount: number;
-  }): Promise<string> {
-    const program = await this.getProgram();
-    const gamePDA = await this.getGamePDA(gameId, program.programId);
-    const gameEscrowPDA = await this.getGameEscrowPDA(
-      gamePDA,
-      program.programId,
-    );
-    const gameVault = await this.getGameVault(this.mint, gamePDA);
-
-    const userAta = await getOrCreateAssociatedTokenAccount(
-      program.provider.connection,
-      program.provider.wallet?.payer as Signer,
-      this.mint,
-      program.provider.wallet?.publicKey as PublicKey,
-    );
-
-    const userBalance =
-      await program.provider.connection.getTokenAccountBalance(userAta.address);
-    const userTokenAmount = userBalance.value.uiAmount as number;
-    const deposit = depositAmount * Math.pow(10, 6);
-
-    // Check if balance is sufficient
-    if (deposit < userTokenAmount) {
-      throw new BadRequestException(
-        'User does not have enough SPL tokens to join the game.',
-      );
-    }
-
-    try {
-      const ix = await program.methods
-        .joinGame()
-        .accountsStrict({
-          mint: this.mint,
-          user: program.provider.wallet?.publicKey as PublicKey,
-          game: gamePDA,
-          gameEscrow: gameEscrowPDA,
-          gameVault,
-          userTokens: userAta.address,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-        })
-        .instruction();
-
-      // Get latest blockhash
-      const { blockhash, lastValidBlockHeight } =
-        await program.provider.connection.getLatestBlockhash('finalized');
-
-      // Build TransactionMessage for VersionedTransaction
-      const messageV0 = new TransactionMessage({
-        payerKey: program.provider.publicKey as PublicKey,
-        recentBlockhash: blockhash,
-        instructions: [ix],
-      }).compileToV0Message();
-
-      // Create VersionedTransaction
-      const transaction = new VersionedTransaction(messageV0);
-
-      // Sign transaction
-      await program.provider.wallet?.signTransaction(transaction);
-
-      // Send transaction
-      const txSig =
-        await program.provider.connection.sendTransaction(transaction);
-
-      // Confirm transaction
-      await program.provider.connection.confirmTransaction(
-        {
-          signature: txSig,
-          blockhash: blockhash,
-          lastValidBlockHeight: lastValidBlockHeight,
-        },
-        'confirmed',
-      );
-
-      console.log(txSig, 'transaction signature');
-
-      return txSig;
-    } catch (error) {
-      console.error('Transaction Error:', error);
-      return '';
-    }
-  }
-
   async submitBetsInstruction(
     gameId: string,
     bets: { lineId: number; direction: PredictionDirection }[],
@@ -491,6 +398,20 @@ export class ParaAnchor {
       gamePDA,
       program.provider.wallet?.publicKey as PublicKey,
       program.programId,
+    );
+
+    const gameEscrowPDA = await this.getGameEscrowPDA(
+      gamePDA,
+      program.programId,
+    );
+
+    const gameVault = await this.getGameVault(this.mint, gamePDA);
+
+    const userAta = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      program.provider.wallet?.payer as Signer,
+      this.mint,
+      program.provider.wallet?.publicKey as PublicKey,
     );
 
     const extraAccounts: any[] = [];
@@ -519,7 +440,22 @@ export class ParaAnchor {
     );
 
     try {
-      const ix = await program.methods
+      const joinIx = await program.methods
+        .joinGame()
+        .accountsStrict({
+          mint: this.mint,
+          user: program.provider.wallet?.publicKey as PublicKey,
+          game: gamePDA,
+          gameEscrow: gameEscrowPDA,
+          gameVault,
+          userTokens: userAta.address,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
+
+      const submitIx = await program.methods
         .submitBet(picks)
         .accountsStrict({
           user: program.provider.wallet?.publicKey as PublicKey,
@@ -538,7 +474,7 @@ export class ParaAnchor {
       const messageV0 = new TransactionMessage({
         payerKey: program.provider.publicKey as PublicKey,
         recentBlockhash: blockhash,
-        instructions: [ix],
+        instructions: [joinIx, submitIx],
       }).compileToV0Message();
 
       // Create VersionedTransaction

@@ -32,8 +32,21 @@ export class AthletesService {
               columns: {
                 id: true,
                 gameDate: true,
-                homeTeam: true,
-                awayTeam: true,
+              },
+              with: {
+                homeTeam: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    city: true,
+                    avatar: true,
+                  },
+                },
+                awayTeam: {
+                  columns: {
+                    id: true,
+                  },
+                },
               },
             },
           },
@@ -56,7 +69,7 @@ export class AthletesService {
       .insert(athletes)
       .values({
         name: dto.name,
-        team: dto.team,
+        teamId: dto.teamId,
         position: dto.position,
         jerseyNumber: dto.jerseyNumber,
         age: dto.age,

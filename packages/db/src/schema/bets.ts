@@ -1,9 +1,15 @@
-import { pgTable, pgEnum, boolean, timestamp } from "drizzle-orm/pg-core";
-import { uuid } from "drizzle-orm/pg-core";
-import { participants } from "./participants";
-import { lines } from "./lines";
 import { relations } from "drizzle-orm";
+import {
+  boolean,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { games } from "./games";
+import { lines } from "./lines";
+import { participants } from "./participants";
 import { users } from "./users";
 
 export const predictedDirectionEnum = pgEnum("predicted_direction", [
@@ -11,7 +17,7 @@ export const predictedDirectionEnum = pgEnum("predicted_direction", [
   "under",
 ]);
 
-export const predictions = pgTable("predictions", {
+export const bets = pgTable("bets", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id),
   participantId: uuid("participant_id").references(() => participants.id),
@@ -20,23 +26,25 @@ export const predictions = pgTable("predictions", {
   predictedDirection: predictedDirectionEnum("predicted_direction"),
   isCorrect: boolean("is_correct"),
   createdAt: timestamp("created_at").defaultNow(),
+  createdTxnSignature: text("created_txn_signature"),
+  // resolvedTxnSignature: text("resolved_txn_signature"),
 });
 
-export const predictionsRelations = relations(predictions, ({ one }) => ({
+export const betsRelations = relations(bets, ({ one }) => ({
   user: one(users, {
-    fields: [predictions.userId],
+    fields: [bets.userId],
     references: [users.id],
   }),
   participant: one(participants, {
-    fields: [predictions.participantId],
+    fields: [bets.participantId],
     references: [participants.id],
   }),
   line: one(lines, {
-    fields: [predictions.lineId],
+    fields: [bets.lineId],
     references: [lines.id],
   }),
   game: one(games, {
-    fields: [predictions.gameId],
+    fields: [bets.gameId],
     references: [games.id],
   }),
 }));

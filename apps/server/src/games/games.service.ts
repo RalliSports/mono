@@ -6,15 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  bets,
   game_access,
   games,
   lines,
-  participants,
-  predictions,
-  users,
+  participants
 } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, count, eq, inArray } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -46,7 +45,7 @@ export class GamesService {
           ...createGameDto,
           creatorId: user.id,
           gameCode,
-          maxBet: createGameDto.maxBets,
+          numBets: createGameDto.numBets,
           status: GameStatus.WAITING,
         })
         .returning();
@@ -58,10 +57,10 @@ export class GamesService {
         txn = await this.anchor.createGameInstruction(
           game.id.toString(),
           Number(game.depositAmount),
-          Number(game.maxBet),
+          Number(game.numBets),
           Number(game.maxParticipants),
           new PublicKey(user.walletAddress),
-          new PublicKey(game.depositToken as string),
+          // new PublicKey(game.depositToken as string),
         );
 
         if (!txn || typeof txn !== 'string') {
@@ -84,7 +83,7 @@ export class GamesService {
       const [updatedGame] = await tx
         .update(games)
         .set({
-          txnId: txn,
+          createdTxnSignature: txn,
         })
         .where(eq(games.id, game.id))
         .returning();
@@ -100,7 +99,7 @@ export class GamesService {
       with: {
         gameMode: true,
         creator: true,
-        participants: { with: { user: true } },
+        participants: { with: { user: true, bets: true } },
       },
     });
   }
@@ -109,7 +108,7 @@ export class GamesService {
       where: eq(games.status, GameStatus.WAITING),
       with: {
         gameMode: true,
-        participants: { with: { user: true } },
+        participants: { with: { user: true, bets: true } },
         creator: true,
       },
     });
@@ -120,7 +119,7 @@ export class GamesService {
       where: eq(participants.userId, user.id),
       with: {
         game: true,
-        predictions: true,
+        bets: true,
       },
     });
   }
@@ -134,7 +133,7 @@ export class GamesService {
         participants: {
           with: {
             user: true,
-            predictions: {
+            bets: {
               with: {
                 line: {
                   with: {
@@ -163,6 +162,12 @@ export class GamesService {
       });
 
       if (!game) throw new NotFoundException('Game not found');
+
+      if (game.numBets !== dto.bets.length) {
+        throw new BadRequestException(
+          `Invalid number of bets: expected ${game.numBets}, but received ${dto.bets.length}`,
+        );
+      }
 
       // await this.validateGameAccess({
       //   game,
@@ -194,27 +199,15 @@ export class GamesService {
         throw new BadRequestException('Game is not open for joining');
       }
 
-      // Call Anchor join instruction (must succeed else rollback DB)
-      const joinTxSig = await this.anchor.joinGameInstruction({
-        gameId: game.id.toString(),
-        depositAmount: game.depositAmount as number,
-      });
-      if (!joinTxSig) {
-        throw new BadRequestException(
-          'Failed to execute join game instruction on-chain',
-        );
-      }
-
       const [insertedParticipant] = await tx
         .insert(participants)
         .values({
           gameId: dto.gameId,
           userId: user.id,
-          txnId: joinTxSig,
         })
         .returning();
 
-      const values = dto.predictions.map((p) => ({
+      const betsValues = dto.bets.map((p) => ({
         participantId: insertedParticipant.id,
         userId: user.id,
         lineId: p.lineId,
@@ -222,12 +215,9 @@ export class GamesService {
         gameId: dto.gameId,
       }));
 
-      const predictionRes = await tx
-        .insert(predictions)
-        .values(values)
-        .returning();
+      const insertedBets = await tx.insert(bets).values(betsValues).returning();
 
-      const picks = predictionRes.flatMap(async (res) => {
+      const picks = insertedBets.flatMap(async (res) => {
         const line = await tx.query.lines.findFirst({
           where: eq(lines.id, res.lineId ?? ''),
         });
@@ -249,12 +239,27 @@ export class GamesService {
         );
       }
 
+      const updateedBets = await tx
+        .update(bets)
+        .set({
+          createdTxnSignature: submitTxnSig,
+        })
+        .where(
+          inArray(
+            bets.id,
+            insertedBets.map((b) => b.id),
+          ),
+        )
+        .returning();
+
+      
+
       // Transaction will auto-commit if no error is thrown
       return {
         success: true,
         message: 'Joined game successfully',
-        joinTxSig,
-        submitTxnSig,
+        txnSignature: submitTxnSig,
+        bets: updateedBets
       };
     });
   }
@@ -305,7 +310,7 @@ export class GamesService {
           participants: {
             with: {
               user: true,
-              predictions: {
+              bets: {
                 with: {
                   line: true,
                 },
@@ -328,7 +333,7 @@ export class GamesService {
       for (const participant of game.participants) {
         let correctPredictions = 0;
 
-        for (const prediction of participant.predictions) {
+        for (const prediction of participant.bets) {
           const line = prediction.line;
           if (!line?.createdAt) {
             throw new BadRequestException('Line or createdAt not found');
@@ -378,9 +383,9 @@ export class GamesService {
         await Promise.all(
           predictionUpdates.map((update) =>
             tx
-              .update(predictions)
+              .update(bets)
               .set({ isCorrect: update.isCorrect })
-              .where(eq(predictions.id, update.id)),
+              .where(eq(bets.id, update.id)),
           ),
         );
       }
