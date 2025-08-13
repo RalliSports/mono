@@ -27,9 +27,8 @@ impl<'info> ResolveLine<'info> {
         let line = &mut self.line;
 
         // Only admin can resolve lines
-        require_eq!(
-            admin.key(),
-            ADMIN_PUBLIC_KEY,
+        require!(
+            is_admin(&admin.key()),
             RalliError::UnauthorizedLineResolution
         );
 

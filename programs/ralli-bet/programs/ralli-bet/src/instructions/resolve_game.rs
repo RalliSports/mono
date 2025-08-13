@@ -70,9 +70,8 @@ impl<'info> ResolveGame<'info> {
         let admin = &self.admin;
 
         // Only admin can resolve games
-        require_eq!(
-            admin.key(),
-            ADMIN_PUBLIC_KEY,
+        require!(
+            is_admin(&admin.key()),
             RalliError::UnauthorizedGameResolution
         );
 

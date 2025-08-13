@@ -1,4 +1,3 @@
-use crate::constants::ADMIN_PUBLIC_KEY;
 use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
@@ -78,7 +77,6 @@ impl<'info> CreateGame<'info> {
             mint: self.mint.key(),
             first_line_starts_at: i64::MAX, // Initialize to max value (no lines yet)
             creator: self.creator.key(),
-            admin: ADMIN_PUBLIC_KEY,
             users: Vec::new(),
             max_users,
             entry_fee,
