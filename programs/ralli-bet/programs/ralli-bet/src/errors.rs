@@ -229,4 +229,10 @@ pub enum RalliError {
 
     #[msg("Number of winners expected does not match number of winners")]
     NumberOfWinnersExpectedMismatch,
+
+    #[msg("Only admin can update the lines")]
+    UnauthorizedLineUpdate,
+
+    #[msg("Predicted value should be different for update")]
+    SamePredictedValue,
 }

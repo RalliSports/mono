@@ -100,6 +100,14 @@ pub mod ralli_bet {
         )
     }
 
+    pub fn update_line(
+        ctx: Context<UpdateLine>,
+        new_predicted_value: f64,
+        should_refund_bettors: bool
+    ) -> Result<()> {
+        ctx.accounts.update_line(new_predicted_value, should_refund_bettors)
+    }
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }
