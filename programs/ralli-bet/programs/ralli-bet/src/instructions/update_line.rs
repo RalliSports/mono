@@ -17,7 +17,7 @@ pub struct UpdateLine<'info> {
 }
 
 impl<'info> UpdateLine<'info> {
-    pub fn update_line(&mut self, new_predicted_value: f64) -> Result<()> {
+    pub fn update_line(&mut self, new_predicted_value: f64, should_refund_bettors: bool) -> Result<()> {
         let admin = &self.admin;
         let line = &mut self.line;
 
@@ -46,12 +46,14 @@ impl<'info> UpdateLine<'info> {
 
         // Update now
         line.predicted_value = new_predicted_value;
+        line.should_refund_bettors = should_refund_bettors;
 
         msg!(
-            "Updated line {} - Changed predicted value from {} to {}",
+            "Updated line {} - Changed predicted value from {} to {}, should_refund_bettors: {}",
             line.key(),
             old_predicted_value,
-            new_predicted_value
+            new_predicted_value,
+            should_refund_bettors
         );
 
         Ok(())
