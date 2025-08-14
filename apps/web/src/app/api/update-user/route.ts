@@ -36,9 +36,6 @@ export async function PATCH(request: NextRequest) {
           error: 'Invalid data format',
           required: {
             username: 'string',
-            avatar: 'string',
-            firstName: 'string',
-            lastName: 'string',
           },
         },
         { status: 400 },
@@ -68,7 +65,6 @@ export async function PATCH(request: NextRequest) {
       },
       body: JSON.stringify(body),
     })
-
     console.log(response, 'response')
 
     // Check if the backend request was successful

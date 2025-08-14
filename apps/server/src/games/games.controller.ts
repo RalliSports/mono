@@ -57,6 +57,7 @@ export class GamesController {
   }
 
   @ApiOperation({ summary: 'Get all games' })
+  @UseGuards(SessionAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'List of all games',
@@ -64,6 +65,7 @@ export class GamesController {
   })
   @Get('/games/my-open-games')
   findMyOpenGames(@UserPayload() user: User) {
+    console.log(user, 'user');
     return this.gamesService.getMyOpenGames(user);
   }
 

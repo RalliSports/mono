@@ -1443,13 +1443,13 @@ function AdminPageContent() {
                     <div>
                       <label className="block text-white font-semibold mb-2">Select Player</label>
                       <Dropdown
-                        value={newMatchUp.homeTeam.id}
+                        value={newMatchUp.awayTeam.id}
                         onChange={(value) =>
-                          setNewMatchUp({ ...newMatchUp, homeTeam: { ...newMatchUp.homeTeam, id: value } })
+                          setNewMatchUp({ ...newMatchUp, awayTeam: { ...newMatchUp.awayTeam, id: value } })
                         }
-                        placeholder="Select the home team"
+                        placeholder="Select the away team"
                         options={[
-                          { value: '', label: 'Select the home team', disabled: true },
+                          { value: '', label: 'Select the away team', disabled: true },
                           ...teams.map((team) => ({
                             value: team.id,
                             label: `${team.name}`,
@@ -1462,13 +1462,13 @@ function AdminPageContent() {
                     <div>
                       <label className="block text-white font-semibold mb-2">Select Player</label>
                       <Dropdown
-                        value={newMatchUp.awayTeam.id}
+                        value={newMatchUp.homeTeam.id}
                         onChange={(value) =>
-                          setNewMatchUp({ ...newMatchUp, awayTeam: { ...newMatchUp.awayTeam, id: value } })
+                          setNewMatchUp({ ...newMatchUp, homeTeam: { ...newMatchUp.homeTeam, id: value } })
                         }
-                        placeholder="Select the away team"
+                        placeholder="Select the home team"
                         options={[
-                          { value: '', label: 'Select the away team', disabled: true },
+                          { value: '', label: 'Select the home team', disabled: true },
                           ...teams.map((team) => ({
                             value: team.id,
                             label: `${team.name}`,

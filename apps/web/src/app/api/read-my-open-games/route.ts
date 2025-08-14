@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { backendUrl } from '@/constants'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the backend URL from environment variables
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL
-
     if (!backendUrl) {
       return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 })
     }
@@ -32,8 +30,6 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    console.log(response, 'response')
-
     // Check if the backend request was successful
     if (!response.ok) {
       const errorData = await response.text()
@@ -49,16 +45,6 @@ export async function GET(request: NextRequest) {
 
     // Parse and return the backend response
     const data = await response.json()
-    if (data.error) {
-      return NextResponse.json(
-        {
-          error: 'Backend request failed',
-          details: data.error,
-          status: response.status,
-        },
-        { status: response.status },
-      )
-    }
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('Create game API error:', error)

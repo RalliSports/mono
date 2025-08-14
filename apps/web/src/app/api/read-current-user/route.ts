@@ -32,8 +32,6 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    console.log(response, 'response')
-
     // Check if the backend request was successful
     if (!response.ok) {
       const errorData = await response.text()

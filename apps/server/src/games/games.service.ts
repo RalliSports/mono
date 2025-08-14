@@ -128,7 +128,16 @@ export class GamesService {
         participants: {
           with: {
             user: true,
-            bets: true,
+            bets: {
+              with: {
+                line: {
+                  with: {
+                    matchup: true,
+                    athlete: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

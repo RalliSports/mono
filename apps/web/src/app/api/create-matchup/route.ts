@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         ...(tokenString && { 'x-para-session': tokenString }),
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, espnEventId: Math.floor(Math.random() * 1000000).toString() }),
     })
 
     // Check if the backend request was successful
