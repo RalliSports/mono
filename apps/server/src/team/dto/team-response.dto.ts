@@ -8,6 +8,9 @@ export class TeamResponseDto {
   id: string;
 
   @ApiProperty()
+  espnTeamId: string;
+
+  @ApiProperty()
   name: string;
 
   @ApiProperty()
@@ -25,10 +28,10 @@ export class TeamResponseDto {
   @ApiProperty()
   avatar?: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [AthleteResponseDto] })
   @IsArray()
   @Type(() => AthleteResponseDto)
-  atheletes?: AthleteResponseDto[];
+  athletes?: AthleteResponseDto[];
 
   @ApiProperty()
   createdAt: Date;

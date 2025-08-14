@@ -1,5 +1,5 @@
 {
-  "id": "f6d37ac9-c6f8-478b-b607-fd69e6953491",
+  "id": "9c36ef64-2f93-4138-b77b-46b6fc1b18b9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -14,6 +14,18 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "custom_id": {
+          "name": "custom_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "espn_athlete_id": {
+          "name": "espn_athlete_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -44,12 +56,6 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
-        },
-        "custom_id": {
-          "name": "custom_id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
         },
         "team_id": {
           "name": "team_id",
@@ -381,6 +387,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "espn_event_id": {
+          "name": "espn_event_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "game_date": {
           "name": "game_date",
           "type": "date",
@@ -395,7 +407,8 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar",
+          "type": "matchup_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -1051,6 +1064,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "espn_team_id": {
+          "name": "espn_team_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(100)",
@@ -1135,6 +1154,16 @@
         "whitelist",
         "blacklist",
         "none"
+      ]
+    },
+    "public.matchup_status": {
+      "name": "matchup_status",
+      "schema": "public",
+      "values": [
+        "scheduled",
+        "in_progress",
+        "finished",
+        "cancelled"
       ]
     },
     "public.predicted_direction": {

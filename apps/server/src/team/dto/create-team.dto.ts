@@ -1,4 +1,3 @@
-
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsInt,
@@ -11,13 +10,16 @@ import {
 export class CreateTeamDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  name: string;
+  espnTeamId: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
+  name: string;
+
   @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
   city: string;
 
   @ApiProperty()

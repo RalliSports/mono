@@ -5,6 +5,9 @@ export class MatchupResponseDto {
   id: string;
 
   @ApiProperty()
+  espnEventId: string;
+
+  @ApiProperty()
   homeTeam: string;
 
   @ApiProperty()
