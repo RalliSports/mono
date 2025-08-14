@@ -11,6 +11,7 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { User } from 'src/user/dto/user-response.dto';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { generateUniqueGamertag } from 'src/utils/generateGamertag';
 
 @Injectable()
 export class AuthService {
@@ -65,12 +66,15 @@ export class AuthService {
           // role: userExisted.role as Role,
         };
       } else {
+        const gamertag = await generateUniqueGamertag(this.db, users);
+
         await this.db
           .insert(users)
           .values({
             paraUserId: para.getUserId(),
             emailAddress: para.getEmail(),
             walletAddress: para.availableWallets[0].address,
+            username: gamertag,
           })
           .onConflictDoNothing();
       }
