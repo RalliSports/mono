@@ -29,15 +29,17 @@
       "cache": false,
       "persistent": true
     },
-     "db:generate": {
+    "db:generate": {
       "cache": false,
       "persistent": true
-
     },
     "db:migrate": {
       "cache": false
     },
     "db:seed": {
+      "cache": false
+    },
+    "db:seed:teams-athletes": {
       "cache": false
     },
     "fetch:athletes": {
