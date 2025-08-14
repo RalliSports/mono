@@ -24,12 +24,12 @@ export const fetchGames = async () => {
 type Game = {
   id: string
   title: string
-  participants?: { id: string }[]
+  participants?: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants?: number
   depositAmount?: number
   maxBet?: number
   gameMode?: { label: string }
-  creator?: { walletAddress: string; username: string }
+  creator?: { walletAddress: string; username: string; avatar: string }
   status: 'waiting' | 'active' | 'complete' | 'pending'
 }
 
@@ -38,7 +38,7 @@ export type Lobby = {
   title: string
   sport: string
   sportIcon: string
-  participants: number
+  participants: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants: number
   buyIn: number
   prizePool: number
@@ -74,12 +74,11 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
   }
 
   return games.map((game) => {
-    const participants = game.participants?.length || 0
+    const participants = game.participants || []
     const maxParticipants = game.maxParticipants || 1
     const buyIn = game.depositAmount || 0
     const maxBet = game.maxBet ?? buyIn // fallback
     const sport = getSport(game.gameMode?.label || '')
-    const wallet = game.creator?.walletAddress || '0x??'
     const username = game.creator?.username || '0x??'
 
     // Determine status based on game data
@@ -107,9 +106,9 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
       timeLeft: '1h 30m', // static placeholder
       host: {
         username,
-        avatar: wallet.slice(0, 2),
+        avatar: game.creator?.avatar || '',
       },
-      isUrgent: participants / maxParticipants >= 0.75,
+      isUrgent: participants.length / maxParticipants >= 0.75,
       status, // Added status field
     }
   })

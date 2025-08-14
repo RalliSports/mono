@@ -149,6 +149,7 @@ function PicksContent() {
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [game, setGame] = useState<Game | null>(null)
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
   const [athletes, setAthletes] = useState<Athlete[]>([])
 
@@ -248,6 +249,7 @@ function PicksContent() {
   }
 
   const handlePaymentConfirm = async () => {
+    setIsSubmittingPayment(true)
     const apiData = {
       gameId: gameId,
       bets: selectedPicks,
@@ -266,6 +268,7 @@ function PicksContent() {
     setTimeout(() => {
       window.location.href = `/view-game?id=${gameId}`
     }, 1000)
+    setIsSubmittingPayment(false)
   }
 
   const handlePaymentCancel = () => {
@@ -518,9 +521,10 @@ function PicksContent() {
                     </button>
                     <button
                       onClick={handlePaymentConfirm}
+                      disabled={isSubmittingPayment}
                       className="flex-1 bg-gradient-to-r from-[#00CED1] to-blue-500 text-white font-bold py-3 px-4 rounded-xl hover:from-[#00CED1]/90 hover:to-blue-500/90 transition-all duration-300"
                     >
-                      Pay ${buyIn}
+                      {isSubmittingPayment ? 'Processing...' : `Pay $${buyIn}`}
                     </button>
                   </div>
                 ) : (

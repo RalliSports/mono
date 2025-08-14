@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import { useSessionToken } from '@/hooks/use-session'
+import { User } from '@repo/db/types'
 
 interface GameMode {
   id: string
@@ -18,6 +20,8 @@ interface Creator {
   emailAddress: string | null
   paraUserId: string
   createdAt: string
+  avatar: string
+  username: string
 }
 
 interface Athlete {
@@ -99,6 +103,22 @@ interface Game {
 function JoinGameContent() {
   const searchParams = useSearchParams()
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
+  const { session } = useSessionToken()
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch('/api/read-current-user', {
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      const data = await response.json()
+      console.log('data', data)
+      setUser(data)
+    }
+    fetchUser()
+  }, [])
 
   // Get lobby ID from URL (simple approach)
   const lobbyId = searchParams.get('id')
@@ -190,19 +210,7 @@ function JoinGameContent() {
             <div className="flex items-center gap-4 mb-6">
               <div className="relative">
                 <div className="w-16 h-16 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
-                  {lobby.title ? (
-                    <img
-                      src={`/users/${lobby.title.toLowerCase().replace(/\s+/g, '-')}.png`}
-                      alt={lobby.title}
-                      className="w-16 h-16 object-cover rounded-xl"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator.walletAddress)}&background=0D8ABC&color=fff&size=128`
-                      }}
-                    />
-                  ) : (
-                    <span className="text-white font-bold text-3xl">{lobby.title}</span>
-                  )}
+                  <Image src={lobby.creator.avatar} alt={lobby.creator.username} width={64} height={64} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 text-lg shadow-lg">👑</div>
               </div>
@@ -247,40 +255,42 @@ function JoinGameContent() {
         </div>
 
         {/* Enhanced Join Button Section */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-[#00CED1]/30 rounded-2xl p-6 shadow-2xl shadow-[#00CED1]/10">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-white font-bold text-xl">Ready to Join?</h3>
-                <p className="text-slate-400">
-                  {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} remaining in this lobby
+        {!lobby.participants.some((participant) => participant.user.id === user?.id) && (
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-[#00CED1]/30 rounded-2xl p-6 shadow-2xl shadow-[#00CED1]/10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-white font-bold text-xl">Ready to Join?</h3>
+                  <p className="text-slate-400">
+                    {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} remaining in this lobby
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-white">${lobby.depositAmount}</div>
+                  <div className="text-sm text-slate-400">Buy-in required</div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleJoinGame}
+                className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group"
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                <span className="relative z-10">
+                  Make Your Picks • {spotsLeft} Spot{spotsLeft !== 1 ? 's' : ''} Left
+                </span>
+              </button>
+
+              {spotsLeft <= 3 && (
+                <p className="text-amber-400 text-sm text-center mt-3 font-medium">
+                  ⚡ Filling up fast! Only {spotsLeft} spot
+                  {spotsLeft !== 1 ? 's' : ''} remaining
                 </p>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-white">${lobby.depositAmount}</div>
-                <div className="text-sm text-slate-400">Buy-in required</div>
-              </div>
+              )}
             </div>
-
-            <button
-              onClick={handleJoinGame}
-              className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group"
-            >
-              {/* Shimmer effect */}
-              <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-              <span className="relative z-10">
-                Make Your Picks • {spotsLeft} Spot{spotsLeft !== 1 ? 's' : ''} Left
-              </span>
-            </button>
-
-            {spotsLeft <= 3 && (
-              <p className="text-amber-400 text-sm text-center mt-3 font-medium">
-                ⚡ Filling up fast! Only {spotsLeft} spot
-                {spotsLeft !== 1 ? 's' : ''} remaining
-              </p>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Enhanced Players Section */}
         <div className="mb-6">
@@ -306,27 +316,20 @@ function JoinGameContent() {
                       <div className="flex items-center gap-4">
                         <div className="relative">
                           <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
-                            {participant.user.walletAddress ? (
-                              <img
-                                src={`/users/${participant.user.walletAddress.toLowerCase().replace(/\s+/g, '-')}.png`}
-                                alt={participant.user.walletAddress}
-                                className="w-14 h-14 object-cover rounded-xl"
-                                onError={(e) => {
-                                  e.currentTarget.onerror = null
-                                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user.walletAddress)}&background=0D8ABC&color=fff&size=128`
-                                }}
-                              />
-                            ) : (
-                              <span className="text-white font-bold text-2xl">{participant.user.walletAddress}</span>
-                            )}
+                            <Image
+                              src={participant.user.avatar}
+                              alt={participant.user.username}
+                              width={56}
+                              height={56}
+                            />
                           </div>
-                          {participant.user.walletAddress === lobby.creator.walletAddress && (
+                          {participant.user.id === lobby.creator.id && (
                             <div className="absolute -top-1 -left-1 text-sm">👑</div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="text-white font-bold text-base leading-tight truncate">
-                            {participant.user.walletAddress}
+                            {participant.user.username}
                           </h4>
                           <p className="text-slate-400 text-sm mt-1">
                             Joined {new Date(participant.joinedAt).toLocaleDateString()} • ${lobby.depositAmount}

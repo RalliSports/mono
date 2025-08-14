@@ -173,7 +173,6 @@ function ProfileContent() {
       }),
     })
     const data = await response.json()
-    console.log(data)
     setUser(data)
     setUsername(data.username)
     setAvatar(data.avatar)
@@ -291,8 +290,10 @@ function ProfileContent() {
                     ? balanceLoading
                       ? 'Loading...'
                       : balanceError
-                        ? '$0.00'
-                        : `$${formatBalance(balances.ralli)}`
+                        ? 'Error'
+                        : balances.ralli === 0
+                          ? 'Top Up'
+                          : `$${formatBalance(balances.ralli)}`
                     : '$0.00'}
                 </span>
               </div>
