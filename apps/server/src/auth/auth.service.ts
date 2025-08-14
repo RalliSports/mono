@@ -36,7 +36,7 @@ export class AuthService {
       const para = await this.getPara();
 
       const userExisted = await this.db.query.users.findFirst({
-        where: eq(users.emailAddress, para.email ?? ''),
+        where: eq(users.emailAddress,  para.getEmail() ?? ''),
       });
 
       if (userExisted) {
@@ -53,7 +53,7 @@ export class AuthService {
           .insert(users)
           .values({
             paraUserId: para.getUserId(),
-            emailAddress: para.email,
+            emailAddress: para.getEmail(),
             walletAddress: para.availableWallets[0].address,
           })
           .onConflictDoNothing();
@@ -61,7 +61,7 @@ export class AuthService {
 
       // fetch the newly created user if needed
       const user = await this.db.query.users.findFirst({
-        where: eq(users.emailAddress, para.email ?? ''),
+        where: eq(users.emailAddress,  para.getEmail() ?? ''),
       });
 
       if (!user) {
