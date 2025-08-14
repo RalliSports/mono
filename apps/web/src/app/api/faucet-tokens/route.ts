@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}/api/v1/user/faucet-tokens`, {
+    const response = await fetch(`${backendUrl}/api/v1/faucet-tokens`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

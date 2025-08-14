@@ -47,10 +47,10 @@ export class UserController {
   updateUser(@Body() dto: UpdateUserDto, @UserPayload() user: User) {
     return this.userService.updateUser(dto, user);
   }
+  @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
   @Post('faucet-tokens')
   faucetTokens(@UserPayload() user: User) {
-    console.log('user', user);
     return this.userService.faucetTokens(user);
   }
 }

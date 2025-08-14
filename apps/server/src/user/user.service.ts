@@ -72,6 +72,7 @@ export class UserService {
     }
 
     // Then faucet tokens
-    return this.anchor.faucetTokens(userPK);
+    this.anchor.faucetTokens(userPK);
+    return { message: 'Tokens fauceted' };
   }
 }
