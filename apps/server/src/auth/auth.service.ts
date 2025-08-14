@@ -5,20 +5,25 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { users } from '@repo/db';
+import { PublicKey } from '@solana/web3.js';
 import { eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
-import { Role, User } from 'src/user/dto/user-response.dto';
+import { User } from 'src/user/dto/user-response.dto';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { generateUniqueGamertag } from 'src/utils/generateGamertag';
 
 @Injectable()
 export class AuthService {
   private readonly paraServer: ParaServer;
+  private anchor: ParaAnchor;
 
   constructor(@Drizzle() private readonly db: Database) {
     this.paraServer = new ParaServer(
       Environment.BETA,
       process.env.PARA_API_KEY,
     );
+    this.anchor = new ParaAnchor(this.getPara());
   }
 
   async validateSession(session: string): Promise<User | null> {
@@ -40,21 +45,36 @@ export class AuthService {
       });
 
       if (userExisted) {
+        if (!userExisted.hasBeenFaucetedSol) {
+          try {
+            await this.faucetTokens({
+              emailAddress: userExisted.emailAddress as string,
+              id: userExisted.id,
+              paraUserId: userExisted.paraUserId as string,
+              walletAddress: userExisted.walletAddress as string,
+            });
+          } catch (error) {
+            console.log(error, 'error faucetTokens');
+          }
+        }
+
         return {
           emailAddress: userExisted.emailAddress as string,
           id: userExisted.id,
           paraUserId: userExisted.paraUserId as string,
           walletAddress: userExisted.walletAddress as string,
-          
           // role: userExisted.role as Role,
         };
       } else {
+        const gamertag = await generateUniqueGamertag(this.db, users);
+
         await this.db
           .insert(users)
           .values({
             paraUserId: para.getUserId(),
-            emailAddress: para.email,
+            emailAddress: para.getEmail(),
             walletAddress: para.availableWallets[0].address,
+            username: gamertag,
           })
           .onConflictDoNothing();
       }
@@ -69,6 +89,19 @@ export class AuthService {
           status: HttpStatus.UNAUTHORIZED,
           message: 'User not found',
         });
+      }
+
+      if (!user.hasBeenFaucetedSol) {
+        try {
+          await this.faucetTokens({
+            emailAddress: user.emailAddress as string,
+            id: user.id,
+            paraUserId: user.paraUserId as string,
+            walletAddress: user.walletAddress as string,
+          });
+        } catch (error) {
+          console.log(error, 'error faucetTokens');
+        }
       }
 
       return {
@@ -86,5 +119,32 @@ export class AuthService {
 
   getPara(): ParaServer {
     return this.paraServer;
+  }
+
+  async faucetTokens(user: User) {
+    const userPK = new PublicKey(user.walletAddress);
+
+    // Check if user has SOL balance
+    const connection = await this.anchor.getConnection();
+    const balance = await connection.getBalance(userPK);
+
+    // If balance is less than 0.01 SOL (10,000,000 lamports), faucet SOL first
+    if (balance < 100_000) {
+      console.log(
+        `User ${user.walletAddress} has low SOL balance (${balance} lamports), fauceting SOL first`,
+      );
+      await this.anchor.faucetSol(userPK);
+    }
+
+    if (!user.hasBeenFaucetedSol) {
+      // Then faucet tokens
+      this.anchor.faucetTokens(userPK);
+      await this.db
+        .update(users)
+        .set({ hasBeenFaucetedSol: true })
+        .where(eq(users.id, user.id));
+    }
+
+    return { message: 'Tokens fauceted' };
   }
 }

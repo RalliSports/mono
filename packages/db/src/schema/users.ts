@@ -19,9 +19,9 @@ export const users = pgTable("users", {
   username: text("username"),
   avatar: text("avatar"),
   walletAddress: varchar("wallet_address"),
-  emailAddress: varchar("email_address"),
-  paraUserId: text("para_user_id"),
-  hasBeenFaucetedSol: boolean("has_been_fauceted_sol"),
+  emailAddress: varchar("email_address").unique(),
+  paraUserId: text("para_user_id").unique(),
+  hasBeenFaucetedSol: boolean("has_been_fauceted_sol").default(false),
   // roleId: uuid("role_id").references(() => roles.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
