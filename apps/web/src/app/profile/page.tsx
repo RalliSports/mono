@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ParaButton } from '@/components/para-modal'
@@ -150,6 +150,12 @@ function ProfileContent() {
   const [lastName, setLastName] = useState('')
   const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
 
+  // Profile picture upload states
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   // Fix hydration issues and handle URL params
   useEffect(() => {
     setMounted(true)
@@ -178,6 +184,92 @@ function ProfileContent() {
     setAvatar(data.avatar)
     setFirstName(data.firstName || '')
     setLastName(data.lastName || '')
+  }
+
+  // Profile picture upload functions
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB limit
+      alert('File size must be less than 5MB.')
+      return
+    }
+
+    setIsUploading(true)
+
+    try {
+      // Create FormData for file upload
+      const formData = new FormData()
+      formData.append('file', file)
+
+      // For now, we'll convert to base64 and store directly
+      // In production, you'd upload to a cloud storage service
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string
+
+        // Add delay for better UX
+        setTimeout(async () => {
+          const response = await fetch('/api/update-user', {
+            method: 'PATCH',
+            headers: {
+              'x-para-session': session || '',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              avatar: base64,
+              firstName,
+              lastName,
+            }),
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            setUser(data)
+            setAvatar(data.avatar)
+            setIsUploadModalOpen(false)
+          }
+
+          setIsUploading(false)
+        }, 1000) // 1 second delay as requested
+      }
+
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      setIsUploading(false)
+    }
+  }
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0])
+    }
   }
 
   useEffect(() => {
@@ -306,53 +398,136 @@ function ProfileContent() {
       <div className="px-4 pt-6 pb-4">
         <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-xl flex items-center justify-center shadow-2xl">
-                <Image src={user.avatar || ''} alt="User Avatar" width={80} height={80} />
-              </div>
-            </div>
-            <div className="flex-1">
-              {/* <h2 className="text-2xl font-bold text-white">{user.name}</h2> */}
-              {editingUsername ? (
-                <div className="flex items-center space-x-1">
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="bg-transparent text-white border border-white rounded-md p-1"
+            {/* Profile Picture with Edit Button */}
+            <div className="relative group">
+              <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
+                {user.avatar && user.avatar !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
+                  <Image
+                    src={user.avatar}
+                    alt="Profile Picture"
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
                   />
-                  <button
-                    onClick={() => {
-                      setEditingUsername(false)
-                      handleUpdateUser()
-                    }}
-                    className="bg-white text-black px-2 py-1 rounded-md"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 24 24" fill="none">
+                ) : (
+                  <div className="w-full h-full bg-slate-600 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-500">
+                    <svg
+                      className="w-8 h-8 text-slate-400 transition-colors duration-300 group-hover:text-slate-300"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M18.1716 1C18.702 1 19.2107 1.21071 19.5858 1.58579L22.4142 4.41421C22.7893 4.78929 23 5.29799 23 5.82843V20C23 21.6569 21.6569 23 20 23H4C2.34315 23 1 21.6569 1 20V4C1 2.34315 2.34315 1 4 1H18.1716ZM4 3C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21L5 21L5 15C5 13.3431 6.34315 12 8 12L16 12C17.6569 12 19 13.3431 19 15V21H20C20.5523 21 21 20.5523 21 20V6.82843C21 6.29799 20.7893 5.78929 20.4142 5.41421L18.5858 3.58579C18.2107 3.21071 17.702 3 17.1716 3H17V5C17 6.65685 15.6569 8 14 8H10C8.34315 8 7 6.65685 7 5V3H4ZM17 21V15C17 14.4477 16.5523 14 16 14L8 14C7.44772 14 7 14.4477 7 15L7 21L17 21ZM9 3H15V5C15 5.55228 14.5523 6 14 6H10C9.44772 6 9 5.55228 9 5V3Z"
-                        fill="#0f172bf2"
+                        fillRule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clipRule="evenodd"
                       />
                     </svg>
-                  </button>
+                  </div>
+                )}
+
+                {/* Subtle overlay on hover */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Edit Button */}
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
+              >
+                <svg
+                  className="w-3.5 h-3.5 text-white transition-transform duration-200 group-hover:rotate-12"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </button>
+            </div>
+
+            <div className="flex-1">
+              {editingUsername ? (
+                <div className="flex items-center space-x-3">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full bg-slate-800/50 text-white text-xl font-semibold border border-slate-600/50 rounded-xl px-4 py-2 focus:border-[#00CED1]/50 focus:ring-1 focus:ring-[#00CED1]/50 focus:outline-none transition-all duration-200"
+                      placeholder="Enter username"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => {
+                        setEditingUsername(false)
+                        handleUpdateUser()
+                      }}
+                      className="p-2 bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white rounded-xl transition-all duration-200 hover:scale-105"
+                      title="Save changes"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingUsername(false)
+                        setUsername(user?.username || '')
+                      }}
+                      className="p-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 hover:text-white rounded-xl transition-all duration-200"
+                      title="Cancel"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6m0 12L6 6" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center space-x-1" onClick={() => setEditingUsername(true)}>
-                  <p className="text-slate-400 text-2xl">{user.username}</p>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 24 24" fill="none">
-                    <g id="Edit / Edit_Pencil_01">
-                      <path
-                        id="Vector"
-                        d="M12 8.00012L4 16.0001V20.0001L8 20.0001L16 12.0001M12 8.00012L14.8686 5.13146L14.8704 5.12976C15.2652 4.73488 15.463 4.53709 15.691 4.46301C15.8919 4.39775 16.1082 4.39775 16.3091 4.46301C16.5369 4.53704 16.7345 4.7346 17.1288 5.12892L18.8686 6.86872C19.2646 7.26474 19.4627 7.46284 19.5369 7.69117C19.6022 7.89201 19.6021 8.10835 19.5369 8.3092C19.4628 8.53736 19.265 8.73516 18.8695 9.13061L18.8686 9.13146L16 12.0001M12 8.00012L16 12.0001"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </g>
-                  </svg>
+                <div className="group/username cursor-pointer" onClick={() => setEditingUsername(true)}>
+                  <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800/30 transition-all duration-200">
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-white group-hover/username:text-[#00CED1] transition-colors duration-200">
+                        {user.username || 'Set username'}
+                      </h2>
+                      <p className="text-slate-400 text-sm mt-1">Click to edit username</p>
+                    </div>
+                    <div className="opacity-0 group-hover/username:opacity-100 transition-opacity duration-200">
+                      <div className="p-2 bg-slate-700/50 rounded-lg">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -685,6 +860,87 @@ function ProfileContent() {
           </div>
         )}
       </div>
+
+      {/* Profile Picture Upload Modal */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Update Profile Picture</h3>
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="w-8 h-8 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {isUploading ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 border-4 border-[#00CED1]/30 border-t-[#00CED1] rounded-full animate-spin"></div>
+                <p className="text-white font-medium">Uploading your photo...</p>
+                <p className="text-slate-400 text-sm mt-1">This may take a moment</p>
+              </div>
+            ) : (
+              <>
+                {/* Drag and Drop Area */}
+                <div
+                  className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${
+                    dragActive
+                      ? 'border-[#00CED1] bg-[#00CED1]/5'
+                      : 'border-slate-600 hover:border-slate-500 hover:bg-slate-800/30'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <div className="w-12 h-12 mx-auto mb-4 bg-slate-700/50 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="text-white font-semibold mb-2">Drop your image here</h4>
+                  <p className="text-slate-400 text-sm mb-4">or click to browse files</p>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-2 bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-medium rounded-lg transition-all duration-200"
+                  >
+                    Choose File
+                  </button>
+                  <p className="text-slate-500 text-xs mt-3">PNG, JPG up to 5MB</p>
+                </div>
+
+                {/* Hidden File Input */}
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+
+                {/* Current Avatar Preview */}
+                {user.avatar && (
+                  <div className="mt-6 text-center">
+                    <p className="text-slate-400 text-sm mb-3">Current photo:</p>
+                    <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
+                      <Image
+                        src={user.avatar}
+                        alt="Current avatar"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -331,7 +331,9 @@ function PicksContent() {
               <p className="text-slate-400 text-sm">Choose player props to build your ${buyIn} parlay</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            {/*commenting the boxes of the things stuff out, check the RAL-134 issue/*}
+
+            {/* <div className="grid grid-cols-3 gap-3">
               <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 text-center">
                 <div className="text-slate-400 text-xs">Buy In</div>
                 <div className="text-white font-bold text-lg">${buyIn}</div>
@@ -346,7 +348,7 @@ function PicksContent() {
                   ~${Math.round(buyIn * game!.maxParticipants || 0)}
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -623,6 +625,7 @@ function AthletePickCard({
           </div>
 
           {/* Star Bookmark Button */}
+          {/* 
           <button
             onClick={() => onBookmarkToggle(athlete.id)}
             className={`p-2 rounded-lg transition-all duration-300 ${
@@ -645,6 +648,7 @@ function AthletePickCard({
               />
             </svg>
           </button>
+          */}
         </div>
 
         {/* Horizontal Layout with Stats and Buttons */}
