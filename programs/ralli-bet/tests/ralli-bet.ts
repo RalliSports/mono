@@ -506,7 +506,7 @@ describe("RalliBet Comprehensive Tests", () => {
 
     before(async () => {
       // Load the admin keypair from file
-      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair.json");
+      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
       const secret = Uint8Array.from(JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8")));
       adminKeypair = Keypair.fromSecretKey(secret);
 
@@ -1672,16 +1672,9 @@ describe("RalliBet Comprehensive Tests", () => {
 
     before(async () => {
 
-      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair.json");
+      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
       const secret = Uint8Array.from(JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8")));
       adminKeypair = Keypair.fromSecretKey(secret);
-
-
-      const signature = await connection.requestAirdrop(
-        adminKeypair.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
 
 
     });
@@ -1967,7 +1960,7 @@ describe("RalliBet Comprehensive Tests", () => {
 
     before(async () => {
 
-      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair.json");
+      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
       const secret = Uint8Array.from(JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8")));
       adminKeypair = Keypair.fromSecretKey(secret);
 
@@ -1982,7 +1975,7 @@ describe("RalliBet Comprehensive Tests", () => {
       let newStartsSoonRaw = Date.now() + 30000;
       let newStartsSoon = new BN(Math.floor(newStartsSoonRaw / 1000));
 
-      let newStartsSoonRawNew = Date.now() + 120000; // 2 minutes instead of 30 seconds
+      let newStartsSoonRawNew = Date.now() + 60000; // 1 minute instead of 30 seconds
       let newStartsSoonNew = new BN(Math.floor(newStartsSoonRawNew / 1000));
 
 
@@ -3308,11 +3301,6 @@ describe("RalliBet Comprehensive Tests", () => {
       newGameEscrow8PK = newGameEscrow8;
       newGameVault8PK = newGameVault8;
 
-
-
-
-
-
       // Single user game (edge case)
       const newGameId14 = new BN(2014);
       const [newGame14] = PublicKey.findProgramAddressSync(
@@ -3384,6 +3372,9 @@ describe("RalliBet Comprehensive Tests", () => {
       newGame14PK = newGame14;
       newGameEscrow14PK = newGameEscrow14;
       newGameVault14PK = newGameVault14;
+
+
+
 
       ////LINE ENDS
 
@@ -4526,6 +4517,50 @@ describe("RalliBet Comprehensive Tests", () => {
       }
     });
 
+    it("should fail to resolve game with insufficient token accounts for winners", async () => {
+      try {
+        // Create a scenario where the actual number of winners is 2, but we expect 2 winners
+        // and only provide 1 winner token account. This should cause array slicing issues.
+        await program.methods
+          .resolveGame(entryFeePercentage, 2)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            treasury: treasury.publicKey,
+            treasuryVault: treasuryTokenAccount,
+            mint: mint,
+            game: newGame7PK, // Game with 7 users
+            gameEscrow: newGameEscrow7PK,
+            gameVault: newGameVault7PK,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          })
+          .signers([adminKeypair])
+          .remainingAccounts([
+            // First 7 accounts: Bet accounts for all users
+            { pubkey: newBet1Game7, isWritable: true, isSigner: false },
+            { pubkey: newBet2Game7, isWritable: true, isSigner: false },
+            { pubkey: newBet3Game7, isWritable: true, isSigner: false },
+            { pubkey: newBet4Game7, isWritable: true, isSigner: false },
+            { pubkey: newBet5Game7, isWritable: true, isSigner: false },
+            { pubkey: newBet6Game7, isWritable: true, isSigner: false },
+            { pubkey: newBet7Game7, isWritable: true, isSigner: false },
+
+            // Next accounts: Winner token accounts (providing only 1 instead of expected 2)
+            { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+
+            // Last 3 accounts: Line accounts  
+            { pubkey: newLine1PK, isWritable: false, isSigner: false },
+            { pubkey: newLine2PK, isWritable: false, isSigner: false },
+            { pubkey: newLine3PK, isWritable: false, isSigner: false },
+          ])
+          .rpc();
+        expect.fail("Should have failed with insufficient token accounts");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: MissingLineAccounts");
+      }
+    });
+
 
     it("should successfully resolve game with 7 users where 2 win with low fees", async () => {
       const user1BalanceBefore = await connection.getTokenAccountBalance(user1TokenAccount);
@@ -4729,43 +4764,10 @@ describe("RalliBet Comprehensive Tests", () => {
 
 
 
-    it("should fail to resolve game with insufficient token accounts for winners", async () => {
-      try {
-        // Try to resolve game with 2 winners but only provide 1 token account
-        await program.methods
-          .resolveGame(entryFeePercentage, 2)
-          .accountsPartial({
-            admin: adminKeypair.publicKey,
-            treasury: treasury.publicKey,
-            treasuryVault: treasuryTokenAccount,
-            mint: mint,
-            game: newGame7PK, // Game with 7 users, 2 winners
-            gameEscrow: newGameEscrow7PK,
-            gameVault: newGameVault7PK,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          })
-          .signers([adminKeypair])
-          .remainingAccounts([
-            { pubkey: newBet1Game7, isWritable: true, isSigner: false },
-            { pubkey: newBet2Game7, isWritable: true, isSigner: false },
-            { pubkey: newBet3Game7, isWritable: true, isSigner: false },
-            { pubkey: newBet4Game7, isWritable: true, isSigner: false },
-            { pubkey: newBet5Game7, isWritable: true, isSigner: false },
-            { pubkey: newBet6Game7, isWritable: true, isSigner: false },
-            { pubkey: newBet7Game7, isWritable: true, isSigner: false },
-            { pubkey: user1TokenAccount, isWritable: true, isSigner: false }, // Only 1 token account provided
-            { pubkey: newLine1PK, isWritable: false, isSigner: false },
-            { pubkey: newLine2PK, isWritable: false, isSigner: false },
-            { pubkey: newLine3PK, isWritable: false, isSigner: false },
-          ])
-          .rpc();
-        expect.fail("Should have failed with insufficient token accounts");
-      } catch (error) {
-        expect(error.toString()).to.include("Error");
-      }
-    });
+
+
+
+
 
   });
 });

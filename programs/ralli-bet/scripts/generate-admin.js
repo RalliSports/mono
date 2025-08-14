@@ -6,7 +6,7 @@ const kp = Keypair.generate();
 
 // Save the secret key to a file so tests can load it later
 fs.writeFileSync(
-    "admin-keypair.json",
+    "admin-keypair-new.json",
     JSON.stringify(Array.from(kp.secretKey))
 );
 
