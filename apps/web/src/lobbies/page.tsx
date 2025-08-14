@@ -503,15 +503,13 @@ export default function LobbiesPage() {
         )}
 
         {/* Lobbies Grid */}
-        {filteredLobbies.length > 0 ? (
+        {/* {filteredLobbies.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredLobbies.map((lobby) => (
               <LobbyCard
                 key={lobby.id}
                 id={lobby.id}
                 title={lobby.title}
-                sport={lobby.sport}
-                sportIcon={lobby.sportIcon}
                 participants={lobby.participants}
                 maxParticipants={lobby.maxParticipants}
                 buyIn={lobby.buyIn}
@@ -558,7 +556,7 @@ export default function LobbiesPage() {
               </button>
             )}
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Sidebar Navigation */}
