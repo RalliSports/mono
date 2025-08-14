@@ -109,7 +109,7 @@ export default function MainFeedPage() {
   useEffect(() => {
     const loadLobbies = async () => {
       const fetchedLobbies = await fetchGames()
-      setLobbiesData(fetchedLobbies)
+      setLobbiesData(fetchedLobbies.filter((lobby) => lobby.participants.length < lobby.maxParticipants))
     }
 
     loadLobbies()

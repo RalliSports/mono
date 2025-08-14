@@ -475,7 +475,7 @@ export default function CreateGame() {
 
               <div className="flex justify-between text-xs text-slate-500">
                 <span>2</span>
-                <span>50</span>
+                <span>10</span>
               </div>
             </div>
           </div>
