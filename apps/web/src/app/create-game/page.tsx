@@ -240,6 +240,21 @@ export default function CreateGame() {
       `}</style>
 
       <div className="max-w-md mx-auto space-y-6">
+        {/* Back Button Header */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            href="/main"
+            className="inline-flex items-center space-x-2 text-slate-400 hover:text-[#00CED1] transition-all duration-200 group"
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-sm border border-slate-600/40 rounded-lg flex items-center justify-center group-hover:border-[#00CED1]/50 transition-all duration-200">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium">Back to Home</span>
+          </Link>
+        </div>
+
         {/* Enhanced Header */}
         <div className="text-center mb-8">
           <div className="mb-6">
@@ -297,24 +312,52 @@ export default function CreateGame() {
                 <p className="text-slate-400 text-xs">Entry fee per player</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 mb-2">
-              <span className="text-[#00CED1] font-bold text-lg">$</span>
-              <input
-                type="range"
-                value={gameSettings.depositAmount}
-                onChange={(e) => handleInputChange('depositAmount', parseInt(e.target.value))}
-                min="5"
-                max="500"
-                step="5"
-                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-              />
-              <span className="text-[#00CED1] font-bold text-xl min-w-[3rem] text-center">
-                ${gameSettings.depositAmount}
-              </span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>$5</span>
-              <span>$500</span>
+
+            {/* Input and Slider Container */}
+            <div className="space-y-4">
+              {/* Direct Input Field */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="number"
+                  value={gameSettings.depositAmount}
+                  onChange={(e) => {
+                    // Allow free typing, including empty values
+                    const value = e.target.value === '' ? '' : parseInt(e.target.value)
+                    handleInputChange('depositAmount', value)
+                  }}
+                  onBlur={(e) => {
+                    // Validate only when user finishes typing (leaves the field)
+                    const value = Math.max(5, Math.min(500, parseInt(e.target.value) || 5))
+                    handleInputChange('depositAmount', value)
+                  }}
+                  min="5"
+                  max="500"
+                  step="5"
+                  className="flex-1 bg-gradient-to-br from-slate-700/80 to-slate-800/60 border-2 border-slate-600/40 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-[#00CED1]/70 focus:ring-2 focus:ring-[#00CED1]/20 transition-all duration-300 text-center font-bold"
+                  placeholder="$ Amount (5-500)"
+                />
+              </div>
+
+              {/* Slider */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="range"
+                  value={gameSettings.depositAmount}
+                  onChange={(e) => handleInputChange('depositAmount', parseInt(e.target.value))}
+                  min="5"
+                  max="500"
+                  step="5"
+                  className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <span className="text-[#00CED1] font-bold text-xl min-w-[3rem] text-center">
+                  ${gameSettings.depositAmount}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-xs text-slate-500">
+                <span>$5</span>
+                <span>$500</span>
+              </div>
             </div>
           </div>
 
@@ -329,22 +372,51 @@ export default function CreateGame() {
                 <p className="text-slate-400 text-xs">Maximum participants</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 mb-2">
-              <input
-                type="range"
-                value={gameSettings.maxParticipants}
-                onChange={(e) => handleInputChange('maxParticipants', parseInt(e.target.value))}
-                min="2"
-                max="20"
-                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-              />
-              <span className="text-orange-400 font-bold text-xl min-w-[2.5rem] text-center">
-                {gameSettings.maxParticipants}
-              </span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>2</span>
-              <span>20</span>
+
+            {/* Input and Slider Container */}
+            <div className="space-y-4">
+              {/* Direct Input Field */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="number"
+                  value={gameSettings.maxParticipants}
+                  onChange={(e) => {
+                    // Allow free typing, including empty values
+                    const value = e.target.value === '' ? '' : parseInt(e.target.value)
+                    handleInputChange('maxParticipants', value)
+                  }}
+                  onBlur={(e) => {
+                    // Validate only when user finishes typing (leaves the field)
+                    const value = Math.max(2, Math.min(20, parseInt(e.target.value) || 2))
+                    handleInputChange('maxParticipants', value)
+                  }}
+                  min="2"
+                  max="20"
+                  step="1"
+                  className="flex-1 bg-gradient-to-br from-slate-700/80 to-slate-800/60 border-2 border-slate-600/40 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-400/70 focus:ring-2 focus:ring-orange-400/20 transition-all duration-300 text-center font-bold"
+                  placeholder="Players (2-20)"
+                />
+              </div>
+
+              {/* Slider */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="range"
+                  value={gameSettings.maxParticipants}
+                  onChange={(e) => handleInputChange('maxParticipants', parseInt(e.target.value))}
+                  min="2"
+                  max="20"
+                  className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <span className="text-orange-400 font-bold text-xl min-w-[2.5rem] text-center">
+                  {gameSettings.maxParticipants}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-xs text-slate-500">
+                <span>2</span>
+                <span>20</span>
+              </div>
             </div>
           </div>
 
@@ -359,21 +431,52 @@ export default function CreateGame() {
                 <p className="text-slate-400 text-xs">Maximum bets allowed per participant</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 mb-2">
-              <input
-                type="range"
-                value={gameSettings.numBets}
-                onChange={(e) => handleInputChange('numBets', parseInt(e.target.value))}
-                min="2"
-                max="50"
-                step="1"
-                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-              />
-              <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">{gameSettings.numBets}</span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>2</span>
-              <span>50</span>
+
+            {/* Input and Slider Container */}
+            <div className="space-y-4">
+              {/* Direct Input Field */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="number"
+                  value={gameSettings.numBets}
+                  onChange={(e) => {
+                    // Allow free typing, including empty values
+                    const value = e.target.value === '' ? '' : parseInt(e.target.value)
+                    handleInputChange('numBets', value)
+                  }}
+                  onBlur={(e) => {
+                    // Validate only when user finishes typing (leaves the field)
+                    const value = Math.max(1, Math.min(50, parseInt(e.target.value) || 1))
+                    handleInputChange('numBets', value)
+                  }}
+                  min="1"
+                  max="50"
+                  step="1"
+                  className="flex-1 bg-gradient-to-br from-slate-700/80 to-slate-800/60 border-2 border-slate-600/40 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-teal-400/70 focus:ring-2 focus:ring-teal-400/20 transition-all duration-300 text-center font-bold"
+                  placeholder="Bets (1-50)"
+                />
+              </div>
+
+              {/* Slider */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="range"
+                  value={gameSettings.numBets}
+                  onChange={(e) => handleInputChange('numBets', parseInt(e.target.value))}
+                  min="2"
+                  max="50"
+                  step="1"
+                  className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">
+                  {gameSettings.numBets}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-xs text-slate-500">
+                <span>2</span>
+                <span>50</span>
+              </div>
             </div>
           </div>
         </div>
@@ -417,19 +520,6 @@ export default function CreateGame() {
               </span>
             </span>
           </button>
-        </div>
-
-        {/* Back Navigation */}
-        <div className="text-center">
-          <Link
-            href="/main"
-            className="inline-flex items-center space-x-2 text-slate-400 hover:text-[#00CED1] transition-colors duration-200"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span className="text-sm">Back to Home</span>
-          </Link>
         </div>
       </div>
       <ToastContainer />
