@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse and return the backend response
-    const data = await response.json()
-    return NextResponse.json(data, { status: 200 })
+    // const data = await response.json()
+    return NextResponse.json({ message: 'Tokens fauceted' }, { status: 200 })
   } catch (error) {
     console.error('Create game API error:', error)
     return NextResponse.json(

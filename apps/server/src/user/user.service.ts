@@ -73,6 +73,6 @@ export class UserService {
 
     // Then faucet tokens
     this.anchor.faucetTokens(userPK);
-    return { message: 'Tokens fauceted' };
+    return;
   }
 }

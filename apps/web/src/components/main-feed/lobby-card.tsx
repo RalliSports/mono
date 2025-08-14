@@ -1,13 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface LobbyCardProps {
   id: string
   title: string
-  sport: string
-  sportIcon: string
-  participants: number
+  participants: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants: number
   buyIn: number
   prizePool: number
@@ -18,14 +17,12 @@ interface LobbyCardProps {
     avatar: string
   }
   isUrgent?: boolean
-  onJoin: (lobbyId: string, requiredLegs: number) => void
+  shouldOpenViewGame?: boolean
 }
 
 export default function LobbyCard({
   id,
   title,
-  sport,
-  sportIcon,
   participants,
   maxParticipants,
   buyIn,
@@ -34,9 +31,10 @@ export default function LobbyCard({
   timeLeft,
   host,
   isUrgent = false,
-  onJoin,
+  shouldOpenViewGame = false,
 }: LobbyCardProps) {
-  const progressPercentage = (participants / maxParticipants) * 100
+  const progressPercentage = (participants.length / maxParticipants) * 100
+  const nextPageOnClick = shouldOpenViewGame ? 'view-game' : 'join-game'
 
   return (
     <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-3xl p-8 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 group hover:transform hover:scale-[1.01] shadow-xl relative min-h-[280px]">
@@ -63,7 +61,7 @@ export default function LobbyCard({
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <h4 className="text-white font-bold text-base">{host.username}</h4>
+              <Image src={host.avatar} alt={host.username} width={24} height={24} />
               <span className="text-slate-400 text-sm">created a lobby</span>
             </div>
             <p className="text-slate-300 text-xs">
@@ -101,7 +99,7 @@ export default function LobbyCard({
               <div className="bg-gradient-to-br from-slate-700/80 to-slate-800/60 rounded-xl p-4 border border-slate-600/30">
                 <div className="text-center">
                   <div className="text-2xl font-black text-emerald-400 mb-1">
-                    {participants}/{maxParticipants}
+                    {participants.length}/{maxParticipants}
                   </div>
                   <div className="text-slate-400 text-xs font-medium uppercase tracking-wide">Slots</div>
                 </div>
@@ -130,7 +128,7 @@ export default function LobbyCard({
 
           {/* View Button - pushed to bottom */}
           <Link
-            href={`/join-game?id=${id}`}
+            href={`/${nextPageOnClick}?id=${id}`}
             className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 mt-auto"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

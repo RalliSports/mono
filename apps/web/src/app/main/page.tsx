@@ -67,10 +67,42 @@ interface Athlete {
   lines: Line[]
 }
 
+interface User {
+  id: string
+  emailAddress: string
+
+  walletAddress: string
+  paraUserId: string
+
+  firstName?: string
+  lastName?: string
+
+  username?: string
+  avatar?: string
+  hasBeenFaucetedSol: boolean
+}
+
 export default function MainFeedPage() {
   const router = useRouter()
   const account = useAccount()
   const { session } = useSessionToken()
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch('/api/read-current-user', {
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      const data: User = await response.json()
+      if (!data.username) {
+        router.push('/profile')
+      }
+      setUser(data)
+    }
+    fetchUser()
+  }, [])
 
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
 
@@ -188,13 +220,7 @@ export default function MainFeedPage() {
   }, [mounted, hasCheckedConnection, account?.isConnected, router])
 
   // Mock lobby data - showing high activity
-  const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === 'active').length
-
-  const handleLobbyJoin = (lobbyId: string, requiredLegs: number) => {
-    setIsInSelectionMode(true)
-    setRequiredSelections(requiredLegs)
-    setSelectedAthletes([])
-  }
+  const totalActiveLobbies = lobbiesData.length
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
@@ -359,8 +385,6 @@ export default function MainFeedPage() {
                   key={lobby.id}
                   id={lobby.id}
                   title={lobby.title}
-                  sport={lobby.sport}
-                  sportIcon={lobby.sportIcon}
                   participants={lobby.participants}
                   maxParticipants={lobby.maxParticipants}
                   buyIn={lobby.buyIn}
@@ -369,7 +393,7 @@ export default function MainFeedPage() {
                   timeLeft={lobby.timeLeft}
                   host={lobby.host}
                   isUrgent={lobby.isUrgent}
-                  onJoin={handleLobbyJoin}
+                  shouldOpenViewGame={lobby.participants.some((participant) => participant.user.id === user?.id)}
                 />
               ))}
             </div>
@@ -431,8 +455,6 @@ export default function MainFeedPage() {
                   key={lobby.id}
                   id={lobby.id}
                   title={lobby.title}
-                  sport={lobby.sport}
-                  sportIcon={lobby.sportIcon}
                   participants={lobby.participants}
                   maxParticipants={lobby.maxParticipants}
                   buyIn={lobby.buyIn}
@@ -441,7 +463,7 @@ export default function MainFeedPage() {
                   timeLeft={lobby.timeLeft}
                   host={lobby.host}
                   isUrgent={lobby.isUrgent}
-                  onJoin={handleLobbyJoin}
+                  shouldOpenViewGame={lobby.participants.some((participant) => participant.user.id === user?.id)}
                 />
               ))}
             </div>

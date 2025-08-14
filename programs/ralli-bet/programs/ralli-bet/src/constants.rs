@@ -1,13 +1,13 @@
 use anchor_lang::prelude::*;
 
-pub const ADMIN_PUBKEYS: [Pubkey; 4] = [
+pub const ADMIN_PUBKEYS: [Pubkey; 6] = [
+    pubkey!("AzMu8gN1rirmx3Q8pHVvFR2A42ek4pU48iBPjSXxCrWa"), //TEST ADMIN PUBKEY
     pubkey!("2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk"), // Jack-para
     pubkey!("BuxU7uwwkoobF8p4Py7nRoTgxWRJfni8fc4U3YKGEXKs"), // Jack
-    pubkey!("GkiKqSVfnU2y4TeUW7up2JS9Z8g1yjGYJ8x2QNf4K6Y"), // Prakhar
-    pubkey!("MNG3SoboXMyjse4ggiyBWJreNhfxyni5VJFxSLmXM5n"), // Ahindra
-
-    // please add your ProgramIDs and update the array size please
-    
+    pubkey!("GkiKqSVfnU2y4TeUW7up2JS9Z8g1yjGYJ8x2QNf4K6Y"),  // Prakhar
+    pubkey!("MNG3SoboXMyjse4ggiyBWJreNhfxyni5VJFxSLmXM5n"),  // Ahindra
+    pubkey!("2GuAG65KTq1oFwztWoGAR4g9jBYVZ2eiMDfEESVumZoc"), //Grey-para
+                                                             // please add your ProgramIDs and update the array size please
 ];
 
 pub fn is_admin(pubkey: &Pubkey) -> bool {

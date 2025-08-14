@@ -8,7 +8,21 @@ import { ParaButton } from '@/components/para-modal'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { fetchGames } from '@/hooks/get-games'
 import type { Lobby } from '@/hooks/get-games'
+import { useSessionToken } from '@/hooks/use-session'
 
+interface User {
+  id: string
+  emailAddress: string
+
+  walletAddress: string
+  paraUserId: string
+
+  firstName?: string
+  lastName?: string
+
+  username?: string
+  avatar?: string
+}
 export default function LobbiesPage() {
   const router = useRouter()
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -19,6 +33,22 @@ export default function LobbiesPage() {
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
   const [lobbiesError, setLobbiesError] = useState<string | null>(null)
   const [lobbiesLoading, setLobbiesLoading] = useState(true)
+  const { session } = useSessionToken()
+
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch('/api/read-current-user', {
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      const data = await response.json()
+      setUser(data)
+    }
+    fetchUser()
+  }, [])
 
   // Para wallet balance hook
   const {
@@ -75,11 +105,6 @@ export default function LobbiesPage() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isProfileDropdownOpen])
-
-  const handleLobbyJoin = (lobbyId: string, requiredLegs: number) => {
-    // Handle lobby join logic here
-    console.log(`Joining lobby ${lobbyId} with ${requiredLegs} legs`)
-  }
 
   // Filter lobbies based on selected filter and search query
   const filteredLobbies = lobbiesData.filter((lobby) => {
@@ -432,8 +457,6 @@ export default function LobbiesPage() {
                 key={lobby.id}
                 id={lobby.id}
                 title={lobby.title}
-                sport={lobby.sport}
-                sportIcon={lobby.sportIcon}
                 participants={lobby.participants}
                 maxParticipants={lobby.maxParticipants}
                 buyIn={lobby.buyIn}
@@ -442,7 +465,7 @@ export default function LobbiesPage() {
                 timeLeft={lobby.timeLeft}
                 host={lobby.host}
                 isUrgent={lobby.isUrgent}
-                onJoin={handleLobbyJoin}
+                shouldOpenViewGame={lobby.participants.some((participant) => participant.user.id === user?.id)}
               />
             ))}
           </div>
