@@ -163,7 +163,7 @@ function ProfileContent() {
     const response = await fetch('/api/update-user', {
       method: 'PATCH',
       headers: {
-        'x-para-session': session,
+        'x-para-session': session || '',
       },
       body: JSON.stringify({
         username,
@@ -185,7 +185,7 @@ function ProfileContent() {
     const fetchUser = async () => {
       const response = await fetch('/api/read-current-user', {
         headers: {
-          'x-para-session': session,
+          'x-para-session': session || '',
         },
       })
       const data = await response.json()
@@ -202,7 +202,7 @@ function ProfileContent() {
     const fetchMyOpenGames = async () => {
       const response = await fetch('/api/read-my-open-games', {
         headers: {
-          'x-para-session': session,
+          'x-para-session': session || '',
         },
       })
       const data = await response.json()

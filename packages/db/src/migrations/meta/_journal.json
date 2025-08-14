@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1755130606990,
-      "tag": "0000_wakeful_molecule_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1755132829999,
-      "tag": "0001_previous_starhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1755133993647,
-      "tag": "0002_omniscient_roughhouse",
+      "when": 1755139964650,
+      "tag": "0000_tricky_king_cobra",
       "breakpoints": true
     }
   ]
