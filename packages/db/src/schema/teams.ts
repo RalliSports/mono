@@ -12,6 +12,7 @@ import { matchups } from "./matchups";
 // Teams Table
 export const teams = pgTable("teams", {
   id: uuid("id").primaryKey().defaultRandom(),
+  espnTeamId: varchar("espn_team_id"),
   name: varchar("name", { length: 100 }).notNull(),
   city: varchar("city", { length: 100 }).notNull(),
   country: varchar("country", { length: 100 }).notNull(),

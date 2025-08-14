@@ -82,6 +82,7 @@ export class AthletesService {
     const [inserted] = await this.db
       .insert(athletes)
       .values({
+        espnAthleteId: dto.espnAthleteId,
         name: dto.name,
         teamId: dto.teamId,
         position: dto.position,
