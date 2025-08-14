@@ -11,6 +11,7 @@ node_modules
 .vscode/settings.json
 .vscode/tasks.json
 .vscode/launch.json
+
 .dockerignore
 # Local env files
 .env
@@ -46,3 +47,4 @@ yarn-error.log*
 *.pem
 
 supabase
+admin-keypair.json
