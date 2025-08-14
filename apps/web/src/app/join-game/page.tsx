@@ -53,7 +53,7 @@ interface Line {
   predictedValue: number
   actualValue: number
 }
-interface Prediction {
+interface Bet {
   id: string
   participantId: string
   lineId: string
@@ -70,7 +70,7 @@ interface Participant {
   isWinner: boolean
   txnId: string | null
   user: Creator
-  predictions: Prediction[]
+  bets: Bet[]
 }
 
 interface Game {
@@ -336,9 +336,7 @@ function JoinGameContent() {
 
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="text-sm text-slate-300 font-medium">
-                            {participant.predictions.length} picks
-                          </div>
+                          <div className="text-sm text-slate-300 font-medium">{participant.bets.length} picks</div>
                           <div className="text-xs text-slate-500">Ready to play</div>
                         </div>
                         <div
@@ -354,7 +352,7 @@ function JoinGameContent() {
                     {/* Enhanced Quick Picks Preview */}
                     <div className="mt-4">
                       <div className="flex gap-1.5">
-                        {participant.predictions.slice(0, 4).map((pick) => (
+                        {participant.bets.slice(0, 4).map((pick) => (
                           <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-blue-400 to-blue-500"
@@ -372,11 +370,11 @@ function JoinGameContent() {
                   <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden animate-in slide-in-from-top-2 duration-300 shadow-2xl shadow-[#00CED1]/10">
                     <div className="p-4 border-b border-slate-700/50">
                       <h5 className="text-white font-bold truncate">{participant.user.walletAddress}&apos;s Picks</h5>
-                      <p className="text-slate-400 text-sm">{participant.predictions.length} legs selected</p>
+                      <p className="text-slate-400 text-sm">{participant.bets.length} legs selected</p>
                     </div>
 
                     <div className="divide-y divide-slate-700/30">
-                      {participant.predictions.map((pick) => (
+                      {participant.bets.map((pick) => (
                         <div key={pick.id} className="p-4 hover:bg-slate-700/20 transition-all duration-200">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 min-w-0 flex-1">
