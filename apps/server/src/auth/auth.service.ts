@@ -36,7 +36,7 @@ export class AuthService {
       const para = await this.getPara();
 
       const userExisted = await this.db.query.users.findFirst({
-        where: eq(users.paraUserId, para.getUserId() ?? ''),
+        where: eq(users.emailAddress, para.email ?? ''),
       });
 
       if (userExisted) {
@@ -61,7 +61,7 @@ export class AuthService {
 
       // fetch the newly created user if needed
       const user = await this.db.query.users.findFirst({
-        where: eq(users.paraUserId, para.getUserId() ?? ''),
+        where: eq(users.emailAddress, para.email ?? ''),
       });
 
       if (!user) {
