@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ParaButton } from '../para-modal'
 
 interface ProfilePageProps {
@@ -9,67 +9,42 @@ interface ProfilePageProps {
 }
 
 export default function ProfilePage({ isOpen, onClose }: ProfilePageProps) {
+  const [username, setUsername] = useState<string>('')
+  // const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch('/api/user')
+      const data = await response.json()
+      setUser(data)
+    }
+    fetchUser()
+  }, [])
+
   if (!isOpen) return null
 
   // Mock user data
   const user = {
     name: 'Mike Chen',
     username: '@mikechen',
-    level: 47,
     balance: 1250,
-    winRate: 68.4,
     totalBets: 342,
-    globalRank: 1847,
-    currentStreak: 7,
-    streakType: 'win' as 'win' | 'loss',
-    joinedDate: 'March 2024',
   }
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'win',
-      amount: 125,
-      game: 'NBA 4-Leg Parlay',
-      date: '2 hours ago',
-      players: ['LeBron James', 'Steph Curry', 'Luka Dončić', 'Jayson Tatum'],
-    },
-    {
-      id: 2,
-      type: 'loss',
-      amount: 50,
-      game: 'NFL Monday Night',
-      date: '1 day ago',
-      players: ['Josh Allen', 'Patrick Mahomes', 'Travis Kelce'],
-    },
-    {
-      id: 3,
-      type: 'win',
-      amount: 75,
-      game: 'Soccer Special',
-      date: '2 days ago',
-      players: ['Lionel Messi', 'Kylian Mbappé'],
-    },
-  ]
+  const recentActivity: {
+    id: number
+    type: 'win' | 'loss'
+    amount: number
+    game: string
+    date: string
+    players: string[]
+  }[] = []
 
-  const achievements = [
-    { name: 'Hot Streak', description: 'Win 5 games in a row', unlocked: true },
-    {
-      name: 'Big Winner',
-      description: 'Win $500+ in a single game',
-      unlocked: true,
-    },
-    {
-      name: 'Consistent Player',
-      description: 'Place 100 bets',
-      unlocked: true,
-    },
-    {
-      name: 'Elite Trader',
-      description: 'Reach 70% win rate',
-      unlocked: false,
-    },
-  ]
+  const achievements: {
+    name: string
+    description: string
+    unlocked: boolean
+  }[] = []
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
@@ -92,12 +67,6 @@ export default function ProfilePage({ isOpen, onClose }: ProfilePageProps) {
             </div>
             <h1 className="text-2xl font-bold text-white mb-1">{user.name}</h1>
             <p className="text-[#00CED1] font-semibold">{user.username}</p>
-            <div className="flex items-center justify-center space-x-2 mt-2">
-              <span className="bg-gradient-to-r from-[#FFAB91] to-[#00CED1] px-3 py-1 rounded-full text-xs font-bold text-white">
-                Level {user.level}
-              </span>
-              <span className="text-slate-400 text-xs">Member since {user.joinedDate}</span>
-            </div>
           </div>
         </div>
 
@@ -112,27 +81,11 @@ export default function ProfilePage({ isOpen, onClose }: ProfilePageProps) {
               </div>
             </div>
 
-            {/* Win Rate */}
-            <div className="bg-gradient-to-br from-emerald-400/10 to-emerald-400/5 rounded-2xl p-4 border border-emerald-400/20">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-400 mb-1">{user.winRate}%</div>
-                <div className="text-slate-400 text-xs">Win Rate</div>
-              </div>
-            </div>
-
             {/* Total Bets */}
             <div className="bg-gradient-to-br from-[#FFAB91]/10 to-[#FFAB91]/5 rounded-2xl p-4 border border-[#FFAB91]/20">
               <div className="text-center">
                 <div className="text-2xl font-bold text-[#FFAB91] mb-1">{user.totalBets}</div>
                 <div className="text-slate-400 text-xs">Total Bets</div>
-              </div>
-            </div>
-
-            {/* Global Rank */}
-            <div className="bg-gradient-to-br from-purple-400/10 to-purple-400/5 rounded-2xl p-4 border border-purple-400/20">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400 mb-1">#{user.globalRank}</div>
-                <div className="text-slate-400 text-xs">Global Rank</div>
               </div>
             </div>
           </div>

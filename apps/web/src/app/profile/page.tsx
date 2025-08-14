@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ParaButton } from '@/components/para-modal'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 
 interface ActiveParlay {
   id: string
@@ -35,6 +36,9 @@ function ProfileContent() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
+  const [username, setUsername] = useState('')
+  const [editingUsername, setEditingUsername] = useState(false)
+
   // Fix hydration issues and handle URL params
   useEffect(() => {
     setMounted(true)
@@ -44,19 +48,34 @@ function ProfileContent() {
     }
   }, [searchParams])
 
+  const handleUpdateUsername = async () => {
+    // TODO: Update username
+  }
+
+  // Para wallet balance hook
+  const {
+    isConnected,
+    balances,
+    isLoading: balanceLoading,
+    error: balanceError,
+    refetch: refetchBalance,
+  } = useParaWalletBalance()
+
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
   // Mock user data
   const user = {
     name: 'Mike Chen',
     username: '@mikechen',
     avatar: 'MC',
-    level: 15,
-    joinDate: 'March 2024',
     balance: 1250,
-    winRate: 72,
     totalBets: 148,
-    globalRank: 1247,
-    currentStreak: 8,
-    streakType: 'win' as const,
   }
 
   const tabs = [
@@ -273,8 +292,44 @@ function ProfileContent() {
           </div>
 
           {/* Right: Balance */}
-          <div className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-3 py-1.5 backdrop-blur-sm">
-            <span className="text-[#00CED1] font-semibold text-sm">${user.balance.toLocaleString()}</span>
+          {/* Right: Balance + Profile */}
+          <div className="flex items-center space-x-3">
+            <div
+              className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-4 py-2 backdrop-blur-sm cursor-pointer hover:from-[#00CED1]/30 hover:to-[#FFAB91]/30 transition-all duration-200"
+              onClick={() => {
+                router.push('/add-funds')
+              }}
+              title={
+                isConnected
+                  ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nRALLI: $${formatBalance(balances.ralli)}`
+                  : 'Connect wallet to view balance'
+              }
+            >
+              <div className="flex items-center space-x-2">
+                <div className="w-5 h-5 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-lg flex items-center justify-center">
+                  {balanceLoading ? (
+                    <div className="w-3 h-3 border-[1.5px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <span className="font-bold text-lg bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
+                  {isConnected
+                    ? balanceLoading
+                      ? 'Loading...'
+                      : balanceError
+                        ? '$0.00'
+                        : `$${formatBalance(balances.ralli)}`
+                    : '$0.00'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -287,20 +342,51 @@ function ProfileContent() {
               <div className="w-20 h-20 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-xl flex items-center justify-center shadow-2xl">
                 <span className="text-white font-bold text-2xl">{user.avatar}</span>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full border-2 border-slate-800 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">{user.level}</span>
-              </div>
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-white">{user.name}</h2>
-              <p className="text-slate-400">{user.username}</p>
-              <div className="flex items-center space-x-4 mt-2">
+              {editingUsername ? (
                 <div className="flex items-center space-x-1">
-                  <span className="text-[#FFAB91]">⭐</span>
-                  <span className="text-white font-semibold">Level {user.level}</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="bg-transparent text-white border border-white rounded-md p-1"
+                  />
+                  <button
+                    onClick={() => {
+                      setEditingUsername(false)
+                      // TODO: Update username
+                    }}
+                    className="bg-white text-black px-2 py-1 rounded-md"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 24 24" fill="none">
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M18.1716 1C18.702 1 19.2107 1.21071 19.5858 1.58579L22.4142 4.41421C22.7893 4.78929 23 5.29799 23 5.82843V20C23 21.6569 21.6569 23 20 23H4C2.34315 23 1 21.6569 1 20V4C1 2.34315 2.34315 1 4 1H18.1716ZM4 3C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21L5 21L5 15C5 13.3431 6.34315 12 8 12L16 12C17.6569 12 19 13.3431 19 15V21H20C20.5523 21 21 20.5523 21 20V6.82843C21 6.29799 20.7893 5.78929 20.4142 5.41421L18.5858 3.58579C18.2107 3.21071 17.702 3 17.1716 3H17V5C17 6.65685 15.6569 8 14 8H10C8.34315 8 7 6.65685 7 5V3H4ZM17 21V15C17 14.4477 16.5523 14 16 14L8 14C7.44772 14 7 14.4477 7 15L7 21L17 21ZM9 3H15V5C15 5.55228 14.5523 6 14 6H10C9.44772 6 9 5.55228 9 5V3Z"
+                        fill="#0f172bf2"
+                      />
+                    </svg>
+                  </button>
                 </div>
-                <div className="text-slate-400 text-sm">Joined {user.joinDate}</div>
-              </div>
+              ) : (
+                <div className="flex items-center space-x-1" onClick={() => setEditingUsername(true)}>
+                  <p className="text-slate-400">{user.username}</p>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24" fill="none">
+                    <g id="Edit / Edit_Pencil_01">
+                      <path
+                        id="Vector"
+                        d="M12 8.00012L4 16.0001V20.0001L8 20.0001L16 12.0001M12 8.00012L14.8686 5.13146L14.8704 5.12976C15.2652 4.73488 15.463 4.53709 15.691 4.46301C15.8919 4.39775 16.1082 4.39775 16.3091 4.46301C16.5369 4.53704 16.7345 4.7346 17.1288 5.12892L18.8686 6.86872C19.2646 7.26474 19.4627 7.46284 19.5369 7.69117C19.6022 7.89201 19.6021 8.10835 19.5369 8.3092C19.4628 8.53736 19.265 8.73516 18.8695 9.13061L18.8686 9.13146L16 12.0001M12 8.00012L16 12.0001"
+                        stroke="white"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </g>
+                  </svg>
+                </div>
+              )}
             </div>
           </div>
 
@@ -312,20 +398,12 @@ function ProfileContent() {
                 router.push('/add-funds')
               }}
             >
-              <div className="text-2xl font-bold text-[#00CED1]">${user.balance.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-[#00CED1]">${formatBalance(balances.ralli)}</div>
               <div className="text-slate-400 text-sm">Balance</div>
-            </div>
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl p-4 text-center border border-slate-700/50">
-              <div className="text-2xl font-bold text-[#FFAB91]">{user.winRate}%</div>
-              <div className="text-slate-400 text-sm">Win Rate</div>
             </div>
             <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl p-4 text-center border border-slate-700/50">
               <div className="text-2xl font-bold text-white">{user.totalBets}</div>
               <div className="text-slate-400 text-sm">Total Bets</div>
-            </div>
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl p-4 text-center border border-slate-700/50">
-              <div className="text-2xl font-bold text-[#00CED1]">#{user.globalRank}</div>
-              <div className="text-slate-400 text-sm">Global Rank</div>
             </div>
           </div>
 
@@ -354,7 +432,7 @@ function ProfileContent() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="px-4 mb-6">
+      {/* <div className="px-4 mb-6">
         <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
           {tabs.map((tab) => (
             <button
@@ -376,75 +454,12 @@ function ProfileContent() {
             display: none;
           }
         `}</style>
-      </div>
+      </div> */}
 
       {/* Tab Content */}
       <div className="px-4 pb-8">
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Recent Activity */}
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
-              <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-4 flex items-center justify-center">
-                  <span className="text-lg">📈</span>
-                </span>
-                Recent Activity
-              </h3>
-              <div className="space-y-4">
-                {[
-                  {
-                    type: 'win',
-                    game: 'NBA Sunday Showdown',
-                    amount: 125,
-                    players: ['LeBron James', 'Stephen Curry'],
-                    time: '2 hours ago',
-                  },
-                  {
-                    type: 'loss',
-                    game: 'Monday Night Football',
-                    amount: -50,
-                    players: ['Josh Allen', 'Patrick Mahomes'],
-                    time: '1 day ago',
-                  },
-                  {
-                    type: 'win',
-                    game: 'Champions League Special',
-                    amount: 85,
-                    players: ['Lionel Messi'],
-                    time: '2 days ago',
-                  },
-                ].map((bet, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:border-slate-600/60 transition-all duration-300"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-3 h-3 rounded-full ${bet.type === 'win' ? 'bg-emerald-400' : 'bg-red-400'}`}
-                      ></div>
-                      <div>
-                        <div className="text-white font-semibold">{bet.game}</div>
-                        <div className="flex items-center space-x-1 mt-1">
-                          {bet.players.map((player, playerIndex) => (
-                            <span
-                              key={playerIndex}
-                              className="bg-slate-700/50 px-2 py-1 rounded-md text-xs text-slate-300"
-                            >
-                              {player}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="text-slate-400 text-sm">{bet.time}</div>
-                      </div>
-                    </div>
-                    <div className={`font-bold ${bet.type === 'win' ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {bet.amount > 0 ? '+' : ''}${Math.abs(bet.amount)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Active Parlays Preview */}
             <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
@@ -513,7 +528,7 @@ function ProfileContent() {
                     {/* Picks Preview */}
                     <div className="flex justify-between items-center">
                       <div className="flex -space-x-2">
-                        {parlay.picks.slice(0, 4).map((pick, index) => (
+                        {parlay.picks.slice(0, 4).map((pick) => (
                           <div
                             key={pick.id}
                             className={`w-8 h-8 rounded-full border-2 border-slate-800 flex items-center justify-center text-xs font-bold ${
@@ -549,22 +564,6 @@ function ProfileContent() {
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Performance Chart Placeholder */}
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
-              <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-4 flex items-center justify-center">
-                  <span className="text-lg">📊</span>
-                </span>
-                Performance Overview
-              </h3>
-              <div className="h-48 bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center border border-slate-700/50">
-                <div className="text-slate-400 text-center">
-                  <div className="text-4xl mb-2">📈</div>
-                  <div>Performance chart coming soon</div>
-                </div>
               </div>
             </div>
           </div>
