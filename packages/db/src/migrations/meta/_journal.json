@@ -8,6 +8,13 @@
       "when": 1755139964650,
       "tag": "0000_tricky_king_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755195173017,
+      "tag": "0001_fair_azazel",
+      "breakpoints": true
     }
   ]
 }

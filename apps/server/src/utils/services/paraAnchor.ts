@@ -181,7 +181,7 @@ export class ParaAnchor {
     startsAt: number,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(false); // useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
     const _athleteId = new BN(athleteId);
     const _startsAt = new BN(startsAt);
