@@ -23,7 +23,7 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
 import { GameResponseDto } from './dto/game-response.dto';
-import { BulkCreatePredictionsDto } from './dto/prediction.dto';
+import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { User } from 'src/user/dto/user-response.dto';
 
@@ -54,6 +54,17 @@ export class GamesController {
   @Get('/games')
   findAll() {
     return this.gamesService.findAll();
+  }
+
+  @ApiOperation({ summary: 'Get all games' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all games',
+    type: [GameResponseDto],
+  })
+  @Get('/games/my-open-games')
+  findMyOpenGames(@UserPayload() user: User) {
+    return this.gamesService.getMyOpenGames(user);
   }
 
   @ApiOperation({ summary: 'Get all games' })
@@ -109,10 +120,7 @@ export class GamesController {
   @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Submit bets' })
   @Post('/submit-bets')
-  predictGame(
-    @Body() body: BulkCreatePredictionsDto,
-    @UserPayload() user: User,
-  ) {
+  predictGame(@Body() body: BulkCreateBetsDto, @UserPayload() user: User) {
     return this.gamesService.submitBets(user, body);
   }
 

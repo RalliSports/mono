@@ -10,6 +10,7 @@ import {
 import { games } from "./games";
 import { participants } from "./participants";
 import { roles } from "./roles";
+import { bets } from "./bets";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -29,4 +30,5 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   games: many(games),
   participants: many(participants),
   role: one(roles),
+  bets: many(bets),
 }));

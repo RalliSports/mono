@@ -24,4 +24,7 @@ export class MatchupResponseDto {
 
   @ApiProperty()
   createdAt: Date;
+
+  @ApiProperty()
+  startsAt: Date;
 }

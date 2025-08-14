@@ -18,6 +18,18 @@ import { User } from './dto/user-response.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @Get('current-user')
+  @ApiResponse({
+    status: 200,
+    description: 'Current user',
+    type: User,
+  })
+  findCurrentUser(@UserPayload() user: User) {
+    return this.userService.findOne(user.id);
+  }
+
   @Get('user/:id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);

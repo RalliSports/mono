@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/user/dto/user-response.dto';
-import { PredictionResponseDto } from './prediction-response.dto';
+import { BetResponseDto } from './bet-response.dto';
 
 export class GameMode {
   @ApiProperty()
@@ -28,9 +28,9 @@ export class Participant {
 
   @ApiProperty()
   joinedAt: Date;
-  
+
   @ApiProperty()
-  predictions: PredictionResponseDto[];
+  bets: BetResponseDto[];
 }
 
 export class GameResponseDto {

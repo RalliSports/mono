@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { LineResponseDto } from 'src/lines/dto/line-response.dto';
 import { User } from 'src/user/dto/user-response.dto';
 
-export class PredictionResponseDto {
+export class BetResponseDto {
   @ApiProperty()
   id: string;
 

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LobbyCard from '@/components/main-feed/lobby-card'
-import AthleteCard from '@/components/main-feed/athlete-card'
 import SelectionBar from '@/components/main-feed/selection-bar'
 import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
 import SidebarNav from '@/components/ui/sidebar-nav'
@@ -84,7 +83,6 @@ export default function MainFeedPage() {
     loadLobbies()
   }, [])
 
-  const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([])
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
   const [athletes, setAthletes] = useState<Athlete[]>([])
   const [isInSelectionMode, setIsInSelectionMode] = useState(false)
@@ -96,13 +94,7 @@ export default function MainFeedPage() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
   // Para wallet balance hook
-  const {
-    isConnected,
-    balances,
-    isLoading: balanceLoading,
-    error: balanceError,
-    refetch: refetchBalance,
-  } = useParaWalletBalance()
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
 
   // Format balance for display
   const formatBalance = (amount: number) => {
@@ -198,39 +190,11 @@ export default function MainFeedPage() {
   // Mock lobby data - showing high activity
   const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === 'active').length
 
-  const toggleBookmark = (athleteId: string) => {
-    setBookmarkedAthletes((prev) => {
-      if (prev.includes(athleteId)) {
-        return prev.filter((id) => id !== athleteId)
-      } else if (prev.length < 50) {
-        return [...prev, athleteId]
-      }
-      return prev
-    })
-  }
-
   const handleLobbyJoin = (lobbyId: string, requiredLegs: number) => {
     setIsInSelectionMode(true)
     setRequiredSelections(requiredLegs)
     setSelectedAthletes([])
   }
-
-  // maybe i can do it some id=$(lobbyId)
-
-  const toggleSelection = (athleteId: string) => {
-    if (!isInSelectionMode) return
-
-    setSelectedAthletes((prev) => {
-      if (prev.includes(athleteId)) {
-        return prev.filter((id) => id !== athleteId)
-      } else if (prev.length < requiredSelections) {
-        return [...prev, athleteId]
-      }
-      return prev
-    })
-  }
-
-  const filteredAthletes = athletes
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {

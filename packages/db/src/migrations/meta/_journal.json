@@ -8,6 +8,20 @@
       "when": 1755048467241,
       "tag": "0000_tan_wallow",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755132829999,
+      "tag": "0001_previous_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755133993647,
+      "tag": "0002_omniscient_roughhouse",
+      "breakpoints": true
     }
   ]
 }

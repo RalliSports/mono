@@ -34,7 +34,7 @@ export function ParaButton() {
     <div className="relative group">
       <button
         onClick={() => openModal()}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all duration-300 ${
+        className={`flex items-center gap-2 px-4 h-full rounded-xl text-sm transition-all duration-300 ${
           isConnected
             ? 'bg-gradient-to-r from-teal-500/20 to-teal-400/20 hover:from-teal-500/30 hover:to-teal-400/30 border border-teal-400/40 backdrop-blur-sm hover:scale-105 hover:shadow-md hover:shadow-teal-500/25'
             : 'bg-gradient-to-r from-orange-300 via-teal-400 to-stone-200 hover:from-orange-400 hover:via-teal-500 hover:to-stone-300 text-slate-800 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 relative overflow-hidden'

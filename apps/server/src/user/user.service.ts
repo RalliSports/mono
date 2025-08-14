@@ -1,7 +1,7 @@
 import { Body, Injectable, Post, UseGuards } from '@nestjs/common';
 import { ApiSecurity } from '@nestjs/swagger';
-import { users } from '@repo/db';
-import { eq } from 'drizzle-orm';
+import { users, athletes } from '@repo/db';
+import { eq, sql } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
@@ -31,13 +31,21 @@ export class UserService {
   }
 
   async updateUser(dto: UpdateUserDto, user: User) {
+    // Get a random athlete's picture for the avatar
+    const randomAthlete = await this.db.query.athletes.findFirst({
+      where: sql`${athletes.picture} IS NOT NULL AND ${athletes.picture} != ''`,
+      orderBy: sql`RANDOM()`,
+    });
+
+    const avatarUrl = randomAthlete?.picture || dto.avatar;
+
     const [updatedUser] = await this.db
       .update(users)
       .set({
         firstName: dto.firstName,
         lastName: dto.lastName,
         username: dto.username,
-        avatar: dto.avatar,
+        avatar: avatarUrl,
       })
       .where(eq(users.id, user.id))
       .returning();

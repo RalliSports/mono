@@ -5,15 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  bets,
-  game_access,
-  games,
-  lines,
-  participants
-} from '@repo/db';
+import { bets, game_access, games, lines, participants } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray, ne } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -21,7 +15,7 @@ import { User } from 'src/user/dto/user-response.dto';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { CreateGameDto } from './dto/create-game.dto';
-import { BulkCreatePredictionsDto } from './dto/prediction.dto';
+import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
 
@@ -124,6 +118,23 @@ export class GamesService {
     });
   }
 
+  async getMyOpenGames(user: User) {
+    return this.db.query.games.findMany({
+      where: and(
+        eq(games.creatorId, user.id),
+        ne(games.status, GameStatus.COMPLETED),
+      ),
+      with: {
+        participants: {
+          with: {
+            user: true,
+            bets: true,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: string) {
     console.log('findOne', id);
     const game = await this.db.query.games.findFirst({
@@ -155,7 +166,7 @@ export class GamesService {
     return game;
   }
 
-  async submitBets(user: User, dto: BulkCreatePredictionsDto) {
+  async submitBets(user: User, dto: BulkCreateBetsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, dto.gameId),
@@ -252,14 +263,12 @@ export class GamesService {
         )
         .returning();
 
-      
-
       // Transaction will auto-commit if no error is thrown
       return {
         success: true,
         message: 'Joined game successfully',
         txnSignature: submitTxnSig,
-        bets: updateedBets
+        bets: updateedBets,
       };
     });
   }
