@@ -68,8 +68,8 @@ export default function CreateGame() {
       errors.depositAmount = 'Deposit must be between $5 and $500.'
     if (gameSettings.maxParticipants < 2 || gameSettings.maxParticipants > 20)
       errors.maxParticipants = 'Participants must be between 2 and 20.'
-    if (gameSettings.numBets < 1 || gameSettings.numBets > 50)
-      errors.numBets = 'Number of Bets must be between 2 and 50.'
+    if (gameSettings.numBets < 1 || gameSettings.numBets > 10)
+      errors.numBets = 'Number of Bets must be between 2 and 10.'
     if (!['1v1', 'limited', 'unlimited'].includes(gameSettings.type)) errors.type = 'Invalid contest type.'
     if (!['none', 'whitelist', 'blacklist'].includes(gameSettings.userControlType))
       errors.userControlType = 'Invalid user control type.'
@@ -446,14 +446,14 @@ export default function CreateGame() {
                   }}
                   onBlur={(e) => {
                     // Validate only when user finishes typing (leaves the field)
-                    const value = Math.max(1, Math.min(50, parseInt(e.target.value) || 1))
+                    const value = Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
                     handleInputChange('numBets', value)
                   }}
                   min="1"
-                  max="50"
+                  max="10"
                   step="1"
                   className="flex-1 bg-gradient-to-br from-slate-700/80 to-slate-800/60 border-2 border-slate-600/40 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-teal-400/70 focus:ring-2 focus:ring-teal-400/20 transition-all duration-300 text-center font-bold"
-                  placeholder="Bets (1-50)"
+                  placeholder="Bets (1-10)"
                 />
               </div>
 
@@ -464,7 +464,7 @@ export default function CreateGame() {
                   value={gameSettings.numBets}
                   onChange={(e) => handleInputChange('numBets', parseInt(e.target.value))}
                   min="2"
-                  max="50"
+                  max="10"
                   step="1"
                   className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
                 />

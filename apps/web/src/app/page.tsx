@@ -1,5 +1,14 @@
-import DashboardFeature from "@/components/dashboard/dashboard-feature"
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
-  return <DashboardFeature />
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace('/main')
+  }, [router])
+
+  return null
 }

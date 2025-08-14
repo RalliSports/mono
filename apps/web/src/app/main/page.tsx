@@ -96,7 +96,7 @@ export default function MainFeedPage() {
         },
       })
       const data: User = await response.json()
-      if (!data.hasBeenFaucetedSol) {
+      if (!data.username) {
         router.push('/profile')
       }
       setUser(data)
