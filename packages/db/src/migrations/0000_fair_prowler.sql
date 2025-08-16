@@ -119,8 +119,10 @@ CREATE TABLE "users" (
 	"wallet_address" varchar,
 	"email_address" varchar,
 	"para_user_id" text,
-	"has_been_fauceted_sol" boolean,
-	"created_at" timestamp with time zone DEFAULT now()
+	"has_been_fauceted_sol" boolean DEFAULT false,
+	"created_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "users_email_address_unique" UNIQUE("email_address"),
+	CONSTRAINT "users_para_user_id_unique" UNIQUE("para_user_id")
 );
 --> statement-breakpoint
 CREATE TABLE "lines" (
