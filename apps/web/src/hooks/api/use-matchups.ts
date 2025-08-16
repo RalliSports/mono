@@ -5,23 +5,24 @@ import { useApiWithAuth } from './base'
 import type { Matchup } from './types'
 
 export function useMatchups() {
+  const queryClient = useQueryClient()
   const api = useApiWithAuth()
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['matchups'],
     queryFn: () => api.get<Matchup[]>('/api/read-matchups'),
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
-}
 
-export function useCreateMatchup() {
-  const queryClient = useQueryClient()
-  const api = useApiWithAuth()
-
-  return useMutation({
+  const createMutation = useMutation({
     mutationFn: (data: Omit<Matchup, 'id'>) => api.post<Matchup>('/api/create-matchup', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matchups'] })
     },
   })
+
+  return {
+    query,
+    create: createMutation,
+  }
 }
