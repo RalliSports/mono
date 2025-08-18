@@ -6,9 +6,8 @@ import LobbyCard from '@/components/main-feed/lobby-card'
 import SelectionBar from '@/components/main-feed/selection-bar'
 import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
 import SidebarNav from '@/components/ui/sidebar-nav'
-import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { useUserData, useWalletBalances, useLobbies } from '@/providers/user-data-provider'
 import { useAccount } from '@getpara/react-sdk'
-import { fetchGames } from '@/hooks/get-games'
 import type { Lobby } from '@/hooks/get-games'
 import { useSessionToken } from '@/hooks/use-session'
 
@@ -102,31 +101,25 @@ export default function MainFeedPage() {
       setUser(data)
     }
     fetchUser()
-  }, [])
+  }, [router, session])
 
-  const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
+  // Using the new provider for lobbies data
+  const { data: allLobbies } = useLobbies()
+  const lobbiesData = allLobbies.filter((lobby) => lobby.participants.length < lobby.maxParticipants)
 
-  useEffect(() => {
-    const loadLobbies = async () => {
-      const fetchedLobbies = await fetchGames()
-      setLobbiesData(fetchedLobbies.filter((lobby) => lobby.participants.length < lobby.maxParticipants))
-    }
-
-    loadLobbies()
-  }, [])
-
-  const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
+  const [selectedAthletes] = useState<string[]>([])
   const [athletes, setAthletes] = useState<Athlete[]>([])
   const [isInSelectionMode, setIsInSelectionMode] = useState(false)
-  const [requiredSelections, setRequiredSelections] = useState(0)
+  const [requiredSelections] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
   const [profilePopupAthleteId, setProfilePopupAthleteId] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
-  // Para wallet balance hook
-  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+  // Using the new provider for wallet and user data
+  const { isConnected } = useUserData()
+  const { balances, isLoading: balanceLoading, error: balanceError } = useWalletBalances()
 
   // Format balance for display
   const formatBalance = (amount: number) => {
@@ -155,7 +148,7 @@ export default function MainFeedPage() {
       }
     }
     fetchAthletes()
-  }, [])
+  }, [session])
 
   // Fix hydration issues
   useEffect(() => {

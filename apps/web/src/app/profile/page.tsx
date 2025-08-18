@@ -4,157 +4,47 @@ import { useState, useEffect, Suspense, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ParaButton } from '@/components/para-modal'
-import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
-import { useSessionToken } from '@/hooks/use-session'
+import { useUserData, useWalletBalances, useCurrentUser, useMyGames } from '@/providers/user-data-provider'
+import { useUser } from '@/hooks/api'
 import Image from 'next/image'
-import { GameMode } from '@repo/db/types'
 
-interface User {
-  id: string
-  emailAddress: string
-
-  walletAddress: string
-  paraUserId: string
-
-  firstName?: string
-  lastName?: string
-
-  username?: string
-  avatar?: string
-}
-
-interface Bet {
-  id: string
-
-  userId: string
-
-  participantId: string
-
-  lineId: string
-
-  gameId: string
-
-  predictedDirection: string
-
-  isCorrect: boolean
-
-  createdAt: Date
-
-  user: User
-
-  line: Line
-}
-
-interface Line {
-  id: string
-  createdAt: Date
-  athleteId: string
-  statId: string
-  matchupId: string
-  predictedValue: number
-  actualValue: number
-  matchup: Matchup
-  athlete: Athlete
-}
-
-interface Athlete {
-  id: string
-  name: string
-  picture: string
-}
-
-interface Matchup {
-  id: string
-
-  homeTeam: string
-
-  awayTeam: string
-
-  gameDate: Date
-
-  status: string
-
-  scoreHome: number
-
-  scoreAway: number
-
-  createdAt: Date
-
-  startsAt: Date
-}
-
-interface Participant {
-  id: string
-  user: User
-  isWinner: boolean
-  joinedAt: Date
-  bets: Bet[]
-}
-
-interface Game {
-  id: string
-
-  title: string
-
-  creatorId: string
-
-  depositAmount: number
-
-  currency: string
-
-  createdAt: Date
-
-  status: string
-
-  maxParticipants: number
-
-  numBets: number
-
-  gameCode: string
-
-  matchupGroup: string
-
-  depositToken: string
-
-  createdTxnSignature: string
-
-  resolvedTxnSignature: string
-
-  isPrivate: boolean
-
-  type: 'parlay' | 'head_to_head' | 'pool'
-
-  userControlType: 'whitelist' | 'blacklist' | 'none'
-
-  gameModeId: string
-
-  gameMode: GameMode
-
-  creator: User
-
-  participants: Participant[]
-}
+// Using types from API instead of duplicating interfaces
 
 function ProfileContent() {
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('overview')
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const { session } = useSessionToken()
 
+  // Using the new providers
+  const { user: currentUser } = useCurrentUser()
+  const { balances, isLoading: balanceLoading, error: balanceError } = useWalletBalances()
+  const { data: myOpenGames } = useMyGames()
+  const { isConnected } = useUserData()
+  const userHooks = useUser()
+
+  // Local state for editing
   const [username, setUsername] = useState('')
-  const [user, setUser] = useState<User | null>(null)
   const [editingUsername, setEditingUsername] = useState(false)
   const [avatar, setAvatar] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
 
   // Profile picture upload states
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Sync local state with user data from provider
+  useEffect(() => {
+    if (currentUser) {
+      setUsername(currentUser.username || '')
+      setAvatar(currentUser.avatar || '')
+      setFirstName(currentUser.firstName || '')
+      setLastName(currentUser.lastName || '')
+    }
+  }, [currentUser])
 
   // Fix hydration issues and handle URL params
   useEffect(() => {
@@ -166,24 +56,16 @@ function ProfileContent() {
   }, [searchParams])
 
   const handleUpdateUser = async () => {
-    const response = await fetch('/api/update-user', {
-      method: 'PATCH',
-      headers: {
-        'x-para-session': session || '',
-      },
-      body: JSON.stringify({
+    try {
+      await userHooks.update.mutateAsync({
         username,
-        avatar: avatar || 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg',
+        avatar: avatar || '/images/avatar-01.jpg',
         firstName,
         lastName,
-      }),
-    })
-    const data = await response.json()
-    setUser(data)
-    setUsername(data.username)
-    setAvatar(data.avatar)
-    setFirstName(data.firstName || '')
-    setLastName(data.lastName || '')
+      })
+    } catch (error) {
+      console.error('Failed to update user:', error)
+    }
   }
 
   // Profile picture upload functions
@@ -214,27 +96,18 @@ function ProfileContent() {
 
         // Add delay for better UX
         setTimeout(async () => {
-          const response = await fetch('/api/update-user', {
-            method: 'PATCH',
-            headers: {
-              'x-para-session': session || '',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+          try {
+            await userHooks.update.mutateAsync({
               username,
               avatar: base64,
               firstName,
               lastName,
-            }),
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            setUser(data)
-            setAvatar(data.avatar)
+            })
+            setAvatar(base64)
             setIsUploadModalOpen(false)
+          } catch (error) {
+            console.error('Failed to update avatar:', error)
           }
-
           setIsUploading(false)
         }, 1000) // 1 second delay as requested
       }
@@ -272,40 +145,6 @@ function ProfileContent() {
     }
   }
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const response = await fetch('/api/read-current-user', {
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      const data = await response.json()
-      setUser(data)
-      setUsername(data.username)
-      setAvatar(data.avatar)
-      setFirstName(data.firstName || '')
-      setLastName(data.lastName || '')
-    }
-    fetchUser()
-  }, [])
-
-  useEffect(() => {
-    const fetchMyOpenGames = async () => {
-      const response = await fetch('/api/read-my-open-games', {
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      const data = await response.json()
-      setMyOpenGames(data)
-      console.log(data, 'data')
-    }
-    fetchMyOpenGames()
-  }, [])
-
-  // Para wallet balance hook
-  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
-
   // Format balance for display
   const formatBalance = (amount: number) => {
     return amount.toLocaleString('en-US', {
@@ -323,7 +162,7 @@ function ProfileContent() {
   // ]
 
   // Don't render until mounted to prevent hydration issues
-  if (!mounted || !user) {
+  if (!mounted || !currentUser) {
     return null
   }
 
@@ -401,9 +240,9 @@ function ProfileContent() {
             {/* Profile Picture with Edit Button */}
             <div className="relative group">
               <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
-                {user.avatar && user.avatar !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
+                {currentUser.avatar && currentUser.avatar !== '/images/avatar-01.jpg' ? (
                   <Image
-                    src={user.avatar}
+                    src={currentUser.avatar}
                     alt="Profile Picture"
                     width={80}
                     height={80}
@@ -495,7 +334,7 @@ function ProfileContent() {
                     <button
                       onClick={() => {
                         setEditingUsername(false)
-                        setUsername(user?.username || '')
+                        setUsername(currentUser?.username || '')
                       }}
                       className="p-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 hover:text-white rounded-xl transition-all duration-200"
                       title="Cancel"
@@ -511,7 +350,7 @@ function ProfileContent() {
                   <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800/30 transition-all duration-200">
                     <div className="flex-1">
                       <h2 className="text-2xl font-bold text-white group-hover/username:text-[#00CED1] transition-colors duration-200">
-                        {user.username || 'Set username'}
+                        {currentUser.username || 'Set username'}
                       </h2>
                       <p className="text-slate-400 text-sm mt-1">Click to edit username</p>
                     </div>
@@ -636,7 +475,7 @@ function ProfileContent() {
                           <div className="flex items-center space-x-2 mt-1">
                             <span
                               className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                game.status === 'live'
+                                game.status === 'active'
                                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                   : game.status === 'pending'
                                     ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
@@ -645,12 +484,12 @@ function ProfileContent() {
                             >
                               {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
                             </span>
-                            <span className="text-slate-400 text-sm">{game.participants.length} players</span>
+                            <span className="text-slate-400 text-sm">{game.participants?.length || 0} players</span>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="text-[#00CED1] font-bold text-lg">
-                            ${game.depositAmount * game.participants.length}
+                            ${(game.depositAmount || 0) * (game.participants?.length || 0)}
                           </div>
                           <div className="text-slate-400 text-xs">Potential</div>
                         </div>
@@ -677,27 +516,10 @@ function ProfileContent() {
                       {/* Picks Preview */}
                       <div className="flex justify-between items-center">
                         <div className="flex -space-x-2">
-                          {game.participants
-                            .find((participant) => participant.user.id === user.id)
-                            ?.bets.map((bet) => (
-                              <div
-                                key={bet.id}
-                                className={`w-8 h-8 rounded-full border-2 border-slate-800 flex items-center justify-center text-xs font-bold ${
-                                  new Date(bet.line.matchup.startsAt) > new Date()
-                                    ? 'bg-slate-600 text-slate-300'
-                                    : !!bet.line.actualValue
-                                      ? 'bg-blue-500 text-white'
-                                      : bet.isCorrect
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'bg-red-500 text-white'
-                                }`}
-                              >
-                                <Image
-                                  src={bet.line.athlete.picture || ''}
-                                  alt={bet.line.athlete.name || ''}
-                                  width={32}
-                                  height={32}
-                                />
+                          {game.participants?.length ||
+                            (0 > 0 && (
+                              <div className="text-slate-400 text-sm">
+                                {game.participants?.length || 0} participants
                               </div>
                             ))}
                           {/* {parlay.picks.length > 4 && (
@@ -922,12 +744,12 @@ function ProfileContent() {
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
 
                 {/* Current Avatar Preview */}
-                {user.avatar && (
+                {currentUser.avatar && (
                   <div className="mt-6 text-center">
                     <p className="text-slate-400 text-sm mb-3">Current photo:</p>
                     <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
                       <Image
-                        src={user.avatar}
+                        src={currentUser.avatar}
                         alt="Current avatar"
                         width={64}
                         height={64}
