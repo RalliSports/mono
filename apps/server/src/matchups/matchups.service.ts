@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { matchups, stats } from '@repo/db';
-import { eq } from 'drizzle-orm';
+import { and, eq, gt, lt } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -37,6 +37,25 @@ export class MatchupsService {
 
     if (!matchup) throw new NotFoundException('Matchup not found');
     return matchup;
+  }
+
+  async getMatchupsThatShouldHaveStarted() {
+    const now = new Date();
+    // console.log('now', now);
+
+    return this.db.query.matchups.findMany({
+      with: {
+        lines: {
+          columns: {
+            id: true,
+          },
+        },
+      },
+      where: and(
+        eq(matchups.status, MatchupStatus.SCHEDULED),
+        lt(matchups.startsAt, now),
+      ),
+    });
   }
 
   async createMatchup(dto: CreateMatchupDto) {

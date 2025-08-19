@@ -15,6 +15,13 @@
       "when": 1755195173017,
       "tag": "0001_fair_azazel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755642516319,
+      "tag": "0002_redundant_thunderball",
+      "breakpoints": true
     }
   ]
 }

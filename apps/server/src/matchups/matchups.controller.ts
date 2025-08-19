@@ -11,23 +11,36 @@ export class MatchupsController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Get all stats' })
+  @ApiOperation({ summary: 'Get all matchups' })
   @ApiResponse({
     status: 200,
-    description: 'List of all stats',
+    description: 'List of all matchups',
     type: [MatchupResponseDto],
   })
   @Get()
-  async getAllStats() {
+  async getAllMatchups() {
     return this.matchupsService.getAllMatchups();
   }
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Get a stat by id' })
+  @ApiOperation({ summary: 'Get matchups that should have started' })
   @ApiResponse({
     status: 200,
-    description: 'Stat fetch successfully',
+    description: 'List of matchups that should have started',
+    type: [MatchupResponseDto],
+  })
+  @Get('/should-have-started')
+  async getMatchupsThatShouldHaveStarted() {
+    return this.matchupsService.getMatchupsThatShouldHaveStarted();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get a matchup by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Matchup fetch successfully',
     type: MatchupResponseDto,
   })
   @Get(':id')
@@ -37,10 +50,10 @@ export class MatchupsController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Create a new line' })
+  @ApiOperation({ summary: 'Create a new matchup' })
   @ApiResponse({
     status: 201,
-    description: 'Line created successfully',
+    description: 'Matchup created successfully',
     type: MatchupResponseDto,
   })
   @Post('/create')
