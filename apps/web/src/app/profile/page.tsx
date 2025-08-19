@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ParaButton } from '@/components/para-modal'
 import { useUserData, useWalletBalances, useCurrentUser, useMyGames } from '@/providers/user-data-provider'
-import { useUser } from '@/hooks/api'
 import Image from 'next/image'
 
 // Using types from API instead of duplicating interfaces
@@ -20,8 +19,7 @@ function ProfileContent() {
   const { user: currentUser } = useCurrentUser()
   const { balances, isLoading: balanceLoading, error: balanceError } = useWalletBalances()
   const { data: myOpenGames } = useMyGames()
-  const { isConnected } = useUserData()
-  const userHooks = useUser()
+  const { isConnected, updateUser } = useUserData()
 
   // Local state for editing
   const [username, setUsername] = useState('')
@@ -57,7 +55,7 @@ function ProfileContent() {
 
   const handleUpdateUser = async () => {
     try {
-      await userHooks.update.mutateAsync({
+      await updateUser({
         username,
         avatar: avatar || '/images/avatar-01.jpg',
         firstName,
@@ -97,7 +95,7 @@ function ProfileContent() {
         // Add delay for better UX
         setTimeout(async () => {
           try {
-            await userHooks.update.mutateAsync({
+            await updateUser({
               username,
               avatar: base64,
               firstName,

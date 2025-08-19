@@ -47,7 +47,7 @@ export function useGames() {
   }
 }
 
-export function useGame(gameId: string) {
+export function useCurrentGame(gameId: string) {
   // Public endpoint - no auth required
   return useQuery({
     queryKey: ['game', gameId],

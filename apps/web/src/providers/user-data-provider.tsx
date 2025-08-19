@@ -8,8 +8,8 @@ import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { useMemo } from 'react'
 import { RALLI_TOKEN, USDC_MINT } from '@/constants'
 import { useUser } from '@/hooks/api/use-user'
-import { fetchGames, type Lobby } from '@/hooks/get-games'
-import type { User, Game } from '@/hooks/api/types'
+import { useLobbies as useLobbiesHook, type Lobby } from '@/hooks/get-games'
+import type { User, Game, UpdateUserData } from '@/hooks/api/types'
 
 interface WalletBalances {
   sol: number
@@ -35,6 +35,7 @@ interface UserDataContextType extends UserData {
   refetchLobbies: () => void
   refetchMyGames: () => void
   refetchAll: () => void
+  updateUser: (data: UpdateUserData) => Promise<User>
 }
 
 const UserDataContext = createContext<UserDataContextType | undefined>(undefined)
@@ -79,12 +80,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
 
   const isConnected = !!account?.isConnected && !!walletAddress
 
-  const lobbiesQuery = useQuery({
-    queryKey: ['lobbies'],
-    queryFn: fetchGames,
-    staleTime: 60 * 1000,
-    refetchInterval: 30 * 1000,
-  })
+  const lobbiesQuery = useLobbiesHook()
 
   const solBalanceQuery = useQuery({
     queryKey: ['para-sol-balance', walletAddress?.toString()],
@@ -206,6 +202,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
     refetchLobbies,
     refetchMyGames,
     refetchAll,
+    updateUser: userHooks.update.mutateAsync,
   }
 
   return <UserDataContext.Provider value={contextValue}>{children}</UserDataContext.Provider>
