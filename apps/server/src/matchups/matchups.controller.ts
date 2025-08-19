@@ -4,6 +4,7 @@ import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { MatchupResponseDto } from './dto/matchup-response.dto';
 import { CreateMatchupDto } from './dto/create-matchup.dto';
+import { UpdateMatchupDto } from './dto/update-matchup.dto';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -33,6 +34,19 @@ export class MatchupsController {
   @Get('/should-have-started')
   async getMatchupsThatShouldHaveStarted() {
     return this.matchupsService.getMatchupsThatShouldHaveStarted();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Update a matchup' })
+  @ApiResponse({
+    status: 200,
+    description: 'Matchup updated successfully',
+    type: MatchupResponseDto,
+  })
+  @Post('/update/:id')
+  async updateMatchup(@Param('id') id: string, @Body() dto: UpdateMatchupDto) {
+    return this.matchupsService.updateMatchup(id, dto);
   }
 
   @ApiSecurity('x-para-session')
