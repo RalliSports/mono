@@ -41,7 +41,7 @@
   "license": "ISC",
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "build": "npx tsup",
+    "build": "tsup",
     "db:generate": "npx drizzle-kit generate",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "db:migrate": "npx drizzle-kit migrate",
@@ -50,7 +50,7 @@
     "db:seed:teams-athletes": "tsx src/seeds/seed-teams-athletes.ts",
     "fetch:athletes": "tsx src/seeds/data/athletes/index.ts",
     "prepare-local": "pnpm db:generate && pnpm db:migrate && pnpm build",
-    "prepare": "pnpm build",
+    "prepare": "echo 'Skipping build in deployment'",
     "studio": "npx drizzle-kit studio"
   }
 }
