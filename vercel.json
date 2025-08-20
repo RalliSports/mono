@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd ../.. && pnpm install && pnpm build && cd apps/web && pnpm build",
-  "outputDirectory": ".next",
-  "installCommand": "pnpm install --no-frozen-lockfile"
-}
