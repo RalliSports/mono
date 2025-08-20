@@ -19,7 +19,8 @@
     "turbo": "^2.5.4",
     "typescript": "5.8.2",
     "drizzle-kit": "^0.31.4",
-    "tsup": "^8.5.0"
+    "tsup": "^8.5.0",
+    "drizzle-orm": "^0.44.4"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
@@ -27,7 +28,6 @@
   },
   "dependencies": {
     "postgres": "^3.4.7",
-    "next": "15.3.3",
-    "drizzle-orm": "^0.44.4"
+    "next": "15.3.3"
   }
 }
