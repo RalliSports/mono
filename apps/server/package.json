@@ -1,12 +1,23 @@
 {
-  "name": "server",
+  "name": "@repo/server",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "main": "dist/types/index.js",
+  "module": "dist/types/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && tsc --project tsconfig.build.json",
+    "build:types": "tsc --project tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",

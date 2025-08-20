@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Game } from '@repo/db/types'
+// import { Game } from '@repo/db/types'
+import { GameWithRelations } from '@repo/server'
 
 export default function AllGames() {
-  const [games, setGames] = useState<Game[]>([])
+  const [games, setGames] = useState<GameWithRelations[]>([])
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       const res = await fetch('http://localhost:4000/api/v1/games', {
         method: 'GET',
         headers: {
@@ -32,10 +33,12 @@ export default function AllGames() {
   )
 }
 
-const GameCard = ({ game }: { game: Game }) => {
+const GameCard = ({ game }: { game: GameWithRelations }) => {
   return (
     <div>
       <h5>{game.title}</h5>
+      <h5>{game.creator?.username}</h5>
+      <h5>{game.participants?.length}</h5>
     </div>
   )
 }
