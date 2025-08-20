@@ -49,8 +49,7 @@
     "db:seed": "tsx src/seeds/index.ts",
     "db:seed:teams-athletes": "tsx src/seeds/seed-teams-athletes.ts",
     "fetch:athletes": "tsx src/seeds/data/athletes/index.ts",
-    "prepare-local": "pnpm db:generate && pnpm db:migrate && pnpm build",
-    "prepare": "echo 'Skipping build in deployment'",
+    "prepare": "pnpm db:generate && pnpm db:migrate && pnpm build",
     "studio": "npx drizzle-kit studio"
   }
 }
