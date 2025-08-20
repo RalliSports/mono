@@ -41,6 +41,24 @@ const provider = new anchor.AnchorProvider(
 anchor.setProvider(provider);
 const program = anchor.workspace.RalliBet as Program<RalliBet>;
 
+let adminKeypair: Keypair;
+
+before(async () => {
+  // Load the admin keypair from file
+  const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
+  const secret = Uint8Array.from(
+    JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8"))
+  );
+  adminKeypair = Keypair.fromSecretKey(secret);
+
+  // Airdrop SOL to admin for testing
+  const signature = await connection.requestAirdrop(
+    adminKeypair.publicKey,
+    2 * LAMPORTS_PER_SOL
+  );
+  await connection.confirmTransaction(signature);
+});
+
 describe("RalliBet Comprehensive Tests", () => {
   const MINT_DECIMALS = 6;
   let gameId: BN;
@@ -100,6 +118,7 @@ describe("RalliBet Comprehensive Tests", () => {
   let newPredictedValue2 = 0.0;
   let newPredictedValue3 = 60.5;
   let newPredictedValue4 = 101.5;
+  let newPredictedValue5 = 10.5;
   let predictedValueError = 0;
   let shouldRefundBettors: boolean;
 
@@ -506,27 +525,6 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Create Line Tests", () => {
-    let adminKeypair: Keypair;
-
-    before(async () => {
-      // Load the admin keypair from file
-      const adminKeypairPath = path.resolve(
-        __dirname,
-        "../admin-keypair-new.json"
-      );
-      const secret = Uint8Array.from(
-        JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8"))
-      );
-      adminKeypair = Keypair.fromSecretKey(secret);
-
-      // Airdrop SOL to admin for testing
-      const signature = await connection.requestAirdrop(
-        adminKeypair.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
-    });
-
     it("should create lines successfully", async () => {
       const [line1] = PublicKey.findProgramAddressSync(
         [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
@@ -795,27 +793,6 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Update Line Tests", () => {
-    let adminKeypair: Keypair;
-
-    before(async () => {
-      // Load the admin keypair from file
-      const adminKeypairPath = path.resolve(
-        __dirname,
-        "../admin-keypair-new.json"
-      );
-      const secret = Uint8Array.from(
-        JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8"))
-      );
-      adminKeypair = Keypair.fromSecretKey(secret);
-
-      // Airdrop SOL to admin for testing
-      const signature = await connection.requestAirdrop(
-        adminKeypair.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
-    });
-
     it("should update the line successfully", async () => {
       try {
         const [line3] = PublicKey.findProgramAddressSync(
@@ -831,6 +808,11 @@ describe("RalliBet Comprehensive Tests", () => {
           })
           .signers([adminKeypair])
           .rpc();
+
+        const updatedLine = await program.account.line.fetch(line3);
+        expect(updatedLine.predictedValue.toString()).to.equal(
+          newPredictedValue3.toString()
+        );
       } catch (error) {
         error;
       }
@@ -860,31 +842,66 @@ describe("RalliBet Comprehensive Tests", () => {
       }
     });
 
-    // NOTE:
-    // Testing this doesnt make sense actually, because we have a rule in create_line
-    // i.e InvalidStartTime (starts_at > current_time)
-    // line cant be created at past, that also means once a line is created it will start lol
-    //
-    // it("should fail to update line if it has already started", async () => {
-    //   try {
-    //     const [line1] = PublicKey.findProgramAddressSync(
-    //       [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
-    //       program.programId
-    //     );
-    //     await program.methods
-    //       .updateLine(lineId1, newPredictedValue, shouldRefundBettors)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         line: line1,
-    //       })
-    //       .signers([adminKeypair])
-    //       .rpc();
+    it("should fail to update line if it has already started", async () => {
+      const testLineId = new anchor.BN(
+        Math.floor(Math.random() * 1000000) + 999999
+      );
 
-    //     expect.fail("Should have failed with LineAlreadyStarted");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: LineAlreadyStarted");
-    //   }
-    // });
+      const nearFutureTime = Math.floor(Date.now() / 1000) + 2;
+      const statId = 1;
+      const predictedValue = 25.5;
+      const athleteId = new anchor.BN(12345);
+
+      const [linePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), testLineId.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+
+      try {
+        await program.methods
+          .createLine(
+            testLineId,
+            statId,
+            predictedValue,
+            athleteId,
+            new anchor.BN(nearFutureTime)
+          )
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: linePda,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        console.log(
+          "Line created successfully, now waiting for it to start..."
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        const newPredictedValue = 30.0;
+        const shouldRefundBettors = false;
+
+        await program.methods
+          .updateLine(testLineId, newPredictedValue, shouldRefundBettors)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: linePda,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        expect.fail("Should have failed with LineAlreadyStarted");
+      } catch (error) {
+        console.log("Caught error:", error.error?.errorCode?.code);
+
+        if (error.error && error.error.errorCode) {
+          expect(error.error.errorCode.code).to.equal("LineAlreadyStarted");
+        } else {
+          expect(error.toString()).to.include("LineAlreadyStarted");
+        }
+      }
+    });
 
     it("should fail to update line with invalid parameters - invalid predicted value", async () => {
       try {
@@ -912,16 +929,16 @@ describe("RalliBet Comprehensive Tests", () => {
 
     it("should fail to update line with invalid parameters - same new predicted value as before", async () => {
       try {
-        const [line1] = PublicKey.findProgramAddressSync(
-          [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
+        const [line5] = PublicKey.findProgramAddressSync(
+          [Buffer.from("line"), lineId5.toArrayLike(Buffer, "le", 8)],
           program.programId
         );
 
         await program.methods
-          .updateLine(lineId1, newPredictedValue1, shouldRefundBettors)
+          .updateLine(lineId5, newPredictedValue5, shouldRefundBettors)
           .accountsPartial({
             admin: adminKeypair.publicKey,
-            line: line1,
+            line: line5,
           })
           .signers([adminKeypair])
           .rpc();
@@ -1836,19 +1853,6 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Resolve Line Tests", () => {
-    let adminKeypair: Keypair;
-
-    before(async () => {
-      const adminKeypairPath = path.resolve(
-        __dirname,
-        "../admin-keypair-new.json"
-      );
-      const secret = Uint8Array.from(
-        JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8"))
-      );
-      adminKeypair = Keypair.fromSecretKey(secret);
-    });
-
     it("should prevent resolution with wrong direction", async () => {
       try {
         const tx = await program.methods
@@ -2126,24 +2130,7 @@ describe("RalliBet Comprehensive Tests", () => {
 
     ////LINE ENDS
 
-    let adminKeypair: Keypair;
-
     before(async () => {
-      const adminKeypairPath = path.resolve(
-        __dirname,
-        "../admin-keypair-new.json"
-      );
-      const secret = Uint8Array.from(
-        JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8"))
-      );
-      adminKeypair = Keypair.fromSecretKey(secret);
-
-      const signature = await connection.requestAirdrop(
-        adminKeypair.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
-
       let newStartsSoonRaw = Date.now() + 30000;
       let newStartsSoon = new BN(Math.floor(newStartsSoonRaw / 1000));
 
