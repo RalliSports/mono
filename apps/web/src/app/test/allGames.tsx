@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 // import { Game } from '@repo/db/types'
-import { GamesFindOne } from '@repo/server'
+import { GamesFindOne, GamesFindAll, GamesFindAllInstance } from '@repo/server'
 
 export default function AllGames() {
-  const [games, setGames] = useState<GamesFindOne[]>([])
+  const [games, setGames] = useState<GamesFindAll>([])
 
   useEffect(() => {
     ;(async () => {
@@ -33,7 +33,7 @@ export default function AllGames() {
   )
 }
 
-const GameCard = ({ game }: { game: GamesFindOne }) => {
+const GameCard = ({ game }: { game: GamesFindAllInstance }) => {
   return (
     <div>
       <h5>{game.title}</h5>

@@ -145,7 +145,6 @@ export class GamesService {
   }
 
   async findOne(id: string) {
-    console.log('findOne', id);
     const game = await this.db.query.games.findFirst({
       where: eq(games.id, id),
       with: {
