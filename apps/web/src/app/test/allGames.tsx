@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 // import { Game } from '@repo/db/types'
-import { GamesFindOne, GamesFindAll, GamesFindAllInstance } from '@repo/server'
+import { GamesFindAll, GamesFindAllInstance, LineFindAll, LineFindAllInstance } from '@repo/server'
 
 export default function AllGames() {
   const [games, setGames] = useState<GamesFindAll>([])
+  const [lines, setLines] = useState<LineFindAll>([])
 
   useEffect(() => {
     ;(async () => {
@@ -22,6 +23,17 @@ export default function AllGames() {
     })()
   }, [])
 
+  useEffect(() => {
+    ;(async () => {
+      const res = await fetch('http://localhost:4000/api/v1/lines', {
+        method: 'GET',
+      })
+      const data = await res.json()
+      console.log(data, 'data')
+      setLines(data)
+    })()
+  }, [])
+
   console.log(games, 'all games')
 
   return (
@@ -29,6 +41,17 @@ export default function AllGames() {
       {games.map((game, i) => (
         <GameCard key={i} game={game} />
       ))}
+      {lines.map((line, i) => (
+        <LineCard key={i} line={line} />
+      ))}
+    </div>
+  )
+}
+
+const LineCard = ({ line }: { line: LineFindAllInstance }) => {
+  return (
+    <div>
+      <h5>{line.athlete?.name}</h5>
     </div>
   )
 }

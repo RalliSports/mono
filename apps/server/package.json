@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "nest build && tsc --project tsconfig.build.json",
-    "build:types": "tsc --project tsconfig.build.json",
+    "build:types": "tsc --project tsconfig.types.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
