@@ -65,9 +65,8 @@ export class MatchupStatusUpdaterService {
       }
 
       if (
-        espnStatus.type.name === EspnStatusName.FINAL
-        // espnStatus.type.name === EspnStatusName.IN_PROGRESS ||
-        // espnStatus.type.name === EspnStatusName.CURRENT
+        espnStatus.type.name === EspnStatusName.IN_PROGRESS ||
+        espnStatus.type.name === EspnStatusName.CURRENT
       ) {
         for (const line of matchup.lines) {
           await this.linesService.updateLine(line.id, {
