@@ -24,6 +24,8 @@
     "node": ">=18"
   },
   "dependencies": {
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "next": "15.3.3"
+
   }
 }
