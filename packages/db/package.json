@@ -41,7 +41,7 @@
   "license": "ISC",
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "build": "tsup",
+    "build": "npx tsup",
     "db:generate": "npx drizzle-kit generate",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "db:migrate": "npx drizzle-kit migrate",
