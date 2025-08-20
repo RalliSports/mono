@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 // import { Game } from '@repo/db/types'
-import { GamesFindOne, GamesFindAll, GamesFindAllInstance } from '@repo/server'
+import { GamesFindOne, GamesFindAll, GamesFindAllInstance } from '@repo/server/types'
 
 export default function AllGames() {
   const [games, setGames] = useState<GamesFindAll>([])

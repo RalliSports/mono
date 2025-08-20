@@ -5,19 +5,25 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "main": "dist/types/index.js",
-  "module": "dist/types/index.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/main.d.ts",
   "exports": {
     ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.js",
+      "types": "./dist/main.d.ts"
+    },
+    "./types": {
       "import": "./dist/types/index.js",
       "require": "./dist/types/index.js",
       "types": "./dist/types/index.d.ts"
     }
   },
   "scripts": {
-    "build": "nest build && tsc --project tsconfig.build.json",
+    "build": "nest build",
     "build:types": "tsc --project tsconfig.build.json",
+    "build:all": "nest build && tsc --project tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
