@@ -12,6 +12,7 @@ import { Database } from 'src/database/database.provider';
 import { User } from 'src/user/dto/user-response.dto';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { generateUniqueGamertag } from 'src/utils/generateGamertag';
+import { getRandomAthleteAvatar } from 'src/utils/getRandomAthleteAvatar';
 
 @Injectable()
 export class AuthService {
@@ -67,6 +68,7 @@ export class AuthService {
         };
       } else {
         const gamertag = await generateUniqueGamertag(this.db, users);
+        const avatar = await getRandomAthleteAvatar(this.db);
 
         await this.db
           .insert(users)
@@ -75,6 +77,7 @@ export class AuthService {
             emailAddress: para.getEmail(),
             walletAddress: para.availableWallets[0].address,
             username: gamertag,
+            avatar: avatar,
           })
           .onConflictDoNothing();
       }
