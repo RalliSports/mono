@@ -8,22 +8,22 @@ export class UpdateMatchupDto extends PartialType(CreateMatchupDto) {
   @IsNumber()
   @IsOptional()
   @Min(0)
-  scoreHome: number;
+  scoreHome?: number;
 
   @ApiProperty()
   @IsNumber()
   @IsOptional()
   @Min(0)
-  scoreAway: number;
+  scoreAway?: number;
 
   @ApiProperty({ enum: MatchupStatus })
   @IsEnum(MatchupStatus)
   @IsOptional()
-  status: MatchupStatus;
+  status?: MatchupStatus;
 
   @ApiProperty()
   @IsNumber()
   @IsOptional()
   @Min(0)
-  startsAtTimestamp: number;
+  startsAtTimestamp?: number;
 }

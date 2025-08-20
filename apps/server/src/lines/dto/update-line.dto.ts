@@ -7,11 +7,11 @@ export class UpdateLineDto extends PartialType(CreateLineDto) {
   @ApiProperty({ enum: LineStatus })
   @IsOptional()
   @IsEnum(LineStatus)
-  status: LineStatus;
+  status?: LineStatus;
 
   @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Min(0)
-  predictedValue: number;
+  predictedValue?: number;
 }
