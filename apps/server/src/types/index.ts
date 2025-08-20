@@ -1,3 +1,3 @@
 import { GamesService } from '../games/games.service';
 
-export type GameWithRelations = Awaited<ReturnType<GamesService['findOne']>>;
+export type GamesFindOne = Awaited<ReturnType<GamesService['findOne']>>;

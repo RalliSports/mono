@@ -11,7 +11,8 @@
     "db:migrate": "turbo run db:migrate",
     "db:seed": "turbo run db:seed",
     "db:seed:teams-athletes": "turbo run db:seed:teams-athletes",
-    "fetch:athletes": "turbo run fetch:athletes"
+    "fetch:athletes": "turbo run fetch:athletes",
+    "update-types": "cd apps/server && pnpm build:types && cd ../../apps/web && pnpm install"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
