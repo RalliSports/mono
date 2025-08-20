@@ -1,55 +1,49 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
+import { useState } from 'react'
+import { useWalletBalances } from '@/providers/user-data-provider'
 
-export default function WalletTopUpModal() {
-  const [amount, setAmount] = useState(100);
-  const [paymentMethod, setPaymentMethod] = useState("card");
-  const [processing, setProcessing] = useState(false);
+export default function WalletTopUpModalRefactored() {
+  const [amount, setAmount] = useState(100)
+  const [paymentMethod, setPaymentMethod] = useState('card')
+  const [processing, setProcessing] = useState(false)
 
-  // Para wallet balance hook
-  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance();
-  
-  // Format balance for display
+  const { balances, isLoading: balanceLoading, error: balanceError } = useWalletBalances()
+
   const formatBalance = (amount: number) => {
     return amount.toLocaleString('en-US', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
+      maximumFractionDigits: 2,
+    })
+  }
 
-  const quickAmounts = [25, 50, 100, 250, 500, 1000];
+  const quickAmounts = [25, 50, 100, 250, 500, 1000]
 
   const paymentMethods = [
     {
-      id: "card",
-      name: "Credit/Debit Card",
-      icon: "💳",
+      id: 'card',
+      name: 'Credit/Debit Card',
+      icon: '💳',
       fee: 0,
       instant: true,
     },
-    { id: "paypal", name: "PayPal", icon: "🔵", fee: 2.9, instant: true },
-    { id: "crypto", name: "Cryptocurrency", icon: "₿", fee: 0, instant: false },
-    { id: "bank", name: "Bank Transfer", icon: "🏦", fee: 0, instant: false },
-  ];
+    { id: 'paypal', name: 'PayPal', icon: '🔵', fee: 2.9, instant: true },
+    { id: 'crypto', name: 'Cryptocurrency', icon: '₿', fee: 0, instant: false },
+    { id: 'bank', name: 'Bank Transfer', icon: '🏦', fee: 0, instant: false },
+  ]
 
   const handleTopUp = async () => {
-    setProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setProcessing(false);
-  };
+    setProcessing(true)
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    setProcessing(false)
+  }
 
   return (
     <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-3xl p-8 border border-slate-700 shadow-2xl max-w-lg w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white flex items-center">
-          <svg
-            className="w-6 h-6 text-[#00CED1] mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
+          <svg className="w-6 h-6 text-[#00CED1] mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
               d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
@@ -60,16 +54,20 @@ export default function WalletTopUpModal() {
         </h2>
       </div>
 
-      {/* Current Balance */}
+      {/* Current Balance - Refactored to use UserDataProvider */}
       <div className="mb-6 p-4 bg-gradient-to-r from-[#00CED1]/10 to-[#FFAB91]/10 rounded-2xl border border-[#00CED1]/20">
         <div className="text-center">
           <div className="text-slate-400 text-sm mb-1">Current Balance</div>
           <div className="text-2xl font-bold text-white">
-            {isConnected ? 
-              (balanceLoading ? "Loading..." : 
-               balanceError ? "$0.00" : 
-               `$${formatBalance(balances.totalUsd)}`) : 
-              "$0.00"}
+            {balanceLoading ? 'Loading...' : balanceError ? '$0.00' : `$${formatBalance(balances?.totalUsd || 0)}`}
+          </div>
+          {/* Additional balance breakdown available from provider */}
+          <div className="text-xs text-slate-400 mt-2 space-x-2">
+            <span>SOL: {balances?.sol.toFixed(4) || '0.0000'}</span>
+            <span>•</span>
+            <span>USDC: ${balances?.usdc.toFixed(2) || '0.00'}</span>
+            <span>•</span>
+            <span>RALLI: {balances?.ralli.toFixed(0) || '0'}</span>
           </div>
         </div>
       </div>
@@ -86,8 +84,8 @@ export default function WalletTopUpModal() {
               onClick={() => setAmount(quickAmount)}
               className={`py-2 px-3 rounded-xl font-semibold transition-all duration-300 ${
                 amount === quickAmount
-                  ? "bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg"
-                  : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white"
+                  ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
               ${quickAmount}
@@ -114,9 +112,7 @@ export default function WalletTopUpModal() {
 
       {/* Payment Methods */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white mb-3">
-          Payment Method
-        </h3>
+        <h3 className="text-lg font-semibold text-white mb-3">Payment Method</h3>
         <div className="space-y-2">
           {paymentMethods.map((method) => (
             <button
@@ -124,8 +120,8 @@ export default function WalletTopUpModal() {
               onClick={() => setPaymentMethod(method.id)}
               className={`w-full p-4 rounded-2xl border transition-all duration-300 ${
                 paymentMethod === method.id
-                  ? "bg-gradient-to-r from-[#00CED1]/10 to-[#FFAB91]/10 border-[#00CED1] text-white"
-                  : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600"
+                  ? 'bg-gradient-to-r from-[#00CED1]/10 to-[#FFAB91]/10 border-[#00CED1] text-white'
+                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -134,21 +130,17 @@ export default function WalletTopUpModal() {
                   <div className="text-left">
                     <div className="font-semibold">{method.name}</div>
                     <div className="text-xs text-slate-400 flex items-center space-x-2">
-                      <span>{method.instant ? "Instant" : "1-3 days"}</span>
+                      <span>{method.instant ? 'Instant' : '1-3 days'}</span>
                       {method.fee > 0 && <span>• {method.fee}% fee</span>}
                     </div>
                   </div>
                 </div>
                 <div
                   className={`w-4 h-4 rounded-full border-2 ${
-                    paymentMethod === method.id
-                      ? "border-[#00CED1] bg-[#00CED1]"
-                      : "border-slate-500"
+                    paymentMethod === method.id ? 'border-[#00CED1] bg-[#00CED1]' : 'border-slate-500'
                   }`}
                 >
-                  {paymentMethod === method.id && (
-                    <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
-                  )}
+                  {paymentMethod === method.id && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>}
                 </div>
               </div>
             </button>
@@ -168,18 +160,14 @@ export default function WalletTopUpModal() {
             <span>Processing...</span>
           </div>
         ) : (
-          "Add Funds"
+          'Add Funds'
         )}
       </button>
 
       {/* Security Note */}
       <div className="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/30">
         <div className="flex items-center space-x-2 text-slate-400 text-xs">
-          <svg
-            className="w-4 h-4 text-emerald-400"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
+          <svg className="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
               d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -190,5 +178,5 @@ export default function WalletTopUpModal() {
         </div>
       </div>
     </div>
-  );
+  )
 }

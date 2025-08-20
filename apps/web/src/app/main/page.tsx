@@ -3,6 +3,7 @@
 import SelectionBar from '@/components/main-feed/selection-bar'
 import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
 import SidebarNav from '@/components/ui/sidebar-nav'
+import { useUserData } from '@/providers/user-data-provider'
 import { useSessionToken } from '@/hooks/use-session'
 
 // Components
@@ -10,7 +11,6 @@ import { TopNavigation, FilterBar, LobbiesSection, LoadingScreen } from './compo
 
 // Hooks
 import { useWalletConnection } from './hooks/useWalletConnection'
-import { useUserData } from './hooks/useUserData'
 import { useMainPage } from './hooks/useMainPage'
 
 export default function MainFeedPage() {
@@ -19,12 +19,11 @@ export default function MainFeedPage() {
   // Custom hooks for separation of concerns
   const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection()
 
-  const { user } = useUserData(session)
+  const { user } = useUserData()
 
   const {
     lobbiesData,
     selectedAthletes,
-    setSelectedAthletes,
     athletes,
     isInSelectionMode,
     setIsInSelectionMode,

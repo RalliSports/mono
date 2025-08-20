@@ -1,5 +1,8 @@
-//send api request to /api/games
+'use client'
 
+import { useQuery } from '@tanstack/react-query'
+
+//send api request to /api/games
 export const fetchGames = async () => {
   const response = await fetch(`/api/games`, {
     method: 'GET',
@@ -19,6 +22,16 @@ export const fetchGames = async () => {
   console.log('games', games)
 
   return transformGamesToLobbies(games)
+}
+
+// New hook version
+export function useLobbies() {
+  return useQuery({
+    queryKey: ['lobbies'],
+    queryFn: fetchGames,
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds
+  })
 }
 
 type Game = {

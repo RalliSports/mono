@@ -1,5 +1,5 @@
 {
-  "id": "89ffe649-1d0a-46fa-aa21-b88a9294c4f3",
+  "id": "29a0d6da-8acc-4895-9222-5abbbf14079e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -806,7 +806,8 @@
           "name": "has_been_fauceted_sol",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -819,7 +820,22 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "users_email_address_unique": {
+          "name": "users_email_address_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email_address"
+          ]
+        },
+        "users_para_user_id_unique": {
+          "name": "users_para_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "para_user_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
