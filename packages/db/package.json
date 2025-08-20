@@ -42,14 +42,14 @@
   "packageManager": "pnpm@9.0.0",
   "scripts": {
     "build": "tsup",
-    "db:generate": "node ./node_modules/.bin/drizzle-kit generate",
+    "db:generate": "npx drizzle-kit generate",
     "lint:fix": "eslint . --ext .ts,.js --fix",
-    "db:migrate": "node ./node_modules/.bin/drizzle-kit migrate",
-    "db:reset": "node ./node_modules/.bin/drizzle-kit drop",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:reset": "npx drizzle-kit drop",
     "db:seed": "tsx src/seeds/index.ts",
     "db:seed:teams-athletes": "tsx src/seeds/seed-teams-athletes.ts",
     "fetch:athletes": "tsx src/seeds/data/athletes/index.ts",
     "prepare": "pnpm db:generate && pnpm db:migrate && pnpm build",
-    "studio": "node ./node_modules/.bin/drizzle-kit studio"
+    "studio": "npx drizzle-kit studio"
   }
 }
