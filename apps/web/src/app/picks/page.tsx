@@ -11,12 +11,12 @@ import {
   PaymentPopup,
   LoadingStates,
   AthletesList,
-  PageLoadingFallback,
 } from './components'
 
 // Hooks and Constants
 import { usePicks } from './hooks/usePicks'
 import { DEFAULT_LEGS_REQUIRED, DEFAULT_BUY_IN, DEFAULT_GAME_NAME } from './constants/gameDefaults'
+import { LoadingSpinner } from '../join-game/components'
 
 function PicksContent() {
   const {
@@ -39,19 +39,13 @@ function PicksContent() {
     handlePaymentCancel,
   } = usePicks()
 
-  // Don't render until mounted to prevent hydration issues
-  if (!mounted) {
-    return null
-  }
-
-  if (!game) {
-    return <div>Loading...</div>
-  }
-
   const legsRequired = game?.numBets || DEFAULT_LEGS_REQUIRED
   const buyIn = game?.depositAmount || DEFAULT_BUY_IN
   const gameName = game?.title || DEFAULT_GAME_NAME
 
+  if (!game || !mounted) {
+    return <LoadingSpinner />
+  }
   return (
     <div className="bg-gray-900 min-h-screen">
       {/* Top Navigation Bar */}
@@ -115,7 +109,7 @@ function PicksContent() {
 
 export default function PicksPage() {
   return (
-    <Suspense fallback={<PageLoadingFallback />}>
+    <Suspense fallback={<LoadingSpinner />}>
       <PicksContent />
     </Suspense>
   )

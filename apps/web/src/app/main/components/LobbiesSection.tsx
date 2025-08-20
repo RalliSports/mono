@@ -88,7 +88,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
                 timeLeft={lobby.timeLeft}
                 host={lobby.host}
                 isUrgent={lobby.isUrgent}
-                shouldOpenViewGame={lobby.participants.some((participant) => participant.user.id === user?.id)}
+                shouldOpenViewGame={lobby.participants.some((participant) => participant.user?.id === user?.id)}
               />
             ))}
           </div>
@@ -136,7 +136,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
               timeLeft={lobby.timeLeft}
               host={lobby.host}
               isUrgent={lobby.isUrgent}
-              shouldOpenViewGame={lobby.participants.some((participant) => participant.user.id === user?.id)}
+              shouldOpenViewGame={lobby.participants.some((participant) => participant.user?.id === user?.id)}
             />
           ))}
         </div>

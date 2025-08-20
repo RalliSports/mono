@@ -1,12 +1,12 @@
+import Link from 'next/link'
 import { Game, Creator } from '../../types'
 
 interface JoinGameButtonProps {
   game: Game
   user: Creator | null
-  onJoinGame: () => void
 }
 
-export default function JoinGameButton({ game, user, onJoinGame }: JoinGameButtonProps) {
+export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
   const spotsLeft = game.maxParticipants - game.participants.length
   const isUserInGame = game.participants.some((participant) => participant.user.id === user?.id)
 
@@ -30,16 +30,16 @@ export default function JoinGameButton({ game, user, onJoinGame }: JoinGameButto
           </div>
         </div>
 
-        <button
-          onClick={onJoinGame}
-          className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group"
+        <Link
+          href={`/picks?gameId=${game.id}`}
+          className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 mt-auto"
         >
           {/* Shimmer effect */}
           <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
           <span className="relative z-10">
             Make Your Picks • {spotsLeft} Spot{spotsLeft !== 1 ? 's' : ''} Left
           </span>
-        </button>
+        </Link>
 
         {spotsLeft <= 3 && (
           <p className="text-amber-400 text-sm text-center mt-3 font-medium">

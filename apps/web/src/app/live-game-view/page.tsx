@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import LoadingSpinner from '../view-game/components/LoadingSpinner'
 
 interface GamePick {
   id: number
@@ -1224,13 +1225,7 @@ function LiveGameViewContent() {
 
 export default function LiveGameView() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-          <div className="text-white">Loading...</div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingSpinner />}>
       <LiveGameViewContent />
     </Suspense>
   )

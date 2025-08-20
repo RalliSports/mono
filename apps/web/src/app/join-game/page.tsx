@@ -50,18 +50,13 @@ function JoinGameContent() {
     )
   }
 
-  // Handle join game flow
-  const handleJoinGame = () => {
-    window.location.href = `/picks?gameId=${lobbyId}`
-  }
-
   if (!game) return <LoadingSpinner />
 
   return (
     <JoinGameLayout>
       <GameHeader game={game} />
 
-      <JoinGameButton game={game} user={user} onJoinGame={handleJoinGame} />
+      <JoinGameButton game={game} user={user} />
 
       <ParticipantsList
         game={game}
