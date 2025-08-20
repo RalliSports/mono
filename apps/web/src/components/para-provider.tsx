@@ -27,7 +27,7 @@ export function Providers({
         paraModalConfig={{
           logo: '/images/RALLI.png',
           oAuthMethods: ['GOOGLE', 'TWITTER', 'DISCORD'],
-          authLayout: ['AUTH:FULL'],
+          authLayout: ['AUTH:FULL', 'EXTERNAL:CONDENSED'],
         }}
         externalWalletConfig={{
           appUrl: 'http://localhost:3000/', // Ensure this matches your app's real URL
@@ -37,6 +37,7 @@ export function Providers({
               chain: WalletAdapterNetwork.Devnet, // Devnet | Mainnet | Testnet
             },
           },
+          wallets: ['BACKPACK', 'PHANTOM', 'GLOW', 'SOLFLARE', 'METAMASK']
         }}
       >
         {children}
