@@ -19,6 +19,14 @@ export default function MainFeedPage() {
   // Custom hooks for separation of concerns
   const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection()
 
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
   const { user } = useUserData()
 
   const {
@@ -93,7 +101,11 @@ export default function MainFeedPage() {
       )}
 
       {/* Sidebar Navigation */}
-      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} isConnected={isConnected}
+              balances={balances}
+              balanceLoading={balanceLoading}
+              balanceError={balanceError?.message}
+              formatBalance={formatBalance} />
     </div>
   )
 }

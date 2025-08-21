@@ -1,4 +1,16 @@
-export default function SelectedPlayers() {
+interface SelectedPlayersProps {
+  isConnected: boolean
+  balances: { sol: number; ralli: number }
+  balanceLoading: boolean
+  balanceError?: string
+  formatBalance: (amount: number) => string
+}
+
+export default function SelectedPlayers({isConnected,
+  balances,
+  balanceLoading,
+  balanceError,
+  formatBalance,}: SelectedPlayersProps) {
   const selectedPlayers = [
     {
       id: 1,
@@ -352,7 +364,15 @@ export default function SelectedPlayers() {
           </h4>
           <div className="text-right">
             <div className="text-sm text-slate-400">Current Balance</div>
-            <div className="text-xl font-bold text-white">$1,250.00</div>
+            <div className="text-xl font-bold text-white">{isConnected
+                  ? balanceLoading
+                    ? 'Loading...'
+                    : balanceError
+                      ? 'Error'
+                      : balances.ralli === 0
+                        ? 'Top Up'
+                        : `$${formatBalance(balances.ralli)}`
+                  : '$0.00'}</div>
           </div>
         </div>
 

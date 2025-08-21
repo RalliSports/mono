@@ -31,8 +31,20 @@ import HostGameComponent from "@/components/gambling/host-game-component";
 import HostGameComponentCompact from "@/components/gambling/host-game-component-compact";
 import LiveLobbyComponent from "@/components/gambling/live-lobby-component";
 import CompletedGameComponent from "@/components/gambling/completed-game-component";
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+
 
 export default function ComponentsShowcase() {
+  
+
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
   return (
     <div className="bg-gray-900 min-h-screen">
       {/* Header */}
@@ -77,7 +89,11 @@ export default function ComponentsShowcase() {
               <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-4"></span>
               Selected Players
             </h2>
-            <SelectedPlayers />
+            <SelectedPlayers isConnected={isConnected}
+              balances={balances}
+              balanceLoading={balanceLoading}
+              balanceError={balanceError?.message}
+              formatBalance={formatBalance}/>
           </div>
           <div>
             <h2 className="text-3xl font-bold text-white mb-8 flex items-center">
