@@ -41,6 +41,7 @@ export class MatchupsService {
         lines: {
           columns: {
             id: true,
+            status: true,
           },
         },
       },

@@ -57,6 +57,13 @@ export class MatchupStatusUpdaterService {
         continue;
       }
 
+      if (matchup.status !== MatchupStatus.SCHEDULED) {
+        this.logger.warn(
+          `Skipping matchup ${matchup.id} due to status ${matchup.status}`,
+        );
+        continue;
+      }
+
       const espnStatus: EspnMatchupStatusResponse =
         await this.fetchEspnMatchupStatus(matchup.espnEventId);
       if (!espnStatus || !espnStatus.type) {
@@ -69,15 +76,22 @@ export class MatchupStatusUpdaterService {
         espnStatus.type.name === EspnStatusName.CURRENT
       ) {
         for (const line of matchup.lines) {
+          if (line.status !== LineStatus.OPEN) {
+            this.logger.warn(
+              `Skipping line ${line.id} due to status ${line.status}`,
+            );
+            continue;
+          }
+
           await this.linesService.updateLine(line.id, {
             status: LineStatus.LOCKED,
           });
-          this.logger.log(`Updated line ${line.id} to locked`);
+          this.logger.log(`Updated line ${line.id} to LOCKED`);
         }
         await this.matchupsService.updateMatchup(matchup.id, {
           status: MatchupStatus.IN_PROGRESS,
         });
-        this.logger.log(`Updated matchup ${matchup.id} to in progress`);
+        this.logger.log(`Updated matchup ${matchup.id} to IN_PROGRESS`);
       }
     }
     this.logger.log('Matchup status update cron job completed.');
