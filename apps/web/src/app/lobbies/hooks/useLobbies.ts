@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { fetchGames } from '@/hooks/get-games'
 import type { Lobby } from '@/hooks/get-games'
+import { useToast } from '@/components/ui/toast'
 
 export const useLobbies = () => {
+  const { addToast } = useToast()
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
   const [lobbiesError, setLobbiesError] = useState<string | null>(null)
   const [lobbiesLoading, setLobbiesLoading] = useState(true)
@@ -12,9 +14,11 @@ export const useLobbies = () => {
       setLobbiesLoading(true)
       setLobbiesError(null)
       const fetchedLobbies = await fetchGames()
+
       setLobbiesData(fetchedLobbies)
     } catch (error) {
       console.error('Failed to fetch lobbies:', error)
+      addToast('Failed to fetch lobbies', 'error')
       setLobbiesError(error instanceof Error ? error.message : 'Failed to fetch lobbies')
     } finally {
       setLobbiesLoading(false)

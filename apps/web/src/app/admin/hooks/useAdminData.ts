@@ -75,8 +75,13 @@ export function useAdminData(session: string | null) {
           'x-para-session': session || '',
         },
       })
-      const data = await response.json()
-      setTeams(data)
+      if (response.ok) {
+        const data = await response.json()
+        setTeams(data)
+      } else {
+        const errorData = await response.json()
+        addToast(errorData.error || 'Failed to fetch teams', 'error')
+      }
     }
     fetchTeams()
   }, [session])
@@ -121,8 +126,13 @@ export function useAdminData(session: string | null) {
             'x-para-session': session || '',
           },
         })
-        const data = await response.json()
-        setLines(data)
+        if (response.ok) {
+          const data = await response.json()
+          setLines(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch lines', 'error')
+        }
       } catch (error) {
         console.error('Error fetching lines:', error)
         setLines([])
@@ -141,8 +151,13 @@ export function useAdminData(session: string | null) {
             'x-para-session': session || '',
           },
         })
-        const data = await response.json()
-        setGames(data)
+        if (response.ok) {
+          const data = await response.json()
+          setGames(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch games', 'error')
+        }
       } catch (error) {
         console.error('Error fetching matchups:', error)
         setGames([])
@@ -161,8 +176,13 @@ export function useAdminData(session: string | null) {
             'x-para-session': session || '',
           },
         })
-        const data = await response.json()
-        setMatchUps(data)
+        if (response.ok) {
+          const data = await response.json()
+          setMatchUps(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch matchups', 'error')
+        }
       } catch (error) {
         console.error('Error fetching matchups:', error)
         setMatchUps([])
@@ -182,6 +202,13 @@ export function useAdminData(session: string | null) {
           },
         })
         const data = await response.json()
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch stats', 'error')
+        }
         setStats(data)
       } catch (error) {
         console.error('Error fetching stats:', error)
@@ -209,15 +236,25 @@ export function useAdminData(session: string | null) {
       description: newStat.description,
       customId: newStat.customId,
     }
-    await fetch('/api/create-stat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-para-session': session || '',
-      },
-      body: JSON.stringify(apiData),
-    })
-    addToast('Stat type created successfully!', 'success')
+    try {
+      const response = await fetch('/api/create-stat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-para-session': session || '',
+        },
+        body: JSON.stringify(apiData),
+      })
+      if (response.ok) {
+        addToast('Stat type created successfully!', 'success')
+      } else {
+        const errorData = await response.json()
+        addToast(errorData.error || 'Failed to create stat', 'error')
+      }
+    } catch (error) {
+      console.error('Error creating stat:', error)
+      addToast('Error creating stat', 'error')
+    }
   }
 
   const handleCreatePlayer = async () => {
@@ -310,7 +347,7 @@ export function useAdminData(session: string | null) {
       lineId: lineId,
       actualValue: actualValue,
     }
-    await fetch('/api/resolve-line', {
+    const response = await fetch('/api/resolve-line', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -319,14 +356,19 @@ export function useAdminData(session: string | null) {
       body: JSON.stringify(apiData),
     })
 
-    addToast(`Line resolved successfully! (${actualValue})`, 'success')
+    if (response.ok) {
+      addToast(`Line resolved successfully! (${actualValue})`, 'success')
+    } else {
+      const errorData = await response.json()
+      addToast(errorData.error || 'Failed to resolve line', 'error')
+    }
   }
 
   const handleResolveGame = async (gameId: string) => {
     const apiData = {
       gameId: gameId,
     }
-    await fetch('/api/resolve-game', {
+    const response = await fetch('/api/resolve-game', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -335,7 +377,12 @@ export function useAdminData(session: string | null) {
       body: JSON.stringify(apiData),
     })
 
-    addToast('Game resolved successfully!', 'success')
+    if (response.ok) {
+      addToast('Game resolved successfully!', 'success')
+    } else {
+      const errorData = await response.json()
+      addToast(errorData.error || 'Failed to resolve game', 'error')
+    }
   }
 
   const handleCreateMatchUp = async () => {
@@ -372,8 +419,12 @@ export function useAdminData(session: string | null) {
 
     const result = await response.json()
     console.log('result', result)
-
-    addToast('Match-up created successfully!', 'success')
+    if (response.ok) {
+      addToast('Match-up created successfully!', 'success')
+    } else {
+      const errorData = await response.json()
+      addToast(errorData.error || 'Failed to create match-up', 'error')
+    }
   }
 
   // Filter functions

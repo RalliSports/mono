@@ -41,9 +41,14 @@ export function usePicks() {
           },
         })
         console.log('athletes response', response)
-        const data = await response.json()
-        console.log('athletes data', data)
-        setAthletes(data)
+        if (response.ok) {
+          const data = await response.json()
+          console.log('athletes data', data)
+          setAthletes(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch athletes', 'error')
+        }
       } catch (error) {
         console.error('Error fetching lines:', error)
         setAthletes([])
@@ -63,9 +68,14 @@ export function usePicks() {
           },
         })
         console.log('game response', response)
-        const data = await response.json()
-        console.log('game data', data)
-        setGame(data)
+        if (response.ok) {
+          const data = await response.json()
+          console.log('game data', data)
+          setGame(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch game', 'error')
+        }
       } catch (error) {
         console.error('Error fetching game:', error)
         setGame(null)
@@ -135,7 +145,12 @@ export function usePicks() {
     })
     const result = await response.json()
     console.log(result, 'result')
-    addToast('Bets submitted successfully!', 'success')
+    if (response.ok) {
+      addToast('Bets submitted successfully!', 'success')
+    } else {
+      const errorData = await response.json()
+      addToast(errorData.error || 'Failed to submit bets', 'error')
+    }
     setTimeout(() => {
       window.location.href = `/view-game?id=${gameId}`
     }, 1000)
