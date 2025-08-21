@@ -71,7 +71,7 @@ export function ParaButton() {
 
         {/* Copy icon */}
         {isConnected && (
-          <button
+          <div
             onClick={(e) => {
               e.stopPropagation()
               copyToClipboard(displayAddress)
@@ -80,7 +80,7 @@ export function ParaButton() {
             title="Copy address"
           >
             <Copy className="w-3.5 h-3.5 text-teal-400" />
-          </button>
+          </div>
         )}
 
         {/* Glow effect */}

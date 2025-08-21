@@ -28,7 +28,14 @@ export default function ProfileContent() {
   } = useProfile(session || null)
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, dragActive, handleDrag, handleDrop, handleFileSelect } =
-    useProfilePictureUpload(session || null, username, firstName, lastName, setUser, setAvatar)
+    useProfilePictureUpload(
+      session || null,
+      username,
+      firstName,
+      lastName,
+      setUser as (user: unknown) => void,
+      setAvatar,
+    )
 
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
