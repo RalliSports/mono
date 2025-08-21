@@ -21,7 +21,6 @@ import { LoadingSpinner } from '../join-game/components'
 function PicksContent() {
   const {
     selectedPicks,
-    bookmarkedAthletes,
     mounted,
     isConfirming,
     showPaymentPopup,
@@ -31,7 +30,6 @@ function PicksContent() {
     isSubmittingPayment,
     athletes,
     gameId,
-    toggleBookmark,
     handlePickSelection,
     removePick,
     handleConfirmPicks,
@@ -65,8 +63,6 @@ function PicksContent() {
               <AthletePickCard
                 key={athlete.id}
                 athlete={athlete}
-                isBookmarked={bookmarkedAthletes.includes(athlete.id)}
-                onBookmarkToggle={toggleBookmark}
                 onPickSelection={handlePickSelection}
                 selectedPick={selectedPicks.find((pick) => pick.athleteId === athlete.id)}
                 isSelectionDisabled={
