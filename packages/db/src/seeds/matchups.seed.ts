@@ -5,8 +5,9 @@ import * as schema from "@repo/db";
 export const matchupsData: (typeof matchups.$inferInsert)[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440050",
-    gameDate: "2024-09-08", // ✅ String format, not Date object
-    status: "finished",
+    gameDate: "2025-08-09", // ✅ String format, not Date object
+    startsAt: new Date("2025-08-09T19:00:00Z"),
+    status: "scheduled",
     scoreHome: 27,
     scoreAway: 20,
     homeTeamId: "550e8400-e29b-41d4-b132-446655440001",
@@ -14,8 +15,9 @@ export const matchupsData: (typeof matchups.$inferInsert)[] = [
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440051",
-    gameDate: "2024-09-08", // ✅ String format
-    status: "finished",
+    gameDate: "2025-09-08", // ✅ String format
+    startsAt: new Date("2025-09-08T19:00:00Z"),
+    status: "scheduled",
     scoreHome: 31,
     scoreAway: 17,
     homeTeamId: "550e8400-e29b-41d4-b132-446655440003",
@@ -23,8 +25,9 @@ export const matchupsData: (typeof matchups.$inferInsert)[] = [
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440052",
-    gameDate: "2024-09-15", // ✅ String format
-    status: "in_progress",
+    gameDate: "2025-08-15", // ✅ String format
+    startsAt: new Date("2025-08-15T19:00:00Z"),
+    status: "finished",
     scoreHome: 41,
     scoreAway: 3,
     homeTeamId: "550e8400-e29b-41d4-b132-446655440005",
@@ -32,7 +35,8 @@ export const matchupsData: (typeof matchups.$inferInsert)[] = [
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440053",
-    gameDate: "2024-09-22", // ✅ String format
+    gameDate: "2025-09-22", // ✅ String format
+    startsAt: new Date("2025-09-22T19:00:00Z"),
     status: "scheduled",
     scoreHome: null,
     scoreAway: null,
@@ -42,11 +46,22 @@ export const matchupsData: (typeof matchups.$inferInsert)[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440060",
     gameDate: "2025-08-05",
-    status: "finished",
+    startsAt: new Date("2025-08-05T19:00:00Z"),
+    status: "scheduled",
     scoreHome: 30,
     scoreAway: 24,
     homeTeamId: "550e8400-e29b-41d4-b132-446655440009",
     awayTeamId: "550e8400-e29b-41d4-b132-446655440010",
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655440061",
+    gameDate: "2025-08-12",
+    startsAt: new Date("2025-08-12T19:00:00Z"),
+    status: "cancelled",
+    scoreHome: null,
+    scoreAway: null,
+    homeTeamId: "550e8400-e29b-41d4-b132-446655440011",
+    awayTeamId: "550e8400-e29b-41d4-b132-446655440012",
   },
 ];
 
