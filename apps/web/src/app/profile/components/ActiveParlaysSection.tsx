@@ -69,26 +69,27 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
                 <div className="flex -space-x-2">
                   {game.participants
                     .find((participant) => participant.user.id === user.id)
-                    ?.bets.map((bet) => (
-                      <div
+                    ?.bets.map((bet, index) => (
+                      <Image
                         key={bet.id}
-                        className={`w-8 h-8 rounded-full border-2 border-slate-800 flex items-center justify-center text-xs font-bold ${
+                        src={bet.line.athlete.picture || ''}
+                        alt={bet.line.athlete.name || ''}
+                        width={32}
+                        height={32}
+                        className={`rounded-full border-2 object-cover bg-slate-800 ${
                           new Date(bet.line.matchup.startsAt) > new Date()
-                            ? 'bg-slate-600 text-slate-300'
+                            ? 'border-slate-600'
                             : !!bet.line.actualValue
-                              ? 'bg-blue-500 text-white'
+                              ? 'border-blue-500'
                               : bet.isCorrect
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-red-500 text-white'
+                                ? 'border-emerald-500'
+                                : 'border-red-500'
                         }`}
-                      >
-                        <Image
-                          src={bet.line.athlete.picture || ''}
-                          alt={bet.line.athlete.name || ''}
-                          width={32}
-                          height={32}
-                        />
-                      </div>
+                        style={{
+                          aspectRatio: '1/1',
+                          zIndex: index + 1,
+                        }}
+                      />
                     ))}
                 </div>
               </div>
