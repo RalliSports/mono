@@ -1,3 +1,4 @@
+import { useToast } from '@/components/ui/toast'
 import { useState } from 'react'
 
 export function useProfilePictureUpload(
@@ -5,9 +6,10 @@ export function useProfilePictureUpload(
   username: string,
   firstName: string,
   lastName: string,
-  setUser: (user: any) => void,
+  setUser: (user: unknown) => void,
   setAvatar: (avatar: string) => void,
 ) {
+  const { addToast } = useToast()
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
@@ -58,6 +60,9 @@ export function useProfilePictureUpload(
             setUser(data)
             setAvatar(data.avatar)
             setIsUploadModalOpen(false)
+          } else {
+            const errorData = await response.json()
+            addToast(errorData.error || 'Failed to update user', 'error')
           }
 
           setIsUploading(false)

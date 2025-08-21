@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { fetchGames } from '@/hooks/get-games'
 import type { Lobby } from '@/hooks/get-games'
 import type { Athlete } from '../components/types'
+import { useToast } from '@/components/ui/toast'
 
 export function useMainPage(session: string | undefined) {
+  const { addToast } = useToast()
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
   const [athletes, setAthletes] = useState<Athlete[]>([])
@@ -18,6 +20,7 @@ export function useMainPage(session: string | undefined) {
     const loadLobbies = async () => {
       try {
         const fetchedLobbies = await fetchGames()
+
         setLobbiesData(fetchedLobbies.filter((lobby) => lobby.participants.length < lobby.maxParticipants))
       } catch (error) {
         console.error('Error fetching lobbies:', error)
@@ -41,9 +44,13 @@ export function useMainPage(session: string | undefined) {
           },
         })
         console.log('athletes response', response)
-        const data = await response.json()
-        console.log('athletes data', data)
-        setAthletes(data)
+        if (response.ok) {
+          const data = await response.json()
+          setAthletes(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch athletes', 'error')
+        }
       } catch (error) {
         console.error('Error fetching lines:', error)
         setAthletes([])
