@@ -4,20 +4,26 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
+#[instruction(line_seed: u64)]
 pub struct UpdateLine<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
     #[account(
         mut,
-        seeds = [b"line", line.key().as_ref()],
+        seeds = [b"line", line_seed.to_le_bytes().as_ref()],
         bump = line.bump
     )]
     pub line: Account<'info, Line>,
 }
 
 impl<'info> UpdateLine<'info> {
-    pub fn update_line(&mut self, new_predicted_value: f64, should_refund_bettors: bool) -> Result<()> {
+    pub fn update_line(
+        &mut self,
+        line_seed: u64,
+        new_predicted_value: f64, 
+        should_refund_bettors: bool,
+    ) -> Result<()> {
         let admin = &self.admin;
         let line = &mut self.line;
 
