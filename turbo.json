@@ -42,6 +42,9 @@
     "db:seed:teams-athletes": {
       "cache": false
     },
+    "db:seed:update-stats": {
+      "cache": false
+    },
     "fetch:athletes": {
       "cache": false
     }

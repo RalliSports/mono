@@ -29,9 +29,7 @@ export class StatsService {
     const stat = await this.db
       .insert(stats)
       .values({
-        customId: dto.customId,
-        name: dto.name,
-        description: dto.description,
+        ...dto,
       })
       .returning();
     return stat;
