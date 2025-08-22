@@ -15,9 +15,11 @@ const pool = new Pool({
 
 const db = drizzle(pool, { schema });
 
-export const updateStats = async (db: NodePgDatabase<typeof schema>) => {
+export const updateAndInsertStats = async (
+  db: NodePgDatabase<typeof schema>
+) => {
   for (const stat of statsData) {
-    await db
+    const result = await db
       .update(stats)
       .set({
         name: stat.name,
@@ -28,14 +30,19 @@ export const updateStats = async (db: NodePgDatabase<typeof schema>) => {
         statOddsName: stat.statOddsName,
       })
       .where(eq(stats.customId, stat.customId));
+
+    if (result.rowCount === 0) {
+      // If no rows were affected, the stat doesn't exist, so insert
+      await db.insert(stats).values(stat);
+    }
   }
-  console.log("✅ Stats updated");
+  console.log("✅ Stats updated and inserted");
 };
 
 async function seed(db: NodePgDatabase<typeof schema>) {
   console.log("🌱 Updating stats...");
   try {
-    await updateStats(db);
+    await updateAndInsertStats(db);
     console.log("🎉 Stats updated successfully!");
   } catch (error) {
     console.error(" ❌ Stats update failed:", error);
