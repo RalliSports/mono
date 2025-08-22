@@ -5,7 +5,6 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "@repo/db";
 
 import { seedAthletes } from "./athletes.seed";
-import { seedStats } from "./stats.seed";
 import { seedTeams } from "./teams.seed";
 
 config();
@@ -17,9 +16,8 @@ const pool = new Pool({
 const db = drizzle(pool, { schema });
 
 async function seed(db: NodePgDatabase<typeof schema>) {
-  console.log("🌱 Starting database seeding < teams | athletes | stats >...");
+  console.log("🌱 Starting database seeding < teams | athletes >...");
   try {
-    await seedStats(db);
     await seedTeams(db);
     await seedAthletes(db);
     console.log("🎉 Database seeding completed successfully!");
