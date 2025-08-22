@@ -5,6 +5,11 @@ import { useState, useEffect } from "react";
 interface SidebarNavProps {
   isOpen: boolean;
   onClose: () => void;
+  isConnected: boolean
+  balances: { sol: number; ralli: number }
+  balanceLoading: boolean
+  balanceError?: string
+  formatBalance: (amount: number) => string
 }
 
 interface NavItem {
@@ -20,7 +25,13 @@ interface NavSection {
   items: NavItem[];
 }
 
-export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
+
+export default function SidebarNav({ isOpen, onClose, isConnected,
+  balances,
+  balanceLoading,
+  balanceError,
+  formatBalance,
+   }: SidebarNavProps) {
   // Handle body scroll lock when sidebar is open
   useEffect(() => {
     if (isOpen) {
@@ -162,7 +173,15 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
               <div>
                 <p className="text-slate-300/80 text-xs sm:text-sm">Balance</p>
                 <p className="text-xl sm:text-2xl font-bold text-[#00CED1] drop-shadow-sm">
-                  $1,250.00
+                  {isConnected
+                  ? balanceLoading
+                    ? 'Loading...'
+                    : balanceError
+                      ? 'Error'
+                      : balances.ralli === 0
+                        ? 'Top Up'
+                        : `$${formatBalance(balances.ralli)}`
+                  : '$0.00'}
                 </p>
               </div>
               <a
