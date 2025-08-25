@@ -1,17 +1,15 @@
-import { Body, Injectable, Post, UseGuards } from '@nestjs/common';
-import { ApiSecurity } from '@nestjs/swagger';
-import { users, athletes } from '@repo/db';
+import { Injectable } from '@nestjs/common';
+import { athletes, pushSubscriptions, users } from '@repo/db';
+import { PublicKey } from '@solana/web3.js';
 import { eq, sql } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
-import { SessionAuthGuard } from 'src/auth/auth.session.guard';
-import { UserPayload } from 'src/auth/auth.user.decorator';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { WebPushService } from 'src/utils/services/webPush';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
-import { PublicKey } from '@solana/web3.js';
-import { CreateGameDto } from 'src/games/dto/create-game.dto';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { PushSubscriptionResponse } from './dto/webpush.dto';
 
 @Injectable()
 export class UserService {
@@ -20,6 +18,7 @@ export class UserService {
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
+    private readonly webPush: WebPushService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
   }
@@ -74,5 +73,49 @@ export class UserService {
     // Then faucet tokens
     this.anchor.faucetTokens(userPK);
     return;
+  }
+
+  async subscribeToWebPushNotification(
+    subscription: PushSubscriptionResponse,
+    user: User,
+  ) {
+    // Check if the subscription already exists for this user
+    const existing = await this.db.query.pushSubscriptions.findFirst({
+      where: sql`${pushSubscriptions.userId} = ${user.id} AND ${pushSubscriptions.subscription} = ${JSON.stringify(subscription)}`,
+    });
+
+    if (existing) {
+      return {
+        message: 'Browser already subscribed',
+        sub: existing,
+      };
+    }
+
+    const [subscribed] = await this.db
+      .insert(pushSubscriptions)
+      .values({
+        subscription,
+        userId: user.id,
+      })
+      .returning();
+
+    return subscribed;
+  }
+
+  async testWebpushNotification(subscription: PushSubscriptionResponse) {
+    const payload = {
+      title: 'Hello from Ralli 👋',
+      body: 'This is a test notification!',
+      image: 'image.png',
+      // icon: "icon.png",
+      // tag: "random unique number",
+      // url: "url"
+    };
+
+    try {
+      await this.webPush.sendNotification(subscription, payload);
+    } catch (error) {
+      console.log(error, 'error sending web push notification');
+    }
   }
 }
