@@ -14,28 +14,17 @@ export default function ProfileContent() {
   const { session } = useSessionToken()
   const { activeTab, setActiveTab, mounted, editingUsername, setEditingUsername } = useProfileTabs()
 
-  const {
+  const { username, setUsername, user, setUser, setAvatar, firstName, lastName, myOpenGames, handleUpdateUser } =
+    useProfile(session || null)
+
+  const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
+    session || null,
     username,
-    setUsername,
-    user,
-    setUser,
-    avatar,
-    setAvatar,
     firstName,
     lastName,
-    myOpenGames,
-    handleUpdateUser,
-  } = useProfile(session || null)
-
-  const { isUploadModalOpen, setIsUploadModalOpen, isUploading, dragActive, handleDrag, handleDrop, handleFileSelect } =
-    useProfilePictureUpload(
-      session || null,
-      username,
-      firstName,
-      lastName,
-      setUser as (user: unknown) => void,
-      setAvatar,
-    )
+    setUser as (user: unknown) => void,
+    setAvatar,
+  )
 
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
@@ -92,11 +81,9 @@ export default function ProfileContent() {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         isUploading={isUploading}
-        dragActive={dragActive}
         user={user}
-        onDrag={handleDrag}
-        onDrop={handleDrop}
         onFileSelect={handleFileSelect}
+        session={session || null}
       />
     </div>
   )
