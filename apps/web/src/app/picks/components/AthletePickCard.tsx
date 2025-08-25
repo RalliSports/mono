@@ -75,10 +75,19 @@ export default function AthletePickCard({
         {/* Horizontal Layout with Stats and Buttons */}
         <div className="flex items-center gap-4">
           {/* Stats Section */}
-          <div className="flex-1 bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-5">
+          <div className="flex-1 min-w-0 bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-5">
             {/* Stat Navigation Header */}
             <div className="flex flex-col mb-3">
-              <div className="text-slate-200 font-bold text-base mb-3 tracking-wide text-center">
+              <div
+                className="text-slate-200 font-bold text-base mb-3 tracking-wide text-center px-1 max-h-12 overflow-hidden flex items-center justify-center"
+                title={currentStat.name}
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: '1.2rem',
+                }}
+              >
                 {currentStat.name}
               </div>
 
