@@ -47,6 +47,7 @@ export default function WebPush() {
       // “Use Google services for push messaging” is enabled.
 
       // Subscribe to push
+      console.log(publicVapidKey, 'publicVapidKey')
       const subscriptionData = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey as string),
@@ -84,7 +85,8 @@ export default function WebPush() {
     setLoading(true)
 
     try {
-      await fetch('http://localhost:4000/api/v1/test/webpush', {
+      console.log('Sending test notification...')
+      const response = await fetch('http://localhost:4000/api/v1/test/webpush', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,8 +94,20 @@ export default function WebPush() {
         }),
       })
 
+      console.log('Response status:', response.status)
+      const result = await response.text()
+      console.log('Response body:', result)
+
+      if (response.ok) {
+        alert('Test notification sent successfully! Check your notifications.')
+      } else {
+        alert(`Failed to send notification: ${response.status} - ${result}`)
+      }
+
       setLoading(false)
     } catch (error) {
+      console.error('Error sending notification:', error)
+      alert(`Error sending notification: ${error}`)
       setLoading(false)
     }
   }

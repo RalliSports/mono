@@ -80,6 +80,7 @@ export class UserService {
     user: User,
   ) {
     // Check if the subscription already exists for this user
+    console.log(subscription, 'subscription');
     const existing = await this.db.query.pushSubscriptions.findFirst({
       where: sql`${pushSubscriptions.userId} = ${user.id} AND ${pushSubscriptions.subscription} = ${JSON.stringify(subscription)}`,
     });
@@ -98,6 +99,8 @@ export class UserService {
         userId: user.id,
       })
       .returning();
+
+    console.log(subscribed, 'subscribed');
 
     return subscribed;
   }
