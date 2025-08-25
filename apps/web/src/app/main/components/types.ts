@@ -52,14 +52,4 @@ export interface Athlete {
   lines: Line[]
 }
 
-export interface User {
-  id: string
-  emailAddress: string
-  walletAddress: string
-  paraUserId: string
-  firstName?: string
-  lastName?: string
-  username?: string
-  avatar?: string
-  hasBeenFaucetedSol: boolean
-}
+export type { UserFindOne as User } from '@repo/server'

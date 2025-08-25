@@ -9,8 +9,8 @@ import { useMemo } from 'react'
 import { RALLI_TOKEN, USDC_MINT } from '@/constants'
 import { useUser } from '@/hooks/api/use-user'
 import { useLobbies as useLobbiesHook, type Lobby } from '@/hooks/get-games'
-import type { Game, UpdateUserData } from '@/hooks/api/types'
-import type { User } from '@/app/main/components/types.ts'
+//import type { Game, UpdateUserData } from '@/hooks/api/types'
+import { UserUpdate, GamesGetMyOpenGames, UserFindOne } from '@repo/server'
 
 interface WalletBalances {
   sol: number
@@ -20,10 +20,10 @@ interface WalletBalances {
 }
 
 interface UserData {
-  user: User | null
+  user: UserFindOne | null
   walletAddress: PublicKey | null
   balances: WalletBalances
-  myOpenGames: Game[]
+  myOpenGames: GamesGetMyOpenGames[]
   lobbies: Lobby[]
   isConnected: boolean
   isLoading: boolean
@@ -38,7 +38,7 @@ interface UserDataContextType extends UserData {
   refetchLobbies: () => void
   refetchMyGames: () => void
   refetchAll: () => void
-  updateUser: (data: UpdateUserData) => Promise<User>
+  updateUser: (data: UserUpdate) => Promise<UserFindOne>
 }
 
 const UserDataContext = createContext<UserDataContextType | undefined>(undefined)
