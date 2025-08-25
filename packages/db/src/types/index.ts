@@ -14,6 +14,7 @@ import {
   stats,
   users,
   teams,
+  pushSubscriptions,
 } from "../schema";
 
 export type User = InferSelectModel<typeof users>;
@@ -30,3 +31,4 @@ export type Referral = InferSelectModel<typeof referrals>;
 export type Role = InferSelectModel<typeof roles>;
 export type Stat = InferSelectModel<typeof stats>;
 export type Team = InferSelectModel<typeof teams>;
+export type PushSubscription = InferSelectModel<typeof pushSubscriptions>;
