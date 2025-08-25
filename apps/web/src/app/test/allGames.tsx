@@ -12,7 +12,7 @@ export default function AllGames() {
 
   useEffect(() => {
     ;(async () => {
-      const res = await fetch('http://localhost:4000/api/v1/games', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/games`, {
         method: 'GET',
         headers: {
           accept: 'application/json',
@@ -32,7 +32,7 @@ export default function AllGames() {
 
   useEffect(() => {
     ;(async () => {
-      const res = await fetch('http://localhost:4000/api/v1/lines', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lines`, {
         method: 'GET',
       })
       if (res.ok) {
