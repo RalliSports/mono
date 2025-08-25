@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const { avatarUrl } = await request.json()
 
     // Call your server API to update the user's avatar
-    const response = await fetch('http://localhost:4000/api/v1/update-user', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/update-user`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

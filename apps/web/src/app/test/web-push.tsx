@@ -1,6 +1,5 @@
 'use client'
 
-import { useApiWithAuth } from '@/hooks/api'
 import { useSessionToken } from '@/hooks/use-session'
 import { useState } from 'react'
 
@@ -15,7 +14,6 @@ export default function WebPush() {
   const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   const [loading, setLoading] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription>()
-  const api = useApiWithAuth()
   const { session } = useSessionToken()
 
   const handleSubscribe = async () => {
@@ -57,7 +55,7 @@ export default function WebPush() {
 
       // Send subscription to backend
       if (session) {
-        await fetch('http://localhost:4000/api/v1/user/subscribe-webpush', {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/subscribe-webpush`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -84,7 +82,7 @@ export default function WebPush() {
     setLoading(true)
 
     try {
-      await fetch('http://localhost:4000/api/v1/test/webpush', {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/test/webpush`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,6 +92,7 @@ export default function WebPush() {
 
       setLoading(false)
     } catch (error) {
+      console.error('Push test notification failed:', error)
       setLoading(false)
     }
   }
