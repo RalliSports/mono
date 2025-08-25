@@ -73,7 +73,9 @@ export default function UsernameEditor({
           </h2>
           {/* Edit Button */}
           <button
-            // onClick={onEditClick}
+            onClick={() => {
+              setEditingUsername(true)
+            }}
             className="w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
           >
             <svg

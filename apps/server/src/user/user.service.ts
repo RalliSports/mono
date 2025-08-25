@@ -31,13 +31,17 @@ export class UserService {
   }
 
   async updateUser(dto: UpdateUserDto, user: User) {
-    // Get a random athlete's picture for the avatar
-    const randomAthlete = await this.db.query.athletes.findFirst({
-      where: sql`${athletes.picture} IS NOT NULL AND ${athletes.picture} != ''`,
-      orderBy: sql`RANDOM()`,
-    });
+    // Use the provided avatar URL if available, otherwise keep existing logic for random athlete
+    let avatarUrl = dto.avatar;
 
-    const avatarUrl = randomAthlete?.picture || dto.avatar;
+    if (!avatarUrl && (user.avatar === '' || user.avatar === null)) {
+      // Get a random athlete's picture for the avatar (fallback)
+      const randomAthlete = await this.db.query.athletes.findFirst({
+        where: sql`${athletes.picture} IS NOT NULL AND ${athletes.picture} != ''`,
+        orderBy: sql`RANDOM()`,
+      });
+      avatarUrl = randomAthlete?.picture ?? '';
+    }
 
     const [updatedUser] = await this.db
       .update(users)

@@ -1,27 +1,24 @@
 import Image from 'next/image'
 import { useRef } from 'react'
 import { User } from './types'
+import { UploadButton } from '@/lib/uploadthing'
 
 interface ProfilePictureUploadModalProps {
   isOpen: boolean
   onClose: () => void
   isUploading: boolean
-  dragActive: boolean
   user: User
-  onDrag: (e: React.DragEvent) => void
-  onDrop: (e: React.DragEvent) => void
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
+  session: string | null
 }
 
 export default function ProfilePictureUploadModal({
   isOpen,
   onClose,
   isUploading,
-  dragActive,
   user,
-  onDrag,
-  onDrop,
   onFileSelect,
+  session,
 }: ProfilePictureUploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -54,7 +51,7 @@ export default function ProfilePictureUploadModal({
           ) : (
             <>
               {/* Drag & Drop Area */}
-              <div
+              {/* <div
                 onDragEnter={onDrag}
                 onDragLeave={onDrag}
                 onDragOver={onDrag}
@@ -75,16 +72,22 @@ export default function ProfilePictureUploadModal({
                     />
                   </svg>
                 </div>
-                <h4 className="text-white font-semibold mb-2">Drop your image here</h4>
-                <p className="text-slate-400 text-sm mb-4">or click to browse files</p>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-2 bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-medium rounded-lg transition-all duration-200"
-                >
-                  Choose File
-                </button>
+
                 <p className="text-slate-500 text-xs mt-3">PNG, JPG up to 5MB</p>
-              </div>
+              </div> */}
+              <UploadButton
+                endpoint="profilePicture"
+                input={{ sessionId: session || '' }}
+                onClientUploadComplete={(res) => {
+                  // Do something with the response
+                  console.log('Files: ', res)
+                  alert('Upload Completed')
+                }}
+                onUploadError={(error: Error) => {
+                  // Do something with the error.
+                  alert(`ERROR! ${error.message}`)
+                }}
+              />
 
               {/* Hidden File Input */}
               <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileSelect} className="hidden" />

@@ -5,7 +5,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['a.espncdn.com', 'static.wikifutbol.com', 'upload.wikimedia.org'],
+    domains: ['a.espncdn.com', 'static.wikifutbol.com', 'upload.wikimedia.org', 'utfs.io'],
   },
   output: 'standalone',
 }
