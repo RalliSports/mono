@@ -5,15 +5,20 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS for production
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL, 'https://your-frontend-domain.com'] 
-      : true,
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? [
+            process.env.FRONTEND_URL,
+            'https://www.ralli.bet',
+            'https://ralli.bet',
+          ].filter(Boolean) // Remove any undefined values
+        : true,
     credentials: true,
   });
-  
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
