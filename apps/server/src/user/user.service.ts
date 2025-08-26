@@ -10,6 +10,7 @@ import { WebPushService } from 'src/utils/services/webPush';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { PushSubscriptionResponse } from './dto/webpush.dto';
+import { SendNotificationDto } from './dto/send-notification.dto';
 
 @Injectable()
 export class UserService {
@@ -121,5 +122,116 @@ export class UserService {
     } catch (error) {
       console.log(error, 'error sending web push notification');
     }
+  }
+
+  async getAllSubscriptions() {
+    console.log('getAllSubscriptions');
+    const subscriptions = await this.db.query.pushSubscriptions.findMany();
+    console.log(subscriptions, 'subscriptions');
+    return subscriptions;
+
+    // Get user data for each subscription
+    // const subscriptionsWithUsers = await Promise.all(
+    //   subscriptions.map(async (sub) => {
+    //     const user = await this.db.query.users.findFirst({
+    //       where: eq(users.id, sub.userId),
+    //     });
+
+    //     return {
+    //       id: sub.id,
+    //       userId: sub.userId,
+    //       subscription: sub.subscription,
+    //       isActive: sub.isActive,
+    //       createdAt: sub.createdAt,
+    //       user: user
+    //         ? {
+    //             username: user.username,
+    //             emailAddress: user.emailAddress,
+    //           }
+    //         : undefined,
+    //     };
+    //   }),
+    // );
+
+    // return subscriptionsWithUsers;
+  }
+
+  async sendNotificationToUser(dto: SendNotificationDto) {
+    if (!dto.subscriptionId) {
+      throw new Error('Subscription ID is required');
+    }
+
+    const subscription = await this.db.query.pushSubscriptions.findFirst({
+      where: eq(pushSubscriptions.id, dto.subscriptionId),
+    });
+
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+
+    const payload = {
+      title: dto.title,
+      body: dto.body,
+      url: dto.url || 'https://www.ralli.bet',
+    };
+
+    try {
+      await this.webPush.sendNotification(
+        subscription.subscription as PushSubscriptionResponse,
+        payload,
+      );
+      return { success: true, message: 'Notification sent successfully' };
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      throw new Error('Failed to send notification');
+    }
+  }
+
+  async sendNotificationToAll(dto: SendNotificationDto) {
+    const subscriptions = await this.db.query.pushSubscriptions.findMany({
+      where: eq(pushSubscriptions.isActive, true),
+    });
+
+    const payload = {
+      title: dto.title,
+      body: dto.body,
+      url: dto.url || 'https://www.ralli.bet',
+    };
+
+    const results: Array<{
+      subscriptionId: string;
+      success: boolean;
+      error?: string;
+    }> = [];
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (const subscription of subscriptions) {
+      try {
+        await this.webPush.sendNotification(
+          subscription.subscription as PushSubscriptionResponse,
+          payload,
+        );
+        successCount++;
+        results.push({ subscriptionId: subscription.id, success: true });
+      } catch (error) {
+        failureCount++;
+        results.push({
+          subscriptionId: subscription.id,
+          success: false,
+          error: (error as Error).message,
+        });
+        console.error(
+          `Failed to send notification to subscription ${subscription.id}:`,
+          error,
+        );
+      }
+    }
+
+    return {
+      success: true,
+      message: `Sent ${successCount} notifications successfully, ${failureCount} failed`,
+      results,
+    };
   }
 }

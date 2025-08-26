@@ -14,6 +14,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { UserService } from './user.service';
 import { CreateWebpushDto, PushSubscriptionResponse } from './dto/webpush.dto';
+import { SendNotificationDto } from './dto/send-notification.dto';
 
 @Controller('')
 export class UserController {
@@ -29,6 +30,19 @@ export class UserController {
   })
   findCurrentUser(@UserPayload() user: User) {
     return this.userService.findOne(user.id);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get all push subscriptions' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all subscriptions',
+  })
+  @Get('user/subscriptions')
+  getSubscriptions() {
+    console.log('getSubscriptions');
+    return this.userService.getAllSubscriptions();
   }
 
   @Get('user/:id')
@@ -56,17 +70,15 @@ export class UserController {
     return this.userService.faucetTokens(user);
   }
 
-
   @ApiResponse({
     status: 200,
     description: 'test web push noftification',
   })
   @Post('test/webpush')
   testWebPush(@Body() dto: CreateWebpushDto) {
-    console.log(dto, "test sub")
-    return this.userService.testWebpushNotification(dto.payload)
+    console.log(dto, 'test sub');
+    return this.userService.testWebpushNotification(dto.payload);
   }
-
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
@@ -76,8 +88,34 @@ export class UserController {
     description: 'success',
   })
   @Post('user/subscribe-webpush')
-  subscribeToWebPushNotification(@Body() dto: CreateWebpushDto, @UserPayload() user: User) {
+  subscribeToWebPushNotification(
+    @Body() dto: CreateWebpushDto,
+    @UserPayload() user: User,
+  ) {
     return this.userService.subscribeToWebPushNotification(dto.payload, user);
   }
-  
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Send notification to specific user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification sent',
+  })
+  @Post('user/send-notification')
+  sendNotification(@Body() dto: SendNotificationDto) {
+    return this.userService.sendNotificationToUser(dto);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Send notification to all users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notifications sent',
+  })
+  @Post('user/send-notification-all')
+  sendNotificationToAll(@Body() dto: SendNotificationDto) {
+    return this.userService.sendNotificationToAll(dto);
+  }
 }
