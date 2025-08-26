@@ -247,7 +247,9 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
               </div>
             ))}
           </div>
-          <button onClick={() => logout()}>Logout</button>
+          <button onClick={() => logout()} className="text-red-400 hover:text-red-300">
+            ➜] Logout
+          </button>
         </div>
 
         {/* Footer */}
