@@ -89,11 +89,7 @@ export default function ComponentsShowcase() {
               <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-4"></span>
               Selected Players
             </h2>
-            <SelectedPlayers isConnected={isConnected}
-              balances={balances}
-              balanceLoading={balanceLoading}
-              balanceError={balanceError?.message}
-              formatBalance={formatBalance}/>
+            <SelectedPlayers/>
           </div>
           <div>
             <h2 className="text-3xl font-bold text-white mb-8 flex items-center">

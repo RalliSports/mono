@@ -1,16 +1,11 @@
 "use client";
-import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance';
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 
 import { useState, useEffect } from "react";
 
 interface SidebarNavProps {
   isOpen: boolean;
   onClose: () => void;
-  isConnected: boolean
-  balances: { sol: number; ralli: number }
-  balanceLoading: boolean
-  balanceError?: string
-  formatBalance: (amount: number) => string
 }
 
 interface NavItem {
@@ -27,7 +22,7 @@ interface NavSection {
 }
 
 
-export default function SidebarNav({ isOpen, onClose
+export default function SidebarNav({ isOpen, onClose,
    }: SidebarNavProps) {
   // Handle body scroll lock when sidebar is open
   useEffect(() => {

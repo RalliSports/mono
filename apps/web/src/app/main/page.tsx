@@ -101,11 +101,7 @@ export default function MainFeedPage() {
       )}
 
       {/* Sidebar Navigation */}
-      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} isConnected={isConnected}
-              balances={balances}
-              balanceLoading={balanceLoading}
-              balanceError={balanceError?.message}
-              formatBalance={formatBalance} />
+      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
     </div>
   )
 }
