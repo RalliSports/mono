@@ -1,3 +1,4 @@
+import { formatBalance } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
 interface BalanceDisplayProps {
@@ -12,14 +13,6 @@ interface BalanceDisplayProps {
 
 export default function BalanceDisplay({ isConnected, balances, balanceLoading, balanceError }: BalanceDisplayProps) {
   const router = useRouter()
-
-  // Format balance for display
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   return (
     <div

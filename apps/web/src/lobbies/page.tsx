@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LobbyCard from '@/components/main-feed/lobby-card'
 import SidebarNav from '@/components/ui/sidebar-nav'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 
 export default function LobbiesPage() {
   const router = useRouter()
@@ -13,10 +14,17 @@ export default function LobbiesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
+  // Para wallet balance hook
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+
   // Fix hydration issues
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   // Close profile dropdown when clicking outside
   useEffect(() => {

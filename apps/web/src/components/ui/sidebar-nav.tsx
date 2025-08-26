@@ -1,6 +1,9 @@
 'use client'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { formatBalance } from '@/lib/utils'
+import { useLogout } from '@getpara/react-sdk'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 
 interface SidebarNavProps {
   isOpen: boolean
@@ -34,50 +37,37 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
     }
   }, [isOpen])
 
+  // Para wallet balance hook
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+
+  // Format balance for display
+
+  const { logout } = useLogout()
+
   const navItems: NavSection[] = [
+    {
+      section: 'Game',
+      items: [
+        { name: 'Create Game', icon: '🎯', href: '/create-game' },
+        // { name: "My Games", icon: "🎮", href: "/my-games" },
+        { name: 'Add Funds', icon: '💳', href: '/add-funds' },
+        // { name: "Leaderboard", icon: "🏆", href: "/leaderboard" },
+        // { name: "Transaction History", icon: "💰", href: "/transactions" },
+      ],
+    },
     {
       section: 'Account',
       items: [
         { name: 'Sign In', icon: '🔑', href: '/signin' },
-        { name: 'Sign Up', icon: '✨', href: '/signup' },
+        // { name: "Sign Up", icon: "✨", href: "/signup" },
         { name: 'Profile', icon: '👤', href: '/profile' },
       ],
     },
     {
-      section: 'Game',
+      section: 'Devs',
       items: [
-        { name: 'Create Lobby', icon: '🎯', href: '/create-game' },
-        { name: 'My Games', icon: '🎮', href: '/my-games' },
-        { name: 'Add Funds', icon: '💳', href: '/add-funds' },
-        { name: 'Leaderboard', icon: '🏆', href: '/leaderboard' },
-        { name: 'Transaction History', icon: '💰', href: '/transactions' },
-      ],
-    },
-    {
-      section: 'Social',
-      items: [
-        { name: 'Friends', icon: '👥', href: '/friends' },
-        { name: 'Referrals', icon: '🎁', href: '/referrals' },
-        {
-          name: 'Discord',
-          icon: '💬',
-          href: 'https://discord.gg/ralli',
-          external: true,
-        },
-      ],
-    },
-    {
-      section: 'Support',
-      items: [
-        { name: 'Help Center', icon: '❓', href: '/help' },
-        { name: 'Contact Us', icon: '📧', href: '/contact' },
-        { name: 'Settings', icon: '⚙️', href: '/settings' },
-        {
-          name: 'Logout',
-          icon: '🚪',
-          href: '/logout',
-          className: 'text-red-400 hover:text-red-300',
-        },
+        { name: 'Admin', icon: '🔑', href: '/admin' },
+        // { name: "Sign Up", icon: "✨", href: "/signup" },
         {
           name: 'Test',
           icon: '🔧',
@@ -85,6 +75,34 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
         },
       ],
     },
+
+    // {
+    //   section: "Social",
+    //   items: [
+    //     { name: "Friends", icon: "👥", href: "/friends" },
+    //     { name: "Referrals", icon: "🎁", href: "/referrals" },
+    //     {
+    //       name: "Discord",
+    //       icon: "💬",
+    //       href: "https://discord.gg/ralli",
+    //       external: true,
+    //     },
+    //   ],
+    // },
+    // {
+    //   section: "Support",
+    //   items: [
+    //     { name: "Help Center", icon: "❓", href: "/help" },
+    //     { name: "Contact Us", icon: "📧", href: "/contact" },
+    //     { name: "Settings", icon: "⚙️", href: "/settings" },
+    //     {
+    //       name: "Logout",
+    //       icon: "🚪",
+    //       href: "/logout",
+    //       className: "text-red-400 hover:text-red-300",
+    //     },
+    //   ],
+    // },
   ]
 
   return (
@@ -152,7 +170,17 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-300/80 text-xs sm:text-sm">Balance</p>
-                <p className="text-xl sm:text-2xl font-bold text-[#00CED1] drop-shadow-sm">$1,250.00</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#00CED1] drop-shadow-sm">
+                  {isConnected
+                    ? balanceLoading
+                      ? 'Loading...'
+                      : balanceError
+                        ? 'Error'
+                        : balances.ralli === 0
+                          ? 'Top Up'
+                          : `$${formatBalance(balances.ralli)}`
+                    : '$0.00'}
+                </p>
               </div>
               <a
                 href="/add-funds"
@@ -219,6 +247,7 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
               </div>
             ))}
           </div>
+          <button onClick={() => logout()}>Logout</button>
         </div>
 
         {/* Footer */}

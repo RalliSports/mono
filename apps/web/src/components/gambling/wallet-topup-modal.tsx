@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useWalletBalances } from '@/providers/user-data-provider'
+import { formatBalance } from '@/lib/utils'
 
 export default function WalletTopUpModalRefactored() {
   const [amount, setAmount] = useState(100)
@@ -9,13 +10,6 @@ export default function WalletTopUpModalRefactored() {
   const [processing, setProcessing] = useState(false)
 
   const { balances, isLoading: balanceLoading, error: balanceError } = useWalletBalances()
-
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   const quickAmounts = [25, 50, 100, 250, 500, 1000]
 
