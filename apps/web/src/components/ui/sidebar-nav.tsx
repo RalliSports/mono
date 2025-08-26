@@ -1,5 +1,6 @@
 'use client'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { useLogout } from '@getpara/react-sdk'
 
 import { useEffect } from 'react'
 
@@ -46,6 +47,8 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
     })
   }
 
+  const { logout } = useLogout()
+
   const navItems: NavSection[] = [
     {
       section: 'Game',
@@ -63,12 +66,6 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
         { name: 'Sign In', icon: '🔑', href: '/signin' },
         // { name: "Sign Up", icon: "✨", href: "/signup" },
         { name: 'Profile', icon: '👤', href: '/profile' },
-        {
-          name: 'Logout',
-          icon: '🚪',
-          href: '/logout',
-          className: 'text-red-400 hover:text-red-300',
-        },
       ],
     },
     {
@@ -255,6 +252,7 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
               </div>
             ))}
           </div>
+          <button onClick={() => logout()}>Logout</button>
         </div>
 
         {/* Footer */}
