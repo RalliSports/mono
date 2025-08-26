@@ -4,8 +4,6 @@ import type { Athlete, SelectedPick } from './types'
 
 interface AthletePickCardProps {
   athlete: Athlete
-  isBookmarked: boolean
-  onBookmarkToggle: (id: string) => void
   onPickSelection: (athleteId: string, statIndex: number, betType: 'over' | 'under') => void
   selectedPick?: SelectedPick
   isSelectionDisabled: boolean
@@ -13,8 +11,6 @@ interface AthletePickCardProps {
 
 export default function AthletePickCard({
   athlete,
-  isBookmarked,
-  onBookmarkToggle,
   onPickSelection,
   selectedPick,
   isSelectionDisabled,
@@ -49,13 +45,15 @@ export default function AthletePickCard({
             {/* Player Avatar */}
             <div className="relative flex-shrink-0">
               <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
-                <Image
-                  src={athlete.picture}
-                  alt={athlete.name}
-                  className="w-12 h-12 object-cover rounded-lg"
-                  width={48}
-                  height={48}
-                />
+                {athlete.picture && athlete.picture !== '' ? (
+                  <Image
+                    src={athlete.picture}
+                    alt={athlete.name}
+                    className="w-12 h-12 object-cover rounded-lg"
+                    width={48}
+                    height={48}
+                  />
+                ) : null}
               </div>
               <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-slate-800 bg-emerald-500"></div>
             </div>
@@ -77,10 +75,19 @@ export default function AthletePickCard({
         {/* Horizontal Layout with Stats and Buttons */}
         <div className="flex items-center gap-4">
           {/* Stats Section */}
-          <div className="flex-1 bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-5">
+          <div className="flex-1 min-w-0 bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-5">
             {/* Stat Navigation Header */}
             <div className="flex flex-col mb-3">
-              <div className="text-slate-200 font-bold text-base mb-3 tracking-wide text-center">
+              <div
+                className="text-slate-200 font-bold text-base mb-3 tracking-wide text-center px-1 max-h-12 overflow-hidden flex items-center justify-center"
+                title={currentStat.name}
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: '1.2rem',
+                }}
+              >
                 {currentStat.name}
               </div>
 

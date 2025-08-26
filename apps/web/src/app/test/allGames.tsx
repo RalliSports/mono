@@ -3,34 +3,46 @@
 import React, { useEffect, useState } from 'react'
 // import { Game } from '@repo/db/types'
 import { GamesFindAll, GamesFindAllInstance, LineFindAll, LineFindAllInstance } from '@repo/server'
+import { useToast } from '@/components/ui/toast'
 
 export default function AllGames() {
+  const { addToast } = useToast()
   const [games, setGames] = useState<GamesFindAll>([])
   const [lines, setLines] = useState<LineFindAll>([])
 
   useEffect(() => {
     ;(async () => {
-      const res = await fetch('http://localhost:4000/api/v1/games', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/games`, {
         method: 'GET',
         headers: {
           accept: 'application/json',
         },
       })
 
-      const data = await res.json()
-      console.log(data, 'data')
-      setGames(data)
+      if (res.ok) {
+        const data = await res.json()
+        console.log(data, 'data')
+        setGames(data)
+      } else {
+        const errorData = await res.json()
+        addToast(errorData.error || 'Failed to fetch games', 'error')
+      }
     })()
   }, [])
 
   useEffect(() => {
     ;(async () => {
-      const res = await fetch('http://localhost:4000/api/v1/lines', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lines`, {
         method: 'GET',
       })
-      const data = await res.json()
-      console.log(data, 'data')
-      setLines(data)
+      if (res.ok) {
+        const data = await res.json()
+        console.log(data, 'data')
+        setLines(data)
+      } else {
+        const errorData = await res.json()
+        addToast(errorData.error || 'Failed to fetch lines', 'error')
+      }
     })()
   }, [])
 

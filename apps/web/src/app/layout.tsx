@@ -1,7 +1,7 @@
 import './globals.css'
 
 import { Inter } from 'next/font/google'
-import { AppProviders } from '@/components/app-providers';
+import { AppProviders } from '@/components/app-providers'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -18,6 +18,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* PWA Meta Tags */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#00CED1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Ralli" />
+        <link rel="apple-touch-icon" href="/images/RALLI.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/images/RALLI.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/RALLI.png" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/images/RALLI.png" />
+
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -69,5 +80,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AppProviders>
       </body>
     </html>
-  );
+  )
 }

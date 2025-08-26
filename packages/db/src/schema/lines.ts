@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   decimal,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -12,8 +13,16 @@ import { bets } from "./bets";
 import { matchups } from "./matchups";
 import { stats } from "./stats";
 
+export const lineStatusEnum = pgEnum("line_status", [
+  "open", // Open for bets, not started
+  "locked", // Locked once matchup starts, no more bets
+  "resolved", // Result is known, bets settled
+  "cancelled", // Event cancelled, bets refunded
+]);
+
 export const lines = pgTable("lines", {
   id: uuid("id").primaryKey().defaultRandom(),
+  status: lineStatusEnum("status").default("open"),
   athleteId: uuid("athlete_id").references(() => athletes.id),
   statId: uuid("stat_id").references(() => stats.id),
   matchupId: uuid("matchup_id").references(() => matchups.id),

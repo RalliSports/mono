@@ -16,6 +16,7 @@ import { UpdateLineDto } from './dto/update-line.dto';
 import { PublicKey } from '@solana/web3.js';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
+import { LineStatus } from './enum/lines';
 
 @Injectable()
 export class LinesService {
@@ -37,6 +38,7 @@ export class LinesService {
     const [inserted] = await this.db
       .insert(lines)
       .values({
+        status: LineStatus.OPEN,
         athleteId: dto.athleteId,
         statId: dto.statId,
         matchupId: dto.matchupId,
@@ -67,7 +69,7 @@ export class LinesService {
     if (!statCustomId) throw new BadRequestException('Stat not found');
     if (!athleteCustomId) throw new BadRequestException('Athlete not found');
 
-    const adjustedTimestamp = new Date(matchup.startsAt ?? "").getTime() / 1000;
+    const adjustedTimestamp = new Date(matchup.startsAt ?? '').getTime() / 1000;
 
     try {
       txn = await this.anchor.createLineInstruction(
@@ -112,6 +114,11 @@ export class LinesService {
   async getLineById(id: string) {
     return this.db.query.lines.findFirst({
       where: eq(lines.id, id),
+      with: {
+        stat: true,
+        matchup: true,
+        athlete: true,
+      },
     });
   }
 
@@ -119,10 +126,11 @@ export class LinesService {
     const res = await this.db
       .update(lines)
       .set({
-        athleteId: dto.athleteId,
-        statId: String(dto.statId),
-        matchupId: dto.matchupId,
+        athleteId: dto.athleteId?.toString(),
+        statId: dto.statId?.toString(),
+        matchupId: dto.matchupId?.toString(),
         predictedValue: dto.predictedValue?.toString(),
+        status: dto.status,
       })
       .where(eq(lines.id, id))
       .returning();
@@ -154,6 +162,7 @@ export class LinesService {
           dto.actualValue && line.predictedValue
             ? dto.actualValue > Number(line.predictedValue)
             : null,
+        status: LineStatus.RESOLVED,
       })
       .where(eq(lines.id, id))
       .returning();

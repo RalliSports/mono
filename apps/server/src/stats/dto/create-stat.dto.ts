@@ -3,6 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateStatDto {
   @ApiProperty()
+  @IsNumber()
+  customId: number;
+
+  @ApiProperty()
   @IsString()
   name: string;
 
@@ -11,6 +15,18 @@ export class CreateStatDto {
   description: string;
 
   @ApiProperty()
-  @IsNumber()
-  customId: number;
+  @IsString()
+  displayName: string;
+
+  @ApiProperty()
+  @IsString()
+  shortDisplayName: string;
+
+  @ApiProperty()
+  @IsString()
+  abbreviation: string;
+
+  @ApiProperty()
+  @IsString()
+  statOddsName: string;
 }

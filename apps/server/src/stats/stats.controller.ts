@@ -37,11 +37,11 @@ export class StatsController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Create a new line' })
+  @ApiOperation({ summary: 'Create a new stat' })
   @ApiResponse({
     status: 201,
-    description: 'Line created successfully',
-    type: StatResponseDto,
+    description: 'Stat created successfully',
+    type: CreateStatDto,
   })
   @Post('/create')
   async createStat(@Body() dto: CreateStatDto) {

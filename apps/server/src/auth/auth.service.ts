@@ -37,6 +37,8 @@ export class AuthService {
           status: HttpStatus.UNAUTHORIZED,
           message: 'Session expired',
         });
+
+        return null
       }
 
       const para = await this.getPara();

@@ -5,17 +5,17 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  firstName: string;
+  firstName?: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  lastName: string;
+  lastName?: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  username: string;
+  username?: string;
 
   @ApiProperty({
     description: 'User avatar URL',
@@ -23,5 +23,5 @@ export class UpdateUserDto {
   })
   @IsOptional()
   @IsUrl({}, { message: 'Avatar must be a valid URL' })
-  avatar: string;
+  avatar?: string;
 }

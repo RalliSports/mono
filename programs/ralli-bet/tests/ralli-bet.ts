@@ -41,6 +41,24 @@ const provider = new anchor.AnchorProvider(
 anchor.setProvider(provider);
 const program = anchor.workspace.RalliBet as Program<RalliBet>;
 
+let adminKeypair: Keypair;
+
+before(async () => {
+  // Load the admin keypair from file
+  const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
+  const secret = Uint8Array.from(
+    JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8"))
+  );
+  adminKeypair = Keypair.fromSecretKey(secret);
+
+  // Airdrop SOL to admin for testing
+  const signature = await connection.requestAirdrop(
+    adminKeypair.publicKey,
+    2 * LAMPORTS_PER_SOL
+  );
+  await connection.confirmTransaction(signature);
+});
+
 describe("RalliBet Comprehensive Tests", () => {
   const MINT_DECIMALS = 6;
   let gameId: BN;
@@ -75,12 +93,12 @@ describe("RalliBet Comprehensive Tests", () => {
   let providerTokenAccount: PublicKey;
   let treasuryTokenAccount: PublicKey;
   let users: Keypair[];
-  let lineId1: BN = new BN(123);
-  let lineId2: BN = new BN(456);
-  let lineId3: BN = new BN(789);
-  let lineId4: BN = new BN(1011);
-  let lineId5: BN = new BN(1012);
-  let lineId6: BN = new BN(1013);
+  let lineId1: BN = new BN(145);
+  let lineId2: BN = new BN(458);
+  let lineId3: BN = new BN(790);
+  let lineId4: BN = new BN(1012);
+  let lineId5: BN = new BN(1014);
+  let lineId6: BN = new BN(1015);
   let numberOfLines = 3;
   let lineIdError: BN = new BN(1000);
   let statIdError = 0;
@@ -96,7 +114,13 @@ describe("RalliBet Comprehensive Tests", () => {
   let predictedValue4 = 100.5;
   let predictedValue5 = 10.5;
   let predictedValue6 = 10.5;
+  let newPredictedValue1 = 17.5;
+  let newPredictedValue2 = 0.0;
+  let newPredictedValue3 = 60.5;
+  let newPredictedValue4 = 101.5;
+  let newPredictedValue5 = 10.5;
   let predictedValueError = 0;
+  let shouldRefundBettors: boolean;
 
   let athleteId1: BN = new BN(10001);
   let athleteId2: BN = new BN(10002);
@@ -116,7 +140,6 @@ describe("RalliBet Comprehensive Tests", () => {
   const entryFee = new BN(entryFeeRaw); // 0.001 SOL
   const entryFeePercentage = 100;
   const maxUsers = 7;
-
 
   before(async () => {
     // Generate test users
@@ -502,22 +525,6 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Create Line Tests", () => {
-    let adminKeypair: Keypair;
-
-    before(async () => {
-      // Load the admin keypair from file
-      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
-      const secret = Uint8Array.from(JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8")));
-      adminKeypair = Keypair.fromSecretKey(secret);
-
-      // Airdrop SOL to admin for testing
-      const signature = await connection.requestAirdrop(
-        adminKeypair.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
-    });
-
     it("should create lines successfully", async () => {
       const [line1] = PublicKey.findProgramAddressSync(
         [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
@@ -781,6 +788,184 @@ describe("RalliBet Comprehensive Tests", () => {
       } catch (error) {
         // This should fail because the account already exists
         expect(error.toString()).to.include("already in use");
+      }
+    });
+  });
+
+  describe("Update Line Tests", () => {
+    it("should update the line successfully", async () => {
+      try {
+        const [line3] = PublicKey.findProgramAddressSync(
+          [Buffer.from("line"), lineId3.toArrayLike(Buffer, "le", 8)],
+          program.programId
+        );
+
+        await program.methods
+          .updateLine(lineId3, newPredictedValue3, shouldRefundBettors)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: line3,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        const updatedLine = await program.account.line.fetch(line3);
+        expect(updatedLine.predictedValue.toString()).to.equal(
+          newPredictedValue3.toString()
+        );
+      } catch (error) {
+        error;
+      }
+    });
+
+    it("should fail to update line with invalid parameters - not admin", async () => {
+      try {
+        const [line1] = PublicKey.findProgramAddressSync(
+          [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
+          program.programId
+        );
+
+        await program.methods
+          .updateLine(lineId1, newPredictedValue1, shouldRefundBettors)
+          .accountsPartial({
+            admin: user1.publicKey,
+            line: line1,
+          })
+          .signers([user1])
+          .rpc();
+
+        expect.fail("Should have failed with UnauthorizedLineUpdate");
+      } catch (error) {
+        expect(error.toString()).to.include(
+          "Error Code: UnauthorizedLineUpdate"
+        );
+      }
+    });
+
+    it("should fail to update line if it has already started", async () => {
+      const testLineId = new anchor.BN(
+        Math.floor(Math.random() * 1000000) + 999999
+      );
+
+      const nearFutureTime = Math.floor(Date.now() / 1000) + 2;
+      const statId = 1;
+      const predictedValue = 25.5;
+      const athleteId = new anchor.BN(12345);
+
+      const [linePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("line"), testLineId.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+
+      try {
+        await program.methods
+          .createLine(
+            testLineId,
+            statId,
+            predictedValue,
+            athleteId,
+            new anchor.BN(nearFutureTime)
+          )
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: linePda,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        console.log(
+          "Line created successfully, now waiting for it to start..."
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        const newPredictedValue = 30.0;
+        const shouldRefundBettors = false;
+
+        await program.methods
+          .updateLine(testLineId, newPredictedValue, shouldRefundBettors)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: linePda,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        expect.fail("Should have failed with LineAlreadyStarted");
+      } catch (error) {
+        console.log("Caught error:", error.error?.errorCode?.code);
+
+        if (error.error && error.error.errorCode) {
+          expect(error.error.errorCode.code).to.equal("LineAlreadyStarted");
+        } else {
+          expect(error.toString()).to.include("LineAlreadyStarted");
+        }
+      }
+    });
+
+    it("should fail to update line with invalid parameters - invalid predicted value", async () => {
+      try {
+        const [line2] = PublicKey.findProgramAddressSync(
+          [Buffer.from("line"), lineId2.toArrayLike(Buffer, "le", 8)],
+          program.programId
+        );
+
+        await program.methods
+          .updateLine(lineId2, newPredictedValue2, shouldRefundBettors)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: line2,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        expect.fail("Should have failed with InvalidPredictedValue");
+      } catch (error) {
+        expect(error.toString()).to.include(
+          "Error Code: InvalidPredictedValue"
+        );
+      }
+    });
+
+    it("should fail to update line with invalid parameters - same new predicted value as before", async () => {
+      try {
+        const [line5] = PublicKey.findProgramAddressSync(
+          [Buffer.from("line"), lineId5.toArrayLike(Buffer, "le", 8)],
+          program.programId
+        );
+
+        await program.methods
+          .updateLine(lineId5, newPredictedValue5, shouldRefundBettors)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: line5,
+          })
+          .signers([adminKeypair])
+          .rpc();
+
+        expect.fail("Should have failed with SamePredictedValue");
+      } catch (error) {
+        expect(error.toString()).to.include("Error Code: SamePredictedValue");
+      }
+    });
+
+    it("should accept positive path for should_refund_bettors", async () => {
+      try {
+        const [line4] = PublicKey.findProgramAddressSync(
+          [Buffer.from("line"), lineId4.toArrayLike(Buffer, "le", 8)],
+          program.programId
+        );
+
+        await program.methods
+          .updateLine(lineId4, newPredictedValue4, true)
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            line: line4,
+          })
+          .signers([adminKeypair])
+          .rpc();
+      } catch (error) {
+        error;
       }
     });
   });
@@ -1668,17 +1853,6 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Resolve Line Tests", () => {
-    let adminKeypair: Keypair;
-
-    before(async () => {
-
-      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
-      const secret = Uint8Array.from(JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8")));
-      adminKeypair = Keypair.fromSecretKey(secret);
-
-
-    });
-
     it("should prevent resolution with wrong direction", async () => {
       try {
         const tx = await program.methods
@@ -1956,29 +2130,12 @@ describe("RalliBet Comprehensive Tests", () => {
 
     ////LINE ENDS
 
-    let adminKeypair: Keypair;
-
     before(async () => {
-
-      const adminKeypairPath = path.resolve(__dirname, "../admin-keypair-new.json");
-      const secret = Uint8Array.from(JSON.parse(fs.readFileSync(adminKeypairPath, "utf-8")));
-      adminKeypair = Keypair.fromSecretKey(secret);
-
-
-      const signature = await connection.requestAirdrop(
-        adminKeypair.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
-
-
       let newStartsSoonRaw = Date.now() + 30000;
       let newStartsSoon = new BN(Math.floor(newStartsSoonRaw / 1000));
 
       let newStartsSoonRawNew = Date.now() + 60000; // 1 minute instead of 30 seconds
       let newStartsSoonNew = new BN(Math.floor(newStartsSoonRawNew / 1000));
-
-
 
       const [newLine1] = PublicKey.findProgramAddressSync(
         [Buffer.from("line"), newLineId1.toArrayLike(Buffer, "le", 8)],
@@ -3041,7 +3198,6 @@ describe("RalliBet Comprehensive Tests", () => {
 
       ////NEW LINE
 
-
       // GAME 7: 7 users, 2 winners with high fees
       const newGameId7 = new BN(2007);
       const [newGame7] = PublicKey.findProgramAddressSync(
@@ -3055,7 +3211,13 @@ describe("RalliBet Comprehensive Tests", () => {
       const newGameVault7 = getAssociatedTokenAddressSync(mint, newGame7, true);
 
       const txCreateGame7 = await program.methods
-        .createGame(newGameId7, maxUsers, entryFee, numberOfLines, provider.wallet.publicKey)
+        .createGame(
+          newGameId7,
+          maxUsers,
+          entryFee,
+          numberOfLines,
+          provider.wallet.publicKey
+        )
         .accountsPartial({
           creator: user1.publicKey,
           game: newGame7,
@@ -3071,7 +3233,15 @@ describe("RalliBet Comprehensive Tests", () => {
 
       // Add 7 users to game 7 with different betting strategies
       const users = [user1, user2, user3, user4, user5, user6, keypair]; // Reuse users for 7 total
-      const userTokenAccounts = [user1TokenAccount, user2TokenAccount, user3TokenAccount, user4TokenAccount, user5TokenAccount, user6TokenAccount, providerTokenAccount];
+      const userTokenAccounts = [
+        user1TokenAccount,
+        user2TokenAccount,
+        user3TokenAccount,
+        user4TokenAccount,
+        user5TokenAccount,
+        user6TokenAccount,
+        providerTokenAccount,
+      ];
 
       for (let i = 0; i < 7; i++) {
         await program.methods
@@ -3091,7 +3261,11 @@ describe("RalliBet Comprehensive Tests", () => {
           .rpc();
 
         const betPK = PublicKey.findProgramAddressSync(
-          [Buffer.from("bet"), newGame7.toBuffer(), users[i].publicKey.toBuffer()],
+          [
+            Buffer.from("bet"),
+            newGame7.toBuffer(),
+            users[i].publicKey.toBuffer(),
+          ],
           program.programId
         )[0];
 
@@ -3207,7 +3381,13 @@ describe("RalliBet Comprehensive Tests", () => {
       const newGameVault8 = getAssociatedTokenAddressSync(mint, newGame8, true);
 
       await program.methods
-        .createGame(newGameId8, maxUsers, entryFee, numberOfLines, provider.wallet.publicKey)
+        .createGame(
+          newGameId8,
+          maxUsers,
+          entryFee,
+          numberOfLines,
+          provider.wallet.publicKey
+        )
         .accountsPartial({
           creator: user1.publicKey,
           game: newGame8,
@@ -3223,7 +3403,13 @@ describe("RalliBet Comprehensive Tests", () => {
 
       // Add 5 users, 4 will win
       const users8 = [user1, user2, keypair, user4, user3];
-      const userTokenAccounts8 = [user1TokenAccount, user2TokenAccount, providerTokenAccount, user4TokenAccount, user3TokenAccount];
+      const userTokenAccounts8 = [
+        user1TokenAccount,
+        user2TokenAccount,
+        providerTokenAccount,
+        user4TokenAccount,
+        user3TokenAccount,
+      ];
 
       for (let i = 0; i < 5; i++) {
         await program.methods
@@ -3243,7 +3429,11 @@ describe("RalliBet Comprehensive Tests", () => {
           .rpc();
 
         const betPK = PublicKey.findProgramAddressSync(
-          [Buffer.from("bet"), newGame8.toBuffer(), users8[i].publicKey.toBuffer()],
+          [
+            Buffer.from("bet"),
+            newGame8.toBuffer(),
+            users8[i].publicKey.toBuffer(),
+          ],
           program.programId
         )[0];
 
@@ -3311,10 +3501,20 @@ describe("RalliBet Comprehensive Tests", () => {
         [Buffer.from("escrow"), newGame14.toBuffer()],
         program.programId
       );
-      const newGameVault14 = getAssociatedTokenAddressSync(mint, newGame14, true);
+      const newGameVault14 = getAssociatedTokenAddressSync(
+        mint,
+        newGame14,
+        true
+      );
 
       await program.methods
-        .createGame(newGameId14, maxUsers, entryFee, numberOfLines, provider.wallet.publicKey)
+        .createGame(
+          newGameId14,
+          maxUsers,
+          entryFee,
+          numberOfLines,
+          provider.wallet.publicKey
+        )
         .accountsPartial({
           creator: user1.publicKey,
           game: newGame14,
@@ -3372,9 +3572,6 @@ describe("RalliBet Comprehensive Tests", () => {
       newGame14PK = newGame14;
       newGameEscrow14PK = newGameEscrow14;
       newGameVault14PK = newGameVault14;
-
-
-
 
       ////LINE ENDS
 
@@ -3512,7 +3709,7 @@ describe("RalliBet Comprehensive Tests", () => {
       );
       expect(
         treasuryBalanceAfter.value.uiAmount! -
-        treasuryBalanceBefore.value.uiAmount!
+          treasuryBalanceBefore.value.uiAmount!
       ).to.equal(
         (entryFeeRaw * (entryFeePercentage / 10000)) / 10 ** MINT_DECIMALS
       );
@@ -3524,7 +3721,7 @@ describe("RalliBet Comprehensive Tests", () => {
         user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!
       ).to.be.closeTo(
         (entryFeeRaw + entryFeeRaw * (1 - entryFeePercentage / 10000)) /
-        10 ** MINT_DECIMALS,
+          10 ** MINT_DECIMALS,
         0.000001
       );
       const user2BalanceAfter = await connection.getTokenAccountBalance(
@@ -3671,7 +3868,7 @@ describe("RalliBet Comprehensive Tests", () => {
       );
       expect(
         treasuryBalanceAfter.value.uiAmount! -
-        treasuryBalanceBefore.value.uiAmount!
+          treasuryBalanceBefore.value.uiAmount!
       ).to.equal(0);
 
       const user1BalanceAfter = await connection.getTokenAccountBalance(
@@ -3790,7 +3987,7 @@ describe("RalliBet Comprehensive Tests", () => {
       );
       expect(
         treasuryBalanceAfter.value.uiAmount! -
-        treasuryBalanceBefore.value.uiAmount!
+          treasuryBalanceBefore.value.uiAmount!
       ).to.not.equal(0);
 
       const user1BalanceAfter = await connection.getTokenAccountBalance(
@@ -4549,7 +4746,7 @@ describe("RalliBet Comprehensive Tests", () => {
             // Next accounts: Winner token accounts (providing only 1 instead of expected 2)
             { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
 
-            // Last 3 accounts: Line accounts  
+            // Last 3 accounts: Line accounts
             { pubkey: newLine1PK, isWritable: false, isSigner: false },
             { pubkey: newLine2PK, isWritable: false, isSigner: false },
             { pubkey: newLine3PK, isWritable: false, isSigner: false },
@@ -4561,11 +4758,16 @@ describe("RalliBet Comprehensive Tests", () => {
       }
     });
 
-
     it("should successfully resolve game with 7 users where 2 win with low fees", async () => {
-      const user1BalanceBefore = await connection.getTokenAccountBalance(user1TokenAccount);
-      const user2BalanceBefore = await connection.getTokenAccountBalance(user2TokenAccount);
-      const treasuryBalanceBefore = await connection.getTokenAccountBalance(treasuryTokenAccount);
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user2BalanceBefore = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
 
       const lowFeePercentage = 100; // 1% (100 basis points)
 
@@ -4616,19 +4818,30 @@ describe("RalliBet Comprehensive Tests", () => {
       const totalPerWinner = entryFeeRaw + winningsPerWinner; // entry_fee + winnings
 
       // Check treasury received fees + remainder
-      const treasuryBalanceAfter = await connection.getTokenAccountBalance(treasuryTokenAccount);
-      const treasuryIncrease = treasuryBalanceAfter.value.uiAmount! - treasuryBalanceBefore.value.uiAmount!;
-      const expectedTreasuryAmount = (feeFromLosers + remainderToTreasury) / 10 ** MINT_DECIMALS;
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      const treasuryIncrease =
+        treasuryBalanceAfter.value.uiAmount! -
+        treasuryBalanceBefore.value.uiAmount!;
+      const expectedTreasuryAmount =
+        (feeFromLosers + remainderToTreasury) / 10 ** MINT_DECIMALS;
       expect(treasuryIncrease).to.be.closeTo(expectedTreasuryAmount, 0.000001);
 
       // Check winners received correct payouts
-      const user1BalanceAfter = await connection.getTokenAccountBalance(user1TokenAccount);
-      const user1Increase = user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!;
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user1Increase =
+        user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!;
       const expectedWinnerPayout = totalPerWinner / 10 ** MINT_DECIMALS;
       expect(user1Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
 
-      const user2BalanceAfter = await connection.getTokenAccountBalance(user2TokenAccount);
-      const user2Increase = user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!;
+      const user2BalanceAfter = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const user2Increase =
+        user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!;
       expect(user2Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
 
       // Verify both winners got the same amount
@@ -4636,11 +4849,21 @@ describe("RalliBet Comprehensive Tests", () => {
     });
 
     it("should successfully resolve game with 5 users where 4 win with medium fees", async () => {
-      const user1BalanceBefore = await connection.getTokenAccountBalance(user1TokenAccount);
-      const user2BalanceBefore = await connection.getTokenAccountBalance(user2TokenAccount);
-      const user3BalanceBefore = await connection.getTokenAccountBalance(user3TokenAccount);
-      const providerBalanceBefore = await connection.getTokenAccountBalance(providerTokenAccount);
-      const treasuryBalanceBefore = await connection.getTokenAccountBalance(treasuryTokenAccount);
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user2BalanceBefore = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const user3BalanceBefore = await connection.getTokenAccountBalance(
+        user3TokenAccount
+      );
+      const providerBalanceBefore = await connection.getTokenAccountBalance(
+        providerTokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
 
       const mediumFeePercentage = 400; // 4%
 
@@ -4681,34 +4904,54 @@ describe("RalliBet Comprehensive Tests", () => {
       const numberOfLosers = totalPlayers - numberOfWinners; // 1
 
       const losersPool = entryFeeRaw * numberOfLosers; // entry_fee * 1
-      const feeFromLosers = Math.floor((losersPool * mediumFeePercentage) / 10000); // 4% of losers pool
+      const feeFromLosers = Math.floor(
+        (losersPool * mediumFeePercentage) / 10000
+      ); // 4% of losers pool
       const netLosersPool = losersPool - feeFromLosers;
       const winningsPerWinner = Math.floor(netLosersPool / numberOfWinners);
       const remainderToTreasury = netLosersPool % numberOfWinners;
       const totalPerWinner = entryFeeRaw + winningsPerWinner; // entry_fee + winnings
 
       // Check treasury received fees + remainder
-      const treasuryBalanceAfter = await connection.getTokenAccountBalance(treasuryTokenAccount);
-      const treasuryIncrease = treasuryBalanceAfter.value.uiAmount! - treasuryBalanceBefore.value.uiAmount!;
-      const expectedTreasuryAmount = (feeFromLosers + remainderToTreasury) / 10 ** MINT_DECIMALS;
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      const treasuryIncrease =
+        treasuryBalanceAfter.value.uiAmount! -
+        treasuryBalanceBefore.value.uiAmount!;
+      const expectedTreasuryAmount =
+        (feeFromLosers + remainderToTreasury) / 10 ** MINT_DECIMALS;
       expect(treasuryIncrease).to.be.closeTo(expectedTreasuryAmount, 0.000001);
 
       // Check each winner's payout
-      const user1BalanceAfter = await connection.getTokenAccountBalance(user1TokenAccount);
-      const user1Increase = user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!;
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user1Increase =
+        user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!;
       const expectedWinnerPayout = totalPerWinner / 10 ** MINT_DECIMALS;
       expect(user1Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
 
-      const user2BalanceAfter = await connection.getTokenAccountBalance(user2TokenAccount);
-      const user2Increase = user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!;
+      const user2BalanceAfter = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const user2Increase =
+        user2BalanceAfter.value.uiAmount! - user2BalanceBefore.value.uiAmount!;
       expect(user2Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
 
-      const user3BalanceAfter = await connection.getTokenAccountBalance(user3TokenAccount);
-      const user3Increase = user3BalanceAfter.value.uiAmount! - user3BalanceBefore.value.uiAmount!;
+      const user3BalanceAfter = await connection.getTokenAccountBalance(
+        user3TokenAccount
+      );
+      const user3Increase =
+        user3BalanceAfter.value.uiAmount! - user3BalanceBefore.value.uiAmount!;
       expect(user3Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
 
-      const providerBalanceAfter = await connection.getTokenAccountBalance(providerTokenAccount);
-      const providerIncrease = providerBalanceAfter.value.uiAmount! - providerBalanceBefore.value.uiAmount!;
+      const providerBalanceAfter = await connection.getTokenAccountBalance(
+        providerTokenAccount
+      );
+      const providerIncrease =
+        providerBalanceAfter.value.uiAmount! -
+        providerBalanceBefore.value.uiAmount!;
       expect(providerIncrease).to.be.closeTo(expectedWinnerPayout, 0.000001);
 
       // Verify all winners got the same amount
@@ -4717,10 +4960,13 @@ describe("RalliBet Comprehensive Tests", () => {
       expect(user3Increase).to.equal(providerIncrease);
     });
 
-
     it("should successfully resolve single user game", async () => {
-      const user1BalanceBefore = await connection.getTokenAccountBalance(user1TokenAccount);
-      const treasuryBalanceBefore = await connection.getTokenAccountBalance(treasuryTokenAccount);
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
 
       const tx = await program.methods
         .resolveGame(0, 1) // Single winner, no fees
@@ -4747,27 +4993,24 @@ describe("RalliBet Comprehensive Tests", () => {
         .rpc();
 
       // User should get their entry fee back (since they're the only player and winner)
-      const user1BalanceAfter = await connection.getTokenAccountBalance(user1TokenAccount);
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
       expect(
         user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!
       ).to.be.closeTo(entryFeeRaw / 10 ** MINT_DECIMALS, 0.000001);
 
       // Treasury should get nothing since no fees
-      const treasuryBalanceAfter = await connection.getTokenAccountBalance(treasuryTokenAccount);
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
       expect(
-        treasuryBalanceAfter.value.uiAmount! - treasuryBalanceBefore.value.uiAmount!
+        treasuryBalanceAfter.value.uiAmount! -
+          treasuryBalanceBefore.value.uiAmount!
       ).to.equal(0);
 
       const gameAccount = await program.account.game.fetch(newGame14PK);
       expect(gameAccount.status).to.deep.equal({ resolved: {} });
     });
-
-
-
-
-
-
-
-
   });
 });

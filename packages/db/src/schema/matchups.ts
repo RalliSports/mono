@@ -22,7 +22,7 @@ export const matchups = pgTable("matchups", {
   id: uuid("id").primaryKey().defaultRandom(),
   espnEventId: varchar("espn_event_id"),
   gameDate: date("game_date"),
-  startsAt: timestamp("starts_at"),
+  startsAt: timestamp("starts_at", { withTimezone: true }),
   status: matchupStatusEnum("status"),
   scoreHome: integer("score_home"),
   scoreAway: integer("score_away"),

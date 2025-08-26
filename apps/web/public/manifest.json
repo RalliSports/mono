@@ -1,0 +1,67 @@
+{
+  "name": "Ralli - Sports Betting",
+  "short_name": "Ralli",
+  "description": "Decentralized sports betting platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#00CED1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["sports", "finance", "entertainment"],
+  "icons": [
+    {
+      "src": "/images/RALLI.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/planet.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create Game",
+      "short_name": "New Game",
+      "description": "Create a new betting game",
+      "url": "/create-game",
+      "icons": [
+        {
+          "src": "/images/planet.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "description": "View your profile and stats",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/images/planet.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

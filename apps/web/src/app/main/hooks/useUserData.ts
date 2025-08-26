@@ -16,8 +16,8 @@ export function useUserData(session: string | undefined) {
             'x-para-session': session,
           },
         })
-        const data: User = await response.json()
-        if (!data.username) {
+        const data: User | null = await response.json()
+        if (data && !data.username) {
           router.push('/profile')
         }
         setUser(data)

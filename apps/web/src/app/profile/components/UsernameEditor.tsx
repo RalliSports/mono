@@ -67,11 +67,32 @@ export default function UsernameEditor({
   return (
     <div className="group/username cursor-pointer" onClick={() => setEditingUsername(true)}>
       <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800/30 transition-all duration-200">
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-white group-hover/username:text-[#00CED1] transition-colors duration-200">
+        <div className="flex-1 flex flex-row items-center gap-3">
+          <h2 className="text-2xl font-bold text-white group-hover/username:text-[#00CED1] transition-colors duration-200 max-w-[150px] truncate">
             {user.username || 'Set username'}
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Click to edit username</p>
+          {/* Edit Button */}
+          <button
+            onClick={() => {
+              setEditingUsername(true)
+            }}
+            className="w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
+          >
+            <svg
+              className="w-3.5 h-3.5 text-white transition-transform duration-200 group-hover:rotate-12"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+          </button>
         </div>
         <div className="opacity-0 group-hover/username:opacity-100 transition-opacity duration-200">
           <div className="p-2 bg-slate-700/50 rounded-lg">

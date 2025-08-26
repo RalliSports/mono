@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Game } from '../components/types'
+import { useToast } from '@/components/ui/toast'
 
 export const useGameData = () => {
+  const { addToast } = useToast()
   const searchParams = useSearchParams()
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
   const [lobby, setLobby] = useState<Game | null>(null)
@@ -20,8 +22,13 @@ export const useGameData = () => {
 
       try {
         const response = await fetch(`/api/read-game?id=${lobbyId}`)
-        const data = await response.json()
-        setLobby(data)
+        if (response.ok) {
+          const data = await response.json()
+          setLobby(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch game', 'error')
+        }
       } catch (error) {
         console.error('Error fetching game:', error)
       } finally {
