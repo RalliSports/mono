@@ -53,42 +53,21 @@ export default function SidebarNav({ isOpen, onClose,
 
   const navItems: NavSection[] = [
     {
+      section: "Game",
+      items: [
+        { name: "Create Game", icon: "🎯", href: "/create-game" },
+        // { name: "My Games", icon: "🎮", href: "/my-games" },
+        { name: "Add Funds", icon: "💳", href: "/add-funds" },
+        // { name: "Leaderboard", icon: "🏆", href: "/leaderboard" },
+        // { name: "Transaction History", icon: "💰", href: "/transactions" },
+      ],
+    },
+    {
       section: "Account",
       items: [
         { name: "Sign In", icon: "🔑", href: "/signin" },
-        { name: "Sign Up", icon: "✨", href: "/signup" },
+        // { name: "Sign Up", icon: "✨", href: "/signup" },
         { name: "Profile", icon: "👤", href: "/profile" },
-      ],
-    },
-    {
-      section: "Game",
-      items: [
-        { name: "Create Lobby", icon: "🎯", href: "/create-game" },
-        { name: "My Games", icon: "🎮", href: "/my-games" },
-        { name: "Add Funds", icon: "💳", href: "/add-funds" },
-        { name: "Leaderboard", icon: "🏆", href: "/leaderboard" },
-        { name: "Transaction History", icon: "💰", href: "/transactions" },
-      ],
-    },
-    {
-      section: "Social",
-      items: [
-        { name: "Friends", icon: "👥", href: "/friends" },
-        { name: "Referrals", icon: "🎁", href: "/referrals" },
-        {
-          name: "Discord",
-          icon: "💬",
-          href: "https://discord.gg/ralli",
-          external: true,
-        },
-      ],
-    },
-    {
-      section: "Support",
-      items: [
-        { name: "Help Center", icon: "❓", href: "/help" },
-        { name: "Contact Us", icon: "📧", href: "/contact" },
-        { name: "Settings", icon: "⚙️", href: "/settings" },
         {
           name: "Logout",
           icon: "🚪",
@@ -97,6 +76,34 @@ export default function SidebarNav({ isOpen, onClose,
         },
       ],
     },
+    
+    // {
+    //   section: "Social",
+    //   items: [
+    //     { name: "Friends", icon: "👥", href: "/friends" },
+    //     { name: "Referrals", icon: "🎁", href: "/referrals" },
+    //     {
+    //       name: "Discord",
+    //       icon: "💬",
+    //       href: "https://discord.gg/ralli",
+    //       external: true,
+    //     },
+    //   ],
+    // },
+    // {
+    //   section: "Support",
+    //   items: [
+    //     { name: "Help Center", icon: "❓", href: "/help" },
+    //     { name: "Contact Us", icon: "📧", href: "/contact" },
+    //     { name: "Settings", icon: "⚙️", href: "/settings" },
+    //     {
+    //       name: "Logout",
+    //       icon: "🚪",
+    //       href: "/logout",
+    //       className: "text-red-400 hover:text-red-300",
+    //     },
+    //   ],
+    // },
   ];
 
   return (
