@@ -6,7 +6,7 @@ interface LinesTabProps {
     playerId: string
     statTypeId: string
     value: number
-    gameId: string
+    matchupId: string
     gameDate: string
   }
   setNewLine: (line: any) => void
