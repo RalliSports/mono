@@ -50,7 +50,7 @@ function PicksContent() {
       <TopNavigation gameId={gameId} selectedCount={selectedPicks.length} legsRequired={legsRequired} />
 
       {/* Main Content */}
-      <div className="px-4 pb-20">
+      <div className={`px-4 ${selectedPicks.length > 0 ? 'pb-48' : 'pb-20'}`}>
         {/* Game Info Header */}
         <GameInfoHeader game={game} legsRequired={legsRequired} buyIn={buyIn} />
 
