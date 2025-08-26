@@ -23,7 +23,7 @@ export function usePicks() {
   const [athletes, setAthletes] = useState<Athlete[]>([])
 
   // Get game parameters from URL
-  const gameId = searchParams.get('gameId') || undefined
+  const gameId = searchParams.get('id') || undefined
 
   // Fix hydration issues
   useEffect(() => {

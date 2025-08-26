@@ -31,7 +31,7 @@ export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
         </div>
 
         <Link
-          href={`/picks?gameId=${game.id}`}
+          href={`/picks?id=${game.id}`}
           className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 mt-auto"
         >
           {/* Shimmer effect */}
