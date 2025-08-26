@@ -15,7 +15,7 @@ interface ResolveLinesTabProps {
     resolutionReason: string
   }
   setResolutionData: (data: any) => void
-  handleResolveLine: (lineId: string, actualValue: number) => void
+  handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
   addToast: (message: string, type: 'success' | 'error') => void
 }
 

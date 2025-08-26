@@ -248,7 +248,7 @@ export class ParaAnchor {
     shouldRefundBettors: boolean,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(true); // useAdminSigner
+    const program = await this.getProgram(false); // useAdminSigner
     const _lineId = new BN(lineId);
 
     const [lineAccount] = PublicKey.findProgramAddressSync(
@@ -518,8 +518,6 @@ export class ParaAnchor {
 
     const gamePDA = await this.getGamePDA(gameId, program.programId);
 
-    const gameAccount = await program.account.game.fetch(gamePDA);
-    console.log('gameAccount', gameAccount);
     const gameEscrow = await this.getGameEscrowPDA(gamePDA, program.programId);
     const gameVault = await this.getGameVault(this.mint, gamePDA);
 
@@ -574,7 +572,7 @@ export class ParaAnchor {
       const ix = await program.methods
         .resolveGame(percentage, winners.length)
         .accountsStrict({
-          admin: this.admin,
+          admin: program.provider.wallet?.publicKey as PublicKey,
           game: gamePDA,
           gameEscrow: gameEscrow,
           mint: this.mint,

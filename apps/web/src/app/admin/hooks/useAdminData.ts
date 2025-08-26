@@ -128,6 +128,7 @@ export function useAdminData(session: string | null) {
         })
         if (response.ok) {
           const data = await response.json()
+          console.log('data', data)
           setLines(data)
         } else {
           const errorData = await response.json()
@@ -203,7 +204,6 @@ export function useAdminData(session: string | null) {
         })
         const data = await response.json()
         if (response.ok) {
-          const data = await response.json()
           setStats(data)
         } else {
           const errorData = await response.json()

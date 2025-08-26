@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { Line } from '../types'
 import { sports } from '../../constants/sports'
+import { useState } from 'react'
 
 interface LineCardProps {
   line: Line
@@ -11,7 +12,7 @@ interface LineCardProps {
     resolutionReason: string
   }
   setResolutionData: (data: any) => void
-  handleResolveLine: (lineId: string, actualValue: number) => void
+  handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
   addToast: (message: string, type: 'success' | 'error') => void
 }
 
@@ -25,6 +26,7 @@ export default function LineCard({
   addToast,
 }: LineCardProps) {
   const timeNow = new Date()
+  const [loading, setLoading] = useState(false)
 
   return (
     <div className="bg-slate-700/30 rounded-xl p-6 hover:bg-slate-700/50 transition-colors border border-slate-600/20">
@@ -156,23 +158,25 @@ export default function LineCard({
 
                 <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       const actualValue = parseFloat(resolutionData.actualValue)
                       if (isNaN(actualValue)) {
                         addToast('Please enter a valid actual value', 'error')
                         return
                       }
-                      handleResolveLine(line.id, actualValue)
+                      setLoading(true)
+                      await handleResolveLine(line.id, actualValue)
                       setResolvingLine(null)
                       setResolutionData({
                         actualValue: '',
                         resolutionReason: '',
                       })
+                      setLoading(false)
                     }}
                     disabled={!resolutionData.actualValue}
                     className="px-6 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Auto Resolve
+                    {loading ? 'Resolving...' : 'Auto Resolve'}
                   </button>
                   <button
                     onClick={() => {

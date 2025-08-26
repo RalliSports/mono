@@ -407,7 +407,9 @@ export class GamesService {
         );
       }
 
-      tx.update(games)
+      console.log('updating game status to completed', id);
+      await tx
+        .update(games)
         .set({ status: GameStatus.COMPLETED })
         .where(eq(games.id, id));
 
@@ -418,10 +420,12 @@ export class GamesService {
         Array.from(allLinesIds),
       );
 
-      // if (!resolveTxnSig) {
-      //   tx.rollback();
-      //   throw new BadRequestException('Failed to execute resolve game instruction on-chain');
-      // }
+      if (!resolveTxnSig) {
+        tx.rollback();
+        throw new BadRequestException(
+          'Failed to execute resolve game instruction on-chain',
+        );
+      }
 
       return {
         game,

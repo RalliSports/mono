@@ -104,7 +104,12 @@ export class LinesService {
     const lines = await this.db.query.lines.findMany({
       with: {
         stat: true,
-        matchup: true,
+        matchup: {
+          with: {
+            homeTeam: true,
+            awayTeam: true,
+          },
+        },
         athlete: true,
       },
     });
