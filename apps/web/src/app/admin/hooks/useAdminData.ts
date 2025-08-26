@@ -33,7 +33,7 @@ export function useAdminData(session: string | null) {
     playerId: '',
     statTypeId: '',
     value: 0,
-    gameId: '',
+    matchupId: '',
     gameDate: '',
   })
 
@@ -310,7 +310,7 @@ export function useAdminData(session: string | null) {
   }
 
   const handleCreateLine = async () => {
-    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.gameId) {
+    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.matchupId) {
       addToast('Please fill in all fields', 'error')
       return
     }
@@ -318,10 +318,11 @@ export function useAdminData(session: string | null) {
     const apiData = {
       athleteId: newLine.playerId,
       statId: newLine.statTypeId,
-      matchupId: newLine.gameId,
+      matchupId: newLine.matchupId,
       predictedValue: newLine.value,
       startsAtTimestamp: new Date(newLine.gameDate).getTime(),
     }
+    console.log('apiData', apiData)
 
     const response = await fetch('/api/create-line', {
       method: 'POST',

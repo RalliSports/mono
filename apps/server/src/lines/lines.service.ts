@@ -69,7 +69,9 @@ export class LinesService {
     if (!statCustomId) throw new BadRequestException('Stat not found');
     if (!athleteCustomId) throw new BadRequestException('Athlete not found');
 
+    console.log('matchup.startsAt', matchup);
     const adjustedTimestamp = new Date(matchup.startsAt ?? '').getTime() / 1000;
+    console.log('adjustedTimestamp', adjustedTimestamp);
 
     try {
       txn = await this.anchor.createLineInstruction(

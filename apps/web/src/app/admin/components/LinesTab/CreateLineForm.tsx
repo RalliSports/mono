@@ -92,7 +92,7 @@ export default function CreateLineForm({
             <label className="block text-white font-semibold mb-2">Select Game</label>
             <select
               value={newLine.gameId}
-              onChange={(e) => setNewLine({ ...newLine, gameId: e.target.value })}
+              onChange={(e) => setNewLine({ ...newLine, matchupId: e.target.value })}
               className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
             >
               <option value="">Select a game</option>
