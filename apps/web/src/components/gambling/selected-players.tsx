@@ -1,104 +1,95 @@
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
-
+import { formatBalance } from '@/lib/utils'
 
 export default function SelectedPlayers() {
-
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
-
-  // Format balance for display
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   const selectedPlayers = [
     {
       id: 1,
-      name: "Patrick Mahomes",
-      team: "KC",
-      position: "QB",
+      name: 'Patrick Mahomes',
+      team: 'KC',
+      position: 'QB',
       price: 2.4,
       selected: true,
-      performance: "+12.5%",
-      status: "hot",
-      statLine: "Passing Yards",
-      prediction: "HIGHER",
-      projectedValue: "285.5",
+      performance: '+12.5%',
+      status: 'hot',
+      statLine: 'Passing Yards',
+      prediction: 'HIGHER',
+      projectedValue: '285.5',
     },
     {
       id: 2,
-      name: "Josh Allen",
-      team: "BUF",
-      position: "QB",
+      name: 'Josh Allen',
+      team: 'BUF',
+      position: 'QB',
       price: 2.8,
       selected: true,
-      performance: "+8.3%",
-      status: "rising",
-      statLine: "Rushing Yards",
-      prediction: "HIGHER",
-      projectedValue: "45.5",
+      performance: '+8.3%',
+      status: 'rising',
+      statLine: 'Rushing Yards',
+      prediction: 'HIGHER',
+      projectedValue: '45.5',
     },
     {
       id: 3,
-      name: "Cooper Kupp",
-      team: "LAR",
-      position: "WR",
+      name: 'Cooper Kupp',
+      team: 'LAR',
+      position: 'WR',
       price: 1.9,
-      selected: "in-progress",
-      performance: "-2.1%",
-      status: "cooling",
+      selected: 'in-progress',
+      performance: '-2.1%',
+      status: 'cooling',
     },
     {
       id: 4,
-      name: "Derrick Henry",
-      team: "TEN",
-      position: "RB",
+      name: 'Derrick Henry',
+      team: 'TEN',
+      position: 'RB',
       price: 2.1,
       selected: false,
-      performance: "+15.7%",
-      status: "hot",
+      performance: '+15.7%',
+      status: 'hot',
     },
-  ];
+  ]
 
   const statLineOptions = [
-    "Passing Yards",
-    "Rushing Yards",
-    "Receiving Yards",
-    "Touchdowns",
-    "Receptions",
-    "First Downs",
-  ];
+    'Passing Yards',
+    'Rushing Yards',
+    'Receiving Yards',
+    'Touchdowns',
+    'Receptions',
+    'First Downs',
+  ]
 
   const getPositionColor = (position: string) => {
     switch (position) {
-      case "QB":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "RB":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "WR":
-        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
-      case "TE":
-        return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+      case 'QB':
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+      case 'RB':
+        return 'bg-green-500/20 text-green-400 border-green-500/30'
+      case 'WR':
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+      case 'TE':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
       default:
-        return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+        return 'bg-slate-500/20 text-slate-400 border-slate-500/30'
     }
-  };
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "hot":
-        return "🔥";
-      case "rising":
-        return "📈";
-      case "cooling":
-        return "❄️";
+      case 'hot':
+        return '🔥'
+      case 'rising':
+        return '📈'
+      case 'cooling':
+        return '❄️'
       default:
-        return "📊";
+        return '📊'
     }
-  };
+  }
 
   return (
     <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-3xl p-6 border border-slate-700/50 shadow-2xl relative overflow-hidden">
@@ -110,27 +101,21 @@ export default function SelectedPlayers() {
       <div className="flex items-center justify-between mb-8 relative z-10">
         <h3 className="text-2xl font-bold text-white flex items-center">
           <div className="w-12 h-12 bg-[#FFAB91]/20 rounded-xl flex items-center justify-center mr-3">
-            <svg
-              className="w-6 h-6 text-[#FFAB91]"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+            <svg className="w-6 h-6 text-[#FFAB91]" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-          </div>{" "}
+          </div>{' '}
           Selected Athletes
-        </h3>{" "}
+        </h3>{' '}
         <div className="flex items-center space-x-3">
           <div className="bg-[#00CED1]/20 border border-[#00CED1]/30 rounded-full px-4 py-2">
-            <span className="text-[#00CED1] font-semibold text-sm">
-              2/5 Selected
-            </span>
+            <span className="text-[#00CED1] font-semibold text-sm">2/5 Selected</span>
           </div>
           <button className="px-4 py-2 bg-[#FFAB91]/20 border border-[#FFAB91]/30 rounded-full text-[#FFAB91] text-sm font-semibold hover:bg-[#FFAB91]/30 transition-colors">
             Add Athlete
           </button>
         </div>
-      </div>{" "}
+      </div>{' '}
       {/* Athlete List */}
       <div className="space-y-4 relative z-10">
         {selectedPlayers.map((player) => (
@@ -138,10 +123,10 @@ export default function SelectedPlayers() {
             key={player.id}
             className={`group flex flex-col p-5 rounded-2xl border transition-all duration-300 hover:transform hover:scale-[1.02] ${
               player.selected === true
-                ? "bg-gradient-to-r from-[#00CED1]/10 to-[#FFAB91]/5 border-[#00CED1]/30 shadow-lg hover:border-[#00CED1]/50"
-                : player.selected === "in-progress"
-                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/5 border-orange-500/30 shadow-lg hover:border-orange-500/50"
-                  : "bg-gradient-to-r from-slate-800/60 to-slate-900/60 backdrop-blur-sm border-slate-700/50 hover:bg-slate-800/80 hover:border-slate-600/50"
+                ? 'bg-gradient-to-r from-[#00CED1]/10 to-[#FFAB91]/5 border-[#00CED1]/30 shadow-lg hover:border-[#00CED1]/50'
+                : player.selected === 'in-progress'
+                  ? 'bg-gradient-to-r from-orange-500/10 to-yellow-500/5 border-orange-500/30 shadow-lg hover:border-orange-500/50'
+                  : 'bg-gradient-to-r from-slate-800/60 to-slate-900/60 backdrop-blur-sm border-slate-700/50 hover:bg-slate-800/80 hover:border-slate-600/50'
             }`}
           >
             {/* Main athlete info row */}
@@ -151,26 +136,22 @@ export default function SelectedPlayers() {
                   <div
                     className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 ${
                       player.selected === true
-                        ? "bg-gradient-to-br from-[#00CED1] to-[#FFAB91] shadow-lg"
-                        : player.selected === "in-progress"
-                          ? "bg-gradient-to-br from-orange-500 to-yellow-500 shadow-lg"
-                          : "bg-slate-700 group-hover:bg-slate-600"
+                        ? 'bg-gradient-to-br from-[#00CED1] to-[#FFAB91] shadow-lg'
+                        : player.selected === 'in-progress'
+                          ? 'bg-gradient-to-br from-orange-500 to-yellow-500 shadow-lg'
+                          : 'bg-slate-700 group-hover:bg-slate-600'
                     }`}
                   >
                     <span className="text-white font-bold text-lg">
                       {player.name
-                        .split(" ")
+                        .split(' ')
                         .map((n) => n[0])
-                        .join("")}
+                        .join('')}
                     </span>
                   </div>
                   {player.selected === true && (
                     <div className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-slate-800 flex items-center justify-center">
-                      <svg
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           fillRule="evenodd"
                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -179,13 +160,9 @@ export default function SelectedPlayers() {
                       </svg>
                     </div>
                   )}
-                  {player.selected === "in-progress" && (
+                  {player.selected === 'in-progress' && (
                     <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 rounded-full border-2 border-slate-800 flex items-center justify-center">
-                      <svg
-                        className="w-3 h-3 text-white animate-spin"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
+                      <svg className="w-3 h-3 text-white animate-spin" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" />
                       </svg>
                     </div>
@@ -193,17 +170,11 @@ export default function SelectedPlayers() {
                 </div>
                 <div>
                   <div className="flex items-center space-x-3 mb-1">
-                    <span className="text-white font-bold text-lg">
-                      {player.name}
-                    </span>
-                    <span className="text-lg">
-                      {getStatusIcon(player.status)}
-                    </span>
+                    <span className="text-white font-bold text-lg">{player.name}</span>
+                    <span className="text-lg">{getStatusIcon(player.status)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-slate-300 font-medium">
-                      {player.team}
-                    </span>
+                    <span className="text-slate-300 font-medium">{player.team}</span>
                     <span className="text-slate-500">•</span>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(player.position)}`}
@@ -216,14 +187,10 @@ export default function SelectedPlayers() {
 
               <div className="flex items-center space-x-4">
                 <div className="text-right">
-                  <div className="text-white font-bold text-lg">
-                    ${player.price}M
-                  </div>
+                  <div className="text-white font-bold text-lg">${player.price}M</div>
                   <div
                     className={`text-sm font-semibold ${
-                      player.performance.startsWith("+")
-                        ? "text-emerald-400"
-                        : "text-red-400"
+                      player.performance.startsWith('+') ? 'text-emerald-400' : 'text-red-400'
                     }`}
                   >
                     {player.performance}
@@ -232,38 +199,26 @@ export default function SelectedPlayers() {
                 <button
                   className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 hover:scale-110 ${
                     player.selected === true
-                      ? "bg-[#00CED1] border-[#00CED1] shadow-lg"
-                      : player.selected === "in-progress"
-                        ? "bg-orange-500 border-orange-500 shadow-lg"
-                        : "border-slate-600 hover:border-[#00CED1] hover:bg-[#00CED1]/20"
+                      ? 'bg-[#00CED1] border-[#00CED1] shadow-lg'
+                      : player.selected === 'in-progress'
+                        ? 'bg-orange-500 border-orange-500 shadow-lg'
+                        : 'border-slate-600 hover:border-[#00CED1] hover:bg-[#00CED1]/20'
                   }`}
                 >
                   {player.selected === true ? (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                         clipRule="evenodd"
                       />
                     </svg>
-                  ) : player.selected === "in-progress" ? (
-                    <svg
-                      className="w-4 h-4 text-white animate-spin"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+                  ) : player.selected === 'in-progress' ? (
+                    <svg className="w-4 h-4 text-white animate-spin" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" />
                     </svg>
                   ) : (
-                    <svg
-                      className="w-4 h-4 text-slate-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+                    <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
@@ -282,22 +237,18 @@ export default function SelectedPlayers() {
                   <div className="flex items-center space-x-4">
                     <div className="text-sm">
                       <span className="text-slate-400">Stat Line:</span>
-                      <span className="text-white font-semibold ml-2">
-                        {player.statLine}
-                      </span>
+                      <span className="text-white font-semibold ml-2">{player.statLine}</span>
                     </div>
                     <div className="text-sm">
                       <span className="text-slate-400">Projection:</span>
-                      <span className="text-white font-semibold ml-2">
-                        {player.projectedValue}
-                      </span>
+                      <span className="text-white font-semibold ml-2">{player.projectedValue}</span>
                     </div>
                   </div>
                   <div
                     className={`px-3 py-1 rounded-full text-sm font-bold ${
-                      player.prediction === "HIGHER"
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      player.prediction === 'HIGHER'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
                     }`}
                   >
                     {player.prediction}
@@ -307,13 +258,11 @@ export default function SelectedPlayers() {
             )}
 
             {/* Dropdown selection for in-progress athletes */}
-            {player.selected === "in-progress" && (
+            {player.selected === 'in-progress' && (
               <div className="mt-4 pt-4 border-t border-orange-500/30">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Select Stat Line
-                    </label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Select Stat Line</label>
                     <select className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
                       <option value="">Choose stat...</option>
                       {statLineOptions.map((stat) => (
@@ -324,9 +273,7 @@ export default function SelectedPlayers() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Prediction
-                    </label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Prediction</label>
                     <div className="flex space-x-2">
                       <button className="flex-1 py-2 px-3 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white hover:border-emerald-500 hover:bg-emerald-500/20 transition-colors">
                         HIGHER
@@ -344,17 +291,13 @@ export default function SelectedPlayers() {
             )}
           </div>
         ))}
-      </div>{" "}
+      </div>{' '}
       {/* Betting Summary */}
       <div className="mt-8 p-6 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <h4 className="text-lg font-bold text-white flex items-center">
             <div className="w-8 h-8 bg-[#00CED1]/20 rounded-lg flex items-center justify-center mr-2">
-              <svg
-                className="w-4 h-4 text-[#00CED1]"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-4 h-4 text-[#00CED1]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
                 <path
                   fillRule="evenodd"
@@ -367,15 +310,17 @@ export default function SelectedPlayers() {
           </h4>
           <div className="text-right">
             <div className="text-sm text-slate-400">Current Balance</div>
-            <div className="text-xl font-bold text-white">{isConnected
-                  ? balanceLoading
-                    ? 'Loading...'
-                    : balanceError
-                      ? 'Error'
-                      : balances.ralli === 0
-                        ? 'Top Up'
-                        : `$${formatBalance(balances.ralli)}`
-                  : '$0.00'}</div>
+            <div className="text-xl font-bold text-white">
+              {isConnected
+                ? balanceLoading
+                  ? 'Loading...'
+                  : balanceError
+                    ? 'Error'
+                    : balances.ralli === 0
+                      ? 'Top Up'
+                      : `$${formatBalance(balances.ralli)}`
+                : '$0.00'}
+            </div>
           </div>
         </div>
 
@@ -406,5 +351,5 @@ export default function SelectedPlayers() {
         </button>
       </div>
     </div>
-  );
+  )
 }

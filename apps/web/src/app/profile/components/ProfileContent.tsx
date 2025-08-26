@@ -9,6 +9,7 @@ import AchievementsSection from './AchievementsSection'
 import { useProfile } from '../hooks/useProfile'
 import { useProfilePictureUpload } from '../hooks/useProfilePictureUpload'
 import { useProfileTabs } from '../hooks/useProfileTabs'
+import { formatBalance } from '@/lib/utils'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
@@ -28,14 +29,6 @@ export default function ProfileContent() {
 
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
-
-  // Format balance for display
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted || !user) {

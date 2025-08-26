@@ -1,14 +1,7 @@
+import { formatBalance } from '@/lib/utils'
 import type { BalanceDisplayProps } from './types'
 
 export default function BalanceDisplay({ isConnected, balances, isLoading, error, refetch }: BalanceDisplayProps) {
-  // Format balance for display
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
-
   return (
     <div
       className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-4 py-2 backdrop-blur-sm cursor-pointer hover:from-[#00CED1]/30 hover:to-[#FFAB91]/30 transition-all duration-200"

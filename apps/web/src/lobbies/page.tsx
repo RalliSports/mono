@@ -6,8 +6,6 @@ import LobbyCard from '@/components/main-feed/lobby-card'
 import SidebarNav from '@/components/ui/sidebar-nav'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 
-
-
 export default function LobbiesPage() {
   const router = useRouter()
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -17,15 +15,7 @@ export default function LobbiesPage() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
   // Para wallet balance hook
-    const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
-  
-    // Format balance for display
-    const formatBalance = (amount: number) => {
-      return amount.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    }
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
 
   // Fix hydration issues
   useEffect(() => {
@@ -578,7 +568,7 @@ export default function LobbiesPage() {
       </div>
 
       {/* Sidebar Navigation */}
-      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)}/>
+      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
     </div>
   )
 }

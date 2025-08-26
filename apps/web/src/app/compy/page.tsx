@@ -1,50 +1,38 @@
-"use client";
+'use client'
 
-import PlayerDashboard from "@/components/gambling/player-dashboard";
-import SelectedPlayers from "@/components/gambling/selected-players";
-import StakeControls from "@/components/gambling/stake-controls";
-import CategoryFilters from "@/components/gambling/category-filters";
-import PlayerCards from "@/components/gambling/player-cards";
-import CompactPlayerCards from "@/components/gambling/compact-player-cards";
-import CompactPlayerCard2 from "@/components/gambling/compact-player-card-2";
-import BetSlip from "@/components/gambling/bet-slip";
-import CategoryTabs from "@/components/gambling/category-tabs";
-import LiveScoreboard from "@/components/gambling/live-scoreboard";
-import TrendingPlayers from "@/components/gambling/trending-players";
-import OddsDisplay from "@/components/gambling/odds-display";
-import UserProfileDrawer from "@/components/gambling/user-profile-drawer";
-import TransactionHistory from "@/components/gambling/transaction-history";
-import WalletTopUpModal from "@/components/gambling/wallet-topup-modal";
-import LeaderboardComponent from "@/components/gambling/leaderboard-component";
-import ReferralBonusPopup from "@/components/gambling/referral-bonus-popup";
-import ChatSocialFeed from "@/components/gambling/chat-social-feed";
-import GameCreation from "@/components/gambling/game-creation";
-import SocialActivityFeed from "@/components/gambling/social-activity-feed-enhanced";
-import LivePlayerDashboard from "@/components/gambling/live-player-dashboard";
-import ParlayProgressTracker from "@/components/gambling/parlay-progress-tracker";
-import OtherPlayersParlays from "@/components/gambling/other-players-parlays";
-import LobbyPicksViewer from "@/components/gambling/lobby-picks-viewer";
-import JoinGameComponent from "@/components/gambling/join-game-component";
-import JoinGameComponentCompact1 from "@/components/gambling/join-game-component-compact-1";
-import JoinGameComponentCompact2 from "@/components/gambling/join-game-component-compact-2";
-import HostGameComponent from "@/components/gambling/host-game-component";
-import HostGameComponentCompact from "@/components/gambling/host-game-component-compact";
-import LiveLobbyComponent from "@/components/gambling/live-lobby-component";
-import CompletedGameComponent from "@/components/gambling/completed-game-component";
-import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
-
+import PlayerDashboard from '@/components/gambling/player-dashboard'
+import SelectedPlayers from '@/components/gambling/selected-players'
+import StakeControls from '@/components/gambling/stake-controls'
+import CategoryFilters from '@/components/gambling/category-filters'
+import PlayerCards from '@/components/gambling/player-cards'
+import CompactPlayerCards from '@/components/gambling/compact-player-cards'
+import CompactPlayerCard2 from '@/components/gambling/compact-player-card-2'
+import BetSlip from '@/components/gambling/bet-slip'
+import CategoryTabs from '@/components/gambling/category-tabs'
+import LiveScoreboard from '@/components/gambling/live-scoreboard'
+import TrendingPlayers from '@/components/gambling/trending-players'
+import OddsDisplay from '@/components/gambling/odds-display'
+import UserProfileDrawer from '@/components/gambling/user-profile-drawer'
+import TransactionHistory from '@/components/gambling/transaction-history'
+import WalletTopUpModal from '@/components/gambling/wallet-topup-modal'
+import LeaderboardComponent from '@/components/gambling/leaderboard-component'
+import ReferralBonusPopup from '@/components/gambling/referral-bonus-popup'
+import ChatSocialFeed from '@/components/gambling/chat-social-feed'
+import GameCreation from '@/components/gambling/game-creation'
+import SocialActivityFeed from '@/components/gambling/social-activity-feed-enhanced'
+import LivePlayerDashboard from '@/components/gambling/live-player-dashboard'
+import ParlayProgressTracker from '@/components/gambling/parlay-progress-tracker'
+import OtherPlayersParlays from '@/components/gambling/other-players-parlays'
+import LobbyPicksViewer from '@/components/gambling/lobby-picks-viewer'
+import JoinGameComponent from '@/components/gambling/join-game-component'
+import JoinGameComponentCompact1 from '@/components/gambling/join-game-component-compact-1'
+import JoinGameComponentCompact2 from '@/components/gambling/join-game-component-compact-2'
+import HostGameComponent from '@/components/gambling/host-game-component'
+import HostGameComponentCompact from '@/components/gambling/host-game-component-compact'
+import LiveLobbyComponent from '@/components/gambling/live-lobby-component'
+import CompletedGameComponent from '@/components/gambling/completed-game-component'
 
 export default function ComponentsShowcase() {
-  
-
-  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
-  // Format balance for display
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
   return (
     <div className="bg-gray-900 min-h-screen">
       {/* Header */}
@@ -53,19 +41,16 @@ export default function ComponentsShowcase() {
           <div className="text-center">
             <div className="inline-flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-full px-6 py-3 mb-8">
               <div className="w-2 h-2 bg-[#00CED1] rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
-                Component Showcase
-              </span>
+              <span className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Component Showcase</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Ralli{" "}
+              Ralli{' '}
               <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
                 Gambling Components
               </span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Advanced gambling UI components built for modern sports betting
-              experiences
+              Advanced gambling UI components built for modern sports betting experiences
             </p>
           </div>
         </div>
@@ -89,7 +74,7 @@ export default function ComponentsShowcase() {
               <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-4"></span>
               Selected Players
             </h2>
-            <SelectedPlayers/>
+            <SelectedPlayers />
           </div>
           <div>
             <h2 className="text-3xl font-bold text-white mb-8 flex items-center">
@@ -129,8 +114,7 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="mb-4">
             <p className="text-slate-300 text-sm">
-              Streamlined player cards with swipeable multiple stats, arrow
-              navigation, and compact design
+              Streamlined player cards with swipeable multiple stats, arrow navigation, and compact design
             </p>
           </div>
           <CompactPlayerCards />
@@ -144,8 +128,7 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="mb-4">
             <p className="text-slate-300 text-sm">
-              Horizontal layout variant with stats on left and over/under
-              buttons stacked vertically on the right
+              Horizontal layout variant with stats on left and over/under buttons stacked vertically on the right
             </p>
           </div>
           <CompactPlayerCard2 />
@@ -195,15 +178,11 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Transaction History
-              </h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Transaction History</h3>
               <TransactionHistory />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Leaderboard
-              </h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Leaderboard</h3>
               <LeaderboardComponent />
             </div>
           </div>
@@ -217,27 +196,19 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                User Profile Drawer
-              </h3>
+              <h3 className="text-xl font-semibold text-white mb-4">User Profile Drawer</h3>
               <UserProfileDrawer />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Wallet Top-Up Modal
-              </h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Wallet Top-Up Modal</h3>
               <WalletTopUpModal />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Referral Program
-              </h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Referral Program</h3>
               <ReferralBonusPopup type="referral" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Bonus Offers
-              </h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Bonus Offers</h3>
               <ReferralBonusPopup type="bonus" />
             </div>
           </div>
@@ -260,8 +231,7 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="mb-4">
             <p className="text-slate-300 text-sm">
-              Create parlay battles where players compete to get the most
-              correct predictions across multiple bet legs
+              Create parlay battles where players compete to get the most correct predictions across multiple bet legs
             </p>
           </div>
           <GameCreation />
@@ -275,8 +245,7 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="mb-4">
             <p className="text-slate-300 text-sm">
-              Stay connected with friends, discover hot lobbies, celebrate big
-              wins, and follow the community action
+              Stay connected with friends, discover hot lobbies, celebrate big wins, and follow the community action
             </p>
           </div>
           <SocialActivityFeed />
@@ -290,8 +259,8 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="mb-4">
             <p className="text-slate-300 text-sm">
-              Real-time tracking of your active bets, live game updates,
-              enhanced player stats with current streak and global rankings
+              Real-time tracking of your active bets, live game updates, enhanced player stats with current streak and
+              global rankings
             </p>
           </div>
           <LivePlayerDashboard />
@@ -305,21 +274,17 @@ export default function ComponentsShowcase() {
           </h2>
           <div className="mb-6">
             <p className="text-slate-300 text-lg mb-4">
-              Beautiful 3-column parlay dashboard showcasing your friends'
-              weekend action in real-time.
+              Beautiful 3-column parlay dashboard showcasing your friends' weekend action in real-time.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-slate-400">
               <div>
-                ✨ <strong>Multi-Sport Parlays</strong> - NBA, NFL, and mixed
-                sport betting
+                ✨ <strong>Multi-Sport Parlays</strong> - NBA, NFL, and mixed sport betting
               </div>
               <div>
-                🔄 <strong>Live Tracking</strong> - Real-time progress with
-                smooth animations
+                🔄 <strong>Live Tracking</strong> - Real-time progress with smooth animations
               </div>
               <div>
-                📊 <strong>Smart Progress</strong> - Visual indicators for wins,
-                losses, and pending bets
+                📊 <strong>Smart Progress</strong> - Visual indicators for wins, losses, and pending bets
               </div>
             </div>
           </div>
@@ -332,27 +297,23 @@ export default function ComponentsShowcase() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold text-white">
-              Lobby{" "}
+              Lobby{' '}
               <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
                 Parlays
               </span>
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              View other players' parlays in the lobby with live progress
-              tracking
+              View other players' parlays in the lobby with live progress tracking
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-400 max-w-2xl mx-auto">
               <div>
-                👥 <strong>Player Rankings</strong> - See how others are
-                performing
+                👥 <strong>Player Rankings</strong> - See how others are performing
               </div>
               <div>
-                📈 <strong>Live Progress</strong> - Real-time bet tracking for
-                all players
+                📈 <strong>Live Progress</strong> - Real-time bet tracking for all players
               </div>
               <div>
-                🎯 <strong>Win Rates</strong> - Historical performance
-                indicators
+                🎯 <strong>Win Rates</strong> - Historical performance indicators
               </div>
             </div>
           </div>
@@ -365,19 +326,15 @@ export default function ComponentsShowcase() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold text-white">
-              Live{" "}
-              <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
-                Picks
-              </span>
+              Live{' '}
+              <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">Picks</span>
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              See what everyone in the lobby is betting on with real-time
-              updates
+              See what everyone in the lobby is betting on with real-time updates
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-400 max-w-2xl mx-auto">
               <div>
-                🎯 <strong>Individual Picks</strong> - Each player's current
-                bets
+                🎯 <strong>Individual Picks</strong> - Each player's current bets
               </div>
               <div>
                 📱 <strong>Real-time Updates</strong> - Live scores and progress
@@ -393,12 +350,10 @@ export default function ComponentsShowcase() {
         {/* Join Game Component */}
         <div className="space-y-6 mt-20">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Join Game Component 🎮
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Join Game Component 🎮</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Review lobby details, see what other players are betting on, and
-              join the action with a clean, comprehensive interface.
+              Review lobby details, see what other players are betting on, and join the action with a clean,
+              comprehensive interface.
             </p>
           </div>
           <JoinGameComponent />
@@ -407,12 +362,9 @@ export default function ComponentsShowcase() {
         {/* Compact Join Game Components */}
         <div className="space-y-6 mt-20">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Compact Join Game Variations 🎯
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Compact Join Game Variations 🎯</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Two smaller components showcasing different sports and lobby
-              configurations for side-by-side display.
+              Two smaller components showcasing different sports and lobby configurations for side-by-side display.
             </p>
           </div>
 
@@ -420,12 +372,8 @@ export default function ComponentsShowcase() {
             {/* NFL Component */}
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-white">
-                  NFL Monday Night 🏈
-                </h3>
-                <p className="text-slate-400 text-sm">
-                  6-player private lobby • $50 buy-in
-                </p>
+                <h3 className="text-xl font-semibold text-white">NFL Monday Night 🏈</h3>
+                <p className="text-slate-400 text-sm">6-player private lobby • $50 buy-in</p>
               </div>
               <JoinGameComponentCompact1 />
             </div>
@@ -433,12 +381,8 @@ export default function ComponentsShowcase() {
             {/* Soccer & Hockey Component */}
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-white">
-                  Champions League & NHL ⚽🏒
-                </h3>
-                <p className="text-slate-400 text-sm">
-                  10-player public lobby • $35 buy-in
-                </p>
+                <h3 className="text-xl font-semibold text-white">Champions League & NHL ⚽🏒</h3>
+                <p className="text-slate-400 text-sm">10-player public lobby • $35 buy-in</p>
               </div>
               <JoinGameComponentCompact2 />
             </div>
@@ -448,12 +392,10 @@ export default function ComponentsShowcase() {
         {/* Host Game Component */}
         <div className="space-y-6 mt-20">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Host Game Component 🎯
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Host Game Component 🎯</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Create and manage your own contests with comprehensive settings
-              for buy-in, player limits, contest legs, and bet types.
+              Create and manage your own contests with comprehensive settings for buy-in, player limits, contest legs,
+              and bet types.
             </p>
           </div>
           <HostGameComponent />
@@ -462,12 +404,9 @@ export default function ComponentsShowcase() {
         {/* Compact Host Game Component */}
         <div className="space-y-6 mt-20">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Compact Host Game Component ⚾🎾
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Compact Host Game Component ⚾🎾</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Tennis & Baseball themed compact hosting interface with
-              streamlined creation and management features.
+              Tennis & Baseball themed compact hosting interface with streamlined creation and management features.
             </p>
           </div>
           <div className="max-w-md mx-auto">
@@ -478,12 +417,10 @@ export default function ComponentsShowcase() {
         {/* Live Lobby Component */}
         <div className="space-y-6 mt-20">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Live Lobby Component 🔴
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Live Lobby Component 🔴</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Real-time game lobby with live updates, player tracking, activity
-              feed, and interactive gameplay management.
+              Real-time game lobby with live updates, player tracking, activity feed, and interactive gameplay
+              management.
             </p>
           </div>
           <div className="w-full">
@@ -494,13 +431,10 @@ export default function ComponentsShowcase() {
         {/* Completed Game Component */}
         <div className="space-y-6 mt-20">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Completed Game Component 🏆
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Completed Game Component 🏆</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Post-game results showing final standings, payouts, performance
-              breakdown, and end-game chat with celebration elements for
-              winners.
+              Post-game results showing final standings, payouts, performance breakdown, and end-game chat with
+              celebration elements for winners.
             </p>
           </div>
           <div className="w-full">
@@ -509,5 +443,5 @@ export default function ComponentsShowcase() {
         </div>
       </div>
     </div>
-  );
+  )
 }

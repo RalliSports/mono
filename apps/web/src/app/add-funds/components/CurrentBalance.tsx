@@ -1,3 +1,5 @@
+import { formatBalance } from '@/lib/utils'
+
 interface CurrentBalanceProps {
   isConnected: boolean
   isLoading: boolean
@@ -6,13 +8,6 @@ interface CurrentBalanceProps {
 }
 
 export default function CurrentBalance({ isConnected, isLoading, error, balance }: CurrentBalanceProps) {
-  const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
-
   const getDisplayBalance = () => {
     if (!isConnected) return '$0.00'
     if (isLoading) return 'Loading...'
