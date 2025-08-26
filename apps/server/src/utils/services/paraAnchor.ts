@@ -424,6 +424,8 @@ export class ParaAnchor {
           program.programId,
         );
 
+        console.log('linePDA', linePDA);
+
         extraAccounts.push({
           pubkey: linePDA,
           isWritable: true,

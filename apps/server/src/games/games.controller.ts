@@ -70,6 +70,19 @@ export class GamesController {
   }
 
   @ApiOperation({ summary: 'Get all games' })
+  @UseGuards(SessionAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'List of all games',
+    type: [GameResponseDto],
+  })
+  @Get('/games/my-completed-games')
+  findMyCompletedGames(@UserPayload() user: User) {
+    console.log(user, 'user');
+    return this.gamesService.getMyCompletedGames(user);
+  }
+
+  @ApiOperation({ summary: 'Get all games' })
   @ApiResponse({
     status: 200,
     description: 'List of all games',

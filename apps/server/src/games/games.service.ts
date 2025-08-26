@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { bets, game_access, games, lines, participants } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, ne } from 'drizzle-orm';
+import { and, count, eq, inArray, ne, or, exists } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -121,8 +121,60 @@ export class GamesService {
   async getMyOpenGames(user: User) {
     return this.db.query.games.findMany({
       where: and(
-        eq(games.creatorId, user.id),
+        or(
+          eq(games.creatorId, user.id),
+          exists(
+            this.db
+              .select()
+              .from(participants)
+              .where(
+                and(
+                  eq(participants.gameId, games.id),
+                  eq(participants.userId, user.id),
+                ),
+              ),
+          ),
+        ),
         ne(games.status, GameStatus.COMPLETED),
+      ),
+      with: {
+        participants: {
+          with: {
+            user: true,
+            bets: {
+              with: {
+                line: {
+                  with: {
+                    matchup: true,
+                    athlete: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getMyCompletedGames(user: User) {
+    return this.db.query.games.findMany({
+      where: and(
+        or(
+          eq(games.creatorId, user.id),
+          exists(
+            this.db
+              .select()
+              .from(participants)
+              .where(
+                and(
+                  eq(participants.gameId, games.id),
+                  eq(participants.userId, user.id),
+                ),
+              ),
+          ),
+        ),
+        eq(games.status, GameStatus.COMPLETED),
       ),
       with: {
         participants: {
@@ -246,6 +298,7 @@ export class GamesService {
           direction: res.predictedDirection as PredictionDirection,
         };
       });
+      console.log('picks', picks);
 
       const submitTxnSig = await this.anchor.submitBetsInstruction(
         dto.gameId,
