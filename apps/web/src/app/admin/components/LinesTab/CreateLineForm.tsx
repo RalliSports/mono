@@ -6,7 +6,7 @@ interface CreateLineFormProps {
     playerId: string
     statTypeId: string
     value: number
-    matchupId: string
+    id: string
     gameDate: string
   }
   setNewLine: (line: any) => void
@@ -24,6 +24,7 @@ export default function CreateLineForm({
   stats,
   matchUps,
 }: CreateLineFormProps) {
+  console.log(matchUps, 'matchUps')
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -91,8 +92,8 @@ export default function CreateLineForm({
           <div>
             <label className="block text-white font-semibold mb-2">Select Game</label>
             <select
-              value={newLine.matchupId}
-              onChange={(e) => setNewLine({ ...newLine, matchupId: e.target.value })}
+              value={newLine.id}
+              onChange={(e) => setNewLine({ ...newLine, id: e.target.value })}
               className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
             >
               <option value="">Select a game</option>
