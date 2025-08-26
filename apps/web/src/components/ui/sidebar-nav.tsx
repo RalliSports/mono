@@ -1,4 +1,5 @@
 "use client";
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance';
 
 import { useState, useEffect } from "react";
 
@@ -26,11 +27,7 @@ interface NavSection {
 }
 
 
-export default function SidebarNav({ isOpen, onClose, isConnected,
-  balances,
-  balanceLoading,
-  balanceError,
-  formatBalance,
+export default function SidebarNav({ isOpen, onClose
    }: SidebarNavProps) {
   // Handle body scroll lock when sidebar is open
   useEffect(() => {
@@ -44,6 +41,20 @@ export default function SidebarNav({ isOpen, onClose, isConnected,
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  
+  
+  
+    // Para wallet balance hook
+    const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+  
+    // Format balance for display
+    const formatBalance = (amount: number) => {
+      return amount.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    }
 
   const navItems: NavSection[] = [
     {

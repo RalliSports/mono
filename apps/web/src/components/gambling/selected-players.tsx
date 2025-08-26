@@ -1,16 +1,17 @@
-interface SelectedPlayersProps {
-  isConnected: boolean
-  balances: { sol: number; ralli: number }
-  balanceLoading: boolean
-  balanceError?: string
-  formatBalance: (amount: number) => string
-}
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+export default function SelectedPlayers() {
 
-export default function SelectedPlayers({isConnected,
-  balances,
-  balanceLoading,
-  balanceError,
-  formatBalance,}: SelectedPlayersProps) {
+  // Para wallet balance hook
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
   const selectedPlayers = [
     {
       id: 1,
