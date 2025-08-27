@@ -67,9 +67,20 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
           {/* Enhanced Quick Picks Preview */}
           <div className="mt-4">
             <div className="flex gap-1.5">
-              {participant.bets.slice(0, 4).map((pick, index) => (
+              {participant.bets.map((pick, index) => (
                 <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-400 to-blue-500" style={{ width: '100%' }} />
+                  <div
+                    className={`h-full bg-gradient-to-r ${
+                      new Date(pick.line.matchup.startsAt) > new Date()
+                        ? 'border-slate-600'
+                        : !!pick.line.actualValue
+                          ? 'border-blue-500'
+                          : pick.isCorrect
+                            ? 'border-emerald-500'
+                            : 'border-red-500'
+                    }`}
+                    style={{ width: '100%' }}
+                  />
                 </div>
               ))}
             </div>

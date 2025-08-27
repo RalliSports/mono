@@ -32,6 +32,24 @@ export class MatchupsService {
     });
   }
 
+  async getAllOpenMatchups() {
+    return this.db.query.matchups.findMany({
+      with: {
+        homeTeam: {
+          columns: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+      where: and(eq(matchups.status, MatchupStatus.SCHEDULED)),
+    });
+  }
+
   async getMatchupsThatShouldHaveStarted() {
     const now = new Date();
     // console.log('now', now);

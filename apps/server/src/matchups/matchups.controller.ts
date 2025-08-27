@@ -25,6 +25,19 @@ export class MatchupsController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get all matchups' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all matchups',
+    type: [MatchupResponseDto],
+  })
+  @Get('/open')
+  async getAllOpenMatchups() {
+    return this.matchupsService.getAllOpenMatchups();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get matchups that should have started' })
   @ApiResponse({
     status: 200,

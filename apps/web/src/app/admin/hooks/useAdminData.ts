@@ -33,7 +33,7 @@ export function useAdminData(session: string | null) {
     playerId: '',
     statTypeId: '',
     value: 0,
-    matchupId: '',
+    id: '',
     gameDate: '',
   })
 
@@ -171,7 +171,7 @@ export function useAdminData(session: string | null) {
   useEffect(() => {
     const fetchMatchups = async () => {
       try {
-        const response = await fetch('/api/read-matchups', {
+        const response = await fetch('/api/read-open-matchups', {
           method: 'GET',
           headers: {
             'x-para-session': session || '',
@@ -310,7 +310,7 @@ export function useAdminData(session: string | null) {
   }
 
   const handleCreateLine = async () => {
-    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.matchupId) {
+    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.id) {
       addToast('Please fill in all fields', 'error')
       return
     }
@@ -318,11 +318,10 @@ export function useAdminData(session: string | null) {
     const apiData = {
       athleteId: newLine.playerId,
       statId: newLine.statTypeId,
-      matchupId: newLine.matchupId,
+      matchupId: newLine.id,
       predictedValue: newLine.value,
       startsAtTimestamp: new Date(newLine.gameDate).getTime(),
     }
-    console.log('apiData', apiData)
 
     const response = await fetch('/api/create-line', {
       method: 'POST',

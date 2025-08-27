@@ -10,6 +10,7 @@ export function useProfile(session: string | null) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
+  const [myCompletedGames, setMyCompletedGames] = useState<Game[]>([])
 
   const handleUpdateUser = async () => {
     const response = await fetch('/api/update-user', {
@@ -73,6 +74,24 @@ export function useProfile(session: string | null) {
     fetchMyOpenGames()
   }, [session])
 
+  useEffect(() => {
+    const fetchMyCompletedGames = async () => {
+      const response = await fetch('/api/read-my-completed-games', {
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setMyCompletedGames(data)
+      } else {
+        const errorData = await response.json()
+        addToast(errorData.error || 'Failed to fetch my completed games', 'error')
+      }
+    }
+    fetchMyCompletedGames()
+  }, [session])
+
   return {
     username,
     setUsername,
@@ -85,6 +104,7 @@ export function useProfile(session: string | null) {
     lastName,
     setLastName,
     myOpenGames,
+    myCompletedGames,
     handleUpdateUser,
   }
 }
