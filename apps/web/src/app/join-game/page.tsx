@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { useSessionToken } from '@/hooks/use-session'
-import { User } from '@repo/db/types'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { useUserData } from '@/providers/user-data-provider'
+import { useAccount } from '@getpara/react-sdk'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { JoinGameLayout, GameHeader, JoinGameButton, ParticipantsList, LoadingSpinner } from './components'
 import { Game } from './types'
 import { useToast } from '@/components/ui/toast'
@@ -11,32 +12,65 @@ import { useToast } from '@/components/ui/toast'
 function JoinGameContent() {
   const { addToast } = useToast()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
-  const { session } = useSessionToken()
-  const [user, setUser] = useState<User | null>(null)
   const [game, setGame] = useState<Game | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
+
+  // Use auth hooks
+  const account = useAccount()
+  const { isConnected, isLoading: balanceLoading } = useParaWalletBalance()
+  const { user } = useUserData()
 
   // Get lobby ID from URL
   const lobbyId = searchParams.get('id')
 
-  // Fetch current user
+  // Fix hydration issues
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await fetch('/api/read-current-user', {
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setUser(data)
-      } else {
-        const errorData = await response.json()
-        addToast(errorData.error || 'Failed to fetch current user', 'error')
-      }
+    setMounted(true)
+  }, [])
+
+  // Handle wallet connection with callback URL for join-game
+  useEffect(() => {
+    if (!mounted) return
+
+    // If we're connected, mark as checked
+    if (isConnected) {
+      setHasCheckedConnection(true)
+      return
     }
-    fetchUser()
-  }, [session])
+
+    // Don't check again if we've already performed a connection check
+    if (hasCheckedConnection) return
+
+    // Don't redirect if still loading
+    if (balanceLoading) return
+
+    // Wait for connection to establish, then redirect with callback URL if not connected
+    const timeoutId = setTimeout(() => {
+      setHasCheckedConnection(true)
+
+      if (!isConnected && !balanceLoading && lobbyId) {
+        const callbackUrl = `/join-game?id=${lobbyId}`
+        router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      }
+    }, 2000) // Same timeout as main page
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router, lobbyId])
+
+  // Secondary check for account connection
+  useEffect(() => {
+    if (!mounted) return
+
+    if (hasCheckedConnection && !account?.isConnected && lobbyId) {
+      const callbackUrl = `/join-game?id=${lobbyId}`
+      router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+    }
+  }, [mounted, hasCheckedConnection, account?.isConnected, router, lobbyId])
 
   // Fetch game data
   useEffect(() => {
@@ -53,7 +87,7 @@ function JoinGameContent() {
     if (lobbyId) {
       fetchGame()
     }
-  }, [lobbyId])
+  }, [lobbyId, addToast])
 
   // Helper function to toggle participant expansion
   const toggleParticipant = (participantId: string) => {
@@ -62,13 +96,25 @@ function JoinGameContent() {
     )
   }
 
+  // Don't render until mounted to prevent hydration issues
+  if (!mounted) {
+    return null
+  }
+
+  // Show loading state while checking wallet connection
+  const shouldShowLoading = !hasCheckedConnection && (balanceLoading || !isConnected)
+  if (shouldShowLoading) {
+    return <LoadingSpinner />
+  }
+
+  // Show loading while fetching game
   if (!game) return <LoadingSpinner />
 
   return (
     <JoinGameLayout>
       <GameHeader game={game} />
 
-      <JoinGameButton game={game} user={user} />
+      <JoinGameButton game={game} user={user ?? null} />
 
       <ParticipantsList
         game={game}

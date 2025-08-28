@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import Image from 'next/image'
-import { Game, Participant } from '../../types'
+import { Game } from '../../types'
 
 interface ParticipantsListProps {
   game: Game
@@ -38,19 +37,19 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                     <div className="relative">
                       <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
                         <Image
-                          src={participant.user.avatar || '/default-avatar.png'}
-                          alt={participant.user.username || 'User'}
+                          src={participant.user?.avatar || '/default-avatar.png'}
+                          alt={participant.user?.username || 'User'}
                           width={56}
                           height={56}
                         />
                       </div>
-                      {participant.user.id === game.creator.id && (
+                      {participant.user?.id === game.creator.id && (
                         <div className="absolute -top-1 -left-1 text-sm">👑</div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="text-white font-bold text-base leading-tight truncate">
-                        {participant.user.username || 'Anonymous User'}
+                        {participant.user?.username || 'Anonymous User'}
                       </h4>
                       <p className="text-slate-400 text-sm mt-1">
                         Joined {new Date(participant.joinedAt).toLocaleDateString()} • ${game.depositAmount}
@@ -91,7 +90,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
               <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden animate-in slide-in-from-top-2 duration-300 shadow-2xl shadow-[#00CED1]/10">
                 <div className="p-4 border-b border-slate-700/50">
                   <h5 className="text-white font-bold truncate">
-                    {participant.user.username || 'Anonymous User'}&apos;s Picks
+                    {participant.user?.username || 'Anonymous User'}&apos;s Picks
                   </h5>
                   <p className="text-slate-400 text-sm">{participant.bets.length} legs selected</p>
                 </div>

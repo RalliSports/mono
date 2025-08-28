@@ -20,6 +20,8 @@ export function useMainPage(session: string | undefined) {
     const loadLobbies = async () => {
       try {
         const fetchedLobbies = await fetchGames()
+        //filter lobbies that are active
+        setLobbiesData(fetchedLobbies.filter((lobby) => ['active'].includes(lobby.status)))
 
         setLobbiesData(fetchedLobbies.filter((lobby) => lobby.participants.length < lobby.maxParticipants))
       } catch (error) {
