@@ -42,6 +42,7 @@ export class AuthService {
       }
 
       const para = await this.getPara();
+      const userEmail = para.getEmail() || para.email;
 
       const userExisted = await this.db.query.users.findFirst({
         where: eq(users.paraUserId, para.getUserId() ?? ''),
@@ -58,6 +59,15 @@ export class AuthService {
             });
           } catch (error) {
             console.error(error, 'error faucetTokens');
+          }
+
+          if (userExisted.emailAddress === null) {
+            await this.db
+              .update(users)
+              .set({
+                emailAddress: userEmail,
+              })
+              .where(eq(users.id, userExisted.id));
           }
         }
 
@@ -76,7 +86,7 @@ export class AuthService {
           .insert(users)
           .values({
             paraUserId: para.getUserId(),
-            emailAddress: para.getEmail(),
+            emailAddress: userEmail,
             walletAddress: para.availableWallets[0].address,
             username: gamertag,
             avatar: avatar,
