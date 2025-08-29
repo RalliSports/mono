@@ -298,7 +298,6 @@ export class GamesService {
           direction: res.predictedDirection as PredictionDirection,
         };
       });
-      console.log('picks', picks);
 
       const submitTxnSig = await this.anchor.submitBetsInstruction(
         dto.gameId,
@@ -371,7 +370,6 @@ export class GamesService {
   }
 
   async resolveGame(id: string) {
-    console.log('resolveGame', id);
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, id),
@@ -460,7 +458,6 @@ export class GamesService {
         );
       }
 
-      console.log('updating game status to completed', id);
       await tx
         .update(games)
         .set({ status: GameStatus.COMPLETED })

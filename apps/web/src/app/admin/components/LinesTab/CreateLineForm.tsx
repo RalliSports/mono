@@ -24,7 +24,6 @@ export default function CreateLineForm({
   stats,
   matchUps,
 }: CreateLineFormProps) {
-  console.log(matchUps, 'matchUps')
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">

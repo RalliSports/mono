@@ -35,8 +35,6 @@ export const uploadRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code runs on your server after upload
-      console.log('Upload complete for userId:', metadata.userId)
-      console.log('file url', file.url)
 
       // Update the user's avatar in the database
       try {
@@ -51,9 +49,7 @@ export const uploadRouter = {
         })
 
         if (!response.ok) {
-          console.error('Failed to update user avatar:', response.statusText)
-        } else {
-          console.log('User avatar updated successfully')
+          throw new Error('Failed to update user avatar')
         }
       } catch (error) {
         console.error('Error updating user avatar:', error)

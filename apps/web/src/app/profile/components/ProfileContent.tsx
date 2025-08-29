@@ -10,24 +10,12 @@ import { useProfile } from '../hooks/useProfile'
 import { useProfilePictureUpload } from '../hooks/useProfilePictureUpload'
 import { useProfileTabs } from '../hooks/useProfileTabs'
 import { formatBalance } from '@/lib/utils'
-import PastParlaysSection from './PastParlaysSection'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
-  const { activeTab, setActiveTab, mounted, editingUsername, setEditingUsername } = useProfileTabs()
+  const { activeTab, setActiveTab, mounted } = useProfileTabs()
 
-  const {
-    username,
-    setUsername,
-    user,
-    setUser,
-    setAvatar,
-    firstName,
-    lastName,
-    myOpenGames,
-    myCompletedGames,
-    handleUpdateUser,
-  } = useProfile(session || null)
+  const { user, myOpenGames, username, firstName, lastName, setUser, setAvatar } = useProfile(session || null)
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
     session || null,
@@ -57,15 +45,9 @@ export default function ProfileContent() {
       />
 
       <ProfileHeader
-        user={user}
-        username={username}
-        setUsername={setUsername}
-        editingUsername={editingUsername}
-        setEditingUsername={setEditingUsername}
-        onUpdateUser={handleUpdateUser}
-        onEditPictureClick={() => setIsUploadModalOpen(true)}
         balances={balances}
         formatBalance={formatBalance}
+        onEditPictureClick={() => setIsUploadModalOpen(true)}
       />
 
       {/* Tab Content */}
@@ -73,7 +55,6 @@ export default function ProfileContent() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <ActiveParlaysSection myOpenGames={myOpenGames} user={user} setActiveTab={setActiveTab} />
-            <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
           </div>
         )}
 

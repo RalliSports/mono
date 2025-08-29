@@ -19,7 +19,6 @@ export const fetchGames = async () => {
   }
 
   const games = await response.json()
-  console.log('games', games)
 
   return transformGamesToLobbies(games)
 }

@@ -128,7 +128,6 @@ export function useAdminData(session: string | null) {
         })
         if (response.ok) {
           const data = await response.json()
-          console.log('data', data)
           setLines(data)
         } else {
           const errorData = await response.json()
@@ -417,8 +416,6 @@ export function useAdminData(session: string | null) {
       body: JSON.stringify(apiData),
     })
 
-    const result = await response.json()
-    console.log('result', result)
     if (response.ok) {
       addToast('Match-up created successfully!', 'success')
     } else {

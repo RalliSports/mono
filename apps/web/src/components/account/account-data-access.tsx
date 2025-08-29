@@ -74,10 +74,9 @@ export function useTransferSol({ address }: { address: PublicKey }) {
         // Send transaction and await for signature
         await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
 
-        console.log(signature)
         return signature
       } catch (error: unknown) {
-        console.log('error', `Transaction failed! ${error}`, signature)
+        console.error('error', `Transaction failed! ${error}`, signature)
 
         return
       }

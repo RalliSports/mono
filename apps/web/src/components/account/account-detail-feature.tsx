@@ -17,7 +17,7 @@ export default function AccountDetailFeature() {
     try {
       return new PublicKey(params.address)
     } catch (e) {
-      console.log(`Invalid public key`, e)
+      console.error(`Invalid public key`, e)
     }
   }, [params])
   if (!address) {

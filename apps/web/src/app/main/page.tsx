@@ -77,7 +77,6 @@ export default function MainFeedPage() {
           onCancel={() => setIsInSelectionMode(false)}
           onContinue={() => {
             // Handle continue logic here
-            console.log('Selected athletes:', selectedAthletes)
             setIsInSelectionMode(false)
           }}
         />

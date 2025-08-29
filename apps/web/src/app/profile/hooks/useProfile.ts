@@ -65,7 +65,6 @@ export function useProfile(session: string | null) {
       if (response.ok) {
         const data = await response.json()
         setMyOpenGames(data)
-        console.log(data, 'data')
       } else {
         const errorData = await response.json()
         addToast(errorData.error || 'Failed to fetch my open games', 'error')

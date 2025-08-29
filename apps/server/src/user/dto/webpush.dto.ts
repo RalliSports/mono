@@ -14,7 +14,7 @@ export class PushSubscriptionResponse {
   endpoint: string;
 
   @ApiProperty()
-  expirationTime: number ;
+  expirationTime: number;
 
   @ApiProperty()
   keys: PushSubscriptionKeys;

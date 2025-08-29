@@ -41,7 +41,6 @@ export class GamesController {
   })
   @Post('/create-game')
   create(@Body() createGameDto: CreateGameDto, @UserPayload() user: User) {
-    console.log('user', user);
     return this.gamesService.create(createGameDto, user);
   }
 
@@ -65,7 +64,6 @@ export class GamesController {
   })
   @Get('/games/my-open-games')
   findMyOpenGames(@UserPayload() user: User) {
-    console.log(user, 'user');
     return this.gamesService.getMyOpenGames(user);
   }
 
@@ -78,7 +76,6 @@ export class GamesController {
   })
   @Get('/games/my-completed-games')
   findMyCompletedGames(@UserPayload() user: User) {
-    console.log(user, 'user');
     return this.gamesService.getMyCompletedGames(user);
   }
 

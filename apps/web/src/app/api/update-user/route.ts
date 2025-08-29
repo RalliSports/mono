@@ -28,7 +28,6 @@ export async function PATCH(request: NextRequest) {
 
     // Parse the request body
     const body = await request.json()
-    console.log(body, 'body')
     // Validate the data structure
     if (!validateUpdateUserRequest(body)) {
       return NextResponse.json(
@@ -65,7 +64,6 @@ export async function PATCH(request: NextRequest) {
       },
       body: JSON.stringify(body),
     })
-    console.log(response, 'response')
 
     // Check if the backend request was successful
     if (!response.ok) {

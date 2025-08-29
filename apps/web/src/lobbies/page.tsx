@@ -225,11 +225,6 @@ export default function LobbiesPage() {
     },
   ]
 
-  const handleLobbyJoin = (lobbyId: string, requiredLegs: number) => {
-    // Handle lobby join logic here
-    console.log(`Joining lobby ${lobbyId} with ${requiredLegs} legs`)
-  }
-
   // Filter lobbies based on selected filter and search query
   const filteredLobbies = allLobbies.filter((lobby) => {
     const matchesFilter = selectedFilter === 'all' || lobby.status === selectedFilter

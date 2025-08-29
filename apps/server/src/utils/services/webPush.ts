@@ -23,8 +23,6 @@ export class WebPushService {
     subscription: PushSubscriptionResponse,
     payload: Payload,
   ) {
-    console.log(payload, subscription, 'payload');
-
     return await webpush.sendNotification(
       {
         endpoint: subscription.endpoint,

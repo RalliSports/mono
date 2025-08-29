@@ -78,9 +78,8 @@ export default function ProfilePictureUploadModal({
               <UploadButton
                 endpoint="profilePicture"
                 input={{ sessionId: session || '' }}
-                onClientUploadComplete={(res) => {
+                onClientUploadComplete={() => {
                   // Do something with the response
-                  console.log('Files: ', res)
                   alert('Upload Completed')
                 }}
                 onUploadError={(error: Error) => {

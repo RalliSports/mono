@@ -126,8 +126,6 @@ export class ParaAnchor {
       null,
       6,
     );
-
-    console.log('mint', mint);
   }
 
   async faucetSol(user: PublicKey) {
@@ -169,8 +167,6 @@ export class ParaAnchor {
       adminKeypair.publicKey,
       10 ** (6 + 2),
     );
-
-    console.log('minted tokens', tx);
   }
 
   async createLineInstruction(
@@ -424,8 +420,6 @@ export class ParaAnchor {
           program.programId,
         );
 
-        console.log('linePDA', linePDA);
-
         extraAccounts.push({
           pubkey: linePDA,
           isWritable: true,
@@ -504,7 +498,7 @@ export class ParaAnchor {
 
       return txSig;
     } catch (error) {
-      console.log(error, 'erro from submitBetsInstruction');
+      console.error(error, 'erro from submitBetsInstruction');
       return '';
     }
   }

@@ -40,10 +40,8 @@ export function usePicks() {
             'x-para-session': session || '',
           },
         })
-        console.log('athletes response', response)
         if (response.ok) {
           const data = await response.json()
-          console.log('athletes data', data)
           setAthletes(data)
         } else {
           const errorData = await response.json()
@@ -67,10 +65,8 @@ export function usePicks() {
             'x-para-session': session || '',
           },
         })
-        console.log('game response', response)
         if (response.ok) {
           const data = await response.json()
-          console.log('game data', data)
           setGame(data)
         } else {
           const errorData = await response.json()
@@ -143,8 +139,7 @@ export function usePicks() {
       },
       body: JSON.stringify(apiData),
     })
-    const result = await response.json()
-    console.log(result, 'result')
+
     if (response.ok) {
       addToast('Bets submitted successfully!', 'success')
     } else {
