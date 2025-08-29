@@ -95,6 +95,7 @@ impl<'info> SubmitBet<'info> {
             player: user.key(),
             picks: pick_structs,
             correct_count: 0, // Will be updated when lines are resolved
+            num_correct: 0, // Will be updated as game proceeds
             submitted_at: clock.unix_timestamp,
             bump: bumps.bet,
         });
