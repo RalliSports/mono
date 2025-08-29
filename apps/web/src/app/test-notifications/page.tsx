@@ -171,7 +171,7 @@ export default function TestNotificationsPage() {
                     <div className="text-white font-medium">{subscription.user?.username || 'Unknown User'}</div>
                     <div className="text-gray-400 text-sm">{subscription.user?.emailAddress || 'No email'}</div>
                     <div className="text-gray-500 text-xs">
-                      Subscribed: {new Date(subscription.createdAt).toLocaleDateString()}
+                      Subscribed: {new Date(subscription.createdAt).toISOString()}
                     </div>
                   </div>
 
@@ -196,17 +196,6 @@ export default function TestNotificationsPage() {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Instructions */}
-        <div className="mt-6 bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-          <h3 className="text-blue-400 font-semibold mb-2">How to Test:</h3>
-          <ol className="text-blue-300 text-sm space-y-1">
-            <li>1. Subscribe to notifications on your phone (visit /test page)</li>
-            <li>2. Come back to this page on your laptop</li>
-            <li>3. Click "Send Test" next to your subscription</li>
-            <li>4. Check your phone for the notification (even if app is closed)</li>
-          </ol>
         </div>
       </div>
     </div>
