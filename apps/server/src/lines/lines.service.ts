@@ -30,76 +30,79 @@ export class LinesService {
   }
 
   async createLine(dto: CreateLineDto, user: User) {
-    const matchup = await this.db.query.matchups.findFirst({
-      where: eq(matchups.id, dto.matchupId),
-    });
-    if (!matchup) throw new BadRequestException('Matchup not found');
+    return await this.db.transaction(async (tx) => {
+      const matchup = await tx.query.matchups.findFirst({
+        where: eq(matchups.id, dto.matchupId),
+      });
+      if (!matchup) throw new BadRequestException('Matchup not found');
 
-    const [inserted] = await this.db
-      .insert(lines)
-      .values({
-        status: LineStatus.OPEN,
-        athleteId: dto.athleteId,
-        statId: dto.statId,
-        matchupId: dto.matchupId,
-        predictedValue: dto.predictedValue.toString(),
-        actualValue: null,
-        isHigher: null,
-        startsAt: matchup.startsAt,
-      })
-      .returning();
+      const [inserted] = await tx
+        .insert(lines)
+        .values({
+          status: LineStatus.OPEN,
+          athleteId: dto.athleteId,
+          statId: dto.statId,
+          matchupId: dto.matchupId,
+          predictedValue: dto.predictedValue.toString(),
+          actualValue: null,
+          isHigher: null,
+          startsAt: matchup.startsAt,
+        })
+        .returning();
 
-    // Ensure createGameInstruction throws if it fails
-    let txn: string;
-    const createdAt = inserted.createdAt;
-    if (!createdAt) throw new BadRequestException('Line not created');
-    const timestamp = new Date(createdAt).getTime();
-    const statCustomId = await this.db.query.stats
-      .findFirst({
-        where: eq(stats.id, dto.statId),
-      })
-      .then((stat) => stat?.customId);
+      // Ensure createGameInstruction throws if it fails
+      let txn: string;
+      const createdAt = inserted.createdAt;
+      if (!createdAt) throw new BadRequestException('Line not created');
+      const timestamp = new Date(createdAt).getTime();
+      const statCustomId = await tx.query.stats
+        .findFirst({
+          where: eq(stats.id, dto.statId),
+        })
+        .then((stat) => stat?.customId);
 
-    const athleteCustomId = await this.db.query.athletes
-      .findFirst({
-        where: eq(athletes.id, dto.athleteId),
-      })
-      .then((athlete) => athlete?.customId);
+      const athleteCustomId = await tx.query.athletes
+        .findFirst({
+          where: eq(athletes.id, dto.athleteId),
+        })
+        .then((athlete) => athlete?.customId);
 
-    if (!statCustomId) throw new BadRequestException('Stat not found');
-    if (!athleteCustomId) throw new BadRequestException('Athlete not found');
+      if (!statCustomId) throw new BadRequestException('Stat not found');
+      if (!athleteCustomId) throw new BadRequestException('Athlete not found');
 
-    console.log('matchup.startsAt', matchup);
-    const adjustedTimestamp = new Date(matchup.startsAt ?? '').getTime() / 1000;
-    console.log('adjustedTimestamp', adjustedTimestamp);
+      console.log('matchup.startsAt', matchup);
+      const adjustedTimestamp =
+        new Date(matchup.startsAt ?? '').getTime() / 1000;
+      console.log('adjustedTimestamp', adjustedTimestamp);
 
-    try {
-      txn = await this.anchor.createLineInstruction(
-        timestamp,
-        statCustomId,
-        dto.predictedValue,
-        athleteCustomId,
-        adjustedTimestamp,
-        new PublicKey(user.walletAddress),
-      );
+      try {
+        txn = await this.anchor.createLineInstruction(
+          timestamp,
+          statCustomId,
+          dto.predictedValue,
+          athleteCustomId,
+          adjustedTimestamp,
+          new PublicKey(user.walletAddress),
+        );
 
-      if (!txn || typeof txn !== 'string') {
-        throw new Error(
-          'Invalid transaction ID returned from createGameInstruction',
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from createGameInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back game creation",
+          error,
         );
       }
-    } catch (error) {
-      console.error(
-        'Anchor instruction failed, rolling back transaction:',
-        error,
-      );
-      // Throw to rollback DB transaction
-      throw new BadRequestException(
-        "'Anchor instruction failed, rolling back game creation",
-        error,
-      );
-    }
-    return inserted;
+      return inserted;
+    });
   }
 
   async getAllLines() {
@@ -152,60 +155,62 @@ export class LinesService {
   }
 
   async resolveLine(id: string, dto: ResolveLineDto, user: User) {
-    console.log('resolveLine', id, dto, user);
-    const line = await this.getLineById(id);
-    if (!line) throw new NotFoundException(`Line ${id} not found`);
-    // if (line.actualValue)
-    //   throw new BadRequestException(`Line ${id} already resolved`);
-    if (!line.predictedValue)
-      throw new BadRequestException(`Line ${id} not predicted`);
-    const predictedValue = Number(line.predictedValue);
+    return await this.db.transaction(async (tx) => {
+      console.log('resolveLine', id, dto, user);
+      const line = await this.getLineById(id);
+      if (!line) throw new NotFoundException(`Line ${id} not found`);
+      // if (line.actualValue)
+      //   throw new BadRequestException(`Line ${id} already resolved`);
+      if (!line.predictedValue)
+        throw new BadRequestException(`Line ${id} not predicted`);
+      const predictedValue = Number(line.predictedValue);
 
-    const res = await this.db
-      .update(lines)
-      .set({
-        actualValue: dto.actualValue?.toString(),
-        isHigher:
-          dto.actualValue && line.predictedValue
-            ? dto.actualValue > Number(line.predictedValue)
-            : null,
-        status: LineStatus.RESOLVED,
-      })
-      .where(eq(lines.id, id))
-      .returning();
-    if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
-    const lineCreatedAt = line.createdAt;
-    if (!lineCreatedAt) throw new BadRequestException('Line not created');
-    const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
+      const res = await tx
+        .update(lines)
+        .set({
+          actualValue: dto.actualValue?.toString(),
+          isHigher:
+            dto.actualValue && line.predictedValue
+              ? dto.actualValue > Number(line.predictedValue)
+              : null,
+          status: LineStatus.RESOLVED,
+        })
+        .where(eq(lines.id, id))
+        .returning();
+      if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
+      const lineCreatedAt = line.createdAt;
+      if (!lineCreatedAt) throw new BadRequestException('Line not created');
+      const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
 
-    // Ensure createGameInstruction throws if it fails
-    let txn: string;
+      // Ensure resolveLineInstruction throws if it fails
+      let txn: string;
 
-    try {
-      txn = await this.anchor.resolveLineInstruction(
-        lineCreatedAtTimestamp,
-        predictedValue,
-        dto.actualValue!,
-        false,
-        new PublicKey(user.walletAddress),
-      );
+      try {
+        txn = await this.anchor.resolveLineInstruction(
+          lineCreatedAtTimestamp,
+          predictedValue,
+          dto.actualValue!,
+          false,
+          new PublicKey(user.walletAddress),
+        );
 
-      if (!txn || typeof txn !== 'string') {
-        throw new Error(
-          'Invalid transaction ID returned from createGameInstruction',
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from resolveLineInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back resolve game",
+          error,
         );
       }
-    } catch (error) {
-      console.error(
-        'Anchor instruction failed, rolling back transaction:',
-        error,
-      );
-      // Throw to rollback DB transaction
-      throw new BadRequestException(
-        "'Anchor instruction failed, rolling back game creation",
-        error,
-      );
-    }
-    return res[0];
+      return res[0];
+    });
   }
 }
