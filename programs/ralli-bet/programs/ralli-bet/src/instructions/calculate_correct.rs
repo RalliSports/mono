@@ -46,14 +46,8 @@ impl<'info> CalculateCorrect<'info> {
 
         // Verify bet belongs to this game
         require_eq!(bet.game, game.key(), RalliError::BetNotInGame);
-
-        // Remaining accounts should be the line accounts
+        
         let line_accounts = remaining_accounts;
-        require_eq!(
-            line_accounts.len(),
-            game.involved_lines.len(),
-            RalliError::MissingLineAccounts
-        );
 
         // Verify all lines are resolved before calculating
         for line_account_info in line_accounts.iter() {

@@ -109,6 +109,12 @@ pub mod ralli_bet {
         ctx.accounts.update_line(line_seed, new_predicted_value, should_refund_bettors)
     }
 
+    pub fn calculate_correct<'info>(
+        ctx: Context<'_, '_, 'info, 'info, CalculateCorrect<'info>>
+    ) -> Result<()> {
+        ctx.accounts.calculate_correct(ctx.remaining_accounts)
+    }
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }
