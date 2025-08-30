@@ -235,4 +235,7 @@ pub enum RalliError {
 
     #[msg("Predicted value should be different for update")]
     SamePredictedValue,
+
+    #[msg("Only admin can calculate correct bets!")]
+    UnauthorizedCalculation,
 }
