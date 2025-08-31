@@ -115,6 +115,12 @@ pub mod ralli_bet {
         ctx.accounts.calculate_correct(ctx.remaining_accounts)
     }
 
+    pub fn calculate_winners<'info>(
+        ctx: Context<'_, '_, 'info, 'info, CalculateWinners<'info>>,
+    ) -> Result<()> {
+        ctx.accounts.calculate_winners(ctx.remaining_accounts)
+    }
+    
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }

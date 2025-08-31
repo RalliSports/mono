@@ -236,6 +236,15 @@ pub enum RalliError {
     #[msg("Predicted value should be different for update")]
     SamePredictedValue,
 
-    #[msg("Only admin can calculate correct bets!")]
+    #[msg("Only admin can calculate correct bets")]
     UnauthorizedCalculation,
+
+    #[msg("Only admin can finalize the game stats")]
+    UnauthorizedGameFinalization,
+
+    #[msg("Calcualtion is already done")]
+    CalculationAlreadyComplete,
+
+    #[msg("Must have atleast one bet")]
+    NoBetsInGame,
 }
