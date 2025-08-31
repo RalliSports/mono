@@ -247,4 +247,10 @@ pub enum RalliError {
 
     #[msg("Must have atleast one bet")]
     NoBetsInGame,
+
+    #[msg("Calculation must be completed")]
+    CalculationNotComplete,
+
+    #[msg("Ensure that we have the correct number of winner accounts")]
+    IncorrectWinnerAccountCount,
 }
