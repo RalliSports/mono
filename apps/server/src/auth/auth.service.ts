@@ -38,7 +38,7 @@ export class AuthService {
           message: 'Session expired',
         });
 
-        return null
+        return null;
       }
 
       const para = await this.getPara();
@@ -57,7 +57,7 @@ export class AuthService {
               walletAddress: userExisted.walletAddress as string,
             });
           } catch (error) {
-            console.log(error, 'error faucetTokens');
+            console.error(error, 'error faucetTokens');
           }
         }
 
@@ -105,7 +105,7 @@ export class AuthService {
             walletAddress: user.walletAddress as string,
           });
         } catch (error) {
-          console.log(error, 'error faucetTokens');
+          console.error(error, 'error faucetTokens');
         }
       }
 

@@ -21,7 +21,6 @@ export default function AllGames() {
 
       if (res.ok) {
         const data = await res.json()
-        console.log(data, 'data')
         setGames(data)
       } else {
         const errorData = await res.json()
@@ -37,7 +36,6 @@ export default function AllGames() {
       })
       if (res.ok) {
         const data = await res.json()
-        console.log(data, 'data')
         setLines(data)
       } else {
         const errorData = await res.json()
@@ -45,8 +43,6 @@ export default function AllGames() {
       }
     })()
   }, [])
-
-  console.log(games, 'all games')
 
   return (
     <div>

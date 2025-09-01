@@ -45,7 +45,6 @@ export function useMainPage(session: string | undefined) {
             'x-para-session': session,
           },
         })
-        console.log('athletes response', response)
         if (response.ok) {
           const data = await response.json()
           setAthletes(data)

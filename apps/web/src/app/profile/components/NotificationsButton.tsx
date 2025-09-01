@@ -10,7 +10,7 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)))
 }
 
-export default function WebPush() {
+export default function NotificationsButton() {
   const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   const [loading, setLoading] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
@@ -136,54 +136,63 @@ export default function WebPush() {
     }
   }
 
-  const handleTestNotification = async () => {
-    if (!subscription) {
-      alert('Please subscribe first!')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/test/webpush`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          payload: subscription.toJSON(),
-        }),
-      })
-
-      setLoading(false)
-    } catch (error) {
-      console.error('Push test notification failed:', error)
-      setLoading(false)
-    }
-  }
-
   return (
-    <div className="space-x-3">
-      <button
-        className="bg-background p-4 text-white cursor-pointer"
-        onClick={handleToggleSubscription}
-        disabled={loading}
-      >
-        {loading
-          ? isSubscribed
-            ? 'Unsubscribing...'
-            : 'Subscribing...'
-          : isSubscribed
-            ? 'Unsubscribe from Notifications'
-            : 'Subscribe to Notifications'}
-      </button>
-      {isSubscribed && (
-        <button
-          className="bg-background p-4 text-white cursor-pointer"
-          onClick={handleTestNotification}
-          disabled={loading}
+    <button
+      className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+      onClick={handleToggleSubscription}
+      disabled={loading}
+      title={isSubscribed ? 'Unsubscribe from notifications' : 'Subscribe to notifications'}
+    >
+      {loading ? (
+        <div className="w-6 h-6 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
+      ) : (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-6 h-6"
         >
-          {loading ? 'Sending...' : 'Send test Notification'}
-        </button>
+          {isSubscribed ? (
+            // Notification on icon
+            <>
+              <g clipPath="url(#clip0_15_159)">
+                <path
+                  d="M9.5 19C8.89555 19 7.01237 19 5.61714 19C4.87375 19 4.39116 18.2177 4.72361 17.5528L5.57771 15.8446C5.85542 15.2892 6 14.6774 6 14.0564C6 13.2867 6 12.1434 6 11C6 9 7 5 12 5C17 5 18 9 18 11C18 12.1434 18 13.2867 18 14.0564C18 14.6774 18.1446 15.2892 18.4223 15.8446L19.2764 17.5528C19.6088 18.2177 19.1253 19 18.382 19H14.5M9.5 19C9.5 21 10.5 22 12 22C13.5 22 14.5 21 14.5 19M9.5 19C11.0621 19 14.5 19 14.5 19"
+                  stroke="currentColor"
+                  strokeLinejoin="round"
+                />
+                <path d="M12 5V3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+              </g>
+              <defs>
+                <clipPath id="clip0_15_159">
+                  <rect width="24" height="24" fill="transparent" />
+                </clipPath>
+              </defs>
+            </>
+          ) : (
+            // Notification off icon
+            <>
+              <g clipPath="url(#clip0_15_166)">
+                <path
+                  d="M6 15C6 15 6 13 6 11C6 9 7 5 12 5C13.5723 5 14.749 5.39552 15.6235 6M9.5 19C9.5 21 10.5 22 12 22C13.5 22 14.5 21 14.5 19M9.5 19C11.0621 19 14.5 19 14.5 19M9.5 19C9.14909 19 8.36719 19 7.5 19M14.5 19H18.382C19.1253 19 19.6088 18.2177 19.2764 17.5528L18 15C18 15 18 13 18 11C18 10.3755 17.9025 9.55594 17.6161 8.72408"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path d="M12 5V3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M21 3L3 21" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+              </g>
+              <defs>
+                <clipPath id="clip0_15_166">
+                  <rect width="24" height="24" fill="transparent" />
+                </clipPath>
+              </defs>
+            </>
+          )}
+        </svg>
       )}
-    </div>
+    </button>
   )
 }
