@@ -17,6 +17,9 @@ pub struct Game {
     pub number_of_lines: u8,
     #[max_len(40)]
     pub involved_lines: Vec<Pubkey>,
+    pub num_winners: u32,
+    pub correct_votes_to_be_winner: u8,
+    pub calculation_complete: bool,
     pub bump: u8,
 }
 

@@ -85,6 +85,9 @@ impl<'info> CreateGame<'info> {
             number_of_lines,
             locked_at: None,
             involved_lines: Vec::new(), // Initialize empty involved_lines vector
+            num_winners: 0,
+            correct_votes_to_be_winner: 0,
+            calculation_complete: false,
             bump: bumps.game,
         });
 

@@ -136,7 +136,6 @@ export default function CreateGame() {
         }, 1000)
       } else {
         setCreatingGameState('error')
-        console.log('result', result)
         if (Array.isArray(result.message)) {
           result.message.forEach((msg: string) => toast.error(msg))
         } else {

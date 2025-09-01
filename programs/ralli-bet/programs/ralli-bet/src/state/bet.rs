@@ -10,6 +10,7 @@ pub struct Bet {
     #[max_len(MAX_LINES_PER_GAME as usize)]
     pub picks: Vec<Pick>,
     pub correct_count: u8,
+    pub num_correct: u8,
     pub submitted_at: i64,
     pub bump: u8,
 }

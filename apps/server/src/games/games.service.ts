@@ -300,7 +300,6 @@ export class GamesService {
           direction: res.predictedDirection as PredictionDirection,
         };
       });
-      console.log('picks', picks);
 
       const submitTxnSig = await this.anchor.submitBetsInstruction(
         dto.gameId,
@@ -368,7 +367,6 @@ export class GamesService {
   }
 
   async resolveGame(id: string) {
-    console.log('resolveGame', id);
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, id),
@@ -546,6 +544,7 @@ export class GamesService {
 
   async ensureUserOwnsGame(gameId: string, userId: string) {
     const game = await this.db.query.games.findFirst({
+      where: (g, { eq }) => eq(game.id, gameId),
       where: (g, { eq }) => eq(game.id, gameId),
     });
 

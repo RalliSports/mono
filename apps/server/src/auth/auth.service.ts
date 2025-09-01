@@ -58,7 +58,16 @@ export class AuthService {
               walletAddress: userExisted.walletAddress as string,
             });
           } catch (error) {
-            console.log(error, 'error faucetTokens');
+            console.error(error, 'error faucetTokens');
+          }
+
+          if (userExisted.emailAddress === null) {
+            await this.db
+              .update(users)
+              .set({
+                emailAddress: userEmail,
+              })
+              .where(eq(users.id, userExisted.id));
           }
 
           if (userExisted.emailAddress === null) {
@@ -115,7 +124,7 @@ export class AuthService {
             walletAddress: user.walletAddress as string,
           });
         } catch (error) {
-          console.log(error, 'error faucetTokens');
+          console.error(error, 'error faucetTokens');
         }
       }
 

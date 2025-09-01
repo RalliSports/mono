@@ -43,7 +43,6 @@ export class UserController {
   })
   @Get('user/subscriptions')
   getSubscriptions() {
-    console.log('getSubscriptions');
     return this.userService.getAllSubscriptions();
   }
 
@@ -78,7 +77,6 @@ export class UserController {
   })
   @Post('test/webpush')
   testWebPush(@Body() dto: CreateWebpushDto) {
-    console.log(dto, 'test sub');
     return this.userService.testWebpushNotification(dto.payload);
   }
 
@@ -95,6 +93,18 @@ export class UserController {
     @UserPayload() user: User,
   ) {
     return this.userService.subscribeToWebPushNotification(dto.payload, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Unsubscribe from webpush notification' })
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+  })
+  @Post('user/unsubscribe-webpush')
+  unsubscribeFromWebPushNotification(@Body() dto: CreateWebpushDto) {
+    return this.userService.unsubscribeFromWebPushNotification(dto.payload);
   }
 
   @ApiSecurity('x-para-session')
