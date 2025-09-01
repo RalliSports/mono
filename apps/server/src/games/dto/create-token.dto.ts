@@ -2,7 +2,6 @@ import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { GameAccessStatus } from '../enum/game';
 import { ApiProperty } from '@nestjs/swagger';
 
-
 export class Token {
   @ApiProperty()
   @IsNotEmpty()
@@ -25,7 +24,4 @@ export class Token {
   mint: string;
 }
 
-export class CreateTokenDto {
-  @ApiProperty()
-  token: Token
-}
+export class CreateTokenDto extends Token {}

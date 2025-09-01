@@ -16,10 +16,10 @@ export class TokenService {
     const [newRecord] = await this.db
       .insert(tokens)
       .values({
-        name: dto.token.name,
-        mint: dto.token.mint,
-        cluster: dto.token.cluster,
-        ticker: dto.token.ticker,
+        name: dto.name,
+        mint: dto.mint,
+        cluster: dto.cluster,
+        ticker: dto.ticker,
       })
       .returning();
     return newRecord;

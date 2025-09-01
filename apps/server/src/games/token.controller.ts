@@ -23,8 +23,9 @@ export class TokenController {
     type: Token,
   })
   @Post('/add-token')
-  create(@Body() createGameDto: CreateTokenDto) {
-    return this.service.create(createGameDto);
+  create(@Body() dto: CreateTokenDto) {
+    console.log(dto, "craee")
+    return this.service.create(dto);
   }
 
   @ApiOperation({ summary: 'get all tokens' })
