@@ -18,6 +18,7 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class GamesService {
@@ -26,6 +27,7 @@ export class GamesService {
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
+    private readonly notificationService: NotificationService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
   }
@@ -311,17 +313,12 @@ export class GamesService {
         );
       }
 
-      const updateedBets = await tx
-        .update(bets)
+      await tx
+        .update(participants)
         .set({
-          createdTxnSignature: submitTxnSig,
+          submitTxnSignature: submitTxnSig,
         })
-        .where(
-          inArray(
-            bets.id,
-            insertedBets.map((b) => b.id),
-          ),
-        )
+        .where(eq(participants.id, insertedParticipant.id ?? ''))
         .returning();
 
       // Transaction will auto-commit if no error is thrown
@@ -329,7 +326,7 @@ export class GamesService {
         success: true,
         message: 'Joined game successfully',
         txnSignature: submitTxnSig,
-        bets: updateedBets,
+        bets: insertedBets,
       };
     });
   }
@@ -460,24 +457,58 @@ export class GamesService {
         );
       }
 
-      console.log('updating game status to completed', id);
-      await tx
-        .update(games)
-        .set({ status: GameStatus.COMPLETED })
-        .where(eq(games.id, id));
-
-      const resolveTxnSig = await this.anchor.resolveGameInstruction(
-        id,
-        winners,
-        allWallets,
-        Array.from(allLinesIds),
-      );
-
-      if (!resolveTxnSig) {
-        tx.rollback();
-        throw new BadRequestException(
-          'Failed to execute resolve game instruction on-chain',
+      try {
+        const resolveTxnSig = await this.anchor.resolveGameInstruction(
+          id,
+          winners,
+          allWallets,
+          Array.from(allLinesIds),
         );
+
+        if (!resolveTxnSig) {
+          tx.rollback();
+          throw new BadRequestException(
+            'Failed to execute resolve game instruction on-chain',
+          );
+        }
+
+        console.log('updating game', id);
+        await tx
+          .update(games)
+          .set({
+            status: GameStatus.COMPLETED,
+            resolvedTxnSignature: resolveTxnSig,
+          })
+          .where(eq(games.id, id));
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back resolve game",
+          error,
+        );
+      }
+
+      // Send notifications AFTER the DB + on-chain update
+      for (const participant of game.participants) {
+        const message = this.notificationService.buildGameResolvedMessage(
+          game.id,
+          game.title ?? '',
+        );
+        try {
+          await this.notificationService.sendNotificationToUser(
+            participant.userId ?? '',
+            message,
+          );
+        } catch (err) {
+          console.warn(
+            `Failed to send notification to user ${participant.userId}:`,
+            err.message || err,
+          );
+        }
       }
 
       return {

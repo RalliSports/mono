@@ -10,11 +10,13 @@ import {
 import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
+import {
+  CreateWebpushDto
+} from '../notification/dto/webpush.dto';
+import { SendNotificationDto } from './dto/send-notification.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { UserService } from './user.service';
-import { CreateWebpushDto, PushSubscriptionResponse } from './dto/webpush.dto';
-import { SendNotificationDto } from './dto/send-notification.dto';
 
 @Controller('')
 export class UserController {
