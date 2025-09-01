@@ -1,5 +1,7 @@
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { Player, Stat, MatchUp } from '../types'
+import { Player, MatchUp } from '../types'
+
+import { StatsFindById, LineCreate } from '@repo/server'
 
 interface CreateLineFormProps {
   newLine: {
@@ -9,10 +11,10 @@ interface CreateLineFormProps {
     id: string
     gameDate: string
   }
-  setNewLine: (line: any) => void
+  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void
   handleCreateLine: () => void
   players: Player[]
-  stats: Stat[]
+  stats: StatsFindById[]
   matchUps: MatchUp[]
 }
 
@@ -67,7 +69,7 @@ export default function CreateLineForm({
                 },
                 ...stats.map((stat) => ({
                   value: stat.id,
-                  label: `${stat.name} (${stat.customId})`,
+                  label: `${stat.displayName} (${stat.customId})`,
                   icon: '📊',
                 })),
               ]}

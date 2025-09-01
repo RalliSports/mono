@@ -6,6 +6,7 @@ import * as schema from "@repo/db";
 
 import { seedAthletes } from "./athletes.seed";
 import { seedTeams } from "./teams.seed";
+import { seedStats } from "./stats.seed";
 
 config();
 
@@ -20,6 +21,7 @@ async function seed(db: NodePgDatabase<typeof schema>) {
   try {
     await seedTeams(db);
     await seedAthletes(db);
+    await seedStats(db);
     console.log("🎉 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Seeding data failed:", error);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '../../../components/ui/toast'
-import { Team, Player, Line, Game, MatchUp, Stat } from '../components/types'
+import { Team, Player, Game, MatchUp } from '../components/types'
+import { LineFindAllInstance, StatsFindById } from '@repo/server'
 
 export function useAdminData(session: string | null) {
   const { addToast } = useToast()
@@ -8,10 +9,10 @@ export function useAdminData(session: string | null) {
   // State for all data
   const [teams, setTeams] = useState<Team[]>([])
   const [players, setPlayers] = useState<Player[]>([])
-  const [lines, setLines] = useState<Line[]>([])
+  const [lines, setLines] = useState<LineFindAllInstance[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [matchUps, setMatchUps] = useState<MatchUp[]>([])
-  const [stats, setStats] = useState<Stat[]>([])
+  const [stats, setStats] = useState<StatsFindById[]>([])
 
   // Form states
   const [newStat, setNewStat] = useState({
@@ -427,9 +428,9 @@ export function useAdminData(session: string | null) {
   // Filter functions
   const filteredLines = lines.filter((line) => {
     const matchesSearch =
-      line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      line.stat.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSport = selectedSport === 'all' || line.matchup.homeTeam.name === selectedSport
+      line.athlete?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      line.stat?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSport = selectedSport === 'all' || line.matchup?.homeTeam?.name === selectedSport
     return matchesSearch && matchesSport
   })
 

@@ -6,15 +6,15 @@ import { useUserData } from '@/providers/user-data-provider'
 import { useAccount } from '@getpara/react-sdk'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { JoinGameLayout, GameHeader, JoinGameButton, ParticipantsList, LoadingSpinner } from './components'
-import { Game } from './types'
 import { useToast } from '@/components/ui/toast'
+import { GamesFindOne } from '@repo/server'
 
 function JoinGameContent() {
   const { addToast } = useToast()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
-  const [game, setGame] = useState<Game | null>(null)
+  const [game, setGame] = useState<GamesFindOne | null>(null)
   const [mounted, setMounted] = useState(false)
   const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
 

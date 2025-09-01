@@ -1,5 +1,6 @@
 import CreateLineForm from './CreateLineForm'
-import { Player, Stat, MatchUp } from '../types'
+import { Player, MatchUp } from '../types'
+import { StatsFindById } from '@repo/server'
 
 interface LinesTabProps {
   newLine: {
@@ -12,7 +13,7 @@ interface LinesTabProps {
   setNewLine: (line: any) => void
   handleCreateLine: () => void
   players: Player[]
-  stats: Stat[]
+  stats: StatsFindById[]
   matchUps: MatchUp[]
 }
 

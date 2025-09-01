@@ -46,6 +46,7 @@
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "db:migrate": "npx drizzle-kit migrate",
     "db:reset": "npx drizzle-kit drop",
+    "db:push": "npx drizzle-kit push",
     "db:seed": "tsx src/seeds/index.ts",
     "db:seed:teams-athletes": "tsx src/seeds/seed-teams-athletes.seed.ts",
     "db:seed:update-stats": "tsx src/seeds/update-stats.seed.ts",

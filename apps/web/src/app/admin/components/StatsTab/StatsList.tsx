@@ -1,7 +1,7 @@
-import { Stat } from '../types'
+import { StatsFindById } from '@repo/server'
 
 interface StatsListProps {
-  stats: Stat[]
+  stats: StatsFindById[]
   searchTerm: string
   setSearchTerm: (term: string) => void
 }
@@ -9,8 +9,8 @@ interface StatsListProps {
 export default function StatsList({ stats, searchTerm, setSearchTerm }: StatsListProps) {
   const filteredStats = stats.filter((stat) => {
     const matchesSearch =
-      stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stat.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       stat.customId.toString().includes(searchTerm.toLowerCase())
     return matchesSearch
   })
@@ -47,7 +47,7 @@ export default function StatsList({ stats, searchTerm, setSearchTerm }: StatsLis
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold text-lg">{stat.name}</h4>
+                    <h4 className="text-white font-semibold text-lg">{stat.displayName}</h4>
                     <div className="flex items-center space-x-2">
                       {/* <span className="text-[#00CED1] text-sm font-medium">{stat.sport}</span> */}
                       <span className="text-slate-400">•</span>

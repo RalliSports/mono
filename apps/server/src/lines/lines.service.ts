@@ -115,7 +115,11 @@ export class LinesService {
             awayTeam: true,
           },
         },
-        athlete: true,
+        athlete: {
+          with: {
+            team: true,
+          },
+        },
       },
     });
     return lines;

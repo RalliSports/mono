@@ -1,13 +1,13 @@
 import Link from 'next/link'
-import { Game, Creator } from '../../types'
+import { GamesFindOne, UserFindOne } from '@repo/server'
 
 interface JoinGameButtonProps {
-  game: Game
-  user: Creator | null
+  game: GamesFindOne
+  user: UserFindOne | null
 }
 
 export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
-  const spotsLeft = game.maxParticipants - game.participants.length
+  const spotsLeft = game.maxParticipants || 0 - game.participants.length
   const isUserInGame = game.participants.some((participant) => participant.user?.id === user?.id)
 
   if (isUserInGame) {

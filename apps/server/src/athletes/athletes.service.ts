@@ -28,12 +28,14 @@ export class AthletesService {
   async getActiveAthletesWithUnresolvedLines() {
     const athletes = await this.db.query.athletes.findMany({
       with: {
+        team: true,
         lines: {
           with: {
             stat: {
               columns: {
                 id: true,
                 name: true,
+                displayName: true,
               },
             },
             matchup: {

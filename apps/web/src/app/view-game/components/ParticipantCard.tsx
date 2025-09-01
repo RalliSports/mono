@@ -1,9 +1,9 @@
-import { Participant, Game } from './types'
+import { GamesFindOne } from '@repo/server'
 import ParticipantPicks from './ParticipantPicks'
 
 interface ParticipantCardProps {
-  participant: Participant
-  lobby: Game
+  participant: GamesFindOne['participants'][number]
+  lobby: GamesFindOne
   isExpanded: boolean
   onToggle: () => void
 }
@@ -23,28 +23,32 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
-                  {participant.user.username ? (
+                  {participant.user?.username ? (
                     <img
                       src={`/users/${participant.user.username.toLowerCase().replace(/\s+/g, '-')}.png`}
                       alt={participant.user.username}
                       className="w-14 h-14 object-cover rounded-xl"
                       onError={(e) => {
                         e.currentTarget.onerror = null
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user.username)}&background=0D8ABC&color=fff&size=128`
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
                       }}
                     />
                   ) : (
-                    <span className="text-white font-bold text-2xl">{participant.user.username}</span>
+                    <span className="text-white font-bold text-2xl">
+                      {participant.user?.username || 'Anonymous User'}
+                    </span>
                   )}
                 </div>
-                {participant.user.username === lobby.creator.username && (
+                {participant.user?.username === lobby.creator?.username && (
                   <div className="absolute -top-1 -left-1 text-sm">👑</div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-white font-bold text-base leading-tight truncate">{participant.user.username}</h4>
+                <h4 className="text-white font-bold text-base leading-tight truncate">
+                  {participant.user?.username || 'Anonymous User'}
+                </h4>
                 <p className="text-slate-400 text-sm mt-1">
-                  Joined {new Date(participant.joinedAt).toLocaleDateString()} • ${lobby.depositAmount}
+                  Joined {new Date(participant.joinedAt || '').toLocaleDateString()} • ${lobby.depositAmount}
                 </p>
               </div>
             </div>
@@ -67,13 +71,13 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
           {/* Enhanced Quick Picks Preview */}
           <div className="mt-4">
             <div className="flex gap-1.5">
-              {participant.bets.map((pick, index) => (
+              {participant.bets.map((pick) => (
                 <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className={`h-full bg-gradient-to-r ${
-                      new Date(pick.line.matchup.startsAt) > new Date()
+                      new Date(pick.line?.matchup?.startsAt || '') > new Date()
                         ? 'border-slate-600'
-                        : !!pick.line.actualValue
+                        : !!pick.line?.actualValue
                           ? 'border-blue-500'
                           : pick.isCorrect
                             ? 'border-emerald-500'
