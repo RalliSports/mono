@@ -544,8 +544,7 @@ export class GamesService {
 
   async ensureUserOwnsGame(gameId: string, userId: string) {
     const game = await this.db.query.games.findFirst({
-      where: (g, { eq }) => eq(game.id, gameId),
-      where: (g, { eq }) => eq(game.id, gameId),
+      where: eq(games.id, gameId),
     });
 
     if (!game) throw new NotFoundException('Game not found');
