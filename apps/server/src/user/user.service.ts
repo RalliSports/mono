@@ -9,7 +9,7 @@ import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { WebPushService } from 'src/utils/services/webPush';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
-import { PushSubscriptionResponse } from './dto/webpush.dto';
+import { PushSubscriptionResponse } from '../notification/dto/webpush.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
 
 @Injectable()

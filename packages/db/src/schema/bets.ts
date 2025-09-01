@@ -26,8 +26,6 @@ export const bets = pgTable("bets", {
   predictedDirection: predictedDirectionEnum("predicted_direction"),
   isCorrect: boolean("is_correct"),
   createdAt: timestamp("created_at").defaultNow(),
-  createdTxnSignature: text("created_txn_signature"),
-  // resolvedTxnSignature: text("resolved_txn_signature"),
 });
 
 export const betsRelations = relations(bets, ({ one }) => ({

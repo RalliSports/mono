@@ -1,0 +1,1 @@
+ALTER TABLE "bets" DROP COLUMN "resolved_txn_signature";

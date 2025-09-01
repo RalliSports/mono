@@ -13,6 +13,7 @@ import { UserModule } from './user/user.module';
 import { AthletesModule } from './athletes/athletes.module';
 import { StatsModule } from './stats/stats.module';
 import { TeamModule } from './team/team.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { TeamModule } from './team/team.module';
     AthletesModule,
     StatsModule,
     TeamModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

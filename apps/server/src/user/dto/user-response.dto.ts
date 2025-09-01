@@ -10,6 +10,25 @@ export class Role {
   @IsString()
   name: string;
 }
+export class PushSubscriptions {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  userId: string;
+
+  @ApiProperty()
+  subscription: Record<string, any>;
+
+  @ApiProperty()
+  isActive: boolean;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+}
 
 export class User {
   @ApiProperty()
@@ -45,6 +64,10 @@ export class User {
   @ApiProperty()
   @IsOptional()
   hasBeenFaucetedSol?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  pushSubscriptions?: PushSubscriptions;
 
   // @ApiProperty()
   // role: Role;
