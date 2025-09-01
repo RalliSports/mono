@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { Game } from '../../types'
+import { GamesFindOne } from '@repo/server'
 
 interface ParticipantsListProps {
-  game: Game
+  game: GamesFindOne
   expandedParticipants: string[]
   onToggleParticipant: (participantId: string) => void
 }
@@ -43,7 +43,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           height={56}
                         />
                       </div>
-                      {participant.user?.id === game.creator.id && (
+                      {participant.user?.id === game.creator?.id && (
                         <div className="absolute -top-1 -left-1 text-sm">👑</div>
                       )}
                     </div>
@@ -52,7 +52,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                         {participant.user?.username || 'Anonymous User'}
                       </h4>
                       <p className="text-slate-400 text-sm mt-1">
-                        Joined {new Date(participant.joinedAt).toLocaleDateString()} • ${game.depositAmount}
+                        Joined {new Date(participant.joinedAt || '').toLocaleDateString()} • ${game.depositAmount}
                       </p>
                     </div>
                   </div>
@@ -101,10 +101,10 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
-                            {pick.line.athleteId ? (
+                            {pick.line?.athleteId ? (
                               <Image
-                                src={pick.line.athlete.picture}
-                                alt={pick.line.athlete.name}
+                                src={pick.line?.athlete?.picture || ''}
+                                alt={pick.line?.athlete?.name || ''}
                                 width={48}
                                 height={48}
                                 className="w-full h-full object-cover"
@@ -114,7 +114,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                                   target.style.display = 'none'
                                   const parent = target.parentElement
                                   if (parent) {
-                                    parent.innerHTML = `<span class="text-white font-bold">${pick.line.athlete.name
+                                    parent.innerHTML = `<span class="text-white font-bold">${pick.line?.athlete?.name || ''}
                                       .split(' ')
                                       .map((n) => n[0])
                                       .join('')
@@ -123,24 +123,24 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                                 }}
                               />
                             ) : (
-                              <span className="text-white font-bold text-lg">{pick.line.athleteId}</span>
+                              <span className="text-white font-bold text-lg">{pick.line?.athleteId}</span>
                             )}
                           </div>
                           <div className="min-w-0">
                             <h6 className="text-white font-semibold text-sm leading-tight truncate">
-                              {pick.line.athlete.name}
+                              {pick.line?.athlete?.name}
                             </h6>
                             <p className="text-slate-400 text-xs">
-                              {new Date(pick.line.matchup.startsAt).toLocaleString()}
+                              {new Date(pick.line?.matchup?.startsAt || '').toLocaleString()}
                             </p>
                           </div>
                         </div>
 
                         <div className="text-right">
                           <div className="text-white font-semibold text-sm">
-                            {pick.line.stat.name} {pick.predictedDirection} {pick.line.predictedValue}
+                            {pick.line?.stat?.displayName} {pick.predictedDirection} {pick.line?.predictedValue}
                           </div>
-                          <div className="text-slate-400 text-xs">{pick.line.actualValue}</div>
+                          <div className="text-slate-400 text-xs">{pick.line?.actualValue}</div>
                         </div>
                       </div>
                     </div>

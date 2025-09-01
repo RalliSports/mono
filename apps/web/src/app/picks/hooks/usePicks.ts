@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useSessionToken } from '@/hooks/use-session'
 import { useToast } from '@/components/ui/toast'
-import type { Athlete, Game, SelectedPick } from '../components/types'
+import type { Game, SelectedPick } from '../components/types'
 import { MAX_BOOKMARKS } from '../constants/gameDefaults'
+import { AthletesGetActiveWithUnresolvedLinesInstance } from '@repo/server'
 
 export function usePicks() {
   const searchParams = useSearchParams()
@@ -20,7 +21,7 @@ export function usePicks() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [game, setGame] = useState<Game | null>(null)
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
-  const [athletes, setAthletes] = useState<Athlete[]>([])
+  const [athletes, setAthletes] = useState<AthletesGetActiveWithUnresolvedLinesInstance[]>([])
 
   // Get game parameters from URL
   const gameId = searchParams.get('id') || undefined
@@ -109,7 +110,7 @@ export function usePicks() {
       lineId: line.id,
       athleteId: athlete.id,
       predictedDirection: betType,
-      athleteAvatar: athlete.picture,
+      picture: athlete.picture || '',
     }
 
     setSelectedPicks([...filteredPicks, newPick])

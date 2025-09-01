@@ -1,7 +1,7 @@
-import { Game } from './types'
+import { GamesFindOne } from '@repo/server'
 
 interface GameHeaderProps {
-  lobby: Game
+  lobby: GamesFindOne
 }
 
 export default function GameHeader({ lobby }: GameHeaderProps) {
@@ -18,7 +18,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
                   className="w-16 h-16 object-cover rounded-xl"
                   onError={(e) => {
                     e.currentTarget.onerror = null
-                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator.username)}&background=0D8ABC&color=fff&size=128`
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
                   }}
                 />
               ) : (
@@ -29,7 +29,9 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
           </div>
           <div className="flex-1">
             <h3 className="text-white font-bold text-xl truncate">{lobby.title}</h3>
-            <p className="text-slate-400 text-sm">Host • Created {new Date(lobby.createdAt).toLocaleDateString()}</p>
+            <p className="text-slate-400 text-sm">
+              Host • Created {new Date(lobby.createdAt || '').toLocaleDateString()}
+            </p>
             <div className="mt-2">
               <h2 className="text-lg font-semibold text-white truncate leading-tight">{lobby.title}</h2>
               <div className="flex items-center gap-2 mt-1">
