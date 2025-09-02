@@ -79,6 +79,18 @@ export class MatchupsService {
     return matchup;
   }
 
+  async getMatchupByEspnId(espnEventId: string) {
+    const matchup = await this.db.query.matchups.findFirst({
+      where: eq(matchups.espnEventId, espnEventId),
+    });
+
+    if (!matchup)
+      throw new NotFoundException(
+        `Matchup with ESPN ID: ${espnEventId} not found`,
+      );
+    return matchup;
+  }
+
   async updateMatchup(id: string, dto: UpdateMatchupDto) {
     const updateData: Partial<{
       espnEventId: string;
