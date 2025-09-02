@@ -3,8 +3,11 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAccount } from '@getpara/react-sdk'
 import { useToast } from '../../components/ui/toast'
 import { useSessionToken } from '@/hooks/use-session'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { Button } from '@/components/ui/button'
 import { useAthletes, useGames, useLines, useMatchups, useStats, useTeams } from '@/hooks/api'
 
 // Import modular components
@@ -28,6 +31,9 @@ function AdminPageContent() {
   const { session } = useSessionToken()
   const router = useRouter()
   const { addToast } = useToast()
+  const account = useAccount()
+  const { isConnected, walletAddress } = useParaWalletBalance()
+  const ADMIN_WALLET = '2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk'
 
   // Hook queries - must be called before any early returns
   const teamsQuery = useTeams()
@@ -39,6 +45,22 @@ function AdminPageContent() {
 
   // Active tab state
   const [activeTab, setActiveTab] = useState<TabType>('stats')
+
+  // Track authentication state
+  const [authState, setAuthState] = useState<'checking' | 'authorized' | 'no-session' | 'no-wallet' | 'unauthorized'>(
+    'checking',
+  )
+
+  // Add timeout for email loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (authState === 'checking' && session && (account?.isConnected || isConnected)) {
+        setAuthState('unauthorized')
+      }
+    }, 5000) // 5 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [authState, session, account?.isConnected, isConnected, walletAddress])
 
   // Form states
   const [newStat, setNewStat] = useState({
@@ -113,20 +135,90 @@ function AdminPageContent() {
     return (gamesQuery.open.data || []) as any
   }, [gamesQuery.open.data])
 
-  // Redirect to signin if not logged in with callback to return to admin
+  // Authentication and authorization logic
   useEffect(() => {
+    // First check: session
     if (!session) {
+      setAuthState('no-session')
       router.push('/signin?callbackUrl=/admin')
+      return
     }
-  }, [session, router])
 
-  // Don't render anything if not authenticated
-  if (!session) {
+    // Second check: wallet connection
+    if (!account?.isConnected && !isConnected) {
+      setAuthState('no-wallet')
+      return
+    }
+
+    // Third check: admin wallet address authorization
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      setAuthState('unauthorized')
+      return
+    }
+
+    // All checks passed
+    setAuthState('authorized')
+  }, [session, account?.isConnected, isConnected, walletAddress, router, authState])
+
+  // Handle different authentication states
+  if (authState === 'checking') {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <h2 className="text-white text-xl font-medium">Checking if admin...</h2>
+        </div>
+      </div>
+    )
+  }
+
+  if (authState === 'no-session') {
+    return null // Will redirect to signin
+  }
+
+  if (authState === 'no-wallet') {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <h2 className="text-white text-xl font-medium">Checking wallet connection...</h2>
+        </div>
+      </div>
+    )
+  }
+
+  if (authState === 'unauthorized') {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="text-red-500 text-6xl mb-6">🚫</div>
+          <h2 className="text-white text-2xl font-bold mb-4">Access Denied</h2>
+          <p className="text-gray-400 mb-6">You aren&apos;t an admin. Only authorized users can access this page.</p>
+          <div className="items-center">
+            <Button
+              className="mx-auto bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl font-semibold text-xs sm:text-sm hover:opacity-90 transition-all duration-200 shadow-lg shadow-[#00CED1]/25 hover:shadow-[#00CED1]/40 hover:scale-105 block text-center"
+              onClick={() => router.push('/main')}
+            >
+              Return to Main
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (authState !== 'authorized') {
     return null
   }
 
   // Handlers using mutations
   const handleCreateStat = async () => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
     if (!newStat.name || !newStat.description || !newStat.customId) {
       addToast('Please fill in all fields', 'error')
       return
@@ -158,6 +250,12 @@ function AdminPageContent() {
   }
 
   const handleCreatePlayer = async () => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
     if (!newPlayer.name || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position || !newPlayer.age) {
       addToast('Please fill in all required fields', 'error')
       return
@@ -193,6 +291,12 @@ function AdminPageContent() {
   }
 
   const handleCreateLine = async () => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
     if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.id) {
       addToast('Please fill in all fields', 'error')
       return
@@ -221,6 +325,12 @@ function AdminPageContent() {
   }
 
   const handleResolveLine = async (lineId: string, actualValue: number) => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
     try {
       await linesQuery.resolve.mutateAsync(lineId)
       addToast(`Line resolved successfully! (${actualValue})`, 'success')
@@ -231,6 +341,12 @@ function AdminPageContent() {
   }
 
   const handleResolveGame = async (gameId: string) => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
     try {
       await gamesQuery.resolve.mutateAsync(gameId)
       addToast('Game resolved successfully!', 'success')
@@ -241,6 +357,12 @@ function AdminPageContent() {
   }
 
   const handleCreateMatchUp = async () => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
     if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.date) {
       addToast('Please fill in all fields', 'error')
       return
