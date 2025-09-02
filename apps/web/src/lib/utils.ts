@@ -12,7 +12,10 @@ export function ellipsify(str = '', len = 4, delimiter = '..') {
   return strLen >= limit ? str.substring(0, len) + delimiter + str.substring(strLen - len, strLen) : str
 }
 
-export function formatBalance(amount: number) {
+export function formatBalance(amount: number | undefined | null) {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return '0.00'
+  }
   return amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
