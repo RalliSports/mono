@@ -80,49 +80,23 @@ export class MatchupsService {
   }
 
   async getMatchupByEspnId(espnEventId: string) {
-    const matchup = await this.db.query.matchups.findFirst({
+    return await this.db.query.matchups.findFirst({
       where: eq(matchups.espnEventId, espnEventId),
     });
-
-    if (!matchup)
-      throw new NotFoundException(
-        `Matchup with ESPN ID: ${espnEventId} not found`,
-      );
-    return matchup;
   }
 
   async updateMatchup(id: string, dto: UpdateMatchupDto) {
-    const updateData: Partial<{
-      espnEventId: string;
-      homeTeamId: string;
-      awayTeamId: string;
-      startsAt: Date;
-      gameDate: string;
-      status: MatchupStatus;
-      scoreHome: number;
-      scoreAway: number;
-    }> = {
-      espnEventId: dto.espnEventId,
-      homeTeamId: dto.homeTeamId,
-      awayTeamId: dto.awayTeamId,
-      status: dto.status,
-      scoreHome: dto.scoreHome,
-      scoreAway: dto.scoreAway,
-    };
-
-    // Only update `startsAt` and `gameDate` if matchup is ReSCHEDULED
-    if (
-      dto.startsAtTimestamp !== undefined &&
-      dto.startsAtTimestamp !== null &&
-      dto.status === MatchupStatus.SCHEDULED
-    ) {
-      updateData.startsAt = new Date(dto.startsAtTimestamp);
-      updateData.gameDate = new Date(dto.startsAtTimestamp).toISOString();
-    }
-
     const matchup = await this.db
       .update(matchups)
-      .set(updateData)
+      .set({
+        ...dto,
+        startsAt: dto.startsAtTimestamp
+          ? new Date(dto.startsAtTimestamp)
+          : undefined,
+        gameDate: dto.startsAtTimestamp
+          ? new Date(dto.startsAtTimestamp).toISOString()
+          : undefined,
+      })
       .where(eq(matchups.id, id))
       .returning();
 

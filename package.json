@@ -9,7 +9,6 @@
     "check-types": "turbo run check-types",
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
-    "db:seed": "turbo run db:seed",
     "db:seed:teams-athletes": "turbo run db:seed:teams-athletes",
     "db:seed:update-stats": "turbo run db:seed:update-stats",
     "fetch:athletes": "turbo run fetch:athletes",
