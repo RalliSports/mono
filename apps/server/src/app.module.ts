@@ -14,10 +14,12 @@ import { AthletesModule } from './athletes/athletes.module';
 import { StatsModule } from './stats/stats.module';
 import { TeamModule } from './team/team.module';
 import { NotificationModule } from './notification/notification.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     WebsocketModule,
