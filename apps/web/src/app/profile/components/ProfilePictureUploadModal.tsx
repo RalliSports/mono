@@ -1,13 +1,12 @@
 import Image from 'next/image'
 import { useRef } from 'react'
-import { User } from './types'
 import { UploadButton } from '@/lib/uploadthing'
+import { useProfile } from '../hooks/useProfile'
 
 interface ProfilePictureUploadModalProps {
   isOpen: boolean
   onClose: () => void
   isUploading: boolean
-  user: User
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   session: string | null
 }
@@ -16,11 +15,11 @@ export default function ProfilePictureUploadModal({
   isOpen,
   onClose,
   isUploading,
-  user,
   onFileSelect,
   session,
 }: ProfilePictureUploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { profilePicture, setProfilePicture } = useProfile(session || null)
 
   if (!isOpen) return null
 
@@ -78,7 +77,9 @@ export default function ProfilePictureUploadModal({
               <UploadButton
                 endpoint="profilePicture"
                 input={{ sessionId: session || '' }}
-                onClientUploadComplete={() => {
+                onClientUploadComplete={(response) => {
+                  console.log('%$#response', response)
+                  setProfilePicture(response[0].ufsUrl)
                   // Do something with the response
                   alert('Upload Completed')
                 }}
@@ -92,12 +93,12 @@ export default function ProfilePictureUploadModal({
               <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileSelect} className="hidden" />
 
               {/* Current Avatar Preview */}
-              {user.avatar && (
+              {profilePicture && (
                 <div className="mt-6 text-center">
                   <p className="text-slate-400 text-sm mb-3">Current photo:</p>
                   <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
                     <Image
-                      src={user.avatar}
+                      src={profilePicture}
                       alt="Current avatar"
                       width={64}
                       height={64}

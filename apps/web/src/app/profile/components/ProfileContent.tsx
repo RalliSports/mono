@@ -67,7 +67,6 @@ export default function ProfileContent() {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         isUploading={isUploading}
-        user={user}
         onFileSelect={handleFileSelect}
         session={session || null}
       />

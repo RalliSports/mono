@@ -1,5 +1,5 @@
 import { GamesFindOne } from '@repo/server'
-
+import Image from 'next/image'
 interface GameHeaderProps {
   lobby: GamesFindOne
 }
@@ -12,10 +12,12 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
           <div className="relative">
             <div className="w-16 h-16 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
               {lobby.title ? (
-                <img
-                  src={`/users/${lobby.title.toLowerCase().replace(/\s+/g, '-')}.png`}
+                <Image
+                  src={lobby.creator?.avatar || ''}
                   alt={lobby.title}
                   className="w-16 h-16 object-cover rounded-xl"
+                  width={64}
+                  height={64}
                   onError={(e) => {
                     e.currentTarget.onerror = null
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`

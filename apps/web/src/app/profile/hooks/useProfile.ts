@@ -10,6 +10,7 @@ export function useProfile(session: string | null) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
+  const [profilePicture, setProfilePicture] = useState('')
   const [myCompletedGames, setMyCompletedGames] = useState<Game[]>([])
 
   const handleUpdateUser = async () => {
@@ -47,6 +48,7 @@ export function useProfile(session: string | null) {
         setAvatar(data.avatar)
         setFirstName(data.firstName || '')
         setLastName(data.lastName || '')
+        setProfilePicture(data.avatar)
       } else {
         const errorData = await response.json()
         addToast(errorData.error || 'Failed to fetch user', 'error')
@@ -105,5 +107,7 @@ export function useProfile(session: string | null) {
     myOpenGames,
     myCompletedGames,
     handleUpdateUser,
+    profilePicture,
+    setProfilePicture,
   }
 }

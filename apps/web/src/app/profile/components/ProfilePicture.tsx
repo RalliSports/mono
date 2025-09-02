@@ -8,7 +8,7 @@ interface ProfilePictureProps {
 
 export default function ProfilePicture({ onEditClick }: ProfilePictureProps) {
   const { session } = useSessionToken()
-  const { user } = useProfile(session || null)
+  const { profilePicture } = useProfile(session || null)
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -19,9 +19,9 @@ export default function ProfilePicture({ onEditClick }: ProfilePictureProps) {
   return (
     <div className="relative group">
       <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
-        {user?.avatar && user.avatar !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
+        {profilePicture && profilePicture !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
           <Image
-            src={user.avatar}
+            src={profilePicture}
             alt="Profile Picture"
             width={80}
             height={80}
