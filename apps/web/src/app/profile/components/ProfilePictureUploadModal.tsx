@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { useRef } from 'react'
 import { UploadButton } from '@/lib/uploadthing'
-import { useProfile } from '../hooks/useProfile'
 
 interface ProfilePictureUploadModalProps {
   isOpen: boolean
@@ -9,6 +8,9 @@ interface ProfilePictureUploadModalProps {
   isUploading: boolean
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   session: string | null
+  onUploadComplete?: () => void
+  avatar: string
+  setAvatar: (avatar: string) => void
 }
 
 export default function ProfilePictureUploadModal({
@@ -17,9 +19,11 @@ export default function ProfilePictureUploadModal({
   isUploading,
   onFileSelect,
   session,
+  onUploadComplete,
+  avatar,
+  setAvatar,
 }: ProfilePictureUploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { profilePicture, setProfilePicture } = useProfile(session || null)
 
   if (!isOpen) return null
 
@@ -79,9 +83,13 @@ export default function ProfilePictureUploadModal({
                 input={{ sessionId: session || '' }}
                 onClientUploadComplete={(response) => {
                   console.log('%$#response', response)
-                  setProfilePicture(response[0].ufsUrl)
+                  setAvatar(response[0].ufsUrl)
+
+                  // Call the callback to trigger refresh
+
                   // Do something with the response
                   alert('Upload Completed')
+                  onUploadComplete?.()
                 }}
                 onUploadError={(error: Error) => {
                   // Do something with the error.
@@ -93,12 +101,12 @@ export default function ProfilePictureUploadModal({
               <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileSelect} className="hidden" />
 
               {/* Current Avatar Preview */}
-              {profilePicture && (
+              {avatar && (
                 <div className="mt-6 text-center">
                   <p className="text-slate-400 text-sm mb-3">Current photo:</p>
                   <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
                     <Image
-                      src={profilePicture}
+                      src={avatar}
                       alt="Current avatar"
                       width={64}
                       height={64}

@@ -10,8 +10,8 @@ export function useProfile(session: string | null) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
-  const [profilePicture, setProfilePicture] = useState('')
   const [myCompletedGames, setMyCompletedGames] = useState<Game[]>([])
+  const [forceRefresh, setForceRefresh] = useState(false)
 
   const handleUpdateUser = async () => {
     const response = await fetch('/api/update-user', {
@@ -43,19 +43,23 @@ export function useProfile(session: string | null) {
       })
       if (response.ok) {
         const data = await response.json()
+        console.log('%$#data', data.avatar)
         setUser(data)
         setUsername(data.username)
         setAvatar(data.avatar)
         setFirstName(data.firstName || '')
         setLastName(data.lastName || '')
-        setProfilePicture(data.avatar)
       } else {
         const errorData = await response.json()
         addToast(errorData.error || 'Failed to fetch user', 'error')
       }
     }
-    fetchUser()
-  }, [session])
+    console.log('%$#forceRefresh', forceRefresh)
+    if (!user || forceRefresh) {
+      fetchUser()
+      setForceRefresh(false)
+    }
+  }, [session, user, forceRefresh])
 
   useEffect(() => {
     const fetchMyOpenGames = async () => {
@@ -107,7 +111,6 @@ export function useProfile(session: string | null) {
     myOpenGames,
     myCompletedGames,
     handleUpdateUser,
-    profilePicture,
-    setProfilePicture,
+    setForceRefresh,
   }
 }
