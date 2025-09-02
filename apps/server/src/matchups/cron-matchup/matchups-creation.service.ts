@@ -16,7 +16,7 @@ export class MatchupCreationService {
   ) {}
 
   // Runs every day
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_MINUTE)
   async createAllMatchupsFromEspn() {
     const SEASON_TYPE_MAP = {
       PRESEASON: 1,
@@ -25,62 +25,31 @@ export class MatchupCreationService {
       OFFSEASON: 4,
     };
 
-    this.logger.log('Running daily ESPN matchup fetch job...');
+    this.logger.log('Running Daily ESPN matchup fetch job...');
     try {
       // 1. Get all specified season week URLs
       const weeksResp = await axios.get(
         `http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/${SEASON_TYPE_MAP.REGULAR}/weeks?lang=en&region=us`,
       );
-      const weekRefs: string[] = weeksResp.data.items.map((item) => item.$ref);
+      const weekRefs: string[] = weeksResp.data.items.map(
+        (item: { $ref: string }) => {
+          const eventUrl = item.$ref; //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/2/weeks/1?lang=en&region=us
+
+          const [urlPart1, urlPart2] = eventUrl.split('?');
+          return `${urlPart1}/events?${urlPart2}`; //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/2/weeks/1/events?lang=en&region=us
+        },
+      );
 
       // 2. Get event (game) URLs from each week
       for (const weekUrl of weekRefs) {
-        //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/2/weeks/1?lang=en&region=us
         const weekData = (await axios.get(weekUrl)).data;
 
-        // Extract the nested events URL
-        const eventsUrl: string | undefined = weekData.events?.$ref;
-        if (!eventsUrl) {
-          this.logger.warn(`No events URL found in week data ${weekUrl}`);
-          continue; // skip this week if no events URL
-        }
-
-        const eventsData = (await axios.get(eventsUrl)).data;
-        //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/2/weeks/1/events?lang=en&region=us
-
-        const eventRefs: string[] = eventsData.items.map(
-          (item: { $ref: string }) => item.$ref,
+        const eventRefs: string[] = weekData.items.map(
+          (item: { $ref: string }) => item.$ref, //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401772510?lang=en&region=us
         );
 
         // 3. Get single event detail (single game)
         for (const eventUrl of eventRefs) {
-          //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401772510?lang=en&region=us
-
-          const eventIdIfExists = eventUrl.split('/').pop()?.split('?')[0];
-          let existingMatchup;
-
-          if (eventIdIfExists) {
-            try {
-              existingMatchup =
-                await this.matchupsService.getMatchupByEspnId(eventIdIfExists);
-
-              // If the event already exists, and IN_PROGRESS/FINISHED/CANCELLED, skip it - Otherwise, update it <For Rescheduled games>
-              if (
-                existingMatchup &&
-                existingMatchup.status !== MatchupStatus.SCHEDULED
-              ) {
-                this.logger.log(
-                  `Matchup ${eventIdIfExists} already exists and ${existingMatchup.status}, skipping...`,
-                );
-                continue;
-              }
-            } catch (err) {
-              this.logger.log(
-                `Matchup ${eventIdIfExists} does not exist, creating...`,
-              );
-            }
-          }
-
           try {
             const eventData: EspnEventData = (await axios.get(eventUrl)).data;
             const competition = eventData.competitions?.[0];
@@ -106,24 +75,51 @@ export class MatchupCreationService {
               );
               continue;
             }
-            if (existingMatchup) {
-              //Just update the startsAtTimestamp
-              await this.matchupsService.updateMatchup(existingMatchup.id, {
-                startsAtTimestamp: new Date(competition.date).getTime(),
-              });
-              this.logger.log(
-                `Updated matchup for event ${eventData.id}: ${homeTeam.name} vs ${awayTeam.name}`,
-              );
-            } else {
-              await this.matchupsService.createMatchup({
-                espnEventId: eventData.id,
-                homeTeamId: homeTeam.id,
-                awayTeamId: awayTeam.id,
-                startsAtTimestamp: new Date(competition.date).getTime(),
-              });
-              this.logger.log(
-                `Created matchup for event ${eventData.id}: ${homeTeam.name} vs ${awayTeam.name}`,
-              );
+            try {
+              const existingMatchup =
+                await this.matchupsService.getMatchupByEspnId(eventData.id);
+
+              if (existingMatchup) {
+                if (existingMatchup.status !== MatchupStatus.SCHEDULED) {
+                  this.logger.log(
+                    `Matchup ${eventData.id} already exists and ${existingMatchup.status}, skipping...`,
+                  );
+                  continue;
+                } else {
+                  try {
+                    await this.matchupsService.updateMatchup(
+                      existingMatchup.id,
+                      {
+                        startsAtTimestamp: new Date(competition.date).getTime(),
+                      },
+                    );
+                    this.logger.log(
+                      `Updated matchup for event ${eventData.id}: ${homeTeam.name} vs ${awayTeam.name}`,
+                    );
+                  } catch (err) {
+                    this.logger.warn(
+                      'Error processing event: ' + eventUrl,
+                      err,
+                    );
+                  }
+                }
+              } else {
+                try {
+                  await this.matchupsService.createMatchup({
+                    espnEventId: eventData.id,
+                    homeTeamId: homeTeam.id,
+                    awayTeamId: awayTeam.id,
+                    startsAtTimestamp: new Date(competition.date).getTime(),
+                  });
+                  this.logger.log(
+                    `Created matchup for event ${eventData.id}: ${homeTeam.name} vs ${awayTeam.name}`,
+                  );
+                } catch (err) {
+                  this.logger.warn('Error processing event: ' + eventUrl, err);
+                }
+              }
+            } catch (err) {
+              this.logger.warn('Error processing event: ' + eventUrl, err);
             }
           } catch (err) {
             this.logger.warn('Error processing event: ' + eventUrl, err);
