@@ -10,7 +10,7 @@ import { MatchupCreationService } from './cron-matchup/matchups-creation.service
 import { TeamService } from 'src/team/team.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule],
   controllers: [MatchupsController],
   providers: [
     MatchupsService,

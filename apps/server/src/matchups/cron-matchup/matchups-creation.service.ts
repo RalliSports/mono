@@ -56,11 +56,12 @@ export class MatchupCreationService {
         for (const eventUrl of eventRefs) {
           //https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401772510?lang=en&region=us
 
-          let eventIdIfExists = eventUrl.split('/').pop()?.split('?')[0];
+          const eventIdIfExists = eventUrl.split('/').pop()?.split('?')[0];
+          let existingMatchup;
 
           if (eventIdIfExists) {
             try {
-              const existingMatchup =
+              existingMatchup =
                 await this.matchupsService.getMatchupByEspnId(eventIdIfExists);
 
               // If the event already exists, and IN_PROGRESS/FINISHED/CANCELLED, skip it - Otherwise, update it <For Rescheduled games>
@@ -74,11 +75,12 @@ export class MatchupCreationService {
                 continue;
               }
             } catch (err) {
-              this.logger.warn(
+              this.logger.log(
                 `Matchup ${eventIdIfExists} does not exist, creating...`,
               );
             }
           }
+
           try {
             const eventData: EspnEventData = (await axios.get(eventUrl)).data;
             const competition = eventData.competitions?.[0];
@@ -104,9 +106,9 @@ export class MatchupCreationService {
               );
               continue;
             }
-            if (eventIdIfExists) {
+            if (existingMatchup) {
               //Just update the startsAtTimestamp
-              await this.matchupsService.updateMatchup(eventIdIfExists, {
+              await this.matchupsService.updateMatchup(existingMatchup.id, {
                 startsAtTimestamp: new Date(competition.date).getTime(),
               });
               this.logger.log(

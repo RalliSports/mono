@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
 import { LinesService } from './lines.service';
 import { LinesController } from './lines.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DatabaseModule, AuthModule],
+  imports: [ DatabaseModule, AuthModule],
   controllers: [LinesController],
   providers: [LinesService],
 })
