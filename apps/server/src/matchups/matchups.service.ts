@@ -52,7 +52,6 @@ export class MatchupsService {
 
   async getMatchupsThatShouldHaveStarted() {
     const now = new Date();
-    // console.log('now', now);
 
     return this.db.query.matchups.findMany({
       with: {

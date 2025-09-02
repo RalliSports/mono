@@ -7,7 +7,7 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { WebPushService } from 'src/utils/services/webPush';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserEmailDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { PushSubscriptionResponse } from '../notification/dto/webpush.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
@@ -56,6 +56,22 @@ export class UserService {
 
     return updatedUser;
   }
+
+  async updateUserEmail(dto: UpdateUserEmailDto, user: User) {
+    // Use the provided avatar URL if available, otherwise keep existing logic for random athlete
+    let email = dto.email;
+
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
+        emailAddress: email,
+      })
+      .where(eq(users.id, user.id))
+      .returning();
+
+    return updatedUser;
+  }
+
   async faucetTokens(user: User) {
     const userPK = new PublicKey(user.walletAddress);
 

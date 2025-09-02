@@ -24,7 +24,6 @@ export class TokenController {
   })
   @Post('/add-token')
   create(@Body() dto: CreateTokenDto) {
-    console.log(dto, "craee")
     return this.service.create(dto);
   }
 

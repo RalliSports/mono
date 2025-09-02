@@ -470,7 +470,6 @@ export class GamesService {
           );
         }
 
-        console.log('updating game', id);
         await tx
           .update(games)
           .set({

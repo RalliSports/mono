@@ -82,7 +82,6 @@ export default function ProfilePictureUploadModal({
                 endpoint="profilePicture"
                 input={{ sessionId: session || '' }}
                 onClientUploadComplete={(response) => {
-                  console.log('%$#response', response)
                   setAvatar(response[0].ufsUrl)
 
                   // Call the callback to trigger refresh

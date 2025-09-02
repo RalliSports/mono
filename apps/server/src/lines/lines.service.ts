@@ -70,10 +70,8 @@ export class LinesService {
       if (!statCustomId) throw new BadRequestException('Stat not found');
       if (!athleteCustomId) throw new BadRequestException('Athlete not found');
 
-      console.log('matchup.startsAt', matchup);
       const adjustedTimestamp =
         new Date(matchup.startsAt ?? '').getTime() / 1000;
-      console.log('adjustedTimestamp', adjustedTimestamp);
 
       try {
         txn = await this.anchor.createLineInstruction(
@@ -160,7 +158,6 @@ export class LinesService {
 
   async resolveLine(id: string, dto: ResolveLineDto, user: User) {
     return await this.db.transaction(async (tx) => {
-      console.log('resolveLine', id, dto, user);
       const line = await this.getLineById(id);
       if (!line) throw new NotFoundException(`Line ${id} not found`);
       // if (line.actualValue)
