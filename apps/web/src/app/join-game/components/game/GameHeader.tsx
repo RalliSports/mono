@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { Game } from '../../types'
+import { GamesFindOne } from '@repo/server'
 
 interface GameHeaderProps {
-  game: Game
+  game: GamesFindOne
 }
 
 const getVisibilityIcon = (visibility: string) => {
@@ -39,8 +39,8 @@ export default function GameHeader({ game }: GameHeaderProps) {
           <div className="relative">
             <div className="w-16 h-16 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
               <Image
-                src={game.creator.avatar || '/default-avatar.png'}
-                alt={game.creator.username || 'Creator'}
+                src={game.creator?.avatar || '/default-avatar.png'}
+                alt={game.creator?.username || 'Creator'}
                 width={64}
                 height={64}
               />
@@ -49,7 +49,9 @@ export default function GameHeader({ game }: GameHeaderProps) {
           </div>
           <div className="flex-1">
             <h3 className="text-white font-bold text-xl truncate">{game.title}</h3>
-            <p className="text-slate-400 text-sm">Host • Created {new Date(game.createdAt).toLocaleDateString()}</p>
+            <p className="text-slate-400 text-sm">
+              Host • Created {new Date(game.createdAt || '').toLocaleDateString()}
+            </p>
             <div className="mt-2">
               <h2 className="text-lg font-semibold text-white truncate leading-tight">{game.title}</h2>
               <div className="flex items-center gap-2 mt-1">
@@ -57,7 +59,7 @@ export default function GameHeader({ game }: GameHeaderProps) {
                   {game.participants.length}/{game.maxParticipants} players
                 </span>
                 <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
-                <span className="text-slate-400 text-sm">{game.maxBet} legs</span>
+                <span className="text-slate-400 text-sm">{game.numBets || 0} legs</span>
               </div>
             </div>
           </div>
@@ -71,7 +73,9 @@ export default function GameHeader({ game }: GameHeaderProps) {
           </div>
           <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-105">
             <div className="text-slate-400 text-xs">Max Payout</div>
-            <div className="text-emerald-400 font-bold text-lg">${game.depositAmount * game.maxParticipants}</div>
+            <div className="text-emerald-400 font-bold text-lg">
+              ${game.depositAmount || 0 * (game.maxParticipants || 0)}
+            </div>
           </div>
           <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:scale-105">
             <div className="text-slate-400 text-xs">Visibility</div>

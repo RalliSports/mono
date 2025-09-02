@@ -37,8 +37,6 @@ function AdminPageContent() {
     // Data
     teams,
     players,
-    lines,
-    games,
     matchUps,
     stats,
 

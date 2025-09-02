@@ -20,6 +20,26 @@ export class PushSubscriptionResponse {
   keys: PushSubscriptionKeys;
 }
 
+export class NotificationPayload {
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  body: string;
+
+  @ApiProperty()
+  image?: string;
+
+  @ApiProperty()
+  url?: string;
+
+  @ApiProperty()
+  icon?: string;
+
+  @ApiProperty()
+  tag?: string;
+}
+
 export class UserPushSubscription {
   @ApiProperty()
   id: string;

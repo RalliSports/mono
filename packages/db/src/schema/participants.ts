@@ -13,6 +13,7 @@ export const participants = pgTable("participants", {
   gameId: uuid("game_id").references(() => games.id),
   joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
   isWinner: boolean("is_winner"),
+  submitTxnSignature: text("created_txn_signature"),
 });
 
 export const participantsRelations = relations(

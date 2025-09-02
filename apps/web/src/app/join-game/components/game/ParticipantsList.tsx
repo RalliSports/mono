@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { Game } from '../../types'
+import { GamesFindOne } from '@repo/server'
 
 interface ParticipantsListProps {
-  game: Game
+  game: GamesFindOne
   expandedParticipants: string[]
   onToggleParticipant: (participantId: string) => void
 }
@@ -43,7 +43,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           height={56}
                         />
                       </div>
-                      {participant.user?.id === game.creator.id && (
+                      {participant.user?.id === game.creator?.id && (
                         <div className="absolute -top-1 -left-1 text-sm">👑</div>
                       )}
                     </div>
@@ -52,7 +52,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                         {participant.user?.username || 'Anonymous User'}
                       </h4>
                       <p className="text-slate-400 text-sm mt-1">
-                        Joined {new Date(participant.joinedAt).toLocaleDateString()} • ${game.depositAmount}
+                        Joined {new Date(participant.joinedAt || '').toLocaleDateString()} • ${game.depositAmount}
                       </p>
                     </div>
                   </div>
@@ -101,10 +101,10 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
-                            {pick.line.athleteId ? (
+                            {pick.line?.athleteId ? (
                               <Image
-                                src={pick.line.athlete.picture}
-                                alt={pick.line.athlete.name}
+                                src={pick.line?.athlete?.picture || ''}
+                                alt={pick.line?.athlete?.name || ''}
                                 width={48}
                                 height={48}
                                 className="w-full h-full object-cover"
@@ -114,7 +114,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                                   target.style.display = 'none'
                                   const parent = target.parentElement
                                   if (parent) {
-                                    parent.innerHTML = `<span class="text-white font-bold">${pick.line.athlete.name
+                                    parent.innerHTML = `<span class="text-white font-bold">${pick.line?.athlete?.name || ''}
                                       .split(' ')
                                       .map((n) => n[0])
                                       .join('')
@@ -123,36 +123,34 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                                 }}
                               />
                             ) : (
-                              <span className="text-white font-bold text-lg">{pick.line.athleteId}</span>
+                              <span className="text-white font-bold text-lg">{pick.line?.athleteId}</span>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <h6 className="text-white font-semibold text-sm leading-tight truncate">
-                              {pick.line.athlete.name}
+                              {pick.line?.athlete?.name}
                             </h6>
-                            <p className="text-slate-400 text-xs">
-                              {pick.line.matchup.homeTeam} vs {pick.line.matchup.awayTeam}
-                            </p>
+                            <p className="text-slate-400 text-xs">Team vs Team</p>
                             <p className="text-slate-500 text-xs">
-                              {new Date(pick.line.matchup.startsAt).toLocaleString()}
+                              {new Date(pick.line?.matchup?.startsAt || '').toLocaleString()}
                             </p>
                           </div>
                         </div>
 
                         <div className="text-right">
                           <div className="text-white font-semibold text-sm">
-                            <span>{pick.line.stat.name} </span>
+                            <span>{pick.line?.stat?.displayName || pick.line?.stat?.name} </span>
                             <span
                               className={`font-bold text-xs ${
-                                pick.predictedDirection.toLowerCase() === 'over' ? 'text-emerald-400' : 'text-red-400'
+                                pick.predictedDirection?.toLowerCase() === 'over' ? 'text-emerald-400' : 'text-red-400'
                               }`}
                             >
-                              {pick.predictedDirection.toUpperCase()}{' '}
-                              {pick.predictedDirection.toLowerCase() === 'over' ? '˄' : '˅'}
+                              {pick.predictedDirection?.toUpperCase()}{' '}
+                              {pick.predictedDirection?.toLowerCase() === 'over' ? '˄' : '˅'}
                             </span>
-                            <span> {pick.line.predictedValue}</span>
+                            <span> {pick.line?.predictedValue}</span>
                           </div>
-                          <div className="text-slate-400 text-xs">Current: {pick.line.actualValue || 'N/A'}</div>
+                          <div className="text-slate-400 text-xs">Current: {pick.line?.actualValue || 'N/A'}</div>
                         </div>
                       </div>
 
@@ -161,7 +159,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                         <div className="flex justify-between items-center text-xs">
                           <span className="text-slate-400">Progress</span>
                           <span className="text-slate-300">
-                            {pick.line.actualValue || 0} / {pick.line.predictedValue}
+                            {pick.line?.actualValue || 0} / {pick.line?.predictedValue}
                           </span>
                         </div>
 
@@ -172,12 +170,12 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                               className={`h-full transition-all duration-1000 ${
                                 pick.isCorrect
                                   ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                  : pick.line.actualValue !== null && pick.line.actualValue > 0
-                                    ? pick.predictedDirection.toLowerCase() === 'over'
-                                      ? pick.line.actualValue >= pick.line.predictedValue
+                                  : pick.line?.actualValue !== null && Number(pick.line?.actualValue || 0) > 0
+                                    ? pick.predictedDirection?.toLowerCase() === 'over'
+                                      ? Number(pick.line?.actualValue || 0) >= Number(pick.line?.predictedValue || 0)
                                         ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
                                         : 'bg-gradient-to-r from-blue-400 to-blue-500'
-                                      : pick.line.actualValue <= pick.line.predictedValue
+                                      : Number(pick.line?.actualValue || 0) <= Number(pick.line?.predictedValue || 0)
                                         ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
                                         : 'bg-gradient-to-r from-red-600 to-red-400'
                                     : 'bg-slate-600'
@@ -187,8 +185,8 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                                   100,
                                   Math.max(
                                     0,
-                                    pick.line.actualValue
-                                      ? (pick.line.actualValue / (pick.line.predictedValue * 1.3)) * 100
+                                    pick.line?.actualValue && pick.line?.predictedValue
+                                      ? (Number(pick.line.actualValue) / (Number(pick.line.predictedValue) * 1.3)) * 100
                                       : 0,
                                   ),
                                 )}%`,
@@ -197,12 +195,12 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           </div>
 
                           {/* Target threshold line */}
-                          {pick.line.actualValue !== null && (
+                          {pick.line?.actualValue !== null && pick.line?.predictedValue && (
                             <>
                               <div
                                 className="absolute w-0.5 bg-white/80 shadow-lg"
                                 style={{
-                                  left: `${(pick.line.predictedValue / (pick.line.predictedValue * 1.3)) * 100}%`,
+                                  left: `${(Number(pick.line.predictedValue) / (Number(pick.line.predictedValue) * 1.3)) * 100}%`,
                                   top: '-1px',
                                   height: '10px',
                                 }}
@@ -212,7 +210,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                               <div
                                 className="absolute -top-6 text-xs text-slate-300 font-medium transform -translate-x-1/2 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-600/50"
                                 style={{
-                                  left: `${(pick.line.predictedValue / (pick.line.predictedValue * 1.3)) * 100}%`,
+                                  left: `${(Number(pick.line.predictedValue) / (Number(pick.line.predictedValue) * 1.3)) * 100}%`,
                                 }}
                               >
                                 {pick.line.predictedValue}

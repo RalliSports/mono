@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Game } from '../components/types'
 import { useToast } from '@/components/ui/toast'
-
+import { GamesFindOne } from '@repo/server'
 export const useGameData = () => {
   const { addToast } = useToast()
   const searchParams = useSearchParams()
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
-  const [lobby, setLobby] = useState<Game | null>(null)
+  const [lobby, setLobby] = useState<GamesFindOne | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Get lobby ID from URL

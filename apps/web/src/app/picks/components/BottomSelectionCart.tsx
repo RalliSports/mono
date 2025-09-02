@@ -40,7 +40,7 @@ export default function BottomSelectionCart({
                   {pick ? (
                     <>
                       <Image
-                        src={pick.athleteAvatar}
+                        src={pick.picture}
                         alt={pick.athleteId}
                         className="w-10 h-10 object-cover rounded-lg"
                         width={24}
