@@ -4,7 +4,6 @@ interface TopNavigationProps {
   onMenuClick: () => void
   isConnected: boolean
   balances: {
-    sol: number
     ralli: number
   }
   balanceLoading: boolean

@@ -17,7 +17,7 @@ export default function LobbiesGrid({ lobbies, user }: LobbiesGridProps) {
           timeLeft={lobby.timeLeft}
           host={lobby.host}
           isUrgent={lobby.isUrgent}
-          shouldOpenViewGame={lobby.participants.some((participant: any) => participant.user.id === user?.id)}
+          shouldOpenViewGame={lobby.participants.some((participant) => participant.user.id === user?.id)}
         />
       ))}
     </div>

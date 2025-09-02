@@ -55,7 +55,7 @@ export default function StakeControls() {
                   ? 'Loading...'
                   : balanceError
                     ? '$0.00'
-                    : `$${formatBalance(balances.totalUsd)}`
+                    : `$${formatBalance(balances.ralli)}`
                 : '$0.00'}
             </span>
           </div>

@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation'
 
 interface TopNavigationProps {
   isConnected: boolean
-  balances: { sol: number; ralli: number }
+  balances: { ralli: number }
   balanceLoading: boolean
   balanceError?: string
   formatBalance: (amount: number) => string
@@ -47,7 +47,7 @@ export default function TopNavigation({
             }}
             title={
               isConnected
-                ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nRALLI: $${formatBalance(balances.ralli)}`
+                ? `Click to refresh balance\nRALLI: $${formatBalance(balances.ralli)}`
                 : 'Connect wallet to view balance'
             }
           >

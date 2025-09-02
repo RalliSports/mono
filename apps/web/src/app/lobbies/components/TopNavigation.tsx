@@ -13,13 +13,11 @@ interface TopNavigationProps {
   balanceProps: {
     isConnected: boolean
     balances: {
-      sol: number
       ralli: number
-      totalUsd: number
     }
     isLoading: boolean
     error: any
-    refetch: () => void
+    refetch: () => Promise<any>
   }
 }
 

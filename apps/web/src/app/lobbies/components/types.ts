@@ -1,3 +1,5 @@
+import type { Lobby } from '@/hooks/get-games'
+
 export interface User {
   id: string
   emailAddress: string
@@ -20,13 +22,11 @@ export interface FilterTab {
 export interface BalanceDisplayProps {
   isConnected: boolean
   balances: {
-    sol: number
     ralli: number
-    totalUsd: number
   }
   isLoading: boolean
-  error: any
-  refetch: () => void
+  error: Error | null
+  refetch: () => Promise<unknown>
 }
 
 export interface ProfileDropdownProps {
@@ -58,7 +58,7 @@ export interface ResultsSummaryProps {
 }
 
 export interface LobbiesGridProps {
-  lobbies: any[]
+  lobbies: Lobby[]
   user: User | null
 }
 
@@ -69,7 +69,8 @@ export interface EmptyStateProps {
   onCreateGame: () => void
 }
 
-export interface LoadingStateProps {}
+
+export type LoadingStateProps = object
 
 export interface ErrorStateProps {
   error: string
