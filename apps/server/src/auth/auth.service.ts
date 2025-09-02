@@ -43,6 +43,7 @@ export class AuthService {
 
       const para = await this.getPara();
       const userEmail = para.getEmail() || para.email;
+      console.log('%$#userEmail', userEmail);
 
       const userExisted = await this.db.query.users.findFirst({
         where: eq(users.paraUserId, para.getUserId() ?? ''),
@@ -69,15 +70,14 @@ export class AuthService {
               })
               .where(eq(users.id, userExisted.id));
           }
-
-          if (userExisted.emailAddress === null) {
-            await this.db
-              .update(users)
-              .set({
-                emailAddress: userEmail,
-              })
-              .where(eq(users.id, userExisted.id));
-          }
+        }
+        if (userExisted.emailAddress === null) {
+          await this.db
+            .update(users)
+            .set({
+              emailAddress: userEmail,
+            })
+            .where(eq(users.id, userExisted.id));
         }
 
         return {
