@@ -113,8 +113,9 @@ export function useParaWalletBalance() {
     isLoading: solBalanceQuery.isLoading || usdcBalanceQuery.isLoading || isPriceLoading,
     error: solBalanceQuery.error || usdcBalanceQuery.error || priceError,
     refetch: () => {
-      solBalanceQuery.refetch()
-      usdcBalanceQuery.refetch()
+  solBalanceQuery.refetch()
+  usdcBalanceQuery.refetch()
+  ralliBalanceQuery.refetch()
     },
   }
 }
