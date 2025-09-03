@@ -1,10 +1,20 @@
 import { GamesFindOne } from '@repo/server'
 import Image from 'next/image'
+import { useState } from 'react';
 interface GameHeaderProps {
   lobby: GamesFindOne
 }
 
 export default function GameHeader({ lobby }: GameHeaderProps) {
+  const [imageSrc, setImageSrc] = useState(lobby.creator?.avatar);
+  const [hasErrored, setHasErrored] = useState(false);
+
+  const handleError = () => {
+    if (!hasErrored) {
+      setHasErrored(true);
+      setImageSrc('/images/pfp-2.svg'); // Use local fallback
+    }
+  };
   return (
     <div className="pt-6 pb-4">
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
@@ -13,13 +23,13 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
             <div className="w-16 h-16 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
               {
                 <Image
-                  src={lobby.creator?.avatar || '/images/pfp-3.svg'}
+                  src={imageSrc || '/images/pfp-2.svg'}
                   alt={lobby.title || 'Game'}
                   className="w-16 h-16 object-cover rounded-xl"
                   width={64}
                   height={64}
                   onError={(e) => {
-                    e.currentTarget.onerror = null
+                    e.currentTarget.onerror = handleError;
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
                   }}
                 />
