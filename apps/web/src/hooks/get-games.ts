@@ -112,7 +112,7 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
       participants,
       maxParticipants,
       buyIn,
-      prizePool: maxParticipants * (game.numBets || 0),
+      prizePool: maxParticipants * (game.depositAmount || 0),
       legs: game.numBets || 1, // updated here
       timeLeft: '1h 30m', // static placeholder
       host: {
