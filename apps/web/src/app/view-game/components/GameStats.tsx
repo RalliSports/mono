@@ -15,7 +15,7 @@ export default function GameStats({ lobby }: GameStatsProps) {
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-105">
         <div className="text-slate-400 text-xs">Max Payout</div>
         <div className="text-emerald-400 font-bold text-lg">
-          ${lobby.depositAmount || 0 * (lobby.maxParticipants || 0)}
+          ${(lobby.depositAmount || 0) * (lobby.maxParticipants || 0)}
         </div>
       </div>
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:scale-105">

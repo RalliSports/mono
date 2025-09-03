@@ -39,7 +39,7 @@ type Game = {
   participants?: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants?: number
   depositAmount?: number
-  maxBet?: number
+  numBets?: number
   gameMode?: { label: string }
   creator?: { walletAddress: string; username: string; avatar: string }
   status: 'waiting' | 'active' | 'complete' | 'pending'
@@ -89,7 +89,6 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
     const participants = game.participants || []
     const maxParticipants = game.maxParticipants || 1
     const buyIn = game.depositAmount || 0
-    const maxBet = game.maxBet ?? buyIn // fallback
     const sport = getSport(game.gameMode?.label || '')
     const username = game.creator?.username || '0x??'
 
@@ -113,8 +112,8 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
       participants,
       maxParticipants,
       buyIn,
-      prizePool: maxParticipants * maxBet,
-      legs: maxBet || 1, // updated here
+      prizePool: maxParticipants * (game.numBets || 0),
+      legs: game.numBets || 1, // updated here
       timeLeft: '1h 30m', // static placeholder
       host: {
         username,
