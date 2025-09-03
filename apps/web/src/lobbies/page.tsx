@@ -343,7 +343,7 @@ export default function LobbiesPage() {
                   alt="Profile"
                   className="w-10 h-10 object-cover rounded-full"
                   onError={(e) => {
-                    e.currentTarget.onerror = null
+                    e.currentTarget.onerror = '/images/pfp-1.svg'
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=Main+User&background=0D8ABC&color=fff&size=128`
                   }}
                 />

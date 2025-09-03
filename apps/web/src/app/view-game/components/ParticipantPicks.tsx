@@ -21,7 +21,7 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                 <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
                   {pick.line?.athleteId ? (
                     <Image
-                      src={pick.line?.athlete?.picture || '/images/pfp2.svg'}
+                      src={pick.line?.athlete?.picture || '/images/pfp-2.svg'}
                       alt={pick.line?.athlete?.name || ''}
                       width={48}
                       height={48}
@@ -32,14 +32,13 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                         target.style.display = 'none'
                         const parent = target.parentElement
                         if (parent) {
-                          parent.innerHTML = `<span class="text-white font-bold">${
-                            pick.line?.athlete?.name ||
+                          parent.innerHTML = `<span class="text-white font-bold">${pick.line?.athlete?.name ||
                             ''
                               .split(' ')
                               .map((n) => n[0])
                               .join('')
                               .toUpperCase()
-                          }</span>`
+                            }</span>`
                         }
                       }}
                     />

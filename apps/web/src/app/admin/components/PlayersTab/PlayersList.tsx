@@ -28,7 +28,7 @@ export default function PlayersList({ players }: PlayersListProps) {
                 <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
                   {
                     <Image
-                      src={player.picture || '/images/pfp1.svg'}
+                      src={player.picture || '/images/pfp-1.svg'}
                       alt={player.name}
                       width={48}
                       height={48}

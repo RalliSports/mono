@@ -13,7 +13,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
             <div className="w-16 h-16 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
               {
                 <Image
-                  src={lobby.creator?.avatar || '/images/pfp3.svg'}
+                  src={lobby.creator?.avatar || '/images/pfp-3.svg'}
                   alt={lobby.title || 'Game'}
                   className="w-16 h-16 object-cover rounded-xl"
                   width={64}

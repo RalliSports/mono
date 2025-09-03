@@ -105,7 +105,7 @@ export default function ProfilePictureUploadModal({
                   <p className="text-slate-400 text-sm mb-3">Current photo:</p>
                   <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
                     <Image
-                      src={avatar || '/images/pfp1.svg'}
+                      src={avatar || '/images/pfp-1.svg'}
                       alt="Current avatar"
                       width={64}
                       height={64}

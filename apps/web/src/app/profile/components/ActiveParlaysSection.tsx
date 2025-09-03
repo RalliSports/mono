@@ -43,13 +43,12 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
                   <h4 className="text-white font-semibold text-lg">{game.title}</h4>
                   <div className="flex items-center space-x-2 mt-1">
                     <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        game.status === 'live'
+                      className={`px-2 py-1 rounded-md text-xs font-medium ${game.status === 'live'
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                           : game.status === 'pending'
                             ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                             : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                      }`}
+                        }`}
                     >
                       {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
                     </span>
@@ -72,19 +71,18 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
                     ?.bets.map((bet, index) => (
                       <Image
                         key={bet.id}
-                        src={bet.line.athlete.picture || '/images/pfp2.svg'}
+                        src={bet.line.athlete.picture || '/images/pfp-2.svg'}
                         alt={bet.line.athlete.name || ''}
                         width={32}
                         height={32}
-                        className={`rounded-full border-2 object-cover bg-slate-800 ${
-                          new Date(bet.line.matchup.startsAt) > new Date()
+                        className={`rounded-full border-2 object-cover bg-slate-800 ${new Date(bet.line.matchup.startsAt) > new Date()
                             ? 'border-slate-600'
                             : !!bet.line.actualValue
                               ? 'border-blue-500'
                               : bet.isCorrect
                                 ? 'border-emerald-500'
                                 : 'border-red-500'
-                        }`}
+                          }`}
                         style={{
                           aspectRatio: '1/1',
                           zIndex: index + 1,

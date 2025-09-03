@@ -19,7 +19,7 @@ export default function ProfileButton() {
     >
       {user ? (
         <Image
-          src={user.avatar || '/images/pfp1.svg'}
+          src={user.avatar || '/images/pfp-1.svg'}
           alt={user.username || 'Profile'}
           width={40}
           height={40}
