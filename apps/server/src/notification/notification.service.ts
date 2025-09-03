@@ -97,7 +97,7 @@ export class NotificationService {
       title: `You’ve Been Invited to join ${gameTitle}`,
       body: `You have been invited to join a new game. Don’t keep them waiting!`,
       // image: 'https://www.ralli.bet/images/game-invite.png',
-      url: `https://www.ralli.bet/view-game?id=${gameId}`,
+      url: `https://www.ralli.bet/join-game?id=${gameId}`,
       // icon: 'https://www.ralli.bet/icons/invite.png',
       tag: `game-invite-${gameId}`,
     };
