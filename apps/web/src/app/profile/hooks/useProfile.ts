@@ -21,7 +21,7 @@ export function useProfile(session: string | null) {
       },
       body: JSON.stringify({
         username,
-        avatar: avatar || 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg',
+        avatar: avatar || '/images/pfp1.svg',
         firstName,
         lastName,
       }),
