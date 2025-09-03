@@ -16,38 +16,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/images/planet.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Create Game",
-      "short_name": "New Game",
-      "description": "Create a new betting game",
-      "url": "/create-game",
-      "icons": [
-        {
-          "src": "/images/planet.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "My Profile",
-      "short_name": "Profile",
-      "description": "View your profile and stats",
-      "url": "/profile",
-      "icons": [
-        {
-          "src": "/images/planet.png",
-          "sizes": "192x192"
-        }
-      ]
     }
   ],
   "screenshots": [
