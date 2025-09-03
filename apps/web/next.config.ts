@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['a.espncdn.com', 'static.wikifutbol.com', 'upload.wikimedia.org', 'utfs.io'],
+    domains: ['a.espncdn.com', 'static.wikifutbol.com', 'upload.wikimedia.org', 'utfs.io', '6oy9epeia2.ufs.sh'],
   },
   output: 'standalone',
   webpack: (config: { resolve: { alias: Record<string, string> } }) => {

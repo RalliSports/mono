@@ -10,11 +10,9 @@ import {
 import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
-import {
-  CreateWebpushDto
-} from '../notification/dto/webpush.dto';
+import { CreateWebpushDto } from '../notification/dto/webpush.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserEmailDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { UserService } from './user.service';
 
@@ -62,6 +60,19 @@ export class UserController {
   @Patch('update-user')
   updateUser(@Body() dto: UpdateUserDto, @UserPayload() user: User) {
     return this.userService.updateUser(dto, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Update user data' })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated successfully',
+    type: User,
+  })
+  @Patch('update-user-email')
+  updateUserEmail(@Body() dto: UpdateUserEmailDto, @UserPayload() user: User) {
+    return this.userService.updateUserEmail(dto, user);
   }
 
   @ApiSecurity('x-para-session')

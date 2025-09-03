@@ -1,24 +1,27 @@
 import Image from 'next/image'
 import { useRef } from 'react'
-import { User } from './types'
 import { UploadButton } from '@/lib/uploadthing'
 
 interface ProfilePictureUploadModalProps {
   isOpen: boolean
   onClose: () => void
   isUploading: boolean
-  user: User
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   session: string | null
+  onUploadComplete?: () => void
+  avatar: string
+  setAvatar: (avatar: string) => void
 }
 
 export default function ProfilePictureUploadModal({
   isOpen,
   onClose,
   isUploading,
-  user,
   onFileSelect,
   session,
+  onUploadComplete,
+  avatar,
+  setAvatar,
 }: ProfilePictureUploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -78,9 +81,14 @@ export default function ProfilePictureUploadModal({
               <UploadButton
                 endpoint="profilePicture"
                 input={{ sessionId: session || '' }}
-                onClientUploadComplete={() => {
+                onClientUploadComplete={(response) => {
+                  setAvatar(response[0].ufsUrl)
+
+                  // Call the callback to trigger refresh
+
                   // Do something with the response
                   alert('Upload Completed')
+                  onUploadComplete?.()
                 }}
                 onUploadError={(error: Error) => {
                   // Do something with the error.
@@ -92,12 +100,12 @@ export default function ProfilePictureUploadModal({
               <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileSelect} className="hidden" />
 
               {/* Current Avatar Preview */}
-              {user.avatar && (
+              {avatar && (
                 <div className="mt-6 text-center">
                   <p className="text-slate-400 text-sm mb-3">Current photo:</p>
                   <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
                     <Image
-                      src={user.avatar}
+                      src={avatar}
                       alt="Current avatar"
                       width={64}
                       height={64}

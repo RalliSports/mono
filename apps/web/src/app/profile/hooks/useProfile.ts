@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { User, Game } from '../components/types'
 import { useToast } from '@/components/ui/toast'
-
+import { useAccount } from '@getpara/react-sdk'
 export function useProfile(session: string | null) {
+  const account = useAccount()
   const { addToast } = useToast()
   const [username, setUsername] = useState('')
   const [user, setUser] = useState<User | null>(null)
@@ -11,7 +12,7 @@ export function useProfile(session: string | null) {
   const [lastName, setLastName] = useState('')
   const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
   const [myCompletedGames, setMyCompletedGames] = useState<Game[]>([])
-
+  const [forceRefresh, setForceRefresh] = useState(false)
   const handleUpdateUser = async () => {
     const response = await fetch('/api/update-user', {
       method: 'PATCH',
@@ -47,13 +48,27 @@ export function useProfile(session: string | null) {
         setAvatar(data.avatar)
         setFirstName(data.firstName || '')
         setLastName(data.lastName || '')
+        if (!data.emailAddress && account.embedded.isConnected) {
+          await fetch('/api/update-user-email', {
+            method: 'PATCH',
+            headers: {
+              'x-para-session': session || '',
+            },
+            body: JSON.stringify({
+              email: account.embedded.email,
+            }),
+          })
+        }
       } else {
         const errorData = await response.json()
         addToast(errorData.error || 'Failed to fetch user', 'error')
       }
     }
-    fetchUser()
-  }, [session])
+    if (!user || forceRefresh) {
+      fetchUser()
+      setForceRefresh(false)
+    }
+  }, [session, user, forceRefresh])
 
   useEffect(() => {
     const fetchMyOpenGames = async () => {
@@ -105,5 +120,6 @@ export function useProfile(session: string | null) {
     myOpenGames,
     myCompletedGames,
     handleUpdateUser,
+    setForceRefresh,
   }
 }

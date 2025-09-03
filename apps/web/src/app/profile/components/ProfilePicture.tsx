@@ -1,27 +1,17 @@
 import Image from 'next/image'
-import { useProfile } from '../hooks/useProfile'
-import { useSessionToken } from '@/hooks/use-session'
 
 interface ProfilePictureProps {
   onEditClick: () => void
+  avatar: string
 }
 
-export default function ProfilePicture({ onEditClick }: ProfilePictureProps) {
-  const { session } = useSessionToken()
-  const { user } = useProfile(session || null)
-
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
-    onEditClick()
-  }
-
+export default function ProfilePicture({ onEditClick, avatar }: ProfilePictureProps) {
   return (
     <div className="relative group">
       <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
-        {user?.avatar && user.avatar !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
+        {avatar && avatar !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
           <Image
-            src={user.avatar}
+            src={avatar}
             alt="Profile Picture"
             width={80}
             height={80}
@@ -55,7 +45,7 @@ export default function ProfilePicture({ onEditClick }: ProfilePictureProps) {
 
       {/* Edit Button */}
       <button
-        onClick={handleEditClick}
+        onClick={onEditClick}
         className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
       >
         <svg

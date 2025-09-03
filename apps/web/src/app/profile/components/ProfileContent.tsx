@@ -15,7 +15,9 @@ export default function ProfileContent() {
   const { session } = useSessionToken()
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
 
-  const { user, myOpenGames, username, firstName, lastName, setUser, setAvatar } = useProfile(session || null)
+  const { user, myOpenGames, username, firstName, lastName, setUser, setAvatar, setForceRefresh } = useProfile(
+    session || null,
+  )
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
     session || null,
@@ -48,6 +50,7 @@ export default function ProfileContent() {
         balances={balances}
         formatBalance={formatBalance}
         onEditPictureClick={() => setIsUploadModalOpen(true)}
+        avatar={user.avatar || ''}
       />
 
       {/* Tab Content */}
@@ -67,9 +70,15 @@ export default function ProfileContent() {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         isUploading={isUploading}
-        user={user}
         onFileSelect={handleFileSelect}
         session={session || null}
+        onUploadComplete={() => {
+          setTimeout(() => {
+            setForceRefresh(true)
+          }, 1000)
+        }}
+        avatar={user.avatar || ''}
+        setAvatar={setAvatar}
       />
     </div>
   )

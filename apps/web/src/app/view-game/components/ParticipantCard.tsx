@@ -1,6 +1,6 @@
 import { GamesFindOne } from '@repo/server'
 import ParticipantPicks from './ParticipantPicks'
-
+import Image from 'next/image'
 interface ParticipantCardProps {
   participant: GamesFindOne['participants'][number]
   lobby: GamesFindOne
@@ -24,10 +24,12 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
               <div className="relative">
                 <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
                   {participant.user?.username ? (
-                    <img
-                      src={`/users/${participant.user.username.toLowerCase().replace(/\s+/g, '-')}.png`}
-                      alt={participant.user.username}
+                    <Image
+                      src={participant.user?.avatar || ''}
+                      alt={participant.user?.username || 'Anonymous User'}
                       className="w-14 h-14 object-cover rounded-xl"
+                      width={56}
+                      height={56}
                       onError={(e) => {
                         e.currentTarget.onerror = null
                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
