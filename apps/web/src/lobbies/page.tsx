@@ -410,11 +410,10 @@ export default function LobbiesPage() {
             <button
               key={tab.id}
               onClick={() => setSelectedFilter(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
-                selectedFilter === tab.id
-                  ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
-                  : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${selectedFilter === tab.id
+                ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
+                }`}
             >
               <span>{tab.icon}</span>
               <span>{tab.name}</span>

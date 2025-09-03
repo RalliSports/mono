@@ -35,13 +35,12 @@ export default function LineCard({
           <div className="flex items-center space-x-3">
             <h4 className="text-white font-semibold text-lg">{line.athlete?.name}</h4>
             <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                line.createdAt && line.createdAt > timeNow
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${line.createdAt && line.createdAt > timeNow
                   ? 'bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30'
                   : !!line.actualValue
                     ? 'bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30'
                     : 'bg-red-500/20 text-red-400 border border-red-400/30'
-              }`}
+                }`}
             >
               {line.createdAt && line.createdAt > timeNow ? 'Pending' : !!line.actualValue ? 'Resolved' : 'Cancelled'}
             </span>
@@ -50,7 +49,7 @@ export default function LineCard({
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
                 <Image
-                  src={line.athlete?.picture || '/images/pfp2.svg'}
+                  src={line.athlete?.picture || '/images/pfp-2.svg'}
                   alt={line.athlete?.name || ''}
                   width={48}
                   height={48}
@@ -100,9 +99,8 @@ export default function LineCard({
               <div className="text-right">
                 <div className="text-sm text-slate-300">Result</div>
                 <div
-                  className={`font-bold ${
-                    line.actualValue! > line.predictedValue! ? 'text-[#00CED1]' : 'text-[#FFAB91]'
-                  }`}
+                  className={`font-bold ${line.actualValue! > line.predictedValue! ? 'text-[#00CED1]' : 'text-[#FFAB91]'
+                    }`}
                 >
                   {line.actualValue! > line.predictedValue!
                     ? 'OVER'

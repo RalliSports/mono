@@ -21,7 +21,7 @@ export function useProfile(session: string | null) {
       },
       body: JSON.stringify({
         username,
-        avatar: avatar || '/images/pfp1.svg',
+        avatar: avatar || '/images/pfp-1.svg',
         firstName,
         lastName,
       }),

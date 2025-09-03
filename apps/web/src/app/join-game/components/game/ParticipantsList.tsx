@@ -24,11 +24,10 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
           <div key={participant.id} className="space-y-3">
             {/* Enhanced Participant Card */}
             <div
-              className={`bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl ${
-                isParticipantExpanded(participant.id)
-                  ? 'border-[#00CED1] shadow-[#00CED1]/20'
-                  : 'hover:border-slate-600 hover:shadow-slate-600/10'
-              }`}
+              className={`bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl ${isParticipantExpanded(participant.id)
+                ? 'border-[#00CED1] shadow-[#00CED1]/20'
+                : 'hover:border-slate-600 hover:shadow-slate-600/10'
+                }`}
               onClick={() => onToggleParticipant(participant.id)}
             >
               <div className="p-5">
@@ -37,7 +36,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                     <div className="relative">
                       <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
                         <Image
-                          src={participant.user?.avatar || '/images/pfp1.svg'}
+                          src={participant.user?.avatar || '/images/pfp-1.svg'}
                           alt={participant.user?.username || 'User'}
                           width={56}
                           height={56}
@@ -63,9 +62,8 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                       <div className="text-xs text-slate-500">Ready to play</div>
                     </div>
                     <div
-                      className={`transform transition-transform duration-300 text-slate-400 ${
-                        isParticipantExpanded(participant.id) ? 'rotate-180' : ''
-                      }`}
+                      className={`transform transition-transform duration-300 text-slate-400 ${isParticipantExpanded(participant.id) ? 'rotate-180' : ''
+                        }`}
                     >
                       ▼
                     </div>
@@ -103,7 +101,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
                             {pick.line?.athleteId ? (
                               <Image
-                                src={pick.line?.athlete?.picture || '/images/pfp2.svg'}
+                                src={pick.line?.athlete?.picture || '/images/pfp-2.svg'}
                                 alt={pick.line?.athlete?.name || ''}
                                 width={48}
                                 height={48}
@@ -141,9 +139,8 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           <div className="text-white font-semibold text-sm">
                             <span>{pick.line?.stat?.displayName || pick.line?.stat?.name} </span>
                             <span
-                              className={`font-bold text-xs ${
-                                pick.predictedDirection?.toLowerCase() === 'over' ? 'text-emerald-400' : 'text-red-400'
-                              }`}
+                              className={`font-bold text-xs ${pick.predictedDirection?.toLowerCase() === 'over' ? 'text-emerald-400' : 'text-red-400'
+                                }`}
                             >
                               {pick.predictedDirection?.toUpperCase()}{' '}
                               {pick.predictedDirection?.toLowerCase() === 'over' ? '˄' : '˅'}
@@ -167,19 +164,18 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                         <div className="relative">
                           <div className="w-full bg-slate-700/60 rounded-full h-2 overflow-hidden">
                             <div
-                              className={`h-full transition-all duration-1000 ${
-                                pick.isCorrect
-                                  ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                  : pick.line?.actualValue !== null && Number(pick.line?.actualValue || 0) > 0
-                                    ? pick.predictedDirection?.toLowerCase() === 'over'
-                                      ? Number(pick.line?.actualValue || 0) >= Number(pick.line?.predictedValue || 0)
-                                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                        : 'bg-gradient-to-r from-blue-400 to-blue-500'
-                                      : Number(pick.line?.actualValue || 0) <= Number(pick.line?.predictedValue || 0)
-                                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                        : 'bg-gradient-to-r from-red-600 to-red-400'
-                                    : 'bg-slate-600'
-                              }`}
+                              className={`h-full transition-all duration-1000 ${pick.isCorrect
+                                ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                : pick.line?.actualValue !== null && Number(pick.line?.actualValue || 0) > 0
+                                  ? pick.predictedDirection?.toLowerCase() === 'over'
+                                    ? Number(pick.line?.actualValue || 0) >= Number(pick.line?.predictedValue || 0)
+                                      ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                      : 'bg-gradient-to-r from-blue-400 to-blue-500'
+                                    : Number(pick.line?.actualValue || 0) <= Number(pick.line?.predictedValue || 0)
+                                      ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                      : 'bg-gradient-to-r from-red-600 to-red-400'
+                                  : 'bg-slate-600'
+                                }`}
                               style={{
                                 width: `${Math.min(
                                   100,

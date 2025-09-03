@@ -11,7 +11,7 @@ export default function ProfilePicture({ onEditClick, avatar }: ProfilePicturePr
       <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
         {
           <Image
-            src={avatar || '/images/pfp1.svg'}
+            src={avatar || '/images/pfp-1.svg'}
             alt="Profile Picture"
             width={80}
             height={80}
