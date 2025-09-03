@@ -37,7 +37,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                     <div className="relative">
                       <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
                         <Image
-                          src={participant.user?.avatar || '/default-avatar.png'}
+                          src={participant.user?.avatar || '/images/pfp1.svg'}
                           alt={participant.user?.username || 'User'}
                           width={56}
                           height={56}
@@ -103,7 +103,7 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
                             {pick.line?.athleteId ? (
                               <Image
-                                src={pick.line?.athlete?.picture || ''}
+                                src={pick.line?.athlete?.picture || '/images/pfp2.svg'}
                                 alt={pick.line?.athlete?.name || ''}
                                 width={48}
                                 height={48}

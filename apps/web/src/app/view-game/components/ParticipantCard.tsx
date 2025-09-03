@@ -25,7 +25,7 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
                 <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
                   {participant.user?.username ? (
                     <Image
-                      src={participant.user?.avatar || ''}
+                      src={participant.user?.avatar || '/images/pfp1.svg'}
                       alt={participant.user?.username || 'Anonymous User'}
                       className="w-14 h-14 object-cover rounded-xl"
                       width={56}

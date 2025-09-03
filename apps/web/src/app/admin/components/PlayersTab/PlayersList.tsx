@@ -26,9 +26,9 @@ export default function PlayersList({ players }: PlayersListProps) {
             <div key={player.id} className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
-                  {player.picture ? (
+                  {
                     <Image
-                      src={player.picture}
+                      src={player.picture || '/images/pfp1.svg'}
                       alt={player.name}
                       width={48}
                       height={48}
@@ -47,15 +47,7 @@ export default function PlayersList({ players }: PlayersListProps) {
                         }
                       }}
                     />
-                  ) : (
-                    <span className="text-white font-bold">
-                      {player.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .toUpperCase()}
-                    </span>
-                  )}
+                  }
                 </div>
                 <div className="flex-1">
                   <h4 className="text-white font-semibold">{player.name}</h4>

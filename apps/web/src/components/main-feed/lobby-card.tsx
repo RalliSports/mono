@@ -62,7 +62,7 @@ export default function LobbyCard({
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
               {host.avatar && host.avatar !== '' ? (
-                <Image src={host.avatar} alt={host.username} width={24} height={24} />
+                <Image src={host.avatar || '/images/pfp1.svg'} alt={host.username} width={24} height={24} />
               ) : null}
               <span className="text-slate-400 text-sm">created a lobby</span>
             </div>

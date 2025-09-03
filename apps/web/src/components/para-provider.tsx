@@ -25,7 +25,7 @@ export function Providers({
           appName: 'Ralli',
         }}
         paraModalConfig={{
-          logo: '/images/RALLI.png',
+          logo: '/images/logo-cream-bg.svg',
           oAuthMethods: ['GOOGLE'],
           authLayout: ['AUTH:FULL', 'EXTERNAL:CONDENSED'],
         }}

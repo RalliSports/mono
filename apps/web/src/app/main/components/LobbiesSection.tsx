@@ -59,12 +59,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
         <div className="relative">
           {/* Section Header */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white flex items-center">
-              <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-4 flex items-center justify-center">
-                <span className="text-lg">🔥</span>
-              </span>
-              Open Lobbies
-            </h2>
+            <h2 className="text-2xl font-bold text-white flex items-center">Open Lobbies</h2>
             <div className="flex items-center gap-3">
               <CreateLobbyButton isMobile={true} />
               <div className="text-right">
@@ -109,12 +104,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
       <div className="lg:col-span-3">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-3 flex items-center justify-center">
-              <span className="text-lg">🔥</span>
-            </span>
-            Open Lobbies
-          </h2>
+          <h2 className="text-2xl font-bold text-white flex items-center">Open Lobbies</h2>
           <CreateLobbyButton isMobile={false} />
         </div>
 
