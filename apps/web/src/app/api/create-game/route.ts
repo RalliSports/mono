@@ -14,6 +14,7 @@ interface CreateGameRequest {
   type: string
   userControlType: string
   gameModeId: string
+  tokenId: string
 }
 
 // Validation function
@@ -29,7 +30,8 @@ function validateCreateGameData(data: any): data is CreateGameRequest {
     typeof data.isPrivate === 'boolean' &&
     typeof data.type === 'string' &&
     typeof data.userControlType === 'string' &&
-    typeof data.gameModeId === 'string'
+    typeof data.gameModeId === 'string' &&
+    typeof data.tokenId === 'string'
   )
 }
 
@@ -59,6 +61,7 @@ export async function POST(request: NextRequest) {
             type: 'string',
             userControlType: 'string',
             gameModeId: 'string',
+            tokenId: 'string',
           },
         },
         { status: 400 },

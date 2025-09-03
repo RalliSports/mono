@@ -71,6 +71,7 @@ export default function CreateGame() {
     userControlType: 'none',
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
     numBets: 10, // Default Number of Bets
+    tokenId: '6028ea26-9f12-40ca-9333-2250b4524670',
   })
 
   const handleInputChange = (field: string, value: any) => {
@@ -102,6 +103,7 @@ export default function CreateGame() {
       type: gameSettings.type,
       userControlType: gameSettings.userControlType,
       gameModeId: gameSettings.gameMode,
+      tokenId: gameSettings.tokenId,
     }
 
     try {

@@ -9,6 +9,7 @@ export interface GameSettings {
   userControlType: 'none' | 'whitelist' | 'blacklist'
   gameMode: string
   numBets: number
+  tokenId: string
 }
 
 export interface FormErrors {
