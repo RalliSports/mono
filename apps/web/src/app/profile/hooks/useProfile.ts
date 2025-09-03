@@ -64,7 +64,7 @@ export function useProfile(session: string | null) {
         addToast(errorData.error || 'Failed to fetch user', 'error')
       }
     }
-    if (!user || forceRefresh) {
+    if (session && (!user || forceRefresh)) {
       fetchUser()
       setForceRefresh(false)
     }
@@ -85,7 +85,9 @@ export function useProfile(session: string | null) {
         addToast(errorData.error || 'Failed to fetch my open games', 'error')
       }
     }
-    fetchMyOpenGames()
+    if (session) {
+      fetchMyOpenGames()
+    }
   }, [session])
 
   useEffect(() => {
