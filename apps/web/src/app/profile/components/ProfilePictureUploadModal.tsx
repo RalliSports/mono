@@ -100,12 +100,12 @@ export default function ProfilePictureUploadModal({
               <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileSelect} className="hidden" />
 
               {/* Current Avatar Preview */}
-              {avatar && (
+              {
                 <div className="mt-6 text-center">
                   <p className="text-slate-400 text-sm mb-3">Current photo:</p>
                   <div className="w-16 h-16 mx-auto bg-slate-700 rounded-xl overflow-hidden">
                     <Image
-                      src={avatar}
+                      src={avatar || '/images/pfp1.svg'}
                       alt="Current avatar"
                       width={64}
                       height={64}
@@ -113,7 +113,7 @@ export default function ProfilePictureUploadModal({
                     />
                   </div>
                 </div>
-              )}
+              }
             </>
           )}
         </div>

@@ -21,7 +21,7 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                 <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
                   {pick.line?.athleteId ? (
                     <Image
-                      src={pick.line?.athlete?.picture || ''}
+                      src={pick.line?.athlete?.picture || '/images/pfp2.svg'}
                       alt={pick.line?.athlete?.name || ''}
                       width={48}
                       height={48}

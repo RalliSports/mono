@@ -17,9 +17,9 @@ export default function ProfileButton() {
       onClick={handleProfileClick}
       className="w-10 h-10 rounded-full bg-slate-800/50 border-2 border-slate-600/70 hover:bg-slate-700/50 hover:border-[#00CED1]/60 hover:shadow-lg hover:shadow-[#00CED1]/20 transition-all duration-300 overflow-hidden group ring-1 ring-slate-500/30"
     >
-      {user?.avatar ? (
+      {user ? (
         <Image
-          src={user.avatar}
+          src={user.avatar || '/images/pfp1.svg'}
           alt={user.username || 'Profile'}
           width={40}
           height={40}

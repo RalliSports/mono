@@ -39,7 +39,7 @@ export default function GameHeader({ game }: GameHeaderProps) {
           <div className="relative">
             <div className="w-16 h-16 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
               <Image
-                src={game.creator?.avatar || '/default-avatar.png'}
+                src={game.creator?.avatar || '/images/pfp3.svg'}
                 alt={game.creator?.username || 'Creator'}
                 width={64}
                 height={64}

@@ -72,7 +72,7 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
                     ?.bets.map((bet, index) => (
                       <Image
                         key={bet.id}
-                        src={bet.line.athlete.picture || ''}
+                        src={bet.line.athlete.picture || '/images/pfp2.svg'}
                         alt={bet.line.athlete.name || ''}
                         width={32}
                         height={32}

@@ -50,7 +50,7 @@ export default function LineCard({
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
                 <Image
-                  src={line.athlete?.picture || ''}
+                  src={line.athlete?.picture || '/images/pfp2.svg'}
                   alt={line.athlete?.name || ''}
                   width={48}
                   height={48}

@@ -24,10 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Ralli" />
-        <link rel="apple-touch-icon" href="/images/RALLI.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/images/RALLI.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/RALLI.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/images/RALLI.png" />
+        <link rel="apple-touch-icon" href="/images/logo-cream-bg.svg" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/images/logo-cream-bg.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/logo-cream-bg.svg" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/images/logo-cream-bg.svg" />
 
         <script
           dangerouslySetInnerHTML={{
