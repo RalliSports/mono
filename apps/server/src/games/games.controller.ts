@@ -52,7 +52,7 @@ export class GamesController {
   })
   @Get('/games')
   findAll() {
-    return this.gamesService.findAll();
+    return this.gamesService.findAllOpen();
   }
 
   @ApiOperation({ summary: 'Get all games' })
