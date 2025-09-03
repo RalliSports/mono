@@ -33,10 +33,7 @@ export class AuthService {
       const isActive = await this.paraServer.isSessionActive();
 
       if (!isActive) {
-        throw new UnprocessableEntityException({
-          status: HttpStatus.UNAUTHORIZED,
-          message: 'Session expired',
-        });
+        console.error('Session expired');
 
         return null;
       }
