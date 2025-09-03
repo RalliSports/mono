@@ -22,11 +22,6 @@ export class CreateGameDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  currency: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
   @IsNumber()
   maxParticipants: number;
 
@@ -43,7 +38,7 @@ export class CreateGameDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  depositToken: string;
+  tokenId: string;
 
   @ApiProperty()
   @IsNotEmpty()
