@@ -81,25 +81,24 @@ export class NotificationService {
     return {
       title: 'Game Resolved 🎉',
       body: `Your recent game ${title} has been resolved. Check the results now!`,
-      image: 'https://example.com/images/game-resolved.png',
-      url: `https://example.com/games/${gameId}/results`, // dynamic link to specific game results
-      icon: 'https://example.com/icons/game.png',
+      image: 'https://www.ralli.bet/images/game-resolved.png',
+      url: `https://www.ralli.bet/games/${gameId}/results`, // dynamic link to specific game results
+      icon: 'https://www.ralli.bet/icons/game.png',
       tag: `game-resolved-${gameId}`, // unique per game
     };
   }
 
   // 🕹️ Game Invite
   buildGameInviteMessage(
-    inviterName: string,
     gameTitle: string,
     gameId: string,
   ): NotificationPayload {
     return {
       title: `You’ve Been Invited to join ${gameTitle}`,
-      body: `${inviterName} has invited you to join a new game. Don’t keep them waiting!`,
-      image: 'https://example.com/images/game-invite.png',
-      url: `https://example.com/games/${gameId}/invite`,
-      icon: 'https://example.com/icons/invite.png',
+      body: `You have been invited to join a new game. Don’t keep them waiting!`,
+      // image: 'https://www.ralli.bet/images/game-invite.png',
+      url: `https://www.ralli.bet/view-game?id=${gameId}`,
+      // icon: 'https://www.ralli.bet/icons/invite.png',
       tag: `game-invite-${gameId}`,
     };
   }
@@ -112,9 +111,9 @@ export class NotificationService {
     return {
       title: 'New Message 💌',
       body: `You’ve got a new message from ${senderName}. Tap to read it now.`,
-      image: 'https://example.com/images/new-message.png',
-      url: `https://example.com/messages/${conversationId}`,
-      icon: 'https://example.com/icons/message.png',
+      image: 'https://www.ralli.bet/images/new-message.png',
+      url: `https://www.ralli.bet/messages/${conversationId}`,
+      icon: 'https://www.ralli.bet/icons/message.png',
       tag: `new-message-${conversationId}`,
     };
   }

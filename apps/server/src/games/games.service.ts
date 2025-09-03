@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { bets, game_access, games, lines, participants } from '@repo/db';
+import { bets, game_access, games, lines, participants, users } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
 import { and, count, eq, inArray, ne, or, exists } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
@@ -95,6 +95,7 @@ export class GamesService {
       with: {
         gameMode: true,
         creator: true,
+        token: true,
         participants: { with: { user: true, bets: true } },
       },
     });
@@ -104,6 +105,7 @@ export class GamesService {
       where: eq(games.status, GameStatus.WAITING),
       with: {
         gameMode: true,
+        token: true,
         participants: { with: { user: true, bets: true } },
         creator: true,
       },
@@ -140,6 +142,7 @@ export class GamesService {
         ne(games.status, GameStatus.COMPLETED),
       ),
       with: {
+        token: true,
         participants: {
           with: {
             user: true,
@@ -179,6 +182,7 @@ export class GamesService {
         eq(games.status, GameStatus.COMPLETED),
       ),
       with: {
+        token: true,
         participants: {
           with: {
             user: true,
@@ -203,6 +207,7 @@ export class GamesService {
       where: eq(games.id, id),
       with: {
         gameMode: true,
+        token: true,
         participants: {
           with: {
             user: true,
@@ -620,6 +625,38 @@ export class GamesService {
       if (access) {
         throw new ForbiddenException('You are blacklisted from this game');
       }
+    }
+  }
+
+  async inviteUserToPlay(userId: string, gameId: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, userId),
+      with: { pushSubscriptions: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    const game = await this.db.query.games.findFirst({
+      where: eq(games.id, gameId),
+    });
+
+    if (!game) {
+      throw new NotFoundException('game not found');
+    }
+
+    console.log(game, user, "invite")
+
+    try {
+      const message = this.notificationService.buildGameInviteMessage(
+        game?.title as string,
+        game.id,
+      );
+
+      await this.notificationService.sendNotificationToUser(user.id, message);
+    } catch (error) {
+      console.log(error, 'unable to send invite');
     }
   }
 }
