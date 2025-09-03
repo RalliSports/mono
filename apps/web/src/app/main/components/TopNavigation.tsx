@@ -1,4 +1,5 @@
 import BalanceDisplay from './BalanceDisplay'
+import ProfileButton from './ProfileButton'
 
 interface TopNavigationProps {
   onMenuClick: () => void
@@ -47,6 +48,7 @@ export default function TopNavigation({
             balanceLoading={balanceLoading}
             balanceError={balanceError}
           />
+          <ProfileButton />
         </div>
       </div>
     </div>
