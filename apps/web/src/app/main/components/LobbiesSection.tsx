@@ -70,7 +70,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
           </div>
 
           <div className="space-y-3">
-            {lobbiesData.slice(0, 3).map((lobby: Lobby) => (
+            {lobbiesData.slice(0, 10).map((lobby: Lobby) => (
               <LobbyCard
                 key={lobby.id}
                 id={lobby.id}
@@ -113,7 +113,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
         </div>
 
         <div className="space-y-3 mb-6">
-          {lobbiesData.slice(0, 4).map((lobby) => (
+          {lobbiesData.slice(0, 10).map((lobby) => (
             <LobbyCard
               key={lobby.id}
               id={lobby.id}
