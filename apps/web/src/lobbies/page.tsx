@@ -343,7 +343,7 @@ export default function LobbiesPage() {
                   alt="Profile"
                   className="w-10 h-10 object-cover rounded-full"
                   onError={(e) => {
-                    e.currentTarget.onerror = '/images/pfp-1.svg'
+                    e.currentTarget.onerror = null
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=Main+User&background=0D8ABC&color=fff&size=128`
                   }}
                 />
@@ -410,11 +410,10 @@ export default function LobbiesPage() {
             <button
               key={tab.id}
               onClick={() => setSelectedFilter(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
-                selectedFilter === tab.id
-                  ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
-                  : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${selectedFilter === tab.id
+                ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
+                }`}
             >
               <span>{tab.icon}</span>
               <span>{tab.name}</span>
