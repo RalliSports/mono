@@ -21,3 +21,22 @@ export function formatBalance(amount: number | undefined | null) {
     maximumFractionDigits: 2,
   })
 }
+
+export const getShortenedPosition = (position: string) => {
+  if (position === 'Quarterback') return 'QB'
+  if (position === 'Running Back') return 'RB'
+  if (position === 'Wide Receiver') return 'WR'
+  if (position === 'Tight End') return 'TE'
+  if (position === 'Defensive End') return 'DE'
+  if (position === 'Defensive Tackle') return 'DT'
+  if (position === 'Linebacker') return 'LB'
+  if (position === 'Cornerback') return 'CB'
+  if (position === 'Safety') return 'S'
+  if (position === 'Kicker') return 'K'
+  if (position === 'Punter') return 'P'
+  return position
+}
+
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}

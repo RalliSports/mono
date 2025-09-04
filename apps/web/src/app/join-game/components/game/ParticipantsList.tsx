@@ -24,10 +24,11 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
           <div key={participant.id} className="space-y-3">
             {/* Enhanced Participant Card */}
             <div
-              className={`bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl ${isParticipantExpanded(participant.id)
-                ? 'border-[#00CED1] shadow-[#00CED1]/20'
-                : 'hover:border-slate-600 hover:shadow-slate-600/10'
-                }`}
+              className={`bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl ${
+                isParticipantExpanded(participant.id)
+                  ? 'border-[#00CED1] shadow-[#00CED1]/20'
+                  : 'hover:border-slate-600 hover:shadow-slate-600/10'
+              }`}
               onClick={() => onToggleParticipant(participant.id)}
             >
               <div className="p-5">
@@ -62,8 +63,9 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                       <div className="text-xs text-slate-500">Ready to play</div>
                     </div>
                     <div
-                      className={`transform transition-transform duration-300 text-slate-400 ${isParticipantExpanded(participant.id) ? 'rotate-180' : ''
-                        }`}
+                      className={`transform transition-transform duration-300 text-slate-400 ${
+                        isParticipantExpanded(participant.id) ? 'rotate-180' : ''
+                      }`}
                     >
                       ▼
                     </div>
@@ -128,7 +130,13 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                             <h6 className="text-white font-semibold text-sm leading-tight truncate">
                               {pick.line?.athlete?.name}
                             </h6>
-                            <p className="text-slate-400 text-xs">Team vs Team</p>
+                            <p className="text-slate-400 text-xs">
+                              {pick.line?.athlete?.team?.abbreviation}{' '}
+                              {pick.line?.matchup?.homeTeamId === pick.line?.athlete?.team?.id ? 'vs' : '@'}{' '}
+                              {pick.line?.matchup?.homeTeamId === pick.line?.athlete?.team?.id
+                                ? pick.line?.matchup?.awayTeam?.abbreviation
+                                : pick.line?.matchup?.homeTeam?.abbreviation}{' '}
+                            </p>
                             <p className="text-slate-500 text-xs">
                               {new Date(pick.line?.matchup?.startsAt || '').toLocaleString()}
                             </p>
@@ -139,8 +147,9 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                           <div className="text-white font-semibold text-sm">
                             <span>{pick.line?.stat?.displayName || pick.line?.stat?.name} </span>
                             <span
-                              className={`font-bold text-xs ${pick.predictedDirection?.toLowerCase() === 'over' ? 'text-emerald-400' : 'text-red-400'
-                                }`}
+                              className={`font-bold text-xs ${
+                                pick.predictedDirection?.toLowerCase() === 'over' ? 'text-emerald-400' : 'text-red-400'
+                              }`}
                             >
                               {pick.predictedDirection?.toUpperCase()}{' '}
                               {pick.predictedDirection?.toLowerCase() === 'over' ? '˄' : '˅'}
@@ -164,18 +173,19 @@ export default function ParticipantsList({ game, expandedParticipants, onToggleP
                         <div className="relative">
                           <div className="w-full bg-slate-700/60 rounded-full h-2 overflow-hidden">
                             <div
-                              className={`h-full transition-all duration-1000 ${pick.isCorrect
-                                ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                : pick.line?.actualValue !== null && Number(pick.line?.actualValue || 0) > 0
-                                  ? pick.predictedDirection?.toLowerCase() === 'over'
-                                    ? Number(pick.line?.actualValue || 0) >= Number(pick.line?.predictedValue || 0)
-                                      ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                      : 'bg-gradient-to-r from-blue-400 to-blue-500'
-                                    : Number(pick.line?.actualValue || 0) <= Number(pick.line?.predictedValue || 0)
-                                      ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                      : 'bg-gradient-to-r from-red-600 to-red-400'
-                                  : 'bg-slate-600'
-                                }`}
+                              className={`h-full transition-all duration-1000 ${
+                                pick.isCorrect
+                                  ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                  : pick.line?.actualValue !== null && Number(pick.line?.actualValue || 0) > 0
+                                    ? pick.predictedDirection?.toLowerCase() === 'over'
+                                      ? Number(pick.line?.actualValue || 0) >= Number(pick.line?.predictedValue || 0)
+                                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                        : 'bg-gradient-to-r from-blue-400 to-blue-500'
+                                      : Number(pick.line?.actualValue || 0) <= Number(pick.line?.predictedValue || 0)
+                                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                        : 'bg-gradient-to-r from-red-600 to-red-400'
+                                    : 'bg-slate-600'
+                              }`}
                               style={{
                                 width: `${Math.min(
                                   100,

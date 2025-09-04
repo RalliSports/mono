@@ -32,8 +32,9 @@ export default function AthletePickCard({
 
   return (
     <div
-      className={`group relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl border shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden ${selectedPick ? 'border-[#00CED1] shadow-[#00CED1]/20' : 'border-slate-700/50 hover:border-slate-600/60'
-        }`}
+      className={`group relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl border shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden ${
+        selectedPick ? 'border-[#00CED1] shadow-[#00CED1]/20' : 'border-slate-700/50 hover:border-slate-600/60'
+      }`}
     >
       {/* Subtle background glow */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#00CED1]/3 via-transparent to-[#FFAB91]/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -60,7 +61,8 @@ export default function AthletePickCard({
 
             {/* Player Details */}
             <div className="min-w-0 flex-1">
-              <h3 className="text-white font-bold text-lg mb-1 truncate">{athlete.name}</h3>
+              <h3 className="text-white font-bold text-lg truncate">{athlete.name}</h3>
+              <div className="text-white font-bold truncate text-sm">{`${athlete.position} - (${athlete.jerseyNumber})`}</div>
               <div className="flex items-center space-x-2">
                 <span className="text-slate-300 font-semibold text-sm">{athlete.team?.name || ''}</span>
                 <div className="text-slate-400 font-medium text-sm">
@@ -132,10 +134,11 @@ export default function AthletePickCard({
                 <button
                   key={index}
                   onClick={() => setCurrentStatIndex(index)}
-                  className={`transition-all duration-500 rounded-full ${index === currentStatIndex
+                  className={`transition-all duration-500 rounded-full ${
+                    index === currentStatIndex
                       ? 'w-6 h-1.5 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] shadow-lg shadow-[#00CED1]/30'
                       : 'w-1.5 h-1.5 bg-slate-600/60 hover:bg-slate-500/80 hover:scale-150 shadow-md'
-                    }`}
+                  }`}
                 ></button>
               ))}
             </div>
@@ -146,21 +149,23 @@ export default function AthletePickCard({
             <button
               onClick={() => onPickSelection(athlete.id, currentStatIndex, 'over')}
               disabled={isSelectionDisabled}
-              className={`rounded-xl py-2 px-4 transition-all duration-300 group shadow-lg ${isThisStatSelected && selectedPick?.predictedDirection === 'over'
+              className={`rounded-xl py-2 px-4 transition-all duration-300 group shadow-lg ${
+                isThisStatSelected && selectedPick?.predictedDirection === 'over'
                   ? 'bg-gradient-to-r from-emerald-500/50 to-emerald-600/40 border-2 border-emerald-300 shadow-emerald-500/40'
                   : isSelectionDisabled
                     ? 'bg-gradient-to-r from-slate-600/25 to-slate-700/15 border-2 border-slate-500/20 cursor-not-allowed opacity-50'
                     : 'bg-gradient-to-r from-emerald-500/25 to-emerald-600/15 border-2 border-emerald-400/40 hover:from-emerald-500/35 hover:to-emerald-600/25 hover:border-emerald-400/60 hover:shadow-emerald-500/20'
-                }`}
+              }`}
             >
               <div className="flex items-center justify-center mb-1">
                 <svg
-                  className={`w-5 h-5 transition-transform duration-300 ${isThisStatSelected && selectedPick?.predictedDirection === 'over'
+                  className={`w-5 h-5 transition-transform duration-300 ${
+                    isThisStatSelected && selectedPick?.predictedDirection === 'over'
                       ? 'text-emerald-300 scale-110'
                       : isSelectionDisabled
                         ? 'text-slate-500'
                         : 'text-emerald-400 group-hover:scale-110'
-                    }`}
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -169,12 +174,13 @@ export default function AthletePickCard({
                 </svg>
               </div>
               <div
-                className={`font-bold text-sm transition-colors ${isThisStatSelected && selectedPick?.predictedDirection === 'over'
+                className={`font-bold text-sm transition-colors ${
+                  isThisStatSelected && selectedPick?.predictedDirection === 'over'
                     ? 'text-emerald-200'
                     : isSelectionDisabled
                       ? 'text-slate-500'
                       : 'text-emerald-300 group-hover:text-emerald-200'
-                  }`}
+                }`}
               >
                 OVER
               </div>
@@ -183,21 +189,23 @@ export default function AthletePickCard({
             <button
               onClick={() => onPickSelection(athlete.id, currentStatIndex, 'under')}
               disabled={isSelectionDisabled}
-              className={`rounded-xl py-2 px-4 transition-all duration-300 group shadow-lg ${isThisStatSelected && selectedPick?.predictedDirection === 'under'
+              className={`rounded-xl py-2 px-4 transition-all duration-300 group shadow-lg ${
+                isThisStatSelected && selectedPick?.predictedDirection === 'under'
                   ? 'bg-gradient-to-r from-red-500/50 to-red-600/40 border-2 border-red-300 shadow-red-500/40'
                   : isSelectionDisabled
                     ? 'bg-gradient-to-r from-slate-600/25 to-slate-700/15 border-2 border-slate-500/20 cursor-not-allowed opacity-50'
                     : 'bg-gradient-to-r from-red-500/25 to-red-600/15 border-2 border-red-400/40 hover:from-red-500/35 hover:to-red-600/25 hover:border-red-400/60 hover:shadow-red-500/20'
-                }`}
+              }`}
             >
               <div className="flex items-center justify-center mb-1">
                 <svg
-                  className={`w-5 h-5 transition-transform duration-300 ${isThisStatSelected && selectedPick?.predictedDirection === 'under'
+                  className={`w-5 h-5 transition-transform duration-300 ${
+                    isThisStatSelected && selectedPick?.predictedDirection === 'under'
                       ? 'text-red-300 scale-110'
                       : isSelectionDisabled
                         ? 'text-slate-500'
                         : 'text-red-400 group-hover:scale-110'
-                    }`}
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -206,12 +214,13 @@ export default function AthletePickCard({
                 </svg>
               </div>
               <div
-                className={`font-bold text-sm transition-colors ${isThisStatSelected && selectedPick?.predictedDirection === 'under'
+                className={`font-bold text-sm transition-colors ${
+                  isThisStatSelected && selectedPick?.predictedDirection === 'under'
                     ? 'text-red-200'
                     : isSelectionDisabled
                       ? 'text-slate-500'
                       : 'text-red-300 group-hover:text-red-200'
-                  }`}
+                }`}
               >
                 UNDER
               </div>

@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { GamesFindOne } from '@repo/server'
+import { capitalize, getShortenedPosition } from '@/lib/utils'
 
 interface ParticipantPicksProps {
   participant: GamesFindOne['participants'][number]
@@ -32,13 +33,14 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                         target.style.display = 'none'
                         const parent = target.parentElement
                         if (parent) {
-                          parent.innerHTML = `<span class="text-white font-bold">${pick.line?.athlete?.name ||
+                          parent.innerHTML = `<span class="text-white font-bold">${
+                            pick.line?.athlete?.name ||
                             ''
                               .split(' ')
                               .map((n) => n[0])
                               .join('')
                               .toUpperCase()
-                            }</span>`
+                          }</span>`
                         }
                       }}
                     />
@@ -51,14 +53,29 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                     {pick.line?.athlete?.name || ''}
                   </h6>
                   <p className="text-slate-400 text-xs">
-                    {new Date(pick.line?.matchup?.startsAt || '').toLocaleString()}
+                    {new Date(pick.line?.matchup?.startsAt || '').toLocaleString('en-US', {
+                      weekday: 'short',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    })}{' '}
+                    | {getShortenedPosition(pick.line?.athlete?.position || '')} ({pick.line?.athlete?.jerseyNumber})
                   </p>
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="text-white font-semibold text-sm">
-                  {pick.line?.stat?.displayName || ''} {pick.predictedDirection} {pick.line?.predictedValue}
+                <div className="text-white font-semibold text-sm">{pick.line?.stat?.displayName || ''}</div>
+                <div
+                  className={`font-semibold text-sm ${
+                    pick.predictedDirection === 'under'
+                      ? 'text-red-400'
+                      : pick.predictedDirection === 'over'
+                        ? 'text-green-400'
+                        : 'text-white'
+                  }`}
+                >
+                  {capitalize(pick.predictedDirection!)} {pick.line?.predictedValue}
                 </div>
                 <div className="text-slate-400 text-xs">{pick.line?.actualValue}</div>
               </div>

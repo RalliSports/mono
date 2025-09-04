@@ -215,8 +215,17 @@ export class GamesService {
               with: {
                 line: {
                   with: {
-                    athlete: true,
-                    matchup: true,
+                    athlete: {
+                      with: {
+                        team: true,
+                      },
+                    },
+                    matchup: {
+                      with: {
+                        homeTeam: true,
+                        awayTeam: true,
+                      },
+                    },
                     stat: true,
                   },
                 },
@@ -645,7 +654,7 @@ export class GamesService {
       throw new NotFoundException('game not found');
     }
 
-    console.log(game, user, "invite")
+    console.log(game, user, 'invite');
 
     try {
       const message = this.notificationService.buildGameInviteMessage(
