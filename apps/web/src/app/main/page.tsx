@@ -60,8 +60,8 @@ export default function MainFeedPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts */}
-        <LobbiesSection lobbiesData={lobbiesData} user={user ?? null} isMobile={false} />
-        <LobbiesSection lobbiesData={lobbiesData} user={user ?? null} isMobile={true} />
+        <LobbiesSection lobbiesData={lobbiesData} isMobile={false} />
+        <LobbiesSection lobbiesData={lobbiesData} isMobile={true} />
       </div>
 
       {/* Bottom Selection Bar (when in selection mode) */}
