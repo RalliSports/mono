@@ -53,9 +53,8 @@ export default function GameHeader({ game }: GameHeaderProps) {
             <p className="text-slate-400 text-sm">
               Host • Created {new Date(game.createdAt || '').toLocaleDateString()}
             </p>
-            <div className="mt-2">
-              <h2 className="text-lg font-semibold text-white truncate leading-tight">{game.title}</h2>
-              <div className="flex items-center gap-2 mt-1">
+            <div>
+              <div className="flex items-center gap-2 ">
                 <span className="text-slate-300 font-medium text-sm">
                   {game.participants.length}/{game.maxParticipants} players
                 </span>

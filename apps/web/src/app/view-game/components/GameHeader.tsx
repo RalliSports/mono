@@ -1,20 +1,20 @@
 import { GamesFindOne } from '@repo/server'
 import Image from 'next/image'
-import { useState } from 'react';
+import { useState } from 'react'
 interface GameHeaderProps {
   lobby: GamesFindOne
 }
 
 export default function GameHeader({ lobby }: GameHeaderProps) {
-  const [imageSrc, setImageSrc] = useState(lobby.creator?.avatar);
-  const [hasErrored, setHasErrored] = useState(false);
+  const [imageSrc, setImageSrc] = useState(lobby.creator?.avatar)
+  const [hasErrored, setHasErrored] = useState(false)
 
   const handleError = () => {
     if (!hasErrored) {
-      setHasErrored(true);
-      setImageSrc('/images/pfp-2.svg'); // Use local fallback
+      setHasErrored(true)
+      setImageSrc('/images/pfp-2.svg') // Use local fallback
     }
-  };
+  }
   return (
     <div className="pt-6 pb-4">
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
@@ -29,7 +29,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
                   width={64}
                   height={64}
                   onError={(e) => {
-                    e.currentTarget.onerror = handleError;
+                    e.currentTarget.onerror = handleError
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
                   }}
                 />
@@ -42,9 +42,8 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
             <p className="text-slate-400 text-sm">
               Host • Created {new Date(lobby.createdAt || '').toLocaleDateString()}
             </p>
-            <div className="mt-2">
-              <h2 className="text-lg font-semibold text-white truncate leading-tight">{lobby.title}</h2>
-              <div className="flex items-center gap-2 mt-1">
+            <div>
+              <div className="flex items-center gap-2 ">
                 <span className="text-slate-300 font-medium text-sm">
                   {lobby.participants.length}/{lobby.maxParticipants} players
                 </span>
