@@ -18,7 +18,6 @@ interface LobbyCardProps {
     avatar: string
   }
   isUrgent?: boolean
-  shouldOpenViewGame?: boolean
 }
 
 export default function LobbyCard({
@@ -32,10 +31,9 @@ export default function LobbyCard({
   timeLeft,
   host,
   isUrgent = false,
-  shouldOpenViewGame = false,
 }: LobbyCardProps) {
   const progressPercentage = (participants.length / maxParticipants) * 100
-  const nextPageOnClick = shouldOpenViewGame ? 'view-game' : 'join-game'
+  const nextPageOnClick = 'game'
 
   const [imageSrc, setImageSrc] = useState(host.avatar)
   const [hasErrored, setHasErrored] = useState(false)

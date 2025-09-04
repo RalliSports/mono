@@ -148,7 +148,7 @@ export function usePicks() {
       addToast(errorData.error || 'Failed to submit bets', 'error')
     }
     setTimeout(() => {
-      window.location.href = `/view-game?id=${gameId}`
+      window.location.href = `/game?id=${gameId}`
     }, 1000)
     setIsSubmittingPayment(false)
   }

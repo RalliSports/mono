@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import LoadingSpinner from '../view-game/components/LoadingSpinner'
+import LoadingSpinner from '../game/components/LoadingSpinner'
 
 interface GamePick {
   id: number

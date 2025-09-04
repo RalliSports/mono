@@ -52,7 +52,7 @@ function JoinGameContent() {
       setHasCheckedConnection(true)
 
       if (!isConnected && !balanceLoading && lobbyId) {
-        const callbackUrl = `/join-game?id=${lobbyId}`
+        const callbackUrl = `/game?id=${lobbyId}`
         router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
       }
     }, 2000) // Same timeout as main page
@@ -67,7 +67,7 @@ function JoinGameContent() {
     if (!mounted) return
 
     if (hasCheckedConnection && !account?.isConnected && lobbyId) {
-      const callbackUrl = `/join-game?id=${lobbyId}`
+      const callbackUrl = `/game?id=${lobbyId}`
       router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
     }
   }, [mounted, hasCheckedConnection, account?.isConnected, router, lobbyId])

@@ -1,15 +1,13 @@
 import { useRouter } from 'next/navigation'
 import LobbyCard from '@/components/main-feed/lobby-card'
 import type { Lobby } from '@/hooks/get-games'
-import type { User } from './types'
 
 interface LobbiesSectionProps {
   lobbiesData: Lobby[]
-  user: User | null
   isMobile?: boolean
 }
 
-export default function LobbiesSection({ lobbiesData, user, isMobile = false }: LobbiesSectionProps) {
+export default function LobbiesSection({ lobbiesData, isMobile = false }: LobbiesSectionProps) {
   const router = useRouter()
   const totalActiveLobbies = lobbiesData.length
 
@@ -83,7 +81,6 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
                 timeLeft={lobby.timeLeft}
                 host={lobby.host}
                 isUrgent={lobby.isUrgent}
-                shouldOpenViewGame={lobby.participants.some((participant) => participant.user?.id === user?.id)}
               />
             ))}
           </div>
@@ -126,7 +123,6 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
               timeLeft={lobby.timeLeft}
               host={lobby.host}
               isUrgent={lobby.isUrgent}
-              shouldOpenViewGame={lobby.participants.some((participant) => participant.user?.id === user?.id)}
             />
           ))}
         </div>
