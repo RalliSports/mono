@@ -11,10 +11,10 @@ interface ResolveLinesTabProps {
   resolvingLine: string | null
   setResolvingLine: (id: string | null) => void
   resolutionData: {
-    actualValue: string
+    actualValue: number
     resolutionReason: string
   }
-  setResolutionData: (data: any) => void
+  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
   handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
   addToast: (message: string, type: 'success' | 'error') => void
 }

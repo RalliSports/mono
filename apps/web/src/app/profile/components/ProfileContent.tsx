@@ -10,14 +10,14 @@ import { useProfile } from '../hooks/useProfile'
 import { useProfilePictureUpload } from '../hooks/useProfilePictureUpload'
 import { useProfileTabs } from '../hooks/useProfileTabs'
 import { formatBalance } from '@/lib/utils'
+import PastParlaysSection from './PastParlaysSection'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
 
-  const { user, myOpenGames, username, firstName, lastName, setUser, setAvatar, setForceRefresh } = useProfile(
-    session || null,
-  )
+  const { user, myOpenGames, myCompletedGames, username, firstName, lastName, setUser, setAvatar, setForceRefresh } =
+    useProfile(session || null)
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
     session || null,
@@ -58,6 +58,7 @@ export default function ProfileContent() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <ActiveParlaysSection myOpenGames={myOpenGames} user={user} setActiveTab={setActiveTab} />
+            <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
           </div>
         )}
 

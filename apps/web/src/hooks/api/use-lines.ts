@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApiWithAuth } from './base'
-import { LineFindAll, LineCreate } from "@repo/server"
+import { LineFindAll, LineCreate } from '@repo/server'
 
 export function useLines() {
   const queryClient = useQueryClient()
@@ -23,7 +23,8 @@ export function useLines() {
   })
 
   const resolveMutation = useMutation({
-    mutationFn: (lineId: string) => api.post(`/api/resolve-line`, { lineId }),
+    mutationFn: ({ lineId, actualValue }: { lineId: string; actualValue: number }) =>
+      api.post(`/api/resolve-line`, { lineId, actualValue }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lines'] })
       queryClient.invalidateQueries({ queryKey: ['active-athletes'] })

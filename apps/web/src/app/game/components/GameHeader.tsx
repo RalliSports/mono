@@ -9,6 +9,8 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
   const [imageSrc, setImageSrc] = useState(lobby.creator?.avatar)
   const [hasErrored, setHasErrored] = useState(false)
 
+  const winners = lobby.participants.filter((p) => p.isWinner)
+
   const handleError = () => {
     if (!hasErrored) {
       setHasErrored(true)
@@ -52,6 +54,16 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
               </div>
             </div>
           </div>
+          {winners.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-300 font-medium text-sm">Winners</span>
+              {winners.map((winner) => (
+                <span key={winner.id} className="text-slate-400 text-sm">
+                  {winner.user?.username}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

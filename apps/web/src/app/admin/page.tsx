@@ -109,7 +109,7 @@ function AdminPageContent() {
   const [selectedSport, setSelectedSport] = useState('all')
   const [resolvingLine, setResolvingLine] = useState<string | null>(null)
   const [resolutionData, setResolutionData] = useState({
-    actualValue: '',
+    actualValue: 0,
     resolutionReason: '',
   })
 
@@ -312,7 +312,7 @@ function AdminPageContent() {
         statId: newLine.statTypeId,
         matchupId: newLine.id,
         predictedValue: newLine.value.toString(),
-        actualValue: null,
+        actualValue: 0,
         isHigher: null,
         startsAt: new Date(newLine.gameDate),
       } as any)
@@ -332,7 +332,7 @@ function AdminPageContent() {
     }
 
     try {
-      await linesQuery.resolve.mutateAsync(lineId)
+      await linesQuery.resolve.mutateAsync({ lineId, actualValue })
       addToast(`Line resolved successfully! (${actualValue})`, 'success')
     } catch (error) {
       console.error('Error resolving line:', error)

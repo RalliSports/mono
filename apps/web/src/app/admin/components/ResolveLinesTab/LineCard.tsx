@@ -7,10 +7,10 @@ interface LineCardProps {
   resolvingLine: string | null
   setResolvingLine: (id: string | null) => void
   resolutionData: {
-    actualValue: string
+    actualValue: number
     resolutionReason: string
   }
-  setResolutionData: (data: { actualValue: string; resolutionReason: string }) => void
+  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
   handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
   addToast: (message: string, type: 'success' | 'error') => void
 }
@@ -35,12 +35,13 @@ export default function LineCard({
           <div className="flex items-center space-x-3">
             <h4 className="text-white font-semibold text-lg">{line.athlete?.name}</h4>
             <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${line.createdAt && line.createdAt > timeNow
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                line.createdAt && line.createdAt > timeNow
                   ? 'bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30'
                   : !!line.actualValue
                     ? 'bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30'
                     : 'bg-red-500/20 text-red-400 border border-red-400/30'
-                }`}
+              }`}
             >
               {line.createdAt && line.createdAt > timeNow ? 'Pending' : !!line.actualValue ? 'Resolved' : 'Cancelled'}
             </span>
@@ -99,8 +100,9 @@ export default function LineCard({
               <div className="text-right">
                 <div className="text-sm text-slate-300">Result</div>
                 <div
-                  className={`font-bold ${line.actualValue! > line.predictedValue! ? 'text-[#00CED1]' : 'text-[#FFAB91]'
-                    }`}
+                  className={`font-bold ${
+                    line.actualValue! > line.predictedValue! ? 'text-[#00CED1]' : 'text-[#FFAB91]'
+                  }`}
                 >
                   {line.actualValue! > line.predictedValue!
                     ? 'OVER'
@@ -127,7 +129,7 @@ export default function LineCard({
                       onChange={(e) =>
                         setResolutionData({
                           ...resolutionData,
-                          actualValue: e.target.value,
+                          actualValue: parseFloat(e.target.value),
                         })
                       }
                       placeholder={`e.g., ${line.predictedValue}`}
@@ -155,7 +157,7 @@ export default function LineCard({
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={async () => {
-                      const actualValue = parseFloat(resolutionData.actualValue)
+                      const actualValue = resolutionData.actualValue
                       if (isNaN(actualValue)) {
                         addToast('Please enter a valid actual value', 'error')
                         return
@@ -164,12 +166,12 @@ export default function LineCard({
                       await handleResolveLine(line.id, actualValue)
                       setResolvingLine(null)
                       setResolutionData({
-                        actualValue: '',
+                        actualValue: 0,
                         resolutionReason: '',
                       })
                       setLoading(false)
                     }}
-                    disabled={!resolutionData.actualValue}
+                    disabled={resolutionData.actualValue < 0}
                     className="px-6 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Resolving...' : 'Auto Resolve'}
@@ -179,7 +181,7 @@ export default function LineCard({
                       handleResolveLine(line.id, 0)
                       setResolvingLine(null)
                       setResolutionData({
-                        actualValue: '',
+                        actualValue: 0,
                         resolutionReason: '',
                       })
                     }}
@@ -191,7 +193,7 @@ export default function LineCard({
                     onClick={() => {
                       setResolvingLine(null)
                       setResolutionData({
-                        actualValue: '',
+                        actualValue: 0,
                         resolutionReason: '',
                       })
                     }}
