@@ -16,10 +16,12 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
 
       <div className="divide-y divide-slate-700/30">
         {participant.bets.map((pick) => (
-          <div key={pick.id} className="p-4 hover:bg-slate-700/20 transition-all duration-200">
+          <div key={pick.id} className={`p-4 hover:bg-slate-700/20 transition-all duration-200 `}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
+                <div
+                  className={`w-10 h-10 backdrop-blur-lg bg-white/5 border border-${pick.line?.status === 'resolved' ? (pick.isCorrect ? 'emerald-400' : 'red-400') : 'white/10'} rounded-lg flex items-center justify-center overflow-hidden`}
+                >
                   {pick.line?.athleteId ? (
                     <Image
                       src={pick.line?.athlete?.picture || '/images/pfp-2.svg'}
@@ -88,13 +90,22 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                 </div>
                 <div className="text-white font-semibold text-xs">{pick.line?.stat?.displayName || ''}</div>
 
-                <div className="text-slate-400 text-xs">{pick.line?.actualValue}</div>
-                <div className="text-slate-400 text-xs">Current: {pick.line?.actualValue || 'N/A'}</div>
+                <div className="text-slate-400 text-xs">
+                  {`${pick.line?.status === 'resolved' ? 'Final' : 'Current:'}`} {pick.line?.actualValue || 'N/A'}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400">Progress</span>
+                <span
+                  className={
+                    pick.line?.status === 'resolved'
+                      ? pick.isCorrect
+                        ? 'text-emerald-400'
+                        : 'text-red-400'
+                      : 'text-slate-400'
+                  }
+                >{`${pick.line?.status === 'resolved' ? `Result: ` + (pick.isCorrect ? 'Correct' : 'Incorrect') : 'Progress'}`}</span>
                 <span className="text-slate-300">
                   {pick.line?.actualValue || 0} / {pick.line?.predictedValue}
                 </span>
@@ -105,9 +116,11 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                 <div className="w-full bg-slate-700/60 rounded-full h-2 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-1000 ${
-                      pick.isCorrect
-                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                        : pick.line?.actualValue !== null && Number(pick.line?.actualValue || 0) > 0
+                      pick.line?.status === 'resolved'
+                        ? pick.isCorrect
+                          ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                          : 'bg-gradient-to-r from-red-600 to-red-400'
+                        : pick.line?.actualValue !== null
                           ? pick.predictedDirection?.toLowerCase() === 'over'
                             ? Number(pick.line?.actualValue || 0) >= Number(pick.line?.predictedValue || 0)
                               ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'

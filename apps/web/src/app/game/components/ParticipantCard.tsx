@@ -10,21 +10,23 @@ interface ParticipantCardProps {
 }
 
 export default function ParticipantCard({ participant, lobby, isExpanded, onToggle }: ParticipantCardProps) {
-  const [imageSrc, setImageSrc] = useState(participant.user?.avatar);
-  const [hasErrored, setHasErrored] = useState(false);
+  const [imageSrc, setImageSrc] = useState(participant.user?.avatar)
+  const [hasErrored, setHasErrored] = useState(false)
+  console.log(participant, 'participant')
 
   const handleError = () => {
     if (!hasErrored) {
-      setHasErrored(true);
-      setImageSrc('/images/pfp-1.svg'); // Use local fallback
+      setHasErrored(true)
+      setImageSrc('/images/pfp-1.svg') // Use local fallback
     }
-  };
+  }
   return (
     <div className="space-y-3">
       {/* Enhanced Participant Card */}
       <div
-        className={`bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl ${isExpanded ? 'border-[#00CED1] shadow-[#00CED1]/20' : 'hover:border-slate-600 hover:shadow-slate-600/10'
-          }`}
+        className={`bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer shadow-2xl ${
+          isExpanded ? 'border-[#00CED1] shadow-[#00CED1]/20' : 'hover:border-slate-600 hover:shadow-slate-600/10'
+        }`}
         onClick={onToggle}
       >
         <div className="p-5">
@@ -40,7 +42,7 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
                       width={56}
                       height={56}
                       onError={(e) => {
-                        e.currentTarget.onerror = handleError;
+                        e.currentTarget.onerror = handleError
                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
                       }}
                     />
@@ -70,8 +72,9 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
                 <div className="text-xs text-slate-500">Ready to play</div>
               </div>
               <div
-                className={`transform transition-transform duration-300 text-slate-400 ${isExpanded ? 'rotate-180' : ''
-                  }`}
+                className={`transform transition-transform duration-300 text-slate-400 ${
+                  isExpanded ? 'rotate-180' : ''
+                }`}
               >
                 ▼
               </div>
@@ -81,21 +84,31 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
           {/* Enhanced Quick Picks Preview */}
           <div className="mt-4">
             <div className="flex gap-1.5">
-              {participant.bets.map((pick) => (
-                <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full bg-gradient-to-r ${new Date(pick.line?.matchup?.startsAt || '') > new Date()
-                      ? 'border-slate-600'
-                      : !!pick.line?.actualValue
-                        ? 'border-blue-500'
-                        : pick.isCorrect
-                          ? 'border-emerald-500'
-                          : 'border-red-500'
+              {participant.bets.map((pick) => {
+                console.log(
+                  pick,
+                  'pick',
+                  new Date(pick.line?.matchup?.startsAt || ''),
+                  new Date(),
+                  new Date(pick.line?.matchup?.startsAt || '') > new Date(),
+                )
+                return (
+                  <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full bg-gradient-to-r ${
+                        new Date(pick.line?.matchup?.startsAt || '') > new Date()
+                          ? 'bg-slate-600'
+                          : pick.line?.status !== 'resolved'
+                            ? 'bg-blue-500'
+                            : pick.isCorrect
+                              ? 'bg-emerald-500'
+                              : 'bg-red-500'
                       }`}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              ))}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>

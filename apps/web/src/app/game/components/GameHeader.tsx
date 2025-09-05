@@ -53,17 +53,18 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
                 <span className="text-slate-400 text-sm">{lobby.numBets} legs</span>
               </div>
             </div>
+
+            {winners.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-slate-300 font-medium text-sm">Winners</span>
+                {winners.map((winner) => (
+                  <span key={winner.id} className="text-slate-400 text-sm">
+                    {winner.user?.username}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-          {winners.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-slate-300 font-medium text-sm">Winners</span>
-              {winners.map((winner) => (
-                <span key={winner.id} className="text-slate-400 text-sm">
-                  {winner.user?.username}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

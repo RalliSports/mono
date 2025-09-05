@@ -407,6 +407,7 @@ export class GamesService {
 
       // Now calculate winners with updated data
       let winners: string[] = [];
+      let winnersIds: string[] = [];
       let betsToWin = 0;
       const allLinesIds = new Set<number>();
       for (const participant of game.participants) {
@@ -448,9 +449,11 @@ export class GamesService {
 
         if (correctPredictions === betsToWin) {
           winners.push(participant.user?.walletAddress!);
+          winnersIds.push(participant.userId!);
         } else if (correctPredictions > betsToWin) {
           betsToWin = correctPredictions;
           winners = [participant.user?.walletAddress!];
+          winnersIds = [participant.userId!];
         }
       }
 
@@ -469,11 +472,13 @@ export class GamesService {
         );
       }
 
-      for (const winner of winners) {
+      for (const winner of winnersIds) {
         await tx
           .update(participants)
           .set({ isWinner: true })
-          .where(eq(participants.userId, winner));
+          .where(
+            and(eq(participants.userId, winner), eq(participants.gameId, id)),
+          );
       }
 
       try {
