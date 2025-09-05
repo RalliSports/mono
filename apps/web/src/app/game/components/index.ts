@@ -6,6 +6,7 @@ export { default as ParticipantsList } from './ParticipantsList'
 export { default as ParticipantCard } from './ParticipantCard'
 export { default as ParticipantPicks } from './ParticipantPicks'
 export { default as LoadingSpinner } from './LoadingSpinner'
+export { default as WinnersDisplay } from './WinnersDisplay'
 
 // Export types
 export * from './types'
