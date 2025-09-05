@@ -469,6 +469,13 @@ export class GamesService {
         );
       }
 
+      for (const winner of winners) {
+        await tx
+          .update(participants)
+          .set({ isWinner: true })
+          .where(eq(participants.userId, winner));
+      }
+
       try {
         const resolveTxnSig = await this.anchor.resolveGameInstruction(
           id,
