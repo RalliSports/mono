@@ -18,7 +18,7 @@ pub struct Bet {
 impl Bet {
     // Adjusted size for the new Pick structure
     pub const MAX_SIZE: usize =
-        8 + 32 + 32 + (4 + MAX_LINES_PER_GAME as usize * (32 + 1)) + 1 + 8 + 1;
+        8 + 32 + 32 + (4 + MAX_LINES_PER_GAME as usize * (32 + 1)) + 1 + 8 + 1 + 1;
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
