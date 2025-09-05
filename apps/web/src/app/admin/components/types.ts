@@ -120,6 +120,7 @@ export interface MatchUp {
   homeTeam: Team
   awayTeam: Team
   date: Date
+  startsAt: Date
 }
 
 export type TabType = 'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games' | 'matchups'

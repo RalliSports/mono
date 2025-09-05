@@ -311,7 +311,7 @@ function AdminPageContent() {
         athleteId: newLine.playerId,
         statId: newLine.statTypeId,
         matchupId: newLine.id,
-        predictedValue: newLine.value.toString(),
+        predictedValue: newLine.value,
         actualValue: 0,
         isHigher: null,
         startsAt: new Date(newLine.gameDate),

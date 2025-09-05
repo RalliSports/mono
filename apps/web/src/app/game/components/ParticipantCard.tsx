@@ -12,7 +12,6 @@ interface ParticipantCardProps {
 export default function ParticipantCard({ participant, lobby, isExpanded, onToggle }: ParticipantCardProps) {
   const [imageSrc, setImageSrc] = useState(participant.user?.avatar)
   const [hasErrored, setHasErrored] = useState(false)
-  console.log(participant, 'participant')
 
   const handleError = () => {
     if (!hasErrored) {
@@ -85,13 +84,6 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
           <div className="mt-4">
             <div className="flex gap-1.5">
               {participant.bets.map((pick) => {
-                console.log(
-                  pick,
-                  'pick',
-                  new Date(pick.line?.matchup?.startsAt || ''),
-                  new Date(),
-                  new Date(pick.line?.matchup?.startsAt || '') > new Date(),
-                )
                 return (
                   <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                     <div

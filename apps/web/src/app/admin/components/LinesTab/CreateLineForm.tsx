@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
 import { Player, MatchUp } from '../types'
 
@@ -12,7 +13,7 @@ interface CreateLineFormProps {
     gameDate: string
   }
   setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void
-  handleCreateLine: () => void
+  handleCreateLine: () => Promise<void>
   players: Player[]
   stats: StatsFindById[]
   matchUps: MatchUp[]
@@ -26,6 +27,14 @@ export default function CreateLineForm({
   stats,
   matchUps,
 }: CreateLineFormProps) {
+  const [isCreating, setIsCreating] = useState(false)
+  const filteredPlayers = players.filter((player) => {
+    if (newLine.id) {
+      const matchUp = matchUps.find((matchUp) => matchUp.id === newLine.id)
+      return player.team.name === matchUp?.homeTeam.name || player.team.name === matchUp?.awayTeam.name
+    }
+    return true
+  })
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -45,7 +54,7 @@ export default function CreateLineForm({
               placeholder="Select a player"
               options={[
                 { value: '', label: 'Select a player', disabled: true },
-                ...players.map((player) => ({
+                ...filteredPlayers.map((player) => ({
                   value: player.id,
                   label: `${player.name} (${player.team.name})`,
                   icon: '👤',
@@ -92,18 +101,20 @@ export default function CreateLineForm({
           </div>
           <div>
             <label className="block text-white font-semibold mb-2">Select Game</label>
-            <select
+            <Dropdown
               value={newLine.id}
-              onChange={(e) => setNewLine({ ...newLine, id: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-            >
-              <option value="">Select a game</option>
-              {matchUps.map((matchUp) => (
-                <option key={matchUp.id} value={matchUp.id}>
-                  {matchUp.homeTeam.name} vs {matchUp.awayTeam.name}
-                </option>
-              ))}
-            </select>
+              onChange={(value: string) => setNewLine({ ...newLine, id: value })}
+              placeholder="Select a game"
+              options={[
+                { value: '', label: 'Select a game', disabled: true },
+                ...matchUps.map((matchUp) => ({
+                  value: matchUp.id,
+                  label: `${matchUp.homeTeam.name} vs ${matchUp.awayTeam.name} (${new Date(matchUp.startsAt).toLocaleDateString()})`,
+                  icon: '🏈',
+                })),
+              ]}
+              searchable={true}
+            />
           </div>
         </div>
       </div>
@@ -111,10 +122,15 @@ export default function CreateLineForm({
       {/* Create Line Button - Full Width at Bottom */}
       <div className="mt-6">
         <button
-          onClick={handleCreateLine}
+          onClick={async () => {
+            setIsCreating(true)
+            await handleCreateLine()
+            setIsCreating(false)
+          }}
+          disabled={isCreating}
           className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         >
-          Create Line
+          {isCreating ? 'Creating Line...' : 'Create Line'}
         </button>
       </div>
     </div>

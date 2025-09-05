@@ -11,7 +11,7 @@ interface LinesTabProps {
     gameDate: string
   }
   setNewLine: (line: any) => void
-  handleCreateLine: () => void
+  handleCreateLine: () => Promise<void>
   players: Player[]
   stats: StatsFindById[]
   matchUps: MatchUp[]
