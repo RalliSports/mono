@@ -16,11 +16,17 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
 
       <div className="divide-y divide-slate-700/30">
         {participant.bets.map((pick) => (
-          <div key={pick.id} className={`p-4 hover:bg-slate-700/20 transition-all duration-200 `}>
+          <div key={pick.id} className={`p-4 hover:bg-slate-700/20 transition-all duration-200 relative`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div
-                  className={`w-10 h-10 backdrop-blur-lg bg-white/5 border border-${pick.line?.status === 'resolved' ? (pick.isCorrect ? 'emerald-400' : 'red-400') : 'white/10'} rounded-lg flex items-center justify-center overflow-hidden`}
+                  className={`w-10 h-10 backdrop-blur-lg rounded-lg flex items-center justify-center overflow-hidden transition-all duration-300 border ${
+                    pick.line?.status === 'resolved'
+                      ? pick.isCorrect
+                        ? 'bg-emerald-500/10 shadow-emerald-500/20 shadow-lg border-emerald-500/40'
+                        : 'bg-red-500/10 shadow-red-500/20 shadow-lg border-red-500/40'
+                      : 'bg-white/5 border-white/20'
+                  }`}
                 >
                   {pick.line?.athleteId ? (
                     <Image
@@ -93,19 +99,48 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                 <div className="text-slate-400 text-xs">
                   {`${pick.line?.status === 'resolved' ? 'Final' : 'Current:'}`} {pick.line?.actualValue || 'N/A'}
                 </div>
+
+                {/* Result indicator - game stats style box */}
+                {pick.line?.status === 'resolved' && (
+                  <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-lg px-1.5 py-0.5 mt-1.5 shadow-lg">
+                    <div className="text-center">
+                      <div
+                        className={`flex items-center justify-center gap-0.5 text-[10px] font-medium ${
+                          pick.isCorrect ? 'text-emerald-400' : 'text-red-400'
+                        }`}
+                      >
+                        {pick.isCorrect ? (
+                          <>
+                            <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            CORRECT
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            INCORRECT
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 mt-3">
               <div className="flex justify-between items-center text-xs">
-                <span
-                  className={
-                    pick.line?.status === 'resolved'
-                      ? pick.isCorrect
-                        ? 'text-emerald-400'
-                        : 'text-red-400'
-                      : 'text-slate-400'
-                  }
-                >{`${pick.line?.status === 'resolved' ? `Result: ` + (pick.isCorrect ? 'Correct' : 'Incorrect') : 'Progress'}`}</span>
+                <span className="text-slate-400">Progress</span>
                 <span className="text-slate-300">
                   {pick.line?.actualValue || 0} / {pick.line?.predictedValue}
                 </span>
