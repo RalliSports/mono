@@ -1,57 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useModal, useAccount } from '@getpara/react-sdk'
-import { toast } from 'sonner'
+import { useToast } from '@/components/ui/toast'
 
 export default function SignIn() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { openModal } = useModal()
+  const modal = useModal()
+  const { openModal } = modal
   const account = useAccount()
-  const [hasShownInitialModal, setHasShownInitialModal] = useState(false)
-  const modalOpenedRef = useRef(false)
+  const { addToast } = useToast()
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const modalOpenedRef = useRef(false)
+  const toastShownRef = useRef(false)
 
   const callbackUrl = searchParams.get('callbackUrl') || '/main'
-
-  // Check if modal is open by looking for Para modal elements in DOM
-  const isModalOpen = () => {
-    return (
-      document.querySelector('[data-testid="para-modal"]') !== null ||
-      document.querySelector('.para-modal') !== null ||
-      document.querySelector('[class*="modal"]') !== null
-    )
-  }
-
-  // Start monitoring for modal close
-  const startModalMonitoring = () => {
-    if (checkIntervalRef.current) return
-
-    checkIntervalRef.current = setInterval(() => {
-      if (modalOpenedRef.current && !isModalOpen() && !account?.isConnected) {
-        // Modal was open but is now closed, and user is not connected
-        modalOpenedRef.current = false
-
-        // Show a simple toast without auto-reopening the modal
-        toast.error('Please sign in to continue', {
-          duration: 5000,
-          action: {
-            label: 'Connect Wallet',
-            onClick: () => {
-              setTimeout(() => {
-                openModal()
-                modalOpenedRef.current = true
-              }, 500)
-            },
-          },
-        })
-
-        // Don't automatically reopen the modal - let user decide
-      }
-    }, 1000)
-  }
 
   // Stop monitoring
   const stopModalMonitoring = () => {
@@ -61,32 +26,29 @@ export default function SignIn() {
     }
   }
 
+  // Handle authentication state - show success toast when connected
   useEffect(() => {
-    // If user is already logged in, redirect to callback URL or main
-    if (account?.isConnected) {
+    // If user just connected, show success toast
+    if (account?.isConnected === true && !toastShownRef.current) {
       stopModalMonitoring()
-      router.push(callbackUrl)
+      toastShownRef.current = true
+      addToast('Successfully signed in! Click the button to go to Main', 'success', 6000)
       return
     }
+  }, [account?.isConnected, router, callbackUrl, addToast])
 
-    // If not logged in and haven't shown modal yet, open it
-    if (!hasShownInitialModal) {
-      setTimeout(() => {
-        openModal()
-        modalOpenedRef.current = true
-        setHasShownInitialModal(true)
-        startModalMonitoring()
-      }, 1000) // Increased delay to be less aggressive
-    }
-  }, [account?.isConnected, router, openModal, hasShownInitialModal, callbackUrl])
+  // Manual navigation to main
+  const handleGoToMain = () => {
+    router.push(callbackUrl)
+  }
 
-  // Monitor account changes and redirect when logged in
-  useEffect(() => {
-    if (account?.isConnected) {
-      stopModalMonitoring()
-      router.push(callbackUrl)
+  // Manual modal open handler
+  const handleOpenModal = () => {
+    if (!modalOpenedRef.current) {
+      modalOpenedRef.current = true
     }
-  }, [account?.isConnected, router, callbackUrl])
+    openModal()
+  }
 
   // Cleanup on unmount
   useEffect(() => {
@@ -98,13 +60,49 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-stone-100">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00CED1] mx-auto mb-4"></div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-2">
-          Welcome to Ralli
-        </h1>
-        <p className="text-gray-600">
-          {account?.isConnected ? 'Redirecting to main...' : 'Opening wallet connection...'}
-        </p>
+        {account?.isConnected === true ? (
+          // Successfully connected - show success state
+          <>
+            <div className="w-16 h-16 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-2">
+              Successfully Signed In!
+            </h1>
+            <p className="text-gray-600 mb-6">Your wallet is now connected. Ready to start betting?</p>
+            <button
+              onClick={handleGoToMain}
+              className="px-8 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            >
+              Go to Main
+            </button>
+          </>
+        ) : account?.isConnected === false ? (
+          // Not connected - show connect button
+          <>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-4">
+              Welcome to Ralli
+            </h1>
+            <p className="text-gray-600 mb-6">Connect your wallet to get started</p>
+            <button
+              onClick={handleOpenModal}
+              className="px-8 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            >
+              Connect Wallet
+            </button>
+          </>
+        ) : (
+          // Loading state
+          <>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00CED1] mx-auto mb-4"></div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-2">
+              Welcome to Ralli
+            </h1>
+            <p className="text-gray-600">Checking connection status...</p>
+          </>
+        )}
       </div>
     </div>
   )
