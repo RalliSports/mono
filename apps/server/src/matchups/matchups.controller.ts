@@ -38,19 +38,6 @@ export class MatchupsController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Get matchups that should have started' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of matchups that should have started',
-    type: [MatchupResponseDto],
-  })
-  @Get('/should-have-started')
-  async getMatchupsThatShouldHaveStarted() {
-    return this.matchupsService.getMatchupsThatShouldHaveStarted();
-  }
-
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Update a matchup' })
   @ApiResponse({
     status: 200,
