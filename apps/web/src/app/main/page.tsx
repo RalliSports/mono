@@ -15,7 +15,7 @@ import { useMainPage } from './hooks/useMainPage'
 
 export default function MainFeedPage() {
   const { session } = useSessionToken()
-  console.log(session)
+  // console.log(session)
 
   // Custom hooks for separation of concerns
   const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection()

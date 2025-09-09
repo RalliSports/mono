@@ -10,6 +10,7 @@ export interface GameSettings {
   gameMode: string
   numBets: number
   tokenId: string
+  imageUrl: string
 }
 
 export interface FormErrors {

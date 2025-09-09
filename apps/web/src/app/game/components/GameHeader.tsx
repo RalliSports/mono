@@ -6,7 +6,7 @@ interface GameHeaderProps {
 }
 
 export default function GameHeader({ lobby }: GameHeaderProps) {
-  const [imageSrc, setImageSrc] = useState(lobby.creator?.avatar)
+  const [imageSrc, setImageSrc] = useState(lobby.imageUrl)
   const [hasErrored, setHasErrored] = useState(false)
 
   const winners = lobby.participants.filter((p) => p.isWinner)
@@ -37,7 +37,6 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
                 />
               }
             </div>
-            <div className="absolute -bottom-1 -right-1 text-lg shadow-lg">👑</div>
           </div>
           <div className="flex-1">
             <h3 className="text-white font-bold text-xl truncate">{lobby.title}</h3>
