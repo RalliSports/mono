@@ -69,6 +69,27 @@ export class MatchupsService {
     });
   }
 
+  async getMatchupsInProgress() {
+    const now = new Date();
+
+    return this.db.query.matchups.findMany({
+      with: {
+        lines: {
+          columns: {
+            id: true,
+            status: true,
+            statId: true,
+            athleteId: true,
+          },
+        },
+      },
+      where: and(
+        eq(matchups.status, MatchupStatus.IN_PROGRESS),
+        lt(matchups.startsAt, now),
+      ),
+    });
+  }
+
   async getMatchupById(id: string) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, id),
