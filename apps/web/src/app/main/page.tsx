@@ -18,7 +18,7 @@ export default function MainFeedPage() {
   // console.log(session)
 
   // Custom hooks for separation of concerns
-  const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection()
+  const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection(false)
 
   const { user } = useUserData()
 
