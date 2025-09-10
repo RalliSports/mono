@@ -154,15 +154,17 @@ export default function CreateGame() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       <style jsx>{sliderStyles}</style>
 
-      <div className="max-w-md mx-auto space-y-6">
-        <PageHeader />
+      <PageHeader />
 
-        {/* Main Form Container */}
-        <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl space-y-6">
-          <GameTitleInput title={gameSettings.title} onChange={(title) => handleInputChange('title', title)} />
+      {/* Main Content */}
+      <div className="px-4 pb-20">
+        <div className="max-w-md mx-auto space-y-6">
+          {/* Main Form Container */}
+          <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl space-y-6">
+            <GameTitleInput title={gameSettings.title} onChange={(title) => handleInputChange('title', title)} />
 
           <GamePictureUpload
             avatar={gameSettings.imageUrl}
@@ -170,25 +172,27 @@ export default function CreateGame() {
             session={session || ''}
           />
 
-          <DepositAmountSelector
-            depositAmount={gameSettings.depositAmount}
-            onChange={(amount) => handleInputChange('depositAmount', amount)}
-          />
+            <DepositAmountSelector
+              depositAmount={gameSettings.depositAmount}
+              onChange={(amount) => handleInputChange('depositAmount', amount)}
+            />
 
-          <ParticipantsSelector
+            <ParticipantsSelector
+              maxParticipants={gameSettings.maxParticipants}
+              onChange={(participants) => handleInputChange('maxParticipants', participants)}
+            />
+
+            <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
+          </div>
+
+          <ContestSummary
             maxParticipants={gameSettings.maxParticipants}
-            onChange={(participants) => handleInputChange('maxParticipants', participants)}
+            depositAmount={gameSettings.depositAmount}
+            numberOfLegs={gameSettings.numBets}
+            creatingGameState={creatingGameState}
+            onCreateContest={handleCreateContest}
           />
-
-          <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
         </div>
-
-        <ContestSummary
-          maxParticipants={gameSettings.maxParticipants}
-          depositAmount={gameSettings.depositAmount}
-          creatingGameState={creatingGameState}
-          onCreateContest={handleCreateContest}
-        />
       </div>
       <ToastContainer />
     </div>
