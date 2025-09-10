@@ -4,7 +4,7 @@ import { useAccount } from '@getpara/react-sdk'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { WALLET_CONNECTION_TIMEOUT } from '../constants/filters'
 
-export function useWalletConnection() {
+export function useWalletConnection(requiresLogin: boolean = true) {
   const router = useRouter()
   const account = useAccount()
   const [mounted, setMounted] = useState(false)
@@ -39,7 +39,7 @@ export function useWalletConnection() {
       setHasCheckedConnection(true)
 
       // Only redirect if definitely not connected and not loading
-      if (!isConnected && !balanceLoading) {
+      if (!isConnected && !balanceLoading && requiresLogin) {
         console.log('No wallet connection found, redirecting to signin')
         router.push('/signin')
       }
@@ -55,7 +55,7 @@ export function useWalletConnection() {
     if (!mounted) return
 
     // Only redirect if we've completed our connection check and user is still not connected
-    if (hasCheckedConnection && !account?.isConnected) {
+    if (hasCheckedConnection && !account?.isConnected && requiresLogin) {
       router.push('/signin')
     }
   }, [mounted, hasCheckedConnection, account?.isConnected, router])

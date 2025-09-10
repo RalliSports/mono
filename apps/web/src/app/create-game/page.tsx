@@ -23,6 +23,7 @@ import {
 
 // Types and Hooks
 import { useGameValidation } from './hooks/useGameValidation'
+import GamePictureUpload from './components/GamePictureUpload'
 
 //check if para is connected else kick back to /signin
 
@@ -72,6 +73,7 @@ export default function CreateGame() {
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
     numBets: 10, // Default Number of Bets
     tokenId: '6028ea26-9f12-40ca-9333-2250b4524670',
+    imageUrl: '/images/pfp-2.svg',
   })
 
   const handleInputChange = (field: string, value: any) => {
@@ -104,6 +106,7 @@ export default function CreateGame() {
       userControlType: gameSettings.userControlType,
       gameModeId: gameSettings.gameMode,
       tokenId: gameSettings.tokenId,
+      imageUrl: gameSettings.imageUrl,
     }
 
     try {
@@ -162,6 +165,12 @@ export default function CreateGame() {
           {/* Main Form Container */}
           <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl space-y-6">
             <GameTitleInput title={gameSettings.title} onChange={(title) => handleInputChange('title', title)} />
+
+          <GamePictureUpload
+            avatar={gameSettings.imageUrl}
+            setAvatar={(imageUrl: string) => handleInputChange('imageUrl', imageUrl)}
+            session={session || ''}
+          />
 
             <DepositAmountSelector
               depositAmount={gameSettings.depositAmount}
