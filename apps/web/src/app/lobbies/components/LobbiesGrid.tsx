@@ -13,6 +13,7 @@ export default function LobbiesGrid({ lobbies }: LobbiesGridProps) {
           maxParticipants={lobby.maxParticipants}
           buyIn={lobby.buyIn}
           prizePool={lobby.prizePool}
+          imageUrl={lobby.imageUrl}
           legs={lobby.legs}
           timeLeft={lobby.timeLeft}
           host={lobby.host}

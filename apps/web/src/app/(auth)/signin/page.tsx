@@ -85,12 +85,12 @@ export default function SignIn() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-4">
               Welcome to Ralli
             </h1>
-            <p className="text-gray-600 mb-6">Connect your wallet to get started</p>
+            <p className="text-gray-600 mb-6">Sign in to continue</p>
             <button
               onClick={handleOpenModal}
               className="px-8 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
             >
-              Connect Wallet
+              Sign In
             </button>
           </>
         ) : (

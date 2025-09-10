@@ -46,15 +46,19 @@ export default function TopNavigation({
 
         {/* Right: Balance + Profile */}
         <div className="flex items-center space-x-3">
-          <div className="hidden lg:block">
-            <BalanceDisplay
-              isConnected={isConnected}
-              balances={balances}
-              balanceLoading={balanceLoading}
-              balanceError={balanceError}
-            />
-          </div>
-          <ProfileButton />
+          {isConnected && (
+            <>
+              <div className="hidden lg:block">
+                <BalanceDisplay
+                  isConnected={isConnected}
+                  balances={balances}
+                  balanceLoading={balanceLoading}
+                  balanceError={balanceError}
+                />
+              </div>
+              <ProfileButton />
+            </>
+          )}
         </div>
       </div>
     </div>
