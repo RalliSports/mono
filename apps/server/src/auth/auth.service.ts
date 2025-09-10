@@ -13,13 +13,17 @@ import { User } from 'src/user/dto/user-response.dto';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { generateUniqueGamertag } from 'src/utils/generateGamertag';
 import { getRandomAthleteAvatar } from 'src/utils/getRandomAthleteAvatar';
+import { ReferralService } from 'src/referral/referral.service';
 
 @Injectable()
 export class AuthService {
   private readonly paraServer: ParaServer;
   private anchor: ParaAnchor;
 
-  constructor(@Drizzle() private readonly db: Database) {
+  constructor(
+    @Drizzle() private readonly db: Database,
+    private readonly referralService: ReferralService,
+  ) {
     this.paraServer = new ParaServer(
       Environment.BETA,
       process.env.PARA_API_KEY,
@@ -27,7 +31,10 @@ export class AuthService {
     this.anchor = new ParaAnchor(this.getPara());
   }
 
-  async validateSession(session: string): Promise<User | null> {
+  async validateSession(
+    session: string,
+    referralCode?: string,
+  ): Promise<User | null> {
     try {
       await this.paraServer.importSession(session);
       const isActive = await this.paraServer.isSessionActive();
@@ -122,6 +129,15 @@ export class AuthService {
           });
         } catch (error) {
           console.error(error, 'error faucetTokens');
+        }
+      }
+
+      // Process referral if provided and user is new
+      if (referralCode && !userExisted) {
+        try {
+          await this.referralService.processReferral(referralCode, user.id);
+        } catch (error) {
+          console.error('Error processing referral:', error);
         }
       }
 

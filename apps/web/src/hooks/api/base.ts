@@ -1,4 +1,5 @@
 import { useSessionToken } from '../use-session'
+import { useReferralCode } from '../useReferralCode'
 
 export class ApiClient {
   private baseURL: string = ''
@@ -85,12 +86,18 @@ export const apiClient = new ApiClient()
 
 export function useApiWithAuth() {
   const { session } = useSessionToken()
+  const { referralCode } = useReferralCode()
 
   const requestWithAuth = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     const authHeaders: HeadersInit = {}
 
     if (session) {
       authHeaders['x-para-session'] = session
+    }
+
+    // Include referral code if available
+    if (referralCode) {
+      authHeaders['x-referral-code'] = referralCode
     }
 
     return apiClient.request<T>(endpoint, {
