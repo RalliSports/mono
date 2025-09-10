@@ -4,9 +4,10 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  // IsOptional,
+  IsOptional,
   IsString,
   IsUUID,
+  IsUrl,
 } from 'class-validator';
 
 export class CreateGameDto {
@@ -57,4 +58,12 @@ export class CreateGameDto {
   @IsNotEmpty()
   @IsUUID()
   gameModeId?: string;
+
+  @ApiProperty({
+    description: 'User avatar URL',
+    example: 'https://example.com/avatar.png',
+  })
+  @IsOptional()
+  @IsUrl({}, { message: 'Image URL must be a valid URL' })
+  imageUrl?: string;
 }

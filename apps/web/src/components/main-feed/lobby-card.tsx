@@ -11,6 +11,7 @@ interface LobbyCardProps {
   maxParticipants: number
   buyIn: number
   prizePool: number
+  imageUrl: string
   legs: number
   timeLeft: string
   host: {
@@ -27,6 +28,7 @@ export default function LobbyCard({
   maxParticipants,
   buyIn,
   prizePool,
+  imageUrl,
   legs,
   timeLeft,
   host,
@@ -35,7 +37,7 @@ export default function LobbyCard({
   const progressPercentage = (participants.length / maxParticipants) * 100
   const nextPageOnClick = 'game'
 
-  const [imageSrc, setImageSrc] = useState(host.avatar)
+  const [imageSrc, setImageSrc] = useState(imageUrl || '/images/pfp-2.svg')
   const [hasErrored, setHasErrored] = useState(false)
 
   const handleError = () => {
@@ -53,7 +55,7 @@ export default function LobbyCard({
         {/* Host Info Header */}
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-            {host.avatar ? (
+            {imageSrc ? (
               <Image
                 src={imageSrc || '/images/pfp-1.svg'}
                 alt={host.username}

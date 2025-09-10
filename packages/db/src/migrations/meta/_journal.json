@@ -64,6 +64,13 @@
       "when": 1756751499502,
       "tag": "0009_bent_pride",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1757439300023,
+      "tag": "0010_blushing_korvac",
+      "breakpoints": true
     }
   ]
 }
