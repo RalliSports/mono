@@ -34,7 +34,8 @@ export default function SignIn() {
     if (account?.isConnected === true && !toastShownRef.current) {
       stopModalMonitoring()
       toastShownRef.current = true
-      addToast('Successfully signed in! Click the button to go to Main', 'success', 6000)
+      router.push(callbackUrl)
+      // addToast('Successfully signed in! Click the button to go to Main', 'success', 6000)
       return
     }
   }, [account?.isConnected, router, callbackUrl, addToast])

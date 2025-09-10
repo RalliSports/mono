@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApiWithAuth } from './api/base'
 import { useReferralCode } from './useReferralCode'
+import { useSessionToken } from './use-session'
+import { apiClient } from './api/base'
 
 interface ReferralStats {
   totalReferrals: number
@@ -25,7 +25,25 @@ interface ReferredUser {
 export function useReferral() {
   const { referralCode, setReferralCode, clearReferralCode } = useReferralCode()
   const queryClient = useQueryClient()
-  const api = useApiWithAuth()
+  const { session } = useSessionToken()
+
+  // Create a separate API client for fetching user's own referral code
+  // This avoids circular dependency since we don't need to include referral codes in headers
+  const fetchUserReferralCode = async () => {
+    if (!session) throw new Error('No session')
+
+    console.log('Fetching user referral code with session:', session.substring(0, 10) + '...')
+
+    const response = await apiClient.request<ReferralResponse>('/api/referral/code', {
+      method: 'GET',
+      headers: {
+        'x-para-session': session,
+      },
+    })
+
+    console.log('Referral code response:', response)
+    return response
+  }
 
   const generateReferralLink = (userCode: string, baseUrl?: string) => {
     const base = baseUrl || window.location.origin
@@ -40,22 +58,49 @@ export function useReferral() {
   // API Queries - automatically fetch data
   const referralCodeQuery = useQuery<ReferralResponse>({
     queryKey: ['referral-code'],
-    queryFn: () => api.get('/referral/code').then((res: any) => res.data),
+    queryFn: fetchUserReferralCode,
+    enabled: !!session, // Only run when we have a session
   })
 
   const referralStatsQuery = useQuery<ReferralStats>({
     queryKey: ['referral-stats'],
-    queryFn: () => api.get('/referral/stats').then((res: any) => res.data),
+    queryFn: async () => {
+      if (!session) throw new Error('No session')
+      return apiClient.request<ReferralStats>('/api/referral/stats', {
+        method: 'GET',
+        headers: {
+          'x-para-session': session,
+        },
+      })
+    },
+    enabled: !!session,
   })
 
   const referredUsersQuery = useQuery<ReferredUser[]>({
     queryKey: ['referred-users'],
-    queryFn: () => api.get('/referral/referred-users').then((res: any) => res.data),
+    queryFn: async () => {
+      if (!session) throw new Error('No session')
+      return apiClient.request<ReferredUser[]>('/api/referral/referred-users', {
+        method: 'GET',
+        headers: {
+          'x-para-session': session,
+        },
+      })
+    },
+    enabled: !!session,
   })
 
   // API Mutations
   const generateReferralCodeMutation = useMutation<ReferralResponse, Error, void>({
-    mutationFn: () => api.post('/referral/generate').then((res: any) => res.data),
+    mutationFn: async () => {
+      if (!session) throw new Error('No session')
+      return apiClient.request<ReferralResponse>('/api/referral/generate', {
+        method: 'POST',
+        headers: {
+          'x-para-session': session,
+        },
+      })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['referral-code'] })
       queryClient.invalidateQueries({ queryKey: ['referral-stats'] })
@@ -63,7 +108,17 @@ export function useReferral() {
   })
 
   const validateReferralCodeMutation = useMutation<{ isValid: boolean }, Error, { code: string }>({
-    mutationFn: (data) => api.post('/referral/validate', data).then((res: any) => res.data),
+    mutationFn: async (data) => {
+      if (!session) throw new Error('No session')
+      return apiClient.request<{ isValid: boolean }>('/api/referral/validate', {
+        method: 'POST',
+        headers: {
+          'x-para-session': session,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+    },
   })
 
   return {

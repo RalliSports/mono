@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // Get the backend URL from environment variables
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL
@@ -11,11 +11,6 @@ export async function GET(request: NextRequest) {
 
     // Extract the JWT token from the request headers
     const tokenString = request.headers.get('x-para-session')
-    const referralCode = request.headers.get('x-referral-code')
-    const email = request.headers.get('x-email')
-
-    console.log('API Route - Session:', tokenString?.substring(0, 10) + '...')
-    console.log('API Route - Referral Code:', referralCode)
 
     // Check if the JWT token is missing
     if (!tokenString) {
@@ -28,15 +23,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Get the request body
+    const body = await request.json()
+
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}/api/v1/current-user`, {
-      method: 'GET',
+    const response = await fetch(`${backendUrl}/api/v1/referral/validate`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(tokenString && { 'x-para-session': tokenString }),
-        ...(referralCode && { 'x-referral-code': referralCode }),
-        ...(email && { 'x-email': email }),
       },
+      body: JSON.stringify(body),
     })
 
     // Check if the backend request was successful
@@ -66,7 +63,7 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
-    console.error('Create game API error:', error)
+    console.error('Referral validate API error:', error)
     return NextResponse.json(
       {
         error: 'Internal server error',

@@ -206,4 +206,10 @@ export class ReferralService {
   ): Promise<boolean> {
     return this.processReferral(referralCode, userId);
   }
+
+  async getRefferer(userId: string) {
+    return this.db.query.referrals.findFirst({
+      where: eq(referrals.refereeId, userId),
+    });
+  }
 }
