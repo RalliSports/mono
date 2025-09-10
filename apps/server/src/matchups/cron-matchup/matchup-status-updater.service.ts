@@ -11,7 +11,7 @@ import {
   EspnStatusType,
   EspnStatusName,
   EspnMatchupStatusResponse,
-} from './types/matchup-status-espn';
+} from './types/matchup-status-espn-response.types';
 import { LinesService } from 'src/lines/lines.service';
 
 @Injectable()

@@ -80,6 +80,7 @@ export class MatchupsService {
             status: true,
             statId: true,
             athleteId: true,
+            matchupId: true,
           },
         },
       },

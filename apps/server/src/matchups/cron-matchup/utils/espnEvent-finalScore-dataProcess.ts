@@ -1,3 +1,5 @@
+import { ESPNBoxScoreResponse } from '../types/matchup-boxscore-espn-response.types';
+
 interface AthleteLines {
   [key: string]: string;
 }
@@ -19,6 +21,8 @@ interface Team {
   id: string;
   name: string;
   abbreviation: string;
+  home_away: string;
+  won: boolean;
   score: number;
   lines: TeamLines;
 }
@@ -38,33 +42,36 @@ async function fetchESPNBoxscoreData(eventId: string): Promise<ProcessedData> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = (await response.json()) as any;
+    const data: ESPNBoxScoreResponse = (await response.json()) as any;
 
     const athletes: Athlete[] = [];
     const teams: Team[] = [];
 
     // Process athletes (players)
     for (const teamPlayers of data.boxscore.players) {
+      //data.boxscore.players[0] = teamPlayers
       const teamInfo = teamPlayers.team;
 
       for (const statCategory of teamPlayers.statistics) {
-        const statName = statCategory.name;
-        const keys = statCategory.keys || [];
+        //data.boxscore.players[0].statistics[0] = statCategory
+        const statName = statCategory.name; //"name": "passing",
+        const keys = statCategory.keys || []; //"keys": ["completions/passingAttempts","passingYards"]
 
         for (const athleteData of statCategory.athletes || []) {
+          //data.boxscore.players[0].statistics[0].athletes[0] = athleteData
           const athlete = athleteData.athlete;
           const athleteId = athlete.id;
-          const athleteName =
-            `${athlete.firstName || ''} ${athlete.lastName || ''}`.trim();
-          const stats = athleteData.stats || [];
+          const athleteName = athlete.displayName;
+          const stats = athleteData.stats || []; // "stats": ["21/34","188"]
 
           // Create lines dictionary mapping keys to values
           const lines: AthleteLines = {};
           keys.forEach((key: string, index: number) => {
             if (index < stats.length) {
               // Clean key name for better readability
-              const cleanKey = key.replace(/\//g, '_').replace(/-/g, '_');
-              lines[`${statName}_${cleanKey}`] = stats[index];
+              // const cleanKey = key.replace(/\//g, '_').replace(/-/g, '_');
+              // lines[`${statName}_${cleanKey}`] = stats[index];
+              lines[key] = stats[index];
             }
           });
 
@@ -83,7 +90,7 @@ async function fetchESPNBoxscoreData(eventId: string): Promise<ProcessedData> {
               name: athleteName,
               jersey: athlete.jersey || '',
               team_id: teamInfo.id,
-              team_name: teamInfo.name,
+              team_name: teamInfo.displayName,
               lines,
             });
           }
@@ -93,6 +100,7 @@ async function fetchESPNBoxscoreData(eventId: string): Promise<ProcessedData> {
 
     // Process teams and get final scores
     for (const teamData of data.boxscore.teams) {
+      //data.boxscore.teams[0] = teamData
       const teamInfo = teamData.team;
       const teamStats: TeamLines = {};
 
@@ -103,6 +111,7 @@ async function fetchESPNBoxscoreData(eventId: string): Promise<ProcessedData> {
 
       // Get final score from the header or competitor data
       let finalScore = 0;
+      let ifWinner = false;
       if (
         data.header &&
         data.header.competitions &&
@@ -114,14 +123,17 @@ async function fetchESPNBoxscoreData(eventId: string): Promise<ProcessedData> {
         );
         if (competitor) {
           finalScore = parseInt(competitor.score) || 0;
+          ifWinner = competitor.winner;
         }
       }
 
       teams.push({
         id: teamInfo.id,
-        name: `${teamInfo.location} ${teamInfo.name}`,
+        name: teamInfo.displayName,
         abbreviation: teamInfo.abbreviation,
         score: finalScore,
+        home_away: teamData.homeAway,
+        won: ifWinner,
         lines: teamStats,
       });
     }

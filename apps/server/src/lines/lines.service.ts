@@ -50,7 +50,7 @@ export class LinesService {
         })
         .returning();
 
-      // Ensure createGameInstruction throws if it fails
+      // Ensure createLineInstruction throws if it fails
       let txn: string;
       const createdAt = inserted.createdAt;
       if (!createdAt) throw new BadRequestException('Line not created');
@@ -85,7 +85,7 @@ export class LinesService {
 
         if (!txn || typeof txn !== 'string') {
           throw new Error(
-            'Invalid transaction ID returned from createGameInstruction',
+            'Invalid transaction ID returned from createLineInstruction',
           );
         }
       } catch (error) {
@@ -95,7 +95,7 @@ export class LinesService {
         );
         // Throw to rollback DB transaction
         throw new BadRequestException(
-          "'Anchor instruction failed, rolling back game creation",
+          "'Anchor instruction failed, rolling back line creation",
           error,
         );
       }
@@ -127,9 +127,43 @@ export class LinesService {
     return this.db.query.lines.findFirst({
       where: eq(lines.id, id),
       with: {
-        stat: true,
-        matchup: true,
-        athlete: true,
+        stat: {
+          columns: {
+            id: true,
+            customId: true,
+            name: true,
+            statOddsName: true,
+          },
+        },
+        matchup: {
+          columns: {
+            id: true,
+            espnEventId: true,
+          },
+          with: {
+            homeTeam: {
+              columns: {
+                id: true,
+                name: true,
+                espnTeamId: true,
+              },
+            },
+            awayTeam: {
+              columns: {
+                id: true,
+                name: true,
+                espnTeamId: true,
+              },
+            },
+          },
+        },
+        athlete: {
+          columns: {
+            id: true,
+            name: true,
+            espnAthleteId: true,
+          },
+        },
       },
     });
   }
