@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body
-        className={`${inter.variable} bg-[#F5F5DC] font-inter tracking-tight text-gray-900 antialiased`}
+        className={`${inter.variable} bg-gray-900 font-inter tracking-tight text-gray-900 antialiased`}
         suppressHydrationWarning={true}
       >
         <AppProviders>
