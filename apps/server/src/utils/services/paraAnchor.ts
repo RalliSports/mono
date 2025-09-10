@@ -186,7 +186,7 @@ export class ParaAnchor {
       [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
       program.programId,
     );
-
+    // console.log(program.provider.wallet?.publicKey, 'program provider wallet');
     try {
       const ix = await program.methods
         .createLine(_lineId, statId, predictedValue, _athleteId, _startsAt)
@@ -200,6 +200,7 @@ export class ParaAnchor {
       // Get latest blockhash
       const { blockhash, lastValidBlockHeight } =
         await program.provider.connection.getLatestBlockhash('finalized');
+      // console.log(blockhash, 'blockhash');
 
       // Build TransactionMessage for VersionedTransaction
       const messageV0 = new TransactionMessage({
@@ -207,9 +208,11 @@ export class ParaAnchor {
         recentBlockhash: blockhash,
         instructions: [ix],
       }).compileToV0Message();
+      // console.log(messageV0, 'messageV0');
 
       // Create VersionedTransaction
       const transaction = new VersionedTransaction(messageV0);
+      // console.log(transaction, 'transaction');
 
       // Sign transaction
       await program.provider.wallet?.signTransaction(transaction);
@@ -217,6 +220,7 @@ export class ParaAnchor {
       // Send transaction
       const txSig =
         await program.provider.connection.sendTransaction(transaction);
+      // console.log(txSig, 'txSig');
 
       // Confirm transaction
       await program.provider.connection.confirmTransaction(
