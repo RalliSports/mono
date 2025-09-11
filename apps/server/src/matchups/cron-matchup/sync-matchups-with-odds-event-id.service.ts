@@ -32,6 +32,14 @@ export class SyncMatchupsWithOddsEventIdService {
       return;
     }
 
+    // Safer to sort, than trusting the order of the API response
+    oddsApiEvents.sort((a, b) => {
+      return (
+        new Date(a.commence_time).getTime() -
+        new Date(b.commence_time).getTime()
+      );
+    });
+
     // Get matchups between & including the start and end date range
     const startDateRange = oddsApiEvents[0].commence_time;
     const endDateRange = oddsApiEvents[oddsApiEvents.length - 1].commence_time;
