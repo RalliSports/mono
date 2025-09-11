@@ -1,5 +1,5 @@
 {
-  "id": "6f854e71-55ec-40b3-9386-552048b011f0",
+  "id": "8ca6294d-3619-4cf3-9235-4d8db363a702",
   "prevId": "04d9823e-d611-4a35-ad12-9356869bad0c",
   "version": "7",
   "dialect": "postgresql",
@@ -292,6 +292,12 @@
         },
         "resolved_txn_signature": {
           "name": "resolved_txn_signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image_url": {
+          "name": "image_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false

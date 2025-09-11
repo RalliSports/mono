@@ -41,6 +41,7 @@ export const games = pgTable("games", {
   gameModeId: uuid("game_mode_id"),
   createdTxnSignature: text("created_txn_signature"),
   resolvedTxnSignature: text("resolved_txn_signature"),
+  imageUrl: text("image_url"),
 });
 
 export const gamesRelations = relations(games, ({ many, one }) => ({

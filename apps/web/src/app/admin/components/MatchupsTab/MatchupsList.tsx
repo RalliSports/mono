@@ -1,7 +1,7 @@
-import { MatchUp } from '../types'
+import { MatchupsFindAllInstance } from '@repo/server'
 
 interface MatchupsListProps {
-  matchUps: MatchUp[]
+  matchUps: MatchupsFindAllInstance[]
 }
 
 export default function MatchupsList({ matchUps }: MatchupsListProps) {
@@ -31,13 +31,15 @@ export default function MatchupsList({ matchUps }: MatchupsListProps) {
               </div>
               <div className="ml-6">
                 <h4 className="text-xl font-bold text-white mb-1">
-                  {matchUp.homeTeam.name} vs {matchUp.awayTeam.name}
+                  {matchUp.homeTeam?.name || 'Home Team'} vs {matchUp.awayTeam?.name || 'Away Team'}
                 </h4>
                 {/* <div className="flex items-center space-x-2 mb-1">
                   <span className="text-lg">{sports.find((s) => s.name === matchUp.sport)?.icon}</span>
                   <p className="text-sm text-slate-300 font-medium">{matchUp.sport}</p>
                 </div> */}
-                <p className="text-xs text-slate-400">{new Date(matchUp.date).toLocaleDateString()}</p>
+                <p className="text-xs text-slate-400">
+                  {matchUp.gameDate ? new Date(matchUp.gameDate).toLocaleDateString() : 'TBD'}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">

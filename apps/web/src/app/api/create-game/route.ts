@@ -15,6 +15,7 @@ interface CreateGameRequest {
   userControlType: string
   gameModeId: string
   tokenId: string
+  imageUrl: string
 }
 
 // Validation function
@@ -31,7 +32,8 @@ function validateCreateGameData(data: any): data is CreateGameRequest {
     typeof data.type === 'string' &&
     typeof data.userControlType === 'string' &&
     typeof data.gameModeId === 'string' &&
-    typeof data.tokenId === 'string'
+    typeof data.tokenId === 'string' &&
+    typeof data.imageUrl === 'string'
   )
 }
 

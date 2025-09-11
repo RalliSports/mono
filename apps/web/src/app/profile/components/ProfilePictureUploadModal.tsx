@@ -94,6 +94,7 @@ export default function ProfilePictureUploadModal({
                   // Do something with the error.
                   alert(`ERROR! ${error.message}`)
                 }}
+                className="bg-blue-900 rounded-2xl p-2 text-black"
               />
 
               {/* Hidden File Input */}

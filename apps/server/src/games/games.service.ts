@@ -41,6 +41,7 @@ export class GamesService {
   }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
+    const imageUrl = createGameDto.imageUrl ?? '/images/pfp-2.svg';
 
     const gameData = await this.db.transaction(async (tx) => {
       const [game] = await tx
@@ -50,6 +51,7 @@ export class GamesService {
           creatorId: user.id,
           gameCode,
           numBets: createGameDto.numBets,
+          imageUrl,
           status: GameStatus.WAITING,
         })
         .returning();
