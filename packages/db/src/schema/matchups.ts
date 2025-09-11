@@ -21,6 +21,7 @@ export const matchupStatusEnum = pgEnum("matchup_status", [
 export const matchups = pgTable("matchups", {
   id: uuid("id").primaryKey().defaultRandom(),
   espnEventId: varchar("espn_event_id"),
+  oddsApiEventId: varchar("odds_api_event_id"),
   gameDate: date("game_date"),
   startsAt: timestamp("starts_at", { withTimezone: true }),
   status: matchupStatusEnum("status"),
