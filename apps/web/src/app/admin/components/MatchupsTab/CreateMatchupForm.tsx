@@ -1,27 +1,15 @@
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { Team } from '../types'
+import { TeamFindOne } from '@repo/server'
 
 interface CreateMatchupFormProps {
   newMatchUp: {
-    homeTeam: {
-      id: string
-      name: string
-      city: string
-      country: string
-      createdAt: Date
-    }
-    awayTeam: {
-      id: string
-      name: string
-      city: string
-      country: string
-      createdAt: Date
-    }
+    homeTeamId: string
+    awayTeamId: string
     date: string
   }
-  setNewMatchUp: (matchup: any) => void
+  setNewMatchUp: (matchup: { homeTeamId?: string; awayTeamId?: string; date?: string }) => void
   handleCreateMatchUp: () => void
-  teams: Team[]
+  teams: TeamFindOne[]
 }
 
 export default function CreateMatchupForm({
@@ -37,10 +25,8 @@ export default function CreateMatchupForm({
         <div>
           <label className="block text-white font-semibold mb-2">Select Player</label>
           <Dropdown
-            value={newMatchUp.awayTeam.id}
-            onChange={(value: string) =>
-              setNewMatchUp({ ...newMatchUp, awayTeam: { ...newMatchUp.awayTeam, id: value } })
-            }
+            value={newMatchUp.awayTeamId}
+            onChange={(value: string) => setNewMatchUp({ ...newMatchUp, awayTeamId: value })}
             placeholder="Select the away team"
             options={[
               { value: '', label: 'Select the away team', disabled: true },
@@ -56,10 +42,8 @@ export default function CreateMatchupForm({
         <div>
           <label className="block text-white font-semibold mb-2">Select Player</label>
           <Dropdown
-            value={newMatchUp.homeTeam.id}
-            onChange={(value: string) =>
-              setNewMatchUp({ ...newMatchUp, homeTeam: { ...newMatchUp.homeTeam, id: value } })
-            }
+            value={newMatchUp.homeTeamId}
+            onChange={(value: string) => setNewMatchUp({ ...newMatchUp, homeTeamId: value })}
             placeholder="Select the home team"
             options={[
               { value: '', label: 'Select the home team', disabled: true },

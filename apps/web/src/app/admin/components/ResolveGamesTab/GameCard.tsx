@@ -1,8 +1,7 @@
-import { Game } from '../types'
-import { sports } from '../../constants/sports'
+import { GamesFindAllInstance } from '@repo/server'
 
 interface GameCardProps {
-  game: Game
+  game: GamesFindAllInstance
   handleResolveGame: (gameId: string) => void
 }
 
@@ -30,8 +29,8 @@ export default function GameCard({ game, handleResolveGame }: GameCardProps) {
             <span>
               Players: {game.participants.length}/{game.maxParticipants}
             </span>
-            <span>Buy-in: ${game.depositAmount}</span>
-            <span>Pool: ${game.depositAmount * game.participants.length}</span>
+            <span>Buy-in: ${game.depositAmount || 0}</span>
+            <span>Pool: ${(game.depositAmount || 0) * game.participants.length}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm">
             <span className="text-slate-300">Host:</span>

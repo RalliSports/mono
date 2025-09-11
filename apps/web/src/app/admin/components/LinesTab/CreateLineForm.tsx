@@ -1,22 +1,20 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { Player, MatchUp } from '../types'
-
-import { StatsFindById, LineCreate } from '@repo/server'
+import { StatsFindById, LineCreate, AthletesFindOne, MatchupsFindById } from '@repo/server'
 
 interface CreateLineFormProps {
   newLine: {
-    playerId: string
-    statTypeId: string
-    value: number
-    id: string
-    gameDate: string
-  }
-  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void
-  handleCreateLine: () => Promise<void>
-  players: Player[]
-  stats: StatsFindById[]
-  matchUps: MatchUp[]
+    playerId: string;
+    statTypeId: string;
+    value: number;
+    id: string;
+    gameDate: string;
+  };
+  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void;
+  handleCreateLine: () => Promise<void>;
+  players: AthletesFindOne[];
+  stats: StatsFindById[];
+  matchUps: MatchupsFindById[];
 }
 
 export default function CreateLineForm({
@@ -28,10 +26,13 @@ export default function CreateLineForm({
   matchUps,
 }: CreateLineFormProps) {
   const [isCreating, setIsCreating] = useState(false)
-  const filteredPlayers = players.filter((player) => {
+  const filteredPlayers = players.filter((player: AthletesFindOne) => {
     if (newLine.id) {
-      const matchUp = matchUps.find((matchUp) => matchUp.id === newLine.id)
-      return player.team.name === matchUp?.homeTeam.name || player.team.name === matchUp?.awayTeam.name
+      const matchUp = matchUps.find((matchUp: MatchupsFindById) => matchUp.id === newLine.id)
+      // Try to match by teamId or fallback to name if available
+      return (
+        (player.teamId && (player.teamId === matchUp?.homeTeamId || player.teamId === matchUp?.awayTeamId))
+      )
     }
     return true
   })
@@ -54,9 +55,9 @@ export default function CreateLineForm({
               placeholder="Select a player"
               options={[
                 { value: '', label: 'Select a player', disabled: true },
-                ...filteredPlayers.map((player) => ({
+                ...filteredPlayers.map((player: AthletesFindOne) => ({
                   value: player.id,
-                  label: `${player.name} (${player.team.name})`,
+                  label: `${player.name ?? 'Unknown'} (${player.teamId ?? ''})`,
                   icon: '👤',
                 })),
               ]}
@@ -76,7 +77,7 @@ export default function CreateLineForm({
                   label: 'Select stat type',
                   disabled: true,
                 },
-                ...stats.map((stat) => ({
+                ...stats.map((stat: StatsFindById) => ({
                   value: stat.id,
                   label: `${stat.displayName} (${stat.customId})`,
                   icon: '📊',
@@ -107,9 +108,9 @@ export default function CreateLineForm({
               placeholder="Select a game"
               options={[
                 { value: '', label: 'Select a game', disabled: true },
-                ...matchUps.map((matchUp) => ({
+                ...matchUps.map((matchUp: MatchupsFindById) => ({
                   value: matchUp.id,
-                  label: `${matchUp.homeTeam.name} vs ${matchUp.awayTeam.name} (${new Date(matchUp.startsAt).toLocaleDateString()})`,
+                  label: `${matchUp.homeTeamId ?? 'Home'} vs ${matchUp.awayTeamId ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
                   icon: '🏈',
                 })),
               ]}

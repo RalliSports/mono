@@ -1,29 +1,17 @@
 import CreateMatchupForm from './CreateMatchupForm'
 import MatchupsList from './MatchupsList'
-import { Team, MatchUp } from '../types'
+import { TeamFindOne, MatchupsFindAllInstance } from '@repo/server'
 
 interface MatchupsTabProps {
-  matchUps: MatchUp[]
+  matchUps: MatchupsFindAllInstance[]
   newMatchUp: {
-    homeTeam: {
-      id: string
-      name: string
-      city: string
-      country: string
-      createdAt: Date
-    }
-    awayTeam: {
-      id: string
-      name: string
-      city: string
-      country: string
-      createdAt: Date
-    }
+    homeTeamId: string
+    awayTeamId: string
     date: string
   }
   setNewMatchUp: (matchup: any) => void
   handleCreateMatchUp: () => void
-  teams: Team[]
+  teams: TeamFindOne[]
 }
 
 export default function MatchupsTab({
