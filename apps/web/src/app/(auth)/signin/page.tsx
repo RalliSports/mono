@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useModal, useAccount } from '@getpara/react-sdk'
 import { useToast } from '@/components/ui/toast'
+import { useReferral } from '@/hooks/useReferral'
 
 export default function SignIn() {
   const router = useRouter()
@@ -12,6 +13,7 @@ export default function SignIn() {
   const { openModal } = modal
   const account = useAccount()
   const { addToast } = useToast()
+  const { referralCode } = useReferral()
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const modalOpenedRef = useRef(false)
   const toastShownRef = useRef(false)
@@ -32,7 +34,8 @@ export default function SignIn() {
     if (account?.isConnected === true && !toastShownRef.current) {
       stopModalMonitoring()
       toastShownRef.current = true
-      addToast('Successfully signed in! Click the button to go to Main', 'success', 6000)
+      router.push(callbackUrl)
+      // addToast('Successfully signed in! Click the button to go to Main', 'success', 6000)
       return
     }
   }, [account?.isConnected, router, callbackUrl, addToast])
@@ -85,6 +88,13 @@ export default function SignIn() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-4">
               Welcome to Ralli
             </h1>
+            {referralCode && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+                <p className="text-sm">
+                  🎉 You were invited by a friend! You&apos;ll get special rewards when you join.
+                </p>
+              </div>
+            )}
             <p className="text-gray-600 mb-6">Sign in to continue</p>
             <button
               onClick={handleOpenModal}

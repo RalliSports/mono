@@ -87,20 +87,8 @@ function AdminPageContent() {
   })
 
   const [newMatchUp, setNewMatchUp] = useState({
-    homeTeam: {
-      id: '',
-      name: '',
-      city: '',
-      country: '',
-      createdAt: new Date(),
-    },
-    awayTeam: {
-      id: '',
-      name: '',
-      city: '',
-      country: '',
-      createdAt: new Date(),
-    },
+    homeTeamId: '',
+    awayTeamId: '',
     date: '',
   })
 
@@ -363,12 +351,12 @@ function AdminPageContent() {
       return
     }
 
-    if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.date) {
+    if (!newMatchUp.homeTeamId || !newMatchUp.awayTeamId || !newMatchUp.date) {
       addToast('Please fill in all fields', 'error')
       return
     }
 
-    if (newMatchUp.homeTeam === newMatchUp.awayTeam) {
+    if (newMatchUp.homeTeamId === newMatchUp.awayTeamId) {
       addToast('Home and away teams must be different', 'error')
       return
     }
@@ -388,8 +376,8 @@ function AdminPageContent() {
         gameDate: null,
         scoreHome: null,
         scoreAway: null,
-        homeTeamId: newMatchUp.homeTeam.id,
-        awayTeamId: newMatchUp.awayTeam.id,
+        homeTeamId: newMatchUp.homeTeamId,
+        awayTeamId: newMatchUp.awayTeamId,
       } as any)
 
       addToast('Match-up created successfully!', 'success')
@@ -434,7 +422,7 @@ function AdminPageContent() {
           {activeTab === 'lines' && (
             <LinesTab
               newLine={newLine}
-              setNewLine={setNewLine}
+              setNewLine={(line: any) => setNewLine(line)}
               handleCreateLine={handleCreateLine}
               players={players}
               stats={stats}
