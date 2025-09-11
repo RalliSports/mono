@@ -1,0 +1,1 @@
+ALTER TABLE "participants" ADD COLUMN "amount_won" numeric;

@@ -474,13 +474,30 @@ export class GamesService {
         );
       }
 
+      // Calculate payout amount for winners
+      const totalPool = Number(game.depositAmount) * game.participants.length;
+      const amountWonPerWinner =
+        winnersIds.length > 0 ? totalPool / winnersIds.length : 0;
+
+      // Update winners with isWinner flag and amountWon
       for (const winner of winnersIds) {
         await tx
           .update(participants)
-          .set({ isWinner: true })
+          .set({ isWinner: true, amountWon: amountWonPerWinner })
           .where(
             and(eq(participants.userId, winner), eq(participants.gameId, id)),
           );
+      }
+
+      // Set amountWon to 0 for non-winners (participants who didn't win)
+      const nonWinners = game.participants.filter(
+        (p) => !winnersIds.includes(p.userId!),
+      );
+      for (const participant of nonWinners) {
+        await tx
+          .update(participants)
+          .set({ amountWon: 0 })
+          .where(eq(participants.id, participant.id));
       }
 
       try {
