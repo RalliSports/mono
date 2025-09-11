@@ -16,12 +16,21 @@ export class SessionAuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     const sessionId = req.headers['x-para-session'];
+    const referralCode = req.headers['x-referral-code'];
+    const email = req.headers['x-email'];
+
+    console.log('SessionGuard - Session:', sessionId?.substring(0, 10) + '...');
+    console.log('SessionGuard - Referral Code:', referralCode);
 
     if (!sessionId || typeof sessionId !== 'string') {
       throw new UnauthorizedException('Session ID missing');
     }
 
-    const user = await this.authService.validateSession(sessionId);
+    const user = await this.authService.validateSession(
+      sessionId,
+      typeof email === 'string' ? email : undefined,
+      typeof referralCode === 'string' ? referralCode : undefined,
+    );
 
     req.user = user;
     return true;

@@ -13,13 +13,17 @@ import { User } from 'src/user/dto/user-response.dto';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { generateUniqueGamertag } from 'src/utils/generateGamertag';
 import { getRandomAthleteAvatar } from 'src/utils/getRandomAthleteAvatar';
+import { ReferralService } from 'src/referral/referral.service';
 
 @Injectable()
 export class AuthService {
   private readonly paraServer: ParaServer;
   private anchor: ParaAnchor;
 
-  constructor(@Drizzle() private readonly db: Database) {
+  constructor(
+    @Drizzle() private readonly db: Database,
+    private readonly referralService: ReferralService,
+  ) {
     this.paraServer = new ParaServer(
       Environment.BETA,
       process.env.PARA_API_KEY,
@@ -27,115 +31,153 @@ export class AuthService {
     this.anchor = new ParaAnchor(this.getPara());
   }
 
-  async validateSession(session: string): Promise<User | null> {
-    try {
-      await this.paraServer.importSession(session);
-      const isActive = await this.paraServer.isSessionActive();
+  async validateSession(
+    session: string,
+    email?: string,
+    referralCode?: string,
+  ): Promise<User | null> {
+    console.log('Validating session', session, referralCode);
+    // try {
+    await this.paraServer.importSession(session);
+    const isActive = await this.paraServer.isSessionActive();
 
-      if (!isActive) {
-        console.error('Session expired');
+    if (!isActive) {
+      console.error('Session expired');
 
-        return null;
-      }
+      return null;
+    }
 
-      const para = await this.getPara();
-      const userEmail = para.getEmail() || para.email;
+    const para = await this.getPara();
+    const userEmail = email || para.getEmail() || para.email;
+    console.log('User email', userEmail);
 
-      const userExisted = await this.db.query.users.findFirst({
-        where: eq(users.paraUserId, para.getUserId() ?? ''),
-      });
+    const userExisted = await this.db.query.users.findFirst({
+      where: eq(users.paraUserId, para.getUserId() ?? ''),
+    });
 
-      if (userExisted) {
-        if (!userExisted.hasBeenFaucetedSol) {
-          try {
-            await this.faucetTokens({
-              emailAddress: userExisted.emailAddress as string,
-              id: userExisted.id,
-              paraUserId: userExisted.paraUserId as string,
-              walletAddress: userExisted.walletAddress as string,
-            });
-          } catch (error) {
-            console.error(error, 'error faucetTokens');
-          }
-
-          if (userExisted.emailAddress === null) {
-            await this.db
-              .update(users)
-              .set({
-                emailAddress: userEmail,
-              })
-              .where(eq(users.id, userExisted.id));
-          }
-
-          if (userExisted.emailAddress === null) {
-            await this.db
-              .update(users)
-              .set({
-                emailAddress: userEmail,
-              })
-              .where(eq(users.id, userExisted.id));
-          }
-        }
-
-        return {
-          emailAddress: userExisted.emailAddress as string,
-          id: userExisted.id,
-          paraUserId: userExisted.paraUserId as string,
-          walletAddress: userExisted.walletAddress as string,
-          // role: userExisted.role as Role,
-        };
-      } else {
-        const gamertag = await generateUniqueGamertag(this.db, users);
-        const avatar = await getRandomAthleteAvatar(this.db);
-
-        await this.db
-          .insert(users)
-          .values({
-            paraUserId: para.getUserId(),
-            emailAddress: userEmail,
-            walletAddress: para.availableWallets[0].address,
-            username: gamertag,
-            avatar: avatar,
-          })
-          .onConflictDoNothing();
-      }
-
-      // fetch the newly created user if needed
-      const user = await this.db.query.users.findFirst({
-        where: eq(users.paraUserId, para.getUserId() ?? ''),
-      });
-
-      if (!user) {
-        throw new UnprocessableEntityException({
-          status: HttpStatus.UNAUTHORIZED,
-          message: 'User not found',
-        });
-      }
-
-      if (!user.hasBeenFaucetedSol) {
+    if (userExisted) {
+      if (!userExisted.hasBeenFaucetedSol) {
         try {
           await this.faucetTokens({
-            emailAddress: user.emailAddress as string,
-            id: user.id,
-            paraUserId: user.paraUserId as string,
-            walletAddress: user.walletAddress as string,
+            emailAddress: userExisted.emailAddress as string,
+            id: userExisted.id,
+            paraUserId: userExisted.paraUserId as string,
+            walletAddress: userExisted.walletAddress as string,
           });
         } catch (error) {
           console.error(error, 'error faucetTokens');
         }
       }
 
+      const existingRefferer = await this.referralService.getRefferer(
+        userExisted.id,
+      );
+      if (!existingRefferer && referralCode) {
+        await this.referralService.processReferral(
+          referralCode,
+          userExisted.id,
+        );
+      }
+
+      const existingCode = await this.referralService.getReferralCode(
+        userExisted.id,
+      );
+      if (!existingCode) {
+        await this.referralService.generateReferralCode(userExisted.id);
+      }
+
+      if (userExisted.emailAddress === null && userEmail) {
+        await this.db
+          .update(users)
+          .set({
+            emailAddress: userEmail,
+          })
+          .where(eq(users.id, userExisted.id));
+      }
       return {
-        emailAddress: user.emailAddress as string,
-        id: user.id,
-        paraUserId: user.paraUserId as string,
-        walletAddress: user.walletAddress as string,
-        // role: user.role as Role,
+        emailAddress: userExisted.emailAddress as string,
+        id: userExisted.id,
+        paraUserId: userExisted.paraUserId as string,
+        walletAddress: userExisted.walletAddress as string,
+        // role: userExisted.role as Role,
       };
-    } catch (error) {
-      console.error('Session validation failed:', error);
-      return null;
+    } else {
+      console.log('Creating new user');
+      const gamertag = await generateUniqueGamertag(this.db, users);
+      const avatar = await getRandomAthleteAvatar(this.db);
+
+      const newUser = await this.db
+        .insert(users)
+        .values({
+          paraUserId: para.getUserId(),
+          emailAddress: userEmail,
+          walletAddress: para.availableWallets[0].address,
+          username: gamertag,
+          avatar: avatar,
+        })
+        .onConflictDoNothing()
+        .returning();
+
+      await this.referralService.generateReferralCode(newUser[0].id);
+      if (referralCode) {
+        await this.referralService.processReferral(referralCode, newUser[0].id);
+      }
+      console.log('New user created');
     }
+
+    // fetch the newly created user if needed
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.paraUserId, para.getUserId() ?? ''),
+    });
+
+    if (!user) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNAUTHORIZED,
+        message: 'User not found',
+      });
+    }
+
+    if (!user.hasBeenFaucetedSol) {
+      try {
+        await this.faucetTokens({
+          emailAddress: user.emailAddress as string,
+          id: user.id,
+          paraUserId: user.paraUserId as string,
+          walletAddress: user.walletAddress as string,
+        });
+      } catch (error) {
+        console.error(error, 'error faucetTokens');
+      }
+    }
+
+    // Process referral if provided and user is new
+    console.log(
+      'AuthService - Referral Code:',
+      referralCode,
+      'User Existed:',
+      userExisted,
+    );
+    if (referralCode && !userExisted) {
+      try {
+        console.log('Processing referral:', referralCode, 'for user:', user.id);
+        await this.referralService.processReferral(referralCode, user.id);
+        console.log('Referral processed successfully');
+      } catch (error) {
+        console.error('Error processing referral:', error);
+      }
+    }
+
+    return {
+      emailAddress: user.emailAddress as string,
+      id: user.id,
+      paraUserId: user.paraUserId as string,
+      walletAddress: user.walletAddress as string,
+      // role: user.role as Role,
+    };
+    // } catch (error) {
+    //   console.error('Session validation failed:', error);
+    //   return null;
+    // }
   }
 
   getPara(): ParaServer {
