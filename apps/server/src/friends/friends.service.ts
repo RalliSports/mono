@@ -16,6 +16,8 @@ export class FriendsService {
       throw new NotFoundException('You cannot follow yourself');
     }
 
+    console.log(followingId, "id user to follow")
+
     // Check if user exists
     const user = await this.db.query.users.findFirst({
       where: eq(users.id, followingId),

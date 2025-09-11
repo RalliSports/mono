@@ -1,13 +1,8 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseGuards
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiSecurity,
 } from '@nestjs/swagger';
@@ -25,12 +20,16 @@ export class FriendsController {
   @ApiOperation({ summary: 'Toggle follow' })
   @ApiResponse({
     status: 200,
-    description: 'Follow/unflollow user',
   })
-  @ApiParam({ name: 'userId', type: String })
+  @ApiQuery({
+    name: 'userId',
+    required: true,
+    type: String,
+    description: 'User ID to follow/unfollow',
+  })
   @Post('toggle')
   async toggleFollow(
-    @Param('userId') userId: string,
+    @Query('userId') userId: string,
     @UserPayload() currentUser: User,
   ) {
     return this.friendsService.toggleFollow(currentUser.id, userId);
@@ -44,7 +43,7 @@ export class FriendsController {
     description: 'Get all my followers',
   })
   @Get('followers')
-  async getFollowers( @UserPayload() user: User) {
+  async getFollowers(@UserPayload() user: User) {
     return this.friendsService.getFollowers(user.id);
   }
 
