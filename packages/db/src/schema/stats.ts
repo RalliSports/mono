@@ -16,6 +16,7 @@ export const stats = pgTable("stats", {
   shortDisplayName: varchar("short_display_name"),
   abbreviation: varchar("abbreviation"),
   statOddsName: varchar("stat_odds_name"),
+  oddsApiStatName: varchar("odds_api_stat_name"),
   description: varchar("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
