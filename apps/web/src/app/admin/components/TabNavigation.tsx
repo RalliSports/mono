@@ -1,4 +1,4 @@
-import { TabType } from './types'
+export type TabType = 'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games' | 'matchups'
 
 interface TabNavigationProps {
   activeTab: TabType

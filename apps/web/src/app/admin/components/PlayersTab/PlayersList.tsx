@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { Player } from '../types'
+import { AthletesFindOne } from '@repo/server'
 
 interface PlayersListProps {
-  players: Player[]
+  players: AthletesFindOne[]
 }
 
 export default function PlayersList({ players }: PlayersListProps) {
@@ -26,10 +26,10 @@ export default function PlayersList({ players }: PlayersListProps) {
             <div key={player.id} className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
-                  {
+                  {player.picture ? (
                     <Image
-                      src={player.picture || '/images/pfp-1.svg'}
-                      alt={player.name}
+                      src={player.picture}
+                      alt={player.name || 'Player'}
                       width={48}
                       height={48}
                       className="w-full h-full object-cover"
@@ -38,7 +38,7 @@ export default function PlayersList({ players }: PlayersListProps) {
                         const target = e.target as HTMLImageElement
                         target.style.display = 'none'
                         const parent = target.parentElement
-                        if (parent) {
+                        if (parent && player.name) {
                           parent.innerHTML = `<span class="text-white font-bold">${player.name
                             .split(' ')
                             .map((n) => n[0])
@@ -47,15 +47,25 @@ export default function PlayersList({ players }: PlayersListProps) {
                         }
                       }}
                     />
-                  }
+                  ) : (
+                    <span className="text-white font-bold">
+                      {player.name
+                        ? player.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()
+                        : '?'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-white font-semibold">{player.name}</h4>
+                  <h4 className="text-white font-semibold">{player.name || 'Unknown Player'}</h4>
                   <div className="flex items-center space-x-2 text-sm">
-                    <span className="text-slate-300">{player.team.name}</span>
-                    <span className="text-slate-400">#{player.jerseyNumber}</span>
-                    <span className="text-slate-400">{player.position}</span>
-                    <span className="text-slate-400">Age: {player.age}</span>
+                    <span className="text-slate-300">Team ID: {player.teamId || 'N/A'}</span>
+                    <span className="text-slate-400">#{player.jerseyNumber || 'N/A'}</span>
+                    <span className="text-slate-400">{player.position || 'N/A'}</span>
+                    <span className="text-slate-400">Age: {player.age || 'N/A'}</span>
                   </div>
                 </div>
               </div>

@@ -1,9 +1,9 @@
 import GameCard from './GameCard'
 import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { Game } from '../types'
+import { GamesFindAllInstance } from '@repo/server'
 
 interface ResolveGamesTabProps {
-  filteredGames: Game[]
+  filteredGames: GamesFindAllInstance[]
   searchTerm: string
   setSearchTerm: (term: string) => void
   selectedSport: string

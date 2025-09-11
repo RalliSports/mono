@@ -40,6 +40,7 @@ type Game = {
   maxParticipants?: number
   depositAmount?: number
   numBets?: number
+  imageUrl?: string
   gameMode?: { label: string }
   creator?: { walletAddress: string; username: string; avatar: string }
   status: 'waiting' | 'active' | 'complete' | 'pending'
@@ -50,6 +51,7 @@ export type Lobby = {
   title: string
   sport: string
   sportIcon: string
+  imageUrl: string
   participants: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants: number
   buyIn: number
@@ -115,6 +117,7 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
       prizePool: maxParticipants * (game.depositAmount || 0),
       legs: game.numBets || 1, // updated here
       timeLeft: '1h 30m', // static placeholder
+      imageUrl: game.imageUrl || '',
       host: {
         username,
         avatar: game.creator?.avatar || '',

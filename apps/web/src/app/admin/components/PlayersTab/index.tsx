@@ -1,9 +1,9 @@
 import CreatePlayerForm from './CreatePlayerForm'
 import PlayersList from './PlayersList'
-import { Player } from '../types'
+import { AthletesFindOne } from '@repo/server'
 
 interface PlayersTabProps {
-  players: Player[]
+  players: AthletesFindOne[]
   newPlayer: {
     name: string
     team: string

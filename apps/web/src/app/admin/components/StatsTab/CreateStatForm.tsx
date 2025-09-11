@@ -1,4 +1,4 @@
-import { Stat } from '../types'
+import { StatsCreate } from '@repo/server'
 
 interface CreateStatFormProps {
   newStat: {
