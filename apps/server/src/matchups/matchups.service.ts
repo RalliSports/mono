@@ -1,18 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { matchups, stats } from '@repo/db';
-import { and, eq, gt, lt } from 'drizzle-orm';
+import { matchups, stats, athletes } from '@repo/db';
+import { and, eq, gt, lt, gte, lte, or } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { CreateMatchupDto } from './dto/create-matchup.dto';
 import { UpdateMatchupDto } from './dto/update-matchup.dto';
 import { MatchupStatus } from './enum/matchups';
+import { CreateLineDto } from 'src/lines/dto/create-line.dto';
+import { NFLBettingData } from './cron-matchup/types/oddsApiTypes';
+import { LinesService } from 'src/lines/lines.service';
+import { User } from 'src/user/dto/user-response.dto';
+import {
+  AMERICAN_FOOTBALL_LABEL,
+  ODDS_API_BASE_URL,
+  AMERICAN_FOOTBALL_MARKETS,
+} from './cron-matchup/types/constants';
 
 @Injectable()
 export class MatchupsService {
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
+    private readonly linesService: LinesService,
   ) {}
 
   async getAllMatchups() {
@@ -66,6 +76,34 @@ export class MatchupsService {
         eq(matchups.status, MatchupStatus.SCHEDULED),
         lt(matchups.startsAt, now),
       ),
+    });
+  }
+
+  async getMatchupsBetweenDateTimeRange(
+    startDateTime: string,
+    endDateTime: string,
+  ) {
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+
+    const DAY_TOLERANCE = 1; // 1 day tolerance both ways
+    start.setDate(start.getDate() - DAY_TOLERANCE);
+    end.setDate(end.getDate() + DAY_TOLERANCE);
+
+    return this.db.query.matchups.findMany({
+      where: and(gte(matchups.startsAt, start), lte(matchups.startsAt, end)),
+      with: {
+        homeTeam: {
+          columns: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
@@ -138,5 +176,65 @@ export class MatchupsService {
       })
       .returning();
     return matchup;
+  }
+
+  async createLinesForMatchup(dto: CreateLineDto, user: User) {
+    const matchup = await this.db.query.matchups.findFirst({
+      where: eq(matchups.id, dto.matchupId),
+    });
+
+    const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}/&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
+
+    const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
+      res.json(),
+    );
+    const allAthletes = await this.db.query.athletes.findMany({
+      where: or(
+        eq(athletes.teamId, matchup?.homeTeamId!),
+        eq(athletes.teamId, matchup?.awayTeamId!),
+      ),
+    });
+
+    const allStats = await this.db.query.stats.findMany();
+
+    const formattedLines: CreateLineDto[] = [];
+
+    for (const market of linesResponse.bookmakers[0].markets) {
+      const outcomes = market.outcomes;
+      for (const outcome of outcomes) {
+        const statId = allStats.find(
+          (stat) => stat.oddsApiStatName === market.key,
+        )?.id;
+        if (!statId) {
+          console.warn('Stat id not found for: ', market.key);
+          continue;
+        }
+        const athleteId = allAthletes.find(
+          (athlete) => athlete.name === outcome.description,
+        )?.id;
+
+        if (!athleteId) {
+          console.warn(
+            `Athlete "${outcome.description}" not found for ${matchup?.espnEventId}`,
+          );
+          continue;
+        }
+
+        formattedLines.push({
+          statId: statId,
+          athleteId: athleteId,
+          matchupId: matchup?.id!,
+          predictedValue: outcome.point,
+        });
+      }
+    }
+
+    const promiseArray = formattedLines.map(async (line) =>
+      this.linesService.createLine(line, user),
+    );
+
+    await Promise.all(promiseArray);
+
+    return 'Lines Created Successfully';
   }
 }

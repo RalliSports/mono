@@ -8,6 +8,7 @@ import { MatchupStatusUpdaterService } from './cron-matchup/matchup-status-updat
 import { LinesService } from 'src/lines/lines.service';
 import { MatchupCreationService } from './cron-matchup/matchups-creation.service';
 import { TeamService } from 'src/team/team.service';
+import { SyncMatchupsWithOddsEventIdService } from './cron-matchup/sync-matchups-with-odds-event-id.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
@@ -16,6 +17,7 @@ import { TeamService } from 'src/team/team.service';
     MatchupsService,
     MatchupStatusUpdaterService,
     MatchupCreationService,
+    SyncMatchupsWithOddsEventIdService,
     LinesService,
     TeamService,
   ],
