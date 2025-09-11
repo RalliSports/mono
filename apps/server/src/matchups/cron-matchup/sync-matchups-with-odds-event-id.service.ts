@@ -23,7 +23,7 @@ export class SyncMatchupsWithOddsEventIdService {
   }
 
   //as odds gets the weekly data
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_WEEK)
   async syncMatchupsWithOddsEventId() {
     this.logger.log('Running matchup odds API event ID sync job...');
     const oddsApiEvents: OddsEventsResponse = await this.fetchOddsApiEvents();
