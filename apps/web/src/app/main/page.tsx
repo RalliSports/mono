@@ -3,7 +3,6 @@
 import SelectionBar from '@/components/main-feed/selection-bar'
 import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
 import SidebarNav from '@/components/ui/sidebar-nav'
-import { useUserData } from '@/providers/user-data-provider'
 import { useSessionToken } from '@/hooks/use-session'
 
 // Components
@@ -12,15 +11,18 @@ import { TopNavigation, FilterBar, LobbiesSection, LoadingScreen } from './compo
 // Hooks
 import { useWalletConnection } from './hooks/useWalletConnection'
 import { useMainPage } from './hooks/useMainPage'
+import { useChat } from '@/hooks/api/use-chat'
 
 export default function MainFeedPage() {
   const { session } = useSessionToken()
+  const { connectToClient, disconnectFromClient, connectToChannelAndSubscribe, sendMessageToCurrentChannel } = useChat()
+
   // console.log(session)
 
   // Custom hooks for separation of concerns
   const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection(false)
-
-  const { user } = useUserData()
+  console.log('isConnected', isConnected)
+  // const { user } = useUserData()
 
   const {
     lobbiesData,
@@ -58,6 +60,26 @@ export default function MainFeedPage() {
 
       {/* Filters and Search */}
       <FilterBar />
+      {
+        <button className="text-white" onClick={() => connectToClient()}>
+          Connect to Client
+        </button>
+      }
+      {
+        <button className="text-white" onClick={() => disconnectFromClient()}>
+          Disconnect from Client
+        </button>
+      }
+      {
+        <button className="text-white" onClick={() => connectToChannelAndSubscribe('test2')}>
+          Connect to Channel
+        </button>
+      }
+      {
+        <button className="text-white" onClick={() => sendMessageToCurrentChannel('test2')}>
+          Send Message to Channel
+        </button>
+      }
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts */}
