@@ -64,6 +64,6 @@ export class CreateGameDto {
     example: 'https://example.com/avatar.png',
   })
   @IsOptional()
-  @IsUrl({}, { message: 'Image URL must be a valid URL' })
+  @IsString()
   imageUrl?: string;
 }

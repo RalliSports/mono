@@ -2,6 +2,7 @@ import ProfilePicture from './ProfilePicture'
 import UsernameEditor from './UsernameEditor'
 import StatsGrid from './StatsGrid'
 import NotificationsButton from './NotificationsButton'
+import ReferFriendsSection from './ReferFriendsSection'
 
 interface ProfileHeaderProps {
   balances: { ralli: number }
@@ -24,6 +25,11 @@ export default function ProfileHeader({ balances, formatBalance, onEditPictureCl
         </div>
 
         <StatsGrid balances={balances} formatBalance={formatBalance} />
+
+        {/* Refer Friends Section */}
+        <div className="mt-4">
+          <ReferFriendsSection />
+        </div>
       </div>
     </div>
   )

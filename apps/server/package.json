@@ -32,8 +32,8 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
-    "@getpara/server-sdk": "^1.18.0",
-    "@getpara/solana-web3.js-v1-integration": "1.18.0",
+    "@getpara/server-sdk": "2.0.0-alpha.55",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.55",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
