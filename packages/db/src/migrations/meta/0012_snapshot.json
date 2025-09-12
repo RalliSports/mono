@@ -1,6 +1,6 @@
 {
-  "id": "a1d7a0bc-d486-4eb1-af27-20386187d5b5",
-  "prevId": "8ca6294d-3619-4cf3-9235-4d8db363a702",
+  "id": "f7b0d956-063c-4ad5-baeb-7d62e70be6af",
+  "prevId": "a1d7a0bc-d486-4eb1-af27-20386187d5b5",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -393,6 +393,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "odds_api_event_id": {
+          "name": "odds_api_event_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "game_date": {
           "name": "game_date",
           "type": "date",
@@ -745,6 +751,12 @@
         },
         "stat_odds_name": {
           "name": "stat_odds_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "odds_api_stat_name": {
+          "name": "odds_api_stat_name",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false

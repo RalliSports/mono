@@ -28,6 +28,9 @@ export class Participant {
   isWinner: boolean;
 
   @ApiProperty()
+  amountWon: number;
+
+  @ApiProperty()
   joinedAt: Date;
 
   @ApiProperty()

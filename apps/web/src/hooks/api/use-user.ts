@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApiWithAuth } from './base'
-import { UserFindOne, UserUpdate, GamesGetMyOpenGames } from '@repo/server'
+import { UserFindOne, UserUpdate, GamesGetMyOpenGames, GamesGetMyCompletedGames } from '@repo/server'
 import { useWalletConnection } from '@/app/main/hooks/useWalletConnection'
 
 export function useUser() {
@@ -31,9 +31,17 @@ export function useUser() {
     enabled: !!isConnected,
   })
 
+  const myCompletedGamesQuery = useQuery({
+    queryKey: ['my-completed-games'],
+    queryFn: () => api.get<GamesGetMyCompletedGames[]>('/api/games/my-completed-games'),
+    staleTime: 60 * 1000, // 1 minute
+    enabled: !!isConnected,
+  })
+
   return {
     currentUser: currentUserQuery,
     update: updateMutation,
     myOpenGames: myOpenGamesQuery,
+    myCompletedGames: myCompletedGamesQuery,
   }
 }
