@@ -83,7 +83,7 @@ function WinnerCard({
           </div>
         </div>
         <div className={`${getPositionColor(position)} font-bold text-xl`}>
-          ${winner.amountWon?.toFixed(2) || '0.00'}
+          ${winner.amountWon?.toFixed(2) || 'YOU LOST'}
         </div>
       </div>
     </div>
