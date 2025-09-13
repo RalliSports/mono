@@ -67,4 +67,24 @@ export class FriendsService {
       with: { following: true },
     });
   }
+
+    async isCreatorFollowing(
+      currentUserId: string,
+      userId: string,
+    ): Promise<boolean> {
+      if (currentUserId === userId) {
+        // You always "follow" yourself
+        return true;
+      }
+  
+      const follow = await this.db.query.friends.findFirst({
+        where: and(
+          eq(friends.followerId, userId),
+          eq(friends.followingId, currentUserId),
+        ),
+      });
+  
+      return !!follow;
+    }
+  
 }

@@ -10,5 +10,7 @@ import { NotificationModule } from 'src/notification/notification.module';
   imports: [DatabaseModule, AuthModule, UserModule, NotificationModule],
   controllers: [FriendsController],
   providers: [FriendsService],
+  exports:[FriendsService]
 })
+
 export class FriendsModule {}

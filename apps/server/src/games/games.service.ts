@@ -27,6 +27,7 @@ import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
 import { NotificationService } from 'src/notification/notification.service';
+import { FriendsService } from 'src/friends/friends.service';
 
 @Injectable()
 export class GamesService {
@@ -36,6 +37,7 @@ export class GamesService {
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
     private readonly notificationService: NotificationService,
+    private readonly friendsService: FriendsService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
   }
@@ -636,7 +638,7 @@ export class GamesService {
         );
       }
 
-      if (!(await this.isFollowing(userId, creatorId as string))) {
+      if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
         throw new ForbiddenException(
           'This is a private game. Follow the creator to gain access.',
         );
@@ -670,24 +672,6 @@ export class GamesService {
     }
   }
 
-  async isFollowing(
-    currentUserId: string,
-    creatorId: string,
-  ): Promise<boolean> {
-    if (currentUserId === creatorId) {
-      // You always "follow" yourself
-      return true;
-    }
-
-    const follow = await this.db.query.friends.findFirst({
-      where: and(
-        eq(friends.followerId, currentUserId),
-        eq(friends.followingId, creatorId),
-      ),
-    });
-
-    return !!follow;
-  }
 
   async inviteUserToPlay(userId: string, gameId: string) {
     const user = await this.db.query.users.findFirst({

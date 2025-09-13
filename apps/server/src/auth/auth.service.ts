@@ -36,7 +36,7 @@ export class AuthService {
     email?: string,
     referralCode?: string,
   ): Promise<User | null> {
-    console.log('Validating session', session, referralCode);
+    // console.log('Validating session', session, referralCode);
     // try {
     await this.paraServer.importSession(session);
     const isActive = await this.paraServer.isSessionActive();
