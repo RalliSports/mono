@@ -10,6 +10,7 @@ import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { User } from 'src/user/dto/user-response.dto';
 import { FriendsService } from './friends.service';
+import { Friend } from './dto/friend.dto';
 
 @Controller('friends')
 export class FriendsController {
@@ -41,6 +42,7 @@ export class FriendsController {
   @ApiResponse({
     status: 200,
     description: 'Get all my followers',
+    type: [Friend],
   })
   @Get('followers')
   async getFollowers(@UserPayload() user: User) {
@@ -53,6 +55,7 @@ export class FriendsController {
   @ApiResponse({
     status: 200,
     description: 'Get all friends following me',
+    type: [Friend],
   })
   @Get('following')
   async getFollowing(@UserPayload() user: User) {
