@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS "participants" ADD COLUMN IF NOT EXISTS "amount_won" numeric;
