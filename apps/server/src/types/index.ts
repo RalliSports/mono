@@ -72,6 +72,9 @@ export type MatchupsGetThatShouldHaveStarted = Awaited<
 export type MatchupsCreate = Awaited<
   ReturnType<MatchupsService['createMatchup']>
 >;
+export type MatchupCreateLinesForMatchup = Awaited<
+  ReturnType<MatchupsService['createLinesForMatchup']>
+>;
 export type MatchupsUpdate = Awaited<
   ReturnType<MatchupsService['updateMatchup']>
 >;
