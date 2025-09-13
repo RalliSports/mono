@@ -1,41 +1,23 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { StatsFindById, LineCreate, AthletesFindOne, MatchupsFindById } from '@repo/server'
+import { LineCreate, MatchupsFindAllInstance } from '@repo/server'
 
 interface CreateLineFormProps {
   newLine: {
-    playerId: string;
-    statTypeId: string;
-    value: number;
-    id: string;
-    gameDate: string;
-  };
-  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void;
-  handleCreateLine: () => Promise<void>;
-  players: AthletesFindOne[];
-  stats: StatsFindById[];
-  matchUps: MatchupsFindById[];
+    playerId: string
+    statTypeId: string
+    value: number
+    id: string
+    gameDate: string
+  }
+  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void
+  handleCreateLine: () => Promise<void>
+  matchUps: MatchupsFindAllInstance[]
 }
 
-export default function CreateLineForm({
-  newLine,
-  setNewLine,
-  handleCreateLine,
-  players,
-  stats,
-  matchUps,
-}: CreateLineFormProps) {
+export default function CreateLineForm({ newLine, setNewLine, handleCreateLine, matchUps }: CreateLineFormProps) {
   const [isCreating, setIsCreating] = useState(false)
-  const filteredPlayers = players.filter((player: AthletesFindOne) => {
-    if (newLine.id) {
-      const matchUp = matchUps.find((matchUp: MatchupsFindById) => matchUp.id === newLine.id)
-      // Try to match by teamId or fallback to name if available
-      return (
-        (player.teamId && (player.teamId === matchUp?.homeTeamId || player.teamId === matchUp?.awayTeamId))
-      )
-    }
-    return true
-  })
+
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -48,59 +30,6 @@ export default function CreateLineForm({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-white font-semibold mb-2">Select Player</label>
-            <Dropdown
-              value={newLine.playerId}
-              onChange={(value: string) => setNewLine({ ...newLine, playerId: value })}
-              placeholder="Select a player"
-              options={[
-                { value: '', label: 'Select a player', disabled: true },
-                ...filteredPlayers.map((player: AthletesFindOne) => ({
-                  value: player.id,
-                  label: `${player.name ?? 'Unknown'} (${player.teamId ?? ''})`,
-                  icon: '👤',
-                })),
-              ]}
-              searchable={true}
-            />
-          </div>
-
-          <div>
-            <label className="block text-white font-semibold mb-2">Select Stat Type</label>
-            <Dropdown
-              value={newLine.statTypeId}
-              onChange={(value: string) => setNewLine({ ...newLine, statTypeId: value })}
-              placeholder="Select stat type"
-              options={[
-                {
-                  value: '',
-                  label: 'Select stat type',
-                  disabled: true,
-                },
-                ...stats.map((stat: StatsFindById) => ({
-                  value: stat.id,
-                  label: `${stat.displayName} (${stat.customId})`,
-                  icon: '📊',
-                })),
-              ]}
-              searchable={true}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-white font-semibold mb-2">Line Value</label>
-            <input
-              type="number"
-              step="0.5"
-              value={newLine.value}
-              onChange={(e) => setNewLine({ ...newLine, value: parseFloat(e.target.value) })}
-              placeholder="e.g., 28.5"
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-            />
-          </div>
-          <div>
             <label className="block text-white font-semibold mb-2">Select Game</label>
             <Dropdown
               value={newLine.id}
@@ -108,9 +37,9 @@ export default function CreateLineForm({
               placeholder="Select a game"
               options={[
                 { value: '', label: 'Select a game', disabled: true },
-                ...matchUps.map((matchUp: MatchupsFindById) => ({
+                ...matchUps.map((matchUp: MatchupsFindAllInstance) => ({
                   value: matchUp.id,
-                  label: `${matchUp.homeTeamId ?? 'Home'} vs ${matchUp.awayTeamId ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
+                  label: `${matchUp.homeTeam?.name ?? 'Home'} vs ${matchUp.awayTeam?.name ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
                   icon: '🏈',
                 })),
               ]}
@@ -131,7 +60,7 @@ export default function CreateLineForm({
           disabled={isCreating}
           className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         >
-          {isCreating ? 'Creating Line...' : 'Create Line'}
+          {isCreating ? 'Creating Lines...' : 'Create Lines'}
         </button>
       </div>
     </div>

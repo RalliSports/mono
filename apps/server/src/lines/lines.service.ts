@@ -103,6 +103,100 @@ export class LinesService {
     });
   }
 
+  async bulkCreateLines(dto: CreateLineDto[], user: User) {
+    return await this.db.transaction(async (tx) => {
+      let txn: string;
+
+      const linesInformation: {
+        timestamp: number;
+        statCustomId: number;
+        athleteCustomId: number;
+        adjustedTimestamp: number;
+        predictedValue: number;
+      }[] = [];
+      const insertedLines = [] as (typeof lines.$inferInsert)[];
+      const initialTimestamp = new Date().getTime();
+      for (const [index, line] of dto.entries()) {
+        const matchup = await tx.query.matchups.findFirst({
+          where: eq(matchups.id, line.matchupId),
+        });
+        if (!matchup) throw new BadRequestException('Matchup not found');
+
+        const [inserted] = await tx
+          .insert(lines)
+          .values({
+            status: LineStatus.OPEN,
+            athleteId: line.athleteId,
+            statId: line.statId,
+            matchupId: line.matchupId,
+            predictedValue: line.predictedValue.toString(),
+            actualValue: null,
+            isHigher: null,
+            startsAt: matchup.startsAt,
+            createdAt: new Date(initialTimestamp + index),
+          })
+          .returning();
+
+        // Ensure createGameInstruction throws if it fails
+        const createdAt = inserted.createdAt;
+        if (!createdAt) throw new BadRequestException('Line not created');
+        const timestamp = new Date(createdAt).getTime();
+        const statCustomId = await tx.query.stats
+          .findFirst({
+            where: eq(stats.id, line.statId),
+          })
+          .then((stat) => stat?.customId);
+
+        const athleteCustomId = await tx.query.athletes
+          .findFirst({
+            where: eq(athletes.id, line.athleteId),
+          })
+          .then((athlete) => athlete?.customId);
+
+        if (!statCustomId) throw new BadRequestException('Stat not found');
+        if (!athleteCustomId)
+          throw new BadRequestException('Athlete not found');
+
+        const adjustedTimestamp =
+          new Date(matchup.startsAt ?? '').getTime() / 1000;
+
+        linesInformation.push({
+          timestamp,
+          statCustomId,
+          athleteCustomId,
+          adjustedTimestamp,
+          predictedValue: line.predictedValue,
+        });
+        insertedLines.push(inserted);
+      }
+
+      try {
+        txn = await this.anchor.bulkCreateLineInstruction(
+          linesInformation,
+          new PublicKey(user.walletAddress),
+        );
+
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from createGameInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        await tx.rollback();
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back lines creation",
+          error,
+        );
+      }
+      return insertedLines;
+    });
+  }
+
   async getAllLines() {
     const lines = await this.db.query.lines.findMany({
       with: {

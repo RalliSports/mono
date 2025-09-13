@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { matchups, stats, athletes } from '@repo/db';
+import { matchups, stats, athletes, lines } from '@repo/db';
 import { and, eq, gt, lt, gte, lte, or } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
@@ -16,6 +16,7 @@ import {
   ODDS_API_BASE_URL,
   AMERICAN_FOOTBALL_MARKETS,
 } from './cron-matchup/types/constants';
+import { CreateLinesDto } from './dto/create-lines.dto';
 
 @Injectable()
 export class MatchupsService {
@@ -178,16 +179,17 @@ export class MatchupsService {
     return matchup;
   }
 
-  async createLinesForMatchup(dto: CreateLineDto, user: User) {
+  async createLinesForMatchup(dto: CreateLinesDto, user: User) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, dto.matchupId),
     });
-
-    const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}/&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
+    console.log('key', process.env.ODDS_API_KEY);
+    const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
 
     const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
       res.json(),
     );
+    console.log('linesResponse', linesResponse);
     const allAthletes = await this.db.query.athletes.findMany({
       where: or(
         eq(athletes.teamId, matchup?.homeTeamId!),
@@ -202,6 +204,9 @@ export class MatchupsService {
     for (const market of linesResponse.bookmakers[0].markets) {
       const outcomes = market.outcomes;
       for (const outcome of outcomes) {
+        if (outcome.name === 'Over') {
+          continue;
+        }
         const statId = allStats.find(
           (stat) => stat.oddsApiStatName === market.key,
         )?.id;
@@ -229,12 +234,94 @@ export class MatchupsService {
       }
     }
 
-    const promiseArray = formattedLines.map(async (line) =>
-      this.linesService.createLine(line, user),
+    // Chunk lines into groups of 5
+    const chunkSize = 5;
+    const chunks: CreateLineDto[][] = [];
+    for (let i = 0; i < formattedLines.length; i += chunkSize) {
+      chunks.push(formattedLines.slice(i, i + chunkSize));
+    }
+
+    // Process each chunk sequentially with 500ms delay between chunks
+    for (let i = 0; i < chunks.length; i++) {
+      if (i > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      await this.linesService.bulkCreateLines(chunks[i], user);
+    }
+
+    return { message: 'Lines Created Successfully' };
+  }
+
+  async resolveLinesForMatchup(dto: CreateLinesDto, user: User) {
+    const matchup = await this.db.query.matchups.findFirst({
+      where: eq(matchups.id, dto.matchupId),
+    });
+    console.log('key', process.env.ODDS_API_KEY);
+    const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
+
+    const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
+      res.json(),
     );
+    console.log('linesResponse', linesResponse);
+    const allAthletes = await this.db.query.athletes.findMany({
+      where: or(
+        eq(athletes.teamId, matchup?.homeTeamId!),
+        eq(athletes.teamId, matchup?.awayTeamId!),
+      ),
+    });
 
-    await Promise.all(promiseArray);
+    const allStats = await this.db.query.stats.findMany();
 
-    return 'Lines Created Successfully';
+    const formattedLines: CreateLineDto[] = [];
+
+    for (const market of linesResponse.bookmakers[0].markets) {
+      const outcomes = market.outcomes;
+      for (const outcome of outcomes) {
+        if (outcome.name === 'Over') {
+          continue;
+        }
+        const statId = allStats.find(
+          (stat) => stat.oddsApiStatName === market.key,
+        )?.id;
+        if (!statId) {
+          console.warn('Stat id not found for: ', market.key);
+          continue;
+        }
+        const athleteId = allAthletes.find(
+          (athlete) => athlete.name === outcome.description,
+        )?.id;
+
+        if (!athleteId) {
+          console.warn(
+            `Athlete "${outcome.description}" not found for ${matchup?.espnEventId}`,
+          );
+          continue;
+        }
+
+        formattedLines.push({
+          statId: statId,
+          athleteId: athleteId,
+          matchupId: matchup?.id!,
+          predictedValue: outcome.point,
+        });
+      }
+    }
+
+    // Chunk lines into groups of 5
+    const chunkSize = 5;
+    const chunks: CreateLineDto[][] = [];
+    for (let i = 0; i < formattedLines.length; i += chunkSize) {
+      chunks.push(formattedLines.slice(i, i + chunkSize));
+    }
+
+    // Process each chunk sequentially with 500ms delay between chunks
+    for (let i = 0; i < chunks.length; i++) {
+      if (i > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      await this.linesService.bulkCreateLines(chunks[i], user);
+    }
+
+    return { message: 'Lines Created Successfully' };
   }
 }
