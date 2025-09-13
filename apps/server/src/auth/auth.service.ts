@@ -36,6 +36,7 @@ export class AuthService {
     email?: string,
     referralCode?: string,
   ): Promise<User | null> {
+
     // try {
     await this.paraServer.importSession(session);
     const isActive = await this.paraServer.isSessionActive();
