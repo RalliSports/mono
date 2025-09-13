@@ -15,6 +15,7 @@ import { StatsModule } from './stats/stats.module';
 import { TeamModule } from './team/team.module';
 import { NotificationModule } from './notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     StatsModule,
     TeamModule,
     NotificationModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
