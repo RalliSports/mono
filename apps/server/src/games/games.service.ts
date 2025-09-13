@@ -483,14 +483,78 @@ export class GamesService {
           ),
         );
       }
+      // Calculate winnings
+      const FEE_BASIS_POINTS = 100; // 100 / 10000 = 0.01 = 1%
 
-      for (const winner of winnersIds) {
-        await tx
-          .update(participants)
-          .set({ isWinner: true })
-          .where(
-            and(eq(participants.userId, winner), eq(participants.gameId, id)),
-          );
+      const totalPlayers = game.participants.length;
+      const numberOfWinners = winnersIds.length;
+      const numberOfLosers = totalPlayers - numberOfWinners;
+
+      // Edge case: everyone wins -> return everyone's entry fee, no fees
+      if (numberOfWinners === totalPlayers) {
+        for (const winnerAddr of winnersIds) {
+          await tx
+            .update(participants)
+            .set({ isWinner: true, amountWon: Number(game.depositAmount) })
+            .where(
+              and(eq(participants.userId, winnerAddr), eq(participants.gameId, id)),
+            );
+        }
+
+        const nonWinners = game.participants.filter(
+          (p) => !winnersIds.includes(p.userId!),
+        );
+        for (const participant of nonWinners) {
+          await tx
+            .update(participants)
+            .set({ amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      } else if (numberOfWinners === 0) {
+        // Edge case: no winners -> all money goes to treasury (amountWon stays 0)
+        for (const participant of game.participants) {
+          await tx
+            .update(participants)
+            .set({ isWinner: false, amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      } else {
+        // Normal case
+        const entryFee = Number(game.depositAmount);
+
+        const losersPool = entryFee * numberOfLosers;
+
+        // fee_from_losers = floor((losers_pool * fee_percentage) / 10000)
+        const feeFromLosers = Number(
+          (BigInt(losersPool) * BigInt(FEE_BASIS_POINTS)) / BigInt(10000),
+        );
+
+        const netLosersPool = losersPool - feeFromLosers;
+
+        const winningsPerWinner = Math.floor(netLosersPool / numberOfWinners);
+        const remainderToTreasury = netLosersPool % numberOfWinners;
+        const totalPerWinner = entryFee + winningsPerWinner;
+
+        // Update winners
+        for (const winner of winnersIds) {
+          await tx
+            .update(participants)
+            .set({ isWinner: true, amountWon: totalPerWinner })
+            .where(
+              and(eq(participants.userId, winner), eq(participants.gameId, id)),
+            );
+        }
+
+        // Update non-winners
+        const nonWinners = game.participants.filter(
+          (p) => !winnersIds.includes(p.userId!),
+        );
+        for (const participant of nonWinners) {
+          await tx
+            .update(participants)
+            .set({ isWinner: false, amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
       }
 
       try {

@@ -8,6 +8,7 @@ import { UpdateMatchupDto } from './dto/update-matchup.dto';
 import { User } from 'src/user/dto/user-response.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
+import { CreateLinesDto } from './dto/create-lines.dto';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -88,7 +89,7 @@ export class MatchupsController {
   })
   @Post('/create-lines')
   async createMatchupLines(
-    @Body() dto: CreateLineDto,
+    @Body() dto: CreateLinesDto,
     @UserPayload() user: User,
   ) {
     return this.matchupsService.createLinesForMatchup(dto, user);

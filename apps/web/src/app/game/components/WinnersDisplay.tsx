@@ -36,7 +36,6 @@ export default function WinnersDisplay({ lobby }: WinnersDisplayProps) {
 function WinnerCard({
   winner,
   position,
-  lobby,
 }: {
   winner: GamesFindOne['participants'][0]
   position: number
@@ -84,7 +83,7 @@ function WinnerCard({
           </div>
         </div>
         <div className={`${getPositionColor(position)} font-bold text-xl`}>
-          ${Math.floor(((lobby.depositAmount || 0) * (lobby.maxParticipants || 0)) / 3)}
+          ${winner.amountWon?.toFixed(2) || 'YOU LOST'}
         </div>
       </div>
     </div>

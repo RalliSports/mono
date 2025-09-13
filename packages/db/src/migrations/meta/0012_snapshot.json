@@ -521,6 +521,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "amount_won": {
+          "name": "amount_won",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_txn_signature": {
           "name": "created_txn_signature",
           "type": "text",
