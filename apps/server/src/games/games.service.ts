@@ -640,7 +640,7 @@ export class GamesService {
 
       if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
         throw new ForbiddenException(
-          'This is a private game. Follow the creator to gain access.',
+          'This is a private game. Follow this user to gain access.',
         );
       }
     }
