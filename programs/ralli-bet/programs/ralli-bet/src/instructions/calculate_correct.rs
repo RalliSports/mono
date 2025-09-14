@@ -42,6 +42,9 @@ impl<'info> CalculateCorrect<'info> {
         require_eq!(game.status, GameStatus::Open, RalliError::GameNotOpen);
 
         // Ensure all involved lines are resolved
+        // Defensive check: This state should be logically unreachable because any instruction
+        // that uses this check also requires Bet accounts, which can only be created
+        // by submit_bet, which in turn populates involved_lines.
         require!(!game.involved_lines.is_empty(), RalliError::NoLinesInGame);
 
         // Verify bet belongs to this game
