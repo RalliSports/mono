@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 
 // Components
 import {
@@ -17,6 +17,9 @@ import {
 import { usePicks } from './hooks/usePicks'
 import { DEFAULT_LEGS_REQUIRED, DEFAULT_BUY_IN, DEFAULT_GAME_NAME } from './constants/gameDefaults'
 import { LoadingSpinner } from '../join-game/components'
+import { useSessionToken } from '@/hooks/use-session'
+import { useRouter } from 'next/navigation'
+import { useAccount } from '@getpara/react-sdk'
 
 function PicksContent() {
   const {
@@ -36,6 +39,18 @@ function PicksContent() {
     handlePaymentConfirm,
     handlePaymentCancel,
   } = usePicks()
+
+  const { session } = useSessionToken()
+  const account = useAccount()
+
+  const router = useRouter()
+
+  useEffect(() => {
+    console.log('session', session)
+    if (!session || !account.isConnected) {
+      router.push(`/signin?callbackUrl=/picks?id=${gameId}`)
+    }
+  }, [session, router, gameId, account.isConnected])
 
   const legsRequired = game?.numBets || DEFAULT_LEGS_REQUIRED
   const buyIn = game?.depositAmount || DEFAULT_BUY_IN

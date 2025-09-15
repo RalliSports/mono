@@ -8,23 +8,21 @@ import { useUserData } from '@/providers/user-data-provider'
 import { useAccount } from '@getpara/react-sdk'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
+import { useGameTabs } from './hooks/useGameTabs'
+import ChatSection from './components/ChatSection'
 
 function ViewGameContent() {
   const { lobby, isLoading, expandedParticipants, toggleParticipant } = useGameData()
+  const { activeTab, setActiveTab, mounted } = useGameTabs()
   const { user } = useUserData()
   const router = useRouter()
 
-  const [mounted, setMounted] = useState(false)
   const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
 
   // Use auth hooks
   const account = useAccount()
   const { isConnected, isLoading: balanceLoading } = useParaWalletBalance()
 
-  // Fix hydration issues
-  useEffect(() => {
-    setMounted(true)
-  }, [])
   // Handle wallet connection with callback URL for join-game
   useEffect(() => {
     if (!mounted) return
@@ -98,11 +96,15 @@ function ViewGameContent() {
         <WinnersDisplay lobby={lobby} />
         <JoinGameButton game={lobby} user={user ?? null} />
 
-        <ParticipantsList
-          lobby={lobby}
-          expandedParticipants={expandedParticipants}
-          toggleParticipant={toggleParticipant}
-        />
+        {activeTab === 'players' && (
+          <ParticipantsList
+            lobby={lobby}
+            expandedParticipants={expandedParticipants}
+            toggleParticipant={toggleParticipant}
+          />
+        )}
+
+        {activeTab === 'chats' && <ChatSection />}
       </div>
     </div>
   )

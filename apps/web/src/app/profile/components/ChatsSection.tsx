@@ -27,14 +27,14 @@ export default function ChatsSection() {
   }, [getChannels])
 
   const filters = {
-    type: { $in: ['messaging', 'team', 'ralli-lobby'] },
+    type: { $in: ['messaging', 'team', 'gaming'] },
     members: { $in: [user?.id] },
   }
 
   //   const sort = [{ last_message_at: -1 }]
   const CustomChannelPreview = (props: ChannelPreviewUIComponentProps) => {
-    const { channel, latestMessagePreview, unread, displayTitle, displayImage } = props
-
+    const { channel, latestMessagePreview, unread, displayImage } = props
+    const channelName = channel.data?.name
     const handleChannelClick = () => {
       setActiveChannel(channel)
     }
@@ -51,8 +51,8 @@ export default function ChatsSection() {
         }}
       >
         <div className="channel-info">
-          <Image src={displayImage || '/images/pfp-1.svg'} alt={displayTitle || 'Channel'} width={32} height={32} />
-          <strong>{displayTitle || 'Direct Message'}</strong>
+          <Image src={displayImage || '/images/pfp-1.svg'} alt={channelName || 'Channel'} width={32} height={32} />
+          <strong>{channelName || 'Direct Message'}</strong>
           {unread && unread > 0 && <span className="unread-count">({unread})</span>}
           <div style={{ fontSize: '12px', color: '#666' }}>{latestMessagePreview || 'No messages yet'}</div>
         </div>

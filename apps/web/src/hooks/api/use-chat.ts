@@ -87,6 +87,11 @@ export function useChat() {
     }
   }, [client])
 
+  const getChannel = useCallback(async (channelId: string) => {
+    const channel = await client.getChannelById('gaming', channelId, {})
+    return channel
+  }, [])
+
   return {
     currentUserChatToken,
     connectToClient,
@@ -96,5 +101,6 @@ export function useChat() {
     client,
     getChannels,
     isConnectedToClient,
+    getChannel,
   }
 }

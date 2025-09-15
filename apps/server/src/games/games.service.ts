@@ -19,10 +19,13 @@ import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
 import { NotificationService } from 'src/notification/notification.service';
+import { StreamChat } from 'stream-chat';
+import { chatClient } from 'src/utils/services/messaging';
 
 @Injectable()
 export class GamesService {
   private anchor: ParaAnchor;
+  private chatClient: StreamChat;
 
   constructor(
     @Drizzle() private readonly db: Database,
@@ -30,6 +33,7 @@ export class GamesService {
     private readonly notificationService: NotificationService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
+    this.chatClient = chatClient;
   }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
@@ -77,6 +81,17 @@ export class GamesService {
           error,
         );
       }
+      const memberIds = [user.id];
+      // await connectToChat(user.id);
+      const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+        name: game.title ?? `Lobby ${game.id}`,
+        // Custom fields for lobby management
+        lobby_id: game.id,
+        members: memberIds,
+        created_by_id: user.id,
+      });
+
+      await channel.create();
 
       const [updatedGame] = await tx
         .update(games)
@@ -326,6 +341,17 @@ export class GamesService {
         throw new BadRequestException(
           'Failed to execute submit bets instruction on-chain',
         );
+      }
+
+      if (user.id !== game.creatorId) {
+        // await connectToChat(user.id);
+        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+          name: `Lobby ${game.id}`,
+          // Custom fields for lobby management
+          lobby_id: game.id,
+        });
+
+        await channel.addMembers([user.id]);
       }
 
       await tx
