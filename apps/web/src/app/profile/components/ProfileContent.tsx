@@ -11,6 +11,7 @@ import { useProfilePictureUpload } from '../hooks/useProfilePictureUpload'
 import { useProfileTabs } from '../hooks/useProfileTabs'
 import { formatBalance } from '@/lib/utils'
 import PastParlaysSection from './PastParlaysSection'
+import ChatsSection from './ChatsSection'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
@@ -65,6 +66,8 @@ export default function ProfileContent() {
         {activeTab === 'history' && <HistorySection />}
 
         {activeTab === 'achievements' && <AchievementsSection />}
+
+        {activeTab === 'chats' && <ChatsSection />}
       </div>
 
       <ProfilePictureUploadModal

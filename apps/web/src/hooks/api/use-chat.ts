@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useApiWithAuth } from './base'
 import { useWalletConnection } from '@/app/main/hooks/useWalletConnection'
 import { Channel, StreamChat } from 'stream-chat'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useUser } from './use-user'
 console.log('stream chat api key', process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY)
 const client = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY!)
@@ -14,6 +14,7 @@ export function useChat() {
   const { currentUser } = useUser()
   const { isConnected } = useWalletConnection(false)
   const [currentChannel, setCurrentChannel] = useState<Channel | null>(null)
+  const [isConnectedToClient, setIsConnectedToClient] = useState(false)
 
   const currentUserChatToken = useQuery({
     queryKey: ['current-user-chat-token'],
@@ -21,6 +22,18 @@ export function useChat() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!isConnected,
   })
+
+  useEffect(() => {
+    console.log('connectToClient', currentUserChatToken.data, currentUser.data)
+    if (currentUserChatToken.data && currentUser.data) {
+      client.connectUser(
+        { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
+        currentUserChatToken.data.token,
+      )
+      console.log('connected to client', client)
+      setIsConnectedToClient(true)
+    }
+  }, [currentUserChatToken.data, currentUser.data])
 
   const connectToClient = useCallback(() => {
     console.log('connectToClient', currentUserChatToken.data, currentUser.data)
@@ -64,11 +77,24 @@ export function useChat() {
     [currentChannel],
   )
 
+  const getChannels = useCallback(async () => {
+    if (currentUser.data) {
+      const channels = await client.queryChannels({
+        members: { $in: [currentUser.data.id!] },
+      })
+      console.log('User channels:', channels)
+      console.log('Channel count:', channels.length)
+    }
+  }, [client])
+
   return {
     currentUserChatToken,
     connectToClient,
     disconnectFromClient,
     connectToChannelAndSubscribe,
     sendMessageToCurrentChannel,
+    client,
+    getChannels,
+    isConnectedToClient,
   }
 }

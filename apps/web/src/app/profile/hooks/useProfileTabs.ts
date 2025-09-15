@@ -3,7 +3,7 @@ import { useSearchParams } from 'next/navigation'
 
 export function useProfileTabs() {
   const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('chats')
   const [mounted, setMounted] = useState(false)
   const [editingUsername, setEditingUsername] = useState(false)
 
@@ -11,7 +11,7 @@ export function useProfileTabs() {
   useEffect(() => {
     setMounted(true)
     const tab = searchParams.get('tab')
-    if (tab && ['overview', 'parlays', 'history', 'achievements', 'settings'].includes(tab)) {
+    if (tab && ['parlays', 'chats', 'friends'].includes(tab)) {
       setActiveTab(tab)
     }
   }, [searchParams])

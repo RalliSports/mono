@@ -273,11 +273,6 @@ export class UserService {
     if (!userData) {
       throw new Error('User not found');
     }
-    console.log(
-      'keys',
-      process.env.STREAM_CHAT_API_KEY,
-      process.env.STREAM_CHAT_SECRET_KEY,
-    );
 
     const chatClient = new StreamChat(
       process.env.STREAM_CHAT_API_KEY!,
