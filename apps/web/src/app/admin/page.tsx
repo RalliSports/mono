@@ -114,8 +114,8 @@ function AdminPageContent() {
       const matchesSearch =
         line.athlete?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         line.stat?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesSport = selectedSport === 'all' || line.matchup?.homeTeam?.name === selectedSport
-      return matchesSearch && matchesSport
+      const lineAlreadyResolved = line.actualValue !== null
+      return matchesSearch && !lineAlreadyResolved
     })
   }, [linesQuery.query.data, searchTerm, selectedSport])
 
@@ -285,27 +285,12 @@ function AdminPageContent() {
       return
     }
 
-    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.id) {
-      addToast('Please fill in all fields', 'error')
-      return
-    }
-
     try {
       await linesQuery.create.mutateAsync({
-        createdAt: new Date(),
-        status: 'open',
-        createdTxnSignature: null,
-        resolvedTxnSignature: null,
-        athleteId: newLine.playerId,
-        statId: newLine.statTypeId,
         matchupId: newLine.id,
-        predictedValue: newLine.value,
-        actualValue: 0,
-        isHigher: null,
-        startsAt: new Date(newLine.gameDate),
       } as any)
 
-      addToast('Line created successfully!', 'success')
+      addToast('Lines created successfully!', 'success')
     } catch (error) {
       console.error('Error creating line:', error)
       addToast('Error creating line', 'error')
@@ -424,8 +409,6 @@ function AdminPageContent() {
               newLine={newLine}
               setNewLine={(line: any) => setNewLine(line)}
               handleCreateLine={handleCreateLine}
-              players={players}
-              stats={stats}
               matchUps={matchUps}
             />
           )}

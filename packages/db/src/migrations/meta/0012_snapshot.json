@@ -1,6 +1,6 @@
 {
-  "id": "8ca6294d-3619-4cf3-9235-4d8db363a702",
-  "prevId": "04d9823e-d611-4a35-ad12-9356869bad0c",
+  "id": "a023569b-2ec6-4479-94a8-65fbfa7ec992",
+  "prevId": "be4fbaa1-7209-4af9-941e-72d4e0f10e90",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -393,6 +393,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "odds_api_event_id": {
+          "name": "odds_api_event_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "game_date": {
           "name": "game_date",
           "type": "date",
@@ -512,6 +518,12 @@
         "is_winner": {
           "name": "is_winner",
           "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount_won": {
+          "name": "amount_won",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
@@ -739,6 +751,12 @@
         },
         "stat_odds_name": {
           "name": "stat_odds_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "odds_api_stat_name": {
+          "name": "odds_api_stat_name",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false

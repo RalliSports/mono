@@ -5,9 +5,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { bets, game_access, games, lines, participants, users } from '@repo/db';
+import {
+  bets,
+  friends,
+  game_access,
+  games,
+  lines,
+  participants,
+  users,
+} from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, ne, or, exists } from 'drizzle-orm';
+import { and, count, eq, inArray, ne, or, exists, desc } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -19,6 +27,7 @@ import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
 import { NotificationService } from 'src/notification/notification.service';
+import { FriendsService } from 'src/friends/friends.service';
 
 @Injectable()
 export class GamesService {
@@ -28,6 +37,7 @@ export class GamesService {
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
     private readonly notificationService: NotificationService,
+    private readonly friendsService: FriendsService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
   }
@@ -244,7 +254,7 @@ export class GamesService {
     return game;
   }
 
-  async submitBets(user: User, dto: BulkCreateBetsDto) {
+  async submitBets(user: User, gameCode:string, dto: BulkCreateBetsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, dto.gameId),
@@ -258,11 +268,11 @@ export class GamesService {
         );
       }
 
-      // await this.validateGameAccess({
-      //   game,
-      //   userId: user.id,
-      //   providedCode: dto.gameCode,
-      // });
+      await this.validateGameAccess({
+        game,
+        userId: user.id,
+        providedCode: gameCode,
+      });
 
       const existing = await tx.query.participants.findFirst({
         where: and(
@@ -473,14 +483,78 @@ export class GamesService {
           ),
         );
       }
+      // Calculate winnings
+      const FEE_BASIS_POINTS = 100; // 100 / 10000 = 0.01 = 1%
 
-      for (const winner of winnersIds) {
-        await tx
-          .update(participants)
-          .set({ isWinner: true })
-          .where(
-            and(eq(participants.userId, winner), eq(participants.gameId, id)),
-          );
+      const totalPlayers = game.participants.length;
+      const numberOfWinners = winnersIds.length;
+      const numberOfLosers = totalPlayers - numberOfWinners;
+
+      // Edge case: everyone wins -> return everyone's entry fee, no fees
+      if (numberOfWinners === totalPlayers) {
+        for (const winnerAddr of winnersIds) {
+          await tx
+            .update(participants)
+            .set({ isWinner: true, amountWon: Number(game.depositAmount) })
+            .where(
+              and(eq(participants.userId, winnerAddr), eq(participants.gameId, id)),
+            );
+        }
+
+        const nonWinners = game.participants.filter(
+          (p) => !winnersIds.includes(p.userId!),
+        );
+        for (const participant of nonWinners) {
+          await tx
+            .update(participants)
+            .set({ amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      } else if (numberOfWinners === 0) {
+        // Edge case: no winners -> all money goes to treasury (amountWon stays 0)
+        for (const participant of game.participants) {
+          await tx
+            .update(participants)
+            .set({ isWinner: false, amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      } else {
+        // Normal case
+        const entryFee = Number(game.depositAmount);
+
+        const losersPool = entryFee * numberOfLosers;
+
+        // fee_from_losers = floor((losers_pool * fee_percentage) / 10000)
+        const feeFromLosers = Number(
+          (BigInt(losersPool) * BigInt(FEE_BASIS_POINTS)) / BigInt(10000),
+        );
+
+        const netLosersPool = losersPool - feeFromLosers;
+
+        const winningsPerWinner = Math.floor(netLosersPool / numberOfWinners);
+        const remainderToTreasury = netLosersPool % numberOfWinners;
+        const totalPerWinner = entryFee + winningsPerWinner;
+
+        // Update winners
+        for (const winner of winnersIds) {
+          await tx
+            .update(participants)
+            .set({ isWinner: true, amountWon: totalPerWinner })
+            .where(
+              and(eq(participants.userId, winner), eq(participants.gameId, id)),
+            );
+        }
+
+        // Update non-winners
+        const nonWinners = game.participants.filter(
+          (p) => !winnersIds.includes(p.userId!),
+        );
+        for (const participant of nonWinners) {
+          await tx
+            .update(participants)
+            .set({ isWinner: false, amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
       }
 
       try {
@@ -613,12 +687,24 @@ export class GamesService {
     userId: string;
     providedCode?: string;
   }) {
-    const { isPrivate, userControlType, gameCode, id: gameId } = game;
+    const {
+      isPrivate,
+      userControlType,
+      gameCode,
+      id: gameId,
+      creatorId,
+    } = game;
 
     if (isPrivate) {
       if (!providedCode || providedCode !== gameCode) {
         throw new ForbiddenException(
           'Private game. Invalid or missing game code.',
+        );
+      }
+
+      if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
+        throw new ForbiddenException(
+          'This is a private game. Follow this user to gain access.',
         );
       }
     }
@@ -650,6 +736,7 @@ export class GamesService {
     }
   }
 
+
   async inviteUserToPlay(userId: string, gameId: string) {
     const user = await this.db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -680,5 +767,28 @@ export class GamesService {
     } catch (error) {
       console.log(error, 'unable to send invite');
     }
+  }
+
+
+   async getPrivateGamesFromFollowing(currentUserId: string) {
+    // 1. Get all the users I am following
+    const following = await this.db.query.friends.findMany({
+      where: eq(friends.followerId, currentUserId),
+    });
+    
+    const followingIds = following.map(f => f.followingId);
+
+    if (followingIds.length === 0) {
+      return [];
+    }
+
+    // 2. Fetch all private games created by those users
+    return this.db.query.games.findMany({
+      where: and(
+        eq(games.isPrivate, true),
+        inArray(games.creatorId, followingIds),
+      ),
+      orderBy: [desc(games.createdAt)],
+    });
   }
 }

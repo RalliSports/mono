@@ -23,6 +23,9 @@ export type GamesGetJoinedGames = Awaited<
 export type GamesGetMyOpenGames = Awaited<
   ReturnType<GamesService['getMyOpenGames']>
 >;
+export type GamesGetMyCompletedGames = Awaited<
+  ReturnType<GamesService['getMyCompletedGames']>
+>;
 export type GamesResolveGame = Awaited<ReturnType<GamesService['resolveGame']>>;
 export type GamesFindAllInstance = GamesFindAll[number];
 export type GamesFindAllOpenInstance = GamesFindAllOpen[number];
@@ -71,6 +74,9 @@ export type MatchupsGetThatShouldHaveStarted = Awaited<
 >;
 export type MatchupsCreate = Awaited<
   ReturnType<MatchupsService['createMatchup']>
+>;
+export type MatchupCreateLinesForMatchup = Awaited<
+  ReturnType<MatchupsService['createLinesForMatchup']>
 >;
 export type MatchupsUpdate = Awaited<
   ReturnType<MatchupsService['updateMatchup']>

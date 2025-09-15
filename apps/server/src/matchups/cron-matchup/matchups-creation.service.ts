@@ -16,7 +16,7 @@ export class MatchupCreationService {
   ) {}
 
   // Runs every day
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_WEEK)
   async createAllMatchupsFromEspn() {
     const SEASON_TYPE_MAP = {
       PRESEASON: 1,

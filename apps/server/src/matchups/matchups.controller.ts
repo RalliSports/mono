@@ -5,6 +5,10 @@ import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { MatchupResponseDto } from './dto/matchup-response.dto';
 import { CreateMatchupDto } from './dto/create-matchup.dto';
 import { UpdateMatchupDto } from './dto/update-matchup.dto';
+import { User } from 'src/user/dto/user-response.dto';
+import { UserPayload } from 'src/auth/auth.user.decorator';
+import { CreateLineDto } from 'src/lines/dto/create-line.dto';
+import { CreateLinesDto } from './dto/create-lines.dto';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -73,5 +77,21 @@ export class MatchupsController {
   @Post('/create')
   async createMatchup(@Body() dto: CreateMatchupDto) {
     return this.matchupsService.createMatchup(dto);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Create lines for a matchup from Odds API data' })
+  @ApiResponse({
+    status: 201,
+    description: 'Lines created successfully for matchup - ${matchupId}',
+    type: MatchupResponseDto,
+  })
+  @Post('/create-lines')
+  async createMatchupLines(
+    @Body() dto: CreateLinesDto,
+    @UserPayload() user: User,
+  ) {
+    return this.matchupsService.createLinesForMatchup(dto, user);
   }
 }

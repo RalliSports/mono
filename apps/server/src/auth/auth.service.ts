@@ -26,7 +26,7 @@ export class AuthService {
   ) {
     this.paraServer = new ParaServer(
       Environment.BETA,
-      process.env.PARA_API_KEY,
+      process.env.PARA_API_KEY!,
     );
     this.anchor = new ParaAnchor(this.getPara());
   }
@@ -36,7 +36,7 @@ export class AuthService {
     email?: string,
     referralCode?: string,
   ): Promise<User | null> {
-    console.log('Validating session', session, referralCode);
+
     // try {
     await this.paraServer.importSession(session);
     const isActive = await this.paraServer.isSessionActive();
@@ -48,8 +48,8 @@ export class AuthService {
     }
 
     const para = await this.getPara();
-    const userEmail = email || para.getEmail() || para.email;
-    console.log('User email', userEmail);
+
+    const userEmail = para.getEmail() || para.email;
 
     const userExisted = await this.db.query.users.findFirst({
       where: eq(users.paraUserId, para.getUserId() ?? ''),
