@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// TypeScript interface for the request data
-interface CreateLineRequest {
-  athleteId: string
-  statId: string
-  matchupId: string
-  predictedValue: number
-}
+// Validation function with detailed error reporting
+function validateCreateLineData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateCreateLineData(data: any): data is CreateLineRequest {
-  return (
-    typeof data.athleteId === 'string' &&
-    typeof data.statId === 'string' &&
-    typeof data.matchupId === 'string' &&
-    typeof data.predictedValue === 'number'
-  )
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.athleteId !== 'string') errors.push('athleteId must be a string')
+  if (typeof obj.statId !== 'string') errors.push('statId must be a string')
+  if (typeof obj.matchupId !== 'string') errors.push('matchupId must be a string')
+  if (typeof obj.predictedValue !== 'number') errors.push('predictedValue must be a number')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -31,16 +30,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateCreateLineData(body)) {
+    const validation = validateCreateLineData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            athleteId: 'string',
-            statId: 'string',
-            matchupId: 'string',
-            predictedValue: 'number',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

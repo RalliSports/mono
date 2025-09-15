@@ -7,11 +7,20 @@ interface CreateMatchupRequest {
   startsAtTimestamp: number
 }
 
-// Validation function
-function validateCreateMatchupData(data: unknown): data is CreateMatchupRequest {
-  if (!data || typeof data !== 'object') return false
-  const d = data as Record<string, unknown>
-  return typeof d.homeTeamId === 'string' && typeof d.awayTeamId === 'string' && typeof d.startsAtTimestamp === 'number'
+// Validation function with detailed error reporting
+function validateCreateMatchupData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
+
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.homeTeamId !== 'string') errors.push('homeTeamId must be a string')
+  if (typeof obj.awayTeamId !== 'string') errors.push('awayTeamId must be a string')
+  if (typeof obj.startsAtTimestamp !== 'number') errors.push('startsAtTimestamp must be a number')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -27,15 +36,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateCreateMatchupData(body)) {
+    const validation = validateCreateMatchupData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            homeTeamId: 'string',
-            awayTeamId: 'string',
-            startsAtTimestamp: 'number',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )
