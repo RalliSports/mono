@@ -1,22 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-interface Pick {
-  lineId: string
-  predictedDirection: 'over' | 'under'
-}
+// Validation function with detailed error reporting
+function validateCreateBetData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-interface CreateBetRequest {
-  gameId: string
-  bets: Pick[]
-}
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
 
-// Validation function
-function validateCreateBetData(data: CreateBetRequest): data is CreateBetRequest {
-  return (
-    typeof data.gameId === 'string' &&
-    Array.isArray(data.bets) &&
-    data.bets.every((pick: Pick) => typeof pick.lineId === 'string' && typeof pick.predictedDirection === 'string')
-  )
+  if (typeof obj.gameId !== 'string') errors.push('gameId must be a string')
+
+  if (!Array.isArray(obj.bets)) {
+    errors.push('bets must be an array')
+  } else {
+    obj.bets.forEach((pick: unknown, index: number) => {
+      const pickObj = pick as Record<string, unknown>
+      if (typeof pickObj.lineId !== 'string') {
+        errors.push(`bets[${index}].lineId must be a string`)
+      }
+      if (typeof pickObj.predictedDirection !== 'string') {
+        errors.push(`bets[${index}].predictedDirection must be a string`)
+      }
+      if (pickObj.predictedDirection && !['over', 'under'].includes(pickObj.predictedDirection as string)) {
+        errors.push(`bets[${index}].predictedDirection must be either 'over' or 'under'`)
+      }
+    })
+  }
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -32,14 +44,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateCreateBetData(body)) {
+    const validation = validateCreateBetData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            gameId: 'string',
-            bets: 'array',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )
