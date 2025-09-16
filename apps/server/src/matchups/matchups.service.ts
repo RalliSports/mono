@@ -202,7 +202,6 @@ export class MatchupsService {
     const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
       res.json(),
     );
-    console.log('linesResponse', linesResponse);
     const allAthletes = await this.db.query.athletes.findMany({
       where: or(
         eq(athletes.teamId, matchup?.homeTeamId!),
@@ -266,7 +265,6 @@ export class MatchupsService {
   }
 
   async resolveLinesForMatchup(dto: ResolveLinesDto, user: User) {
-    console.log('Resolving lines for matchups...');
     // const matchupsToResolve = await this.getMatchupsInProgress();
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, dto.matchupId),
@@ -374,7 +372,6 @@ export class MatchupsService {
       chunks.push(allLinesToResolve.slice(i, i + CHUNK_SIZE));
     }
 
-    console.log('chunks', chunks);
     // Process each chunk sequentially with 500ms delay between chunks
     for (let i = 0; i < chunks.length; i++) {
       if (i > 0) {

@@ -36,14 +36,12 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
         // Desktop: copy to clipboard
         await navigator.clipboard.writeText(shareUrl)
         // You could add a toast notification here
-        console.log('Link copied to clipboard!')
       }
     } catch (error) {
       console.error('Error sharing:', error)
       // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(shareUrl)
-        console.log('Link copied to clipboard!')
       } catch (clipboardError) {
         console.error('Failed to copy to clipboard:', clipboardError)
       }

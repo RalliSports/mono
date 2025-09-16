@@ -364,19 +364,19 @@ export class LinesService {
 
         // Check if line exists and is not resolved
         if (!lineData) {
-          console.log(
+          console.warn(
             `Line not found for ${lineDataForResole.lineId}, athlete: ${lineDataForResole.athleteName}, stat: ${lineDataForResole.statName}`,
           );
           continue;
         }
         if (lineData.actualValue) {
-          console.log(
+          console.warn(
             `Line already resolved for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
           );
           continue;
         }
         if (!lineData.predictedValue) {
-          console.log(
+          console.warn(
             `Line not predicted for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
           );
           continue;
@@ -385,14 +385,14 @@ export class LinesService {
           lineDataForResole.actualValue === null ||
           lineDataForResole.actualValue === undefined
         ) {
-          console.log(
+          console.warn(
             `Actual value not provided for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
           );
           continue;
         }
         const lineCreatedAt = lineData.createdAt;
         if (!lineCreatedAt) {
-          console.log(
+          console.warn(
             `Line not created for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
           );
           continue;
