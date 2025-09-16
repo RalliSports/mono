@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-interface UpdateUserRequest {
-  email: string
-}
+// Validation function with detailed error reporting
+function validateUpdateUserRequest(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateUpdateUserRequest(data: UpdateUserRequest): data is UpdateUserRequest {
-  return typeof data.email === 'string'
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.email !== 'string') errors.push('email must be a string')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function PATCH(request: NextRequest) {
@@ -21,13 +26,12 @@ export async function PATCH(request: NextRequest) {
     // Parse the request body
     const body = await request.json()
     // Validate the data structure
-    if (!validateUpdateUserRequest(body)) {
+    const validation = validateUpdateUserRequest(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            username: 'string',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

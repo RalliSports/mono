@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-interface UpdateUserRequest {
-  username: string
-  avatar: string
-  firstName: string
-  lastName: string
-}
+// Validation function with detailed error reporting
+function validateUpdateUserRequest(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateUpdateUserRequest(data: UpdateUserRequest): data is UpdateUserRequest {
-  return (
-    typeof data.username === 'string' &&
-    typeof data.avatar === 'string' &&
-    typeof data.firstName === 'string' &&
-    typeof data.lastName === 'string'
-  )
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.username !== 'string') errors.push('username must be a string')
+  if (typeof obj.avatar !== 'string') errors.push('avatar must be a string')
+  if (typeof obj.firstName !== 'string') errors.push('firstName must be a string')
+  if (typeof obj.lastName !== 'string') errors.push('lastName must be a string')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function PATCH(request: NextRequest) {
@@ -29,13 +29,12 @@ export async function PATCH(request: NextRequest) {
     // Parse the request body
     const body = await request.json()
     // Validate the data structure
-    if (!validateUpdateUserRequest(body)) {
+    const validation = validateUpdateUserRequest(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            username: 'string',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

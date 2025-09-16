@@ -23,11 +23,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { subscriptionId, title, body: messageBody, url } = body
 
-    if (!subscriptionId || !title || !messageBody) {
+    const missingFields: string[] = []
+    if (!subscriptionId) missingFields.push('subscriptionId')
+    if (!title) missingFields.push('title')
+    if (!messageBody) missingFields.push('body')
+
+    if (missingFields.length > 0) {
       return NextResponse.json(
         {
           error: 'Missing required fields',
-          message: 'subscriptionId, title, and body are required',
+          missingFields: missingFields,
         },
         { status: 400 },
       )

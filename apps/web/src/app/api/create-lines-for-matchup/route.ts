@@ -5,9 +5,18 @@ interface CreateLinesForMatchupRequest {
   matchupId: string
 }
 
-// Validation function
-function validateCreateLineData(data: any): data is CreateLinesForMatchupRequest {
-  return typeof data.matchupId === 'string'
+// Validation function with detailed error reporting
+function validateCreateLineData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
+
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.matchupId !== 'string') errors.push('matchupId must be a string')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -23,13 +32,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateCreateLineData(body)) {
+    const validation = validateCreateLineData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            matchupId: 'string',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )
