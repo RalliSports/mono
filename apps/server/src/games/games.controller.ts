@@ -200,11 +200,11 @@ export class GamesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Update a game' })
+  @ApiOperation({ summary: 'Resolve a game' })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({
     status: 200,
-    description: 'Game updated successfully',
+    description: 'Game resolved successfully',
     type: GameResponseDto,
   })
   @Patch('/game/resolve/:id')
@@ -215,12 +215,14 @@ export class GamesController {
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a game' })
+  @ApiOperation({
+    summary: 'Delete a game created by the user if none has joined',
+  })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 204, description: 'Game deleted successfully' })
   @Delete('/game/delete/:id')
   remove(@Param('id') id: string, @UserPayload() user: User) {
-    return this.gamesService.remove(id, user);
+    return this.gamesService.removeCreatedGameWithNoParticipants(id, user);
   }
 
   @ApiOperation({ summary: 'Get a game using its unique code' })

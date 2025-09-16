@@ -254,7 +254,7 @@ export class GamesService {
     return game;
   }
 
-  async submitBets(user: User, gameCode:string, dto: BulkCreateBetsDto) {
+  async submitBets(user: User, gameCode: string, dto: BulkCreateBetsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, dto.gameId),
@@ -497,7 +497,10 @@ export class GamesService {
             .update(participants)
             .set({ isWinner: true, amountWon: Number(game.depositAmount) })
             .where(
-              and(eq(participants.userId, winnerAddr), eq(participants.gameId, id)),
+              and(
+                eq(participants.userId, winnerAddr),
+                eq(participants.gameId, id),
+              ),
             );
         }
 
@@ -632,15 +635,40 @@ export class GamesService {
     return false;
   }
 
-  async remove(id: string, user: User) {
-    await this.ensureUserOwnsGame(id, user.id);
-    const [deleted] = await this.db
-      .delete(games)
-      .where(eq(games.id, id))
-      .returning();
+  async removeCreatedGameWithNoParticipants(id: string, user: User) {
+    const selectedGame = await this.db.query.games.findFirst({
+      where: eq(games.id, id),
+      with: {
+        participants: true,
+      },
+    });
 
-    if (!deleted) throw new NotFoundException('Game not found');
-    return deleted;
+    // safety checks
+    if (!selectedGame) {
+      throw new NotFoundException(`Game with GameId ${id} not found`);
+    }
+    if (selectedGame.creatorId !== user.id) {
+      throw new ForbiddenException(
+        `You do not own this game with GameId ${id}`,
+      );
+    }
+    if (selectedGame.participants.length > 1) {
+      throw new BadRequestException(
+        `Game with GameId ${id} already has ${selectedGame.participants.length} participants`,
+      );
+    }
+
+    try {
+      const [deleted] = await this.db
+        .delete(games)
+        .where(and(eq(games.id, id), eq(games.creatorId, user.id)))
+        .returning();
+      return deleted;
+    } catch (error) {
+      throw new BadRequestException(
+        `Game with GameId ${id} not deleted: ${error}`,
+      );
+    }
   }
 
   async ensureUserOwnsGame(gameId: string, userId: string) {
@@ -702,7 +730,12 @@ export class GamesService {
         );
       }
 
-      if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
+      if (
+        !(await this.friendsService.isCreatorFollowing(
+          userId,
+          creatorId as string,
+        ))
+      ) {
         throw new ForbiddenException(
           'This is a private game. Follow this user to gain access.',
         );
@@ -736,7 +769,6 @@ export class GamesService {
     }
   }
 
-
   async inviteUserToPlay(userId: string, gameId: string) {
     const user = await this.db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -769,14 +801,13 @@ export class GamesService {
     }
   }
 
-
-   async getPrivateGamesFromFollowing(currentUserId: string) {
+  async getPrivateGamesFromFollowing(currentUserId: string) {
     // 1. Get all the users I am following
     const following = await this.db.query.friends.findMany({
       where: eq(friends.followerId, currentUserId),
     });
-    
-    const followingIds = following.map(f => f.followingId);
+
+    const followingIds = following.map((f) => f.followingId);
 
     if (followingIds.length === 0) {
       return [];
