@@ -344,7 +344,10 @@ export class LinesService {
     });
   }
 
-  async bulkResolveLines(dto: ResolveLineDto[], user: User) {
+  async bulkResolveLines(
+    dto: (ResolveLineDto & { athleteName: string; statName: string })[],
+    user: User,
+  ) {
     return await this.db.transaction(async (tx) => {
       let txn: string;
 
@@ -361,26 +364,37 @@ export class LinesService {
 
         // Check if line exists and is not resolved
         if (!lineData) {
-          console.log(`Line not found for ${lineDataForResole.lineId}`);
+          console.log(
+            `Line not found for ${lineDataForResole.lineId}, athlete: ${lineDataForResole.athleteName}, stat: ${lineDataForResole.statName}`,
+          );
           continue;
         }
         if (lineData.actualValue) {
-          console.log(`Line already resolved for ${lineDataForResole.lineId}`);
+          console.log(
+            `Line already resolved for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
           continue;
         }
         if (!lineData.predictedValue) {
-          console.log(`Line not predicted for ${lineDataForResole.lineId}`);
+          console.log(
+            `Line not predicted for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
           continue;
         }
-        if (!lineDataForResole.actualValue) {
+        if (
+          lineDataForResole.actualValue === null ||
+          lineDataForResole.actualValue === undefined
+        ) {
           console.log(
-            `Actual value not provided for ${lineDataForResole.lineId}`,
+            `Actual value not provided for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
           );
           continue;
         }
         const lineCreatedAt = lineData.createdAt;
         if (!lineCreatedAt) {
-          console.log(`Line not created for ${lineDataForResole.lineId}`);
+          console.log(
+            `Line not created for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
           continue;
         }
         const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();

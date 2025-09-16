@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { matchups, stats, athletes, lines } from '@repo/db';
-import { and, eq, gt, lt, gte, lte, or } from 'drizzle-orm';
+import { and, eq, gt, lt, gte, lte, or, inArray } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -28,6 +28,7 @@ import {
   fetchESPNBoxscoreData,
   ProcessedData,
 } from './cron-matchup/utils/espnEvent-finalScore-dataProcess';
+import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 
 @Injectable()
 export class MatchupsService {
@@ -264,11 +265,19 @@ export class MatchupsService {
     return { message: 'Lines Created Successfully' };
   }
 
-  async resolveLinesForMatchup(dto: ResolveLineDto, user: User) {
+  async resolveLinesForMatchup(dto: ResolveLinesDto, user: User) {
     console.log('Resolving lines for matchups...');
-    const matchupsToResolve = await this.getMatchupsInProgress();
+    // const matchupsToResolve = await this.getMatchupsInProgress();
+    const matchup = await this.db.query.matchups.findFirst({
+      where: eq(matchups.id, dto.matchupId),
+    });
+    if (!matchup) throw new NotFoundException('Matchup not found');
+    const matchupsToResolve = [matchup];
     const allStats = await this.statsService.getAllStats();
-    const allLinesToResolve: ResolveLineDto[] = [];
+    const allLinesToResolve: (ResolveLineDto & {
+      athleteName: string;
+      statName: string;
+    })[] = [];
     for (const matchup of matchupsToResolve) {
       if (!matchup.espnEventId) {
         console.warn(`Matchup ${matchup.id} missing ESPN event ID`);
@@ -286,54 +295,63 @@ export class MatchupsService {
         console.warn(`Matchup ${matchup.id} not final, skipping`);
         continue;
       }
-      const allAthletesInThisMatchup = await this.db.query.athletes.findMany({
-        where: or(
-          eq(athletes.teamId, matchup?.homeTeamId!),
-          eq(athletes.teamId, matchup?.awayTeamId!),
-        ),
+
+      const allLinesInThisMatchup = await this.db.query.lines.findMany({
+        where: and(eq(lines.matchupId, matchup.id)),
+        with: {
+          athlete: {
+            columns: {
+              name: true,
+            },
+          },
+          stat: {
+            columns: {
+              name: true,
+              statOddsName: true,
+            },
+          },
+        },
       });
+      const allAthletesInThisMatchupWithLines =
+        await this.db.query.athletes.findMany({
+          where: or(
+            eq(athletes.teamId, matchup?.homeTeamId!),
+            eq(athletes.teamId, matchup?.awayTeamId!),
+            inArray(
+              athletes.id,
+              allLinesInThisMatchup.map((line) => line.athleteId ?? ''),
+            ),
+          ),
+        });
       const matchupBoxScore: ProcessedData = await fetchESPNBoxscoreData(
         matchup.espnEventId,
       );
 
-      for (const outcomePerAthlete of matchupBoxScore.athletes) {
-        const athlete = allAthletesInThisMatchup.find(
-          (athlete) => athlete.name === outcomePerAthlete.name,
+      for (const athlete of allAthletesInThisMatchupWithLines) {
+        const lines = allLinesInThisMatchup.filter(
+          (line) => line.athleteId === athlete.id,
         );
-        if (!athlete) {
-          console.warn(
-            `Athlete "${outcomePerAthlete.name}" not found for ${matchup.espnEventId}`,
-          );
+        const outcomePerAthlete = matchupBoxScore.athletes.find(
+          (athlete) => athlete.name === athlete.name,
+        );
+        if (!outcomePerAthlete) {
           continue;
         }
-        for (const linesDataPerAthlete in outcomePerAthlete.lines) {
-          const stat = allStats.find(
-            (stat) => stat.oddsApiStatName === linesDataPerAthlete,
-          );
+        for (const lineData of lines) {
+          const stat = lineData.stat;
           if (!stat) {
-            console.warn(
-              `Stat "${linesDataPerAthlete}" not found for ${matchup.espnEventId}`,
-            );
+            // console.warn(
+            //   `Stat "${linesDataPerAthlete}" not found for ${matchup.espnEventId}`,
+            // );
             continue;
           }
-          const line = await this.db.query.lines.findFirst({
-            where: and(
-              eq(lines.athleteId, athlete.id),
-              eq(lines.statId, stat.id),
-              eq(lines.matchupId, matchup.id),
-            ),
-          });
-          if (!line) {
-            console.warn(
-              `Line not found for ${matchup.espnEventId} - ${athlete.name} - ${stat.name}`,
-            );
-            continue;
-          }
-          const actualValue = outcomePerAthlete.lines[linesDataPerAthlete];
+          const actualValue = outcomePerAthlete.lines[stat.statOddsName!];
           try {
             allLinesToResolve.push({
-              lineId: line.id,
-              actualValue: Number(actualValue),
+              lineId: lineData.id,
+              actualValue: Number(actualValue) || 0.0,
+              athleteName: athlete.name!,
+              statName: stat.name!,
             });
           } catch (error) {
             console.error(
@@ -348,11 +366,15 @@ export class MatchupsService {
 
     // Chunk lines into groups of 5
     const CHUNK_SIZE = 5;
-    const chunks: ResolveLineDto[][] = [];
+    const chunks: (ResolveLineDto & {
+      athleteName: string;
+      statName: string;
+    })[][] = [];
     for (let i = 0; i < allLinesToResolve.length; i += CHUNK_SIZE) {
       chunks.push(allLinesToResolve.slice(i, i + CHUNK_SIZE));
     }
 
+    console.log('chunks', chunks);
     // Process each chunk sequentially with 500ms delay between chunks
     for (let i = 0; i < chunks.length; i++) {
       if (i > 0) {

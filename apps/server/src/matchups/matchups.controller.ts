@@ -10,6 +10,7 @@ import { UserPayload } from 'src/auth/auth.user.decorator';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { CreateLinesDto } from './dto/create-lines.dto';
 import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
+import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -108,7 +109,7 @@ export class MatchupsController {
   })
   @Post('/resolve-lines')
   async resolveMatchupLines(
-    @Body() dto: ResolveLineDto,
+    @Body() dto: ResolveLinesDto,
     @UserPayload() user: User,
   ) {
     return this.matchupsService.resolveLinesForMatchup(dto, user);
