@@ -9,6 +9,7 @@ import { User } from 'src/user/dto/user-response.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { CreateLinesDto } from './dto/create-lines.dto';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -93,5 +94,23 @@ export class MatchupsController {
     @UserPayload() user: User,
   ) {
     return this.matchupsService.createLinesForMatchup(dto, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary: 'Resolve lines for matchups with ESPN final score data',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lines resolved successfully',
+    type: MatchupResponseDto,
+  })
+  @Post('/resolve-lines')
+  async resolveMatchupLines(
+    @Body() dto: ResolveLineDto,
+    @UserPayload() user: User,
+  ) {
+    return this.matchupsService.resolveLinesForMatchup(dto, user);
   }
 }

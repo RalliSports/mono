@@ -384,6 +384,80 @@ export class ParaAnchor {
     }
   }
 
+  async bulkResolveLineInstruction(
+    linesInformation: {
+      lineId: number;
+      predictedValue: number;
+      actualValue: number;
+      shouldRefundBettors: boolean;
+    }[],
+    creator: PublicKey,
+  ): Promise<string> {
+    const program = await this.getProgram(false); // useAdminSigner
+    const linesIxs = [] as TransactionInstruction[];
+    for (const line of linesInformation) {
+      const _lineId = new BN(line.lineId);
+      const _predictedValue = line.predictedValue;
+      const _actualValue = line.actualValue;
+      const _shouldRefundBettors = line.shouldRefundBettors;
+
+      const [lineAccount] = PublicKey.findProgramAddressSync(
+        [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+        program.programId,
+      );
+      const direction =
+        _actualValue > _predictedValue ? { over: {} } : { under: {} };
+      const ix = await program.methods
+        .resolveLine(direction, _actualValue, _shouldRefundBettors)
+        .accountsPartial({
+          admin: creator,
+          line: lineAccount,
+        })
+        .instruction();
+      linesIxs.push(ix);
+    }
+
+    try {
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: linesIxs,
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {
+      console.error('Transaction Error:', error);
+      return '';
+    }
+  }
+
   async createGameInstruction(
     gameId: string,
     depositAmount: number,

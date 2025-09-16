@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import axios from 'axios';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -12,6 +11,7 @@ import {
   EspnMatchupStatusResponse,
   EspnStatusName,
 } from './types/matchup-status-espn-response.types';
+import { fetchEspnMatchupStatus } from './utils/espn-event-status-fetcher';
 
 @Injectable()
 export class MatchupResolveLinesService {
@@ -23,22 +23,6 @@ export class MatchupResolveLinesService {
     private readonly matchupsService: MatchupsService,
     private readonly linesService: LinesService,
   ) {}
-
-  // Fetch live ESPN status of a matchup by espnEventId, returns parsed JSON or null
-  async fetchEspnMatchupStatus(espnEventId: string) {
-    const url = `http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${espnEventId}/competitions/${espnEventId}/status?lang=en&region=us`;
-
-    try {
-      const response = await axios.get(url);
-      return response.data;
-    } catch (error) {
-      this.logger.error(
-        `Error fetching ESPN status for event ${espnEventId}:`,
-        error,
-      );
-      return null;
-    }
-  }
 
   // 60 minutes interval
   @Cron(CronExpression.EVERY_HOUR)
@@ -64,7 +48,7 @@ export class MatchupResolveLinesService {
       }
 
       const espnStatus: EspnMatchupStatusResponse =
-        await this.fetchEspnMatchupStatus(matchup.espnEventId);
+        await fetchEspnMatchupStatus(matchup.espnEventId);
       if (!espnStatus || !espnStatus.type) {
         this.logger.warn(`Invalid ESPN status data for ${matchup.espnEventId}`);
         continue;

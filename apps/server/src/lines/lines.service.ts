@@ -17,6 +17,7 @@ import { PublicKey } from '@solana/web3.js';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
+import { line } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class LinesService {
@@ -340,6 +341,95 @@ export class LinesService {
         );
       }
       return res[0];
+    });
+  }
+
+  async bulkResolveLines(dto: ResolveLineDto[], user: User) {
+    return await this.db.transaction(async (tx) => {
+      let txn: string;
+
+      const linesInformation: {
+        lineId: number;
+        predictedValue: number;
+        actualValue: number;
+        shouldRefundBettors: boolean;
+      }[] = [];
+      for (const [index, lineDataForResole] of dto.entries()) {
+        const lineData = await tx.query.lines.findFirst({
+          where: eq(lines.id, lineDataForResole.lineId),
+        });
+
+        // Check if line exists and is not resolved
+        if (!lineData) {
+          console.log(`Line not found for ${lineDataForResole.lineId}`);
+          continue;
+        }
+        if (lineData.actualValue) {
+          console.log(`Line already resolved for ${lineDataForResole.lineId}`);
+          continue;
+        }
+        if (!lineData.predictedValue) {
+          console.log(`Line not predicted for ${lineDataForResole.lineId}`);
+          continue;
+        }
+        if (!lineDataForResole.actualValue) {
+          console.log(
+            `Actual value not provided for ${lineDataForResole.lineId}`,
+          );
+          continue;
+        }
+        const lineCreatedAt = lineData.createdAt;
+        if (!lineCreatedAt) {
+          console.log(`Line not created for ${lineDataForResole.lineId}`);
+          continue;
+        }
+        const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
+        // Update line to mark as resolved
+        const [inserted] = await tx
+          .update(lines)
+          .set({
+            actualValue: lineDataForResole.actualValue.toString(),
+            isHigher:
+              lineDataForResole.actualValue && lineData.predictedValue
+                ? lineDataForResole.actualValue >
+                  Number(lineData.predictedValue)
+                : null,
+            status: LineStatus.RESOLVED,
+          })
+          .where(eq(lines.id, lineDataForResole.lineId))
+          .returning();
+        linesInformation.push({
+          lineId: lineCreatedAtTimestamp,
+          predictedValue: Number(lineData.predictedValue),
+          actualValue: lineDataForResole.actualValue,
+          shouldRefundBettors: false,
+        });
+      }
+
+      try {
+        txn = await this.anchor.bulkResolveLineInstruction(
+          linesInformation,
+          new PublicKey(user.walletAddress),
+        );
+
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from bulkResolveLineInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        await tx.rollback();
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back lines resolution",
+          error,
+        );
+      }
+      return { success: true };
     });
   }
 }
