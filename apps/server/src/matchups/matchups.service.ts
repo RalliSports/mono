@@ -209,7 +209,7 @@ export class MatchupsService {
       ),
     });
 
-    const allStats = await this.db.query.stats.findMany();
+    const allStats = await this.statsService.getAllStats();
 
     const formattedLines: CreateLineDto[] = [];
 
@@ -247,10 +247,10 @@ export class MatchupsService {
     }
 
     // Chunk lines into groups of 5
-    const chunkSize = 5;
+    const CHUNK_SIZE = 5;
     const chunks: CreateLineDto[][] = [];
-    for (let i = 0; i < formattedLines.length; i += chunkSize) {
-      chunks.push(formattedLines.slice(i, i + chunkSize));
+    for (let i = 0; i < formattedLines.length; i += CHUNK_SIZE) {
+      chunks.push(formattedLines.slice(i, i + CHUNK_SIZE));
     }
 
     // Process each chunk sequentially with 500ms delay between chunks
