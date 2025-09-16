@@ -19,6 +19,8 @@ import {
   GameSettings,
   CreatingGameState,
   FormErrors,
+  PrivateGameToggle,
+  InviteFriends,
 } from './components'
 
 // Types and Hooks
@@ -166,11 +168,11 @@ export default function CreateGame() {
           <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl space-y-6">
             <GameTitleInput title={gameSettings.title} onChange={(title) => handleInputChange('title', title)} />
 
-          <GamePictureUpload
-            avatar={gameSettings.imageUrl}
-            setAvatar={(imageUrl: string) => handleInputChange('imageUrl', imageUrl)}
-            session={session || ''}
-          />
+            <GamePictureUpload
+              avatar={gameSettings.imageUrl}
+              setAvatar={(imageUrl: string) => handleInputChange('imageUrl', imageUrl)}
+              session={session || ''}
+            />
 
             <DepositAmountSelector
               depositAmount={gameSettings.depositAmount}
@@ -183,6 +185,11 @@ export default function CreateGame() {
             />
 
             <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
+
+            <PrivateGameToggle
+              isPrivate={gameSettings.isPrivate}
+              onChange={(isPrivate) => handleInputChange('isPrivate', isPrivate)}
+            />
           </div>
 
           <ContestSummary
@@ -191,7 +198,10 @@ export default function CreateGame() {
             numberOfLegs={gameSettings.numBets}
             creatingGameState={creatingGameState}
             onCreateContest={handleCreateContest}
+            isPrivate={gameSettings.isPrivate}
           />
+
+          <InviteFriends isPrivate={gameSettings.isPrivate} />
         </div>
       </div>
       <ToastContainer />
