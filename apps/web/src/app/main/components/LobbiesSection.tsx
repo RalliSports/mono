@@ -1,15 +1,13 @@
 import { useRouter } from 'next/navigation'
 import LobbyCard from '@/components/main-feed/lobby-card'
 import type { Lobby } from '@/hooks/get-games'
-import type { User } from './types'
 
 interface LobbiesSectionProps {
   lobbiesData: Lobby[]
-  user: User | null
   isMobile?: boolean
 }
 
-export default function LobbiesSection({ lobbiesData, user, isMobile = false }: LobbiesSectionProps) {
+export default function LobbiesSection({ lobbiesData, isMobile = false }: LobbiesSectionProps) {
   const router = useRouter()
   const totalActiveLobbies = lobbiesData.length
 
@@ -59,12 +57,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
         <div className="relative">
           {/* Section Header */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white flex items-center">
-              <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-4 flex items-center justify-center">
-                <span className="text-lg">🔥</span>
-              </span>
-              Open Lobbies
-            </h2>
+            <h2 className="text-2xl font-bold text-white flex items-center">Open Lobbies</h2>
             <div className="flex items-center gap-3">
               <CreateLobbyButton isMobile={true} />
               <div className="text-right">
@@ -75,7 +68,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
           </div>
 
           <div className="space-y-3">
-            {lobbiesData.slice(0, 3).map((lobby: Lobby) => (
+            {lobbiesData.slice(0, 10).map((lobby: Lobby) => (
               <LobbyCard
                 key={lobby.id}
                 id={lobby.id}
@@ -84,11 +77,11 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
                 maxParticipants={lobby.maxParticipants}
                 buyIn={lobby.buyIn}
                 prizePool={lobby.prizePool}
+                imageUrl={lobby.imageUrl}
                 legs={lobby.legs}
                 timeLeft={lobby.timeLeft}
                 host={lobby.host}
                 isUrgent={lobby.isUrgent}
-                shouldOpenViewGame={lobby.participants.some((participant) => participant.user?.id === user?.id)}
               />
             ))}
           </div>
@@ -109,12 +102,7 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
       <div className="lg:col-span-3">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-3 flex items-center justify-center">
-              <span className="text-lg">🔥</span>
-            </span>
-            Open Lobbies
-          </h2>
+          <h2 className="text-2xl font-bold text-white flex items-center">Open Lobbies</h2>
           <CreateLobbyButton isMobile={false} />
         </div>
 
@@ -123,11 +111,12 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
         </div>
 
         <div className="space-y-3 mb-6">
-          {lobbiesData.slice(0, 4).map((lobby) => (
+          {lobbiesData.slice(0, 10).map((lobby) => (
             <LobbyCard
               key={lobby.id}
               id={lobby.id}
               title={lobby.title}
+              imageUrl={lobby.imageUrl}
               participants={lobby.participants}
               maxParticipants={lobby.maxParticipants}
               buyIn={lobby.buyIn}
@@ -136,7 +125,6 @@ export default function LobbiesSection({ lobbiesData, user, isMobile = false }: 
               timeLeft={lobby.timeLeft}
               host={lobby.host}
               isUrgent={lobby.isUrgent}
-              shouldOpenViewGame={lobby.participants.some((participant) => participant.user?.id === user?.id)}
             />
           ))}
         </div>

@@ -25,8 +25,9 @@ export function useUserData(session: string | undefined) {
         console.error('Error fetching user:', error)
       }
     }
-
-    fetchUser()
+    if (session) {
+      fetchUser()
+    }
   }, [session, router])
 
   return { user, setUser }

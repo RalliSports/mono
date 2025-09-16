@@ -3,6 +3,7 @@ export { default as TopNavigation } from './TopNavigation'
 export { default as FilterBar } from './FilterBar'
 export { default as LobbiesSection } from './LobbiesSection'
 export { default as BalanceDisplay } from './BalanceDisplay'
+export { default as ProfileButton } from './ProfileButton'
 export { default as LoadingScreen } from './LoadingScreen'
 
 // Export types

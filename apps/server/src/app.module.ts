@@ -13,10 +13,14 @@ import { UserModule } from './user/user.module';
 import { AthletesModule } from './athletes/athletes.module';
 import { StatsModule } from './stats/stats.module';
 import { TeamModule } from './team/team.module';
+import { NotificationModule } from './notification/notification.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     WebsocketModule,
@@ -28,6 +32,8 @@ import { TeamModule } from './team/team.module';
     AthletesModule,
     StatsModule,
     TeamModule,
+    NotificationModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

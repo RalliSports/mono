@@ -1,60 +1,44 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { SessionAuthGuard } from 'src/auth/auth.session.guard';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { ReferralService } from './referral.service';
-import { Referral, ReferralCode } from './dto/referral.dto';
-import { User } from 'src/user/dto/user-response.dto';
+import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
+import { User, User as UserType } from 'src/user/dto/user-response.dto';
 
-@Controller('')
+@Controller('referral')
+@UseGuards(SessionAuthGuard)
 export class ReferralController {
   constructor(private readonly referralService: ReferralService) {}
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Generate referral code' })
-  @ApiResponse({
-    status: 201,
-    type: ReferralCode,
-  })
-  @Post('/referral/generate-referral-code')
-  generateReferralCode(@UserPayload() user: User) {
-    return this.referralService.generateReferralCode(user);
+  @Get('code')
+  async getReferralCode(@UserPayload() user: UserType) {
+    const code = await this.referralService.getReferralCode(user.id);
+    if (!code) {
+      // Generate a new code if user doesn't have one
+      const newCode = await this.referralService.generateReferralCode(user.id);
+      return { code: newCode };
+    }
+    return { code };
   }
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Apply referral code' })
-  @ApiResponse({
-    status: 201,
-    type: Referral,
-  })
-  @Post('/referral/apply-referral-code/:code')
-  applyReferralCode(@Param('code') code: string, @UserPayload() user: User) {
-    return this.referralService.applyReferralCode(code, user);
+  @Post('generate')
+  async generateReferralCode(@UserPayload() user: UserType) {
+    const code = await this.referralService.generateReferralCode(user.id);
+    return { code };
   }
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Referred users' })
-  @ApiResponse({
-    status: 200,
-    type: [Referral],
-  })
-  @Get('/referral/referred-users')
-  findAllReferredUsers(@UserPayload() user: User) {
-    return this.referralService.findAllReferredUsers(user);
+  @Get('stats')
+  async getReferralStats(@UserPayload() user: UserType) {
+    return await this.referralService.getReferralStats(user.id);
   }
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Fetch user referral code' })
-  @ApiResponse({
-    status: 200,
-    type: ReferralCode,
-  })
-  @Get('/referral/fetch-referral-code')
-  fetchUserReferralCode(@UserPayload() user: User) {
-    return this.referralService.fetchUserReferralCode(user);
+  @Post('validate')
+  async validateReferralCode(@Body() body: { code: string }) {
+    const isValid = this.referralService.isValidReferralCode(body.code);
+    return { isValid };
+  }
+
+  @Get('referred-users')
+  async getReferredUsers(@UserPayload() user: UserType) {
+    return await this.referralService.findAllReferredUsers(user.id);
   }
 }

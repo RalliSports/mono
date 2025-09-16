@@ -1,9 +1,9 @@
 import CreateStatForm from './CreateStatForm'
 import StatsList from './StatsList'
-import { Stat } from '../types'
+import { StatsFindById } from '@repo/server'
 
 interface StatsTabProps {
-  stats: Stat[]
+  stats: StatsFindById[]
   newStat: {
     name: string
     description: string

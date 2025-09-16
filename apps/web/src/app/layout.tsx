@@ -16,7 +16,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
         {/* PWA Meta Tags */}
         <link rel="manifest" href="/manifest.json" />
@@ -24,10 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Ralli" />
-        <link rel="apple-touch-icon" href="/images/RALLI.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/images/RALLI.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/RALLI.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/images/RALLI.png" />
+        <link rel="apple-touch-icon" href="/images/logo-cream-bg.svg" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/images/logo-cream-bg.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/logo-cream-bg.svg" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/images/logo-cream-bg.svg" />
 
         <script
           dangerouslySetInnerHTML={{
@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body
-        className={`${inter.variable} bg-[#F5F5DC] font-inter tracking-tight text-gray-900 antialiased`}
+        className={`${inter.variable} bg-gray-900 font-inter tracking-tight text-gray-900 antialiased`}
         suppressHydrationWarning={true}
       >
         <AppProviders>

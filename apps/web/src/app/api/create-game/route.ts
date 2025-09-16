@@ -1,36 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { backendUrl } from '@/constants'
 
-// TypeScript interface for the request data
-interface CreateGameRequest {
-  title: string
-  depositAmount: number
-  currency: string
-  maxParticipants: number
-  numBets: number
-  matchupGroup: string
-  depositToken: string
-  isPrivate: boolean
-  type: string
-  userControlType: string
-  gameModeId: string
-}
+// Validation function with detailed error reporting
+function validateCreateGameData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateCreateGameData(data: any): data is CreateGameRequest {
-  return (
-    typeof data.title === 'string' &&
-    typeof data.depositAmount === 'number' &&
-    typeof data.currency === 'string' &&
-    typeof data.maxParticipants === 'number' &&
-    typeof data.numBets === 'number' &&
-    typeof data.matchupGroup === 'string' &&
-    typeof data.depositToken === 'string' &&
-    typeof data.isPrivate === 'boolean' &&
-    typeof data.type === 'string' &&
-    typeof data.userControlType === 'string' &&
-    typeof data.gameModeId === 'string'
-  )
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.title !== 'string') errors.push('title must be a string')
+  if (typeof obj.depositAmount !== 'number') errors.push('depositAmount must be a number')
+  if (typeof obj.currency !== 'string') errors.push('currency must be a string')
+  if (typeof obj.maxParticipants !== 'number') errors.push('maxParticipants must be a number')
+  if (typeof obj.numBets !== 'number') errors.push('numBets must be a number')
+  if (typeof obj.matchupGroup !== 'string') errors.push('matchupGroup must be a string')
+  if (typeof obj.depositToken !== 'string') errors.push('depositToken must be a string')
+  if (typeof obj.isPrivate !== 'boolean') errors.push('isPrivate must be a boolean')
+  if (typeof obj.type !== 'string') errors.push('type must be a string')
+  if (typeof obj.userControlType !== 'string') errors.push('userControlType must be a string')
+  if (typeof obj.gameModeId !== 'string') errors.push('gameModeId must be a string')
+  if (typeof obj.tokenId !== 'string') errors.push('tokenId must be a string')
+  if (typeof obj.imageUrl !== 'string') errors.push('imageUrl must be a string')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -43,23 +37,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateCreateGameData(body)) {
+    const validation = validateCreateGameData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            title: 'string',
-            depositAmount: 'number',
-            currency: 'string',
-            maxParticipants: 'number',
-            numBets: 'number',
-            matchupGroup: 'string',
-            depositToken: 'string',
-            isPrivate: 'boolean',
-            type: 'string',
-            userControlType: 'string',
-            gameModeId: 'string',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

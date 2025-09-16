@@ -1,15 +1,26 @@
 import { Module } from '@nestjs/common';
 import { MatchupsService } from './matchups.service';
 import { MatchupsController } from './matchups.controller';
-import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from 'src/auth/auth.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { MatchupStatusUpdaterService } from './cron-matchup/matchup-status-updater.service';
 import { LinesService } from 'src/lines/lines.service';
+import { MatchupCreationService } from './cron-matchup/matchups-creation.service';
+import { TeamService } from 'src/team/team.service';
+import { SyncMatchupsWithOddsEventIdService } from './cron-matchup/sync-matchups-with-odds-event-id.service';
+import { StatsService } from 'src/stats/stats.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule],
   controllers: [MatchupsController],
-  providers: [MatchupsService, MatchupStatusUpdaterService, LinesService],
+  providers: [
+    MatchupsService,
+    MatchupStatusUpdaterService,
+    MatchupCreationService,
+    SyncMatchupsWithOddsEventIdService,
+    LinesService,
+    TeamService,
+    StatsService,
+  ],
 })
 export class MatchupsModule {}

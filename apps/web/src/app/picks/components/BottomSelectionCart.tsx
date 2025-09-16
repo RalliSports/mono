@@ -31,16 +31,15 @@ export default function BottomSelectionCart({
             return (
               <div key={index} className="text-center min-w-[45px]">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative ${
-                    pick
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative ${pick
                       ? 'bg-gradient-to-br from-[#00CED1] to-[#FFAB91] border-white text-white shadow-lg'
                       : 'bg-slate-800/50 border-slate-600/50 text-slate-400'
-                  }`}
+                    }`}
                 >
                   {pick ? (
                     <>
                       <Image
-                        src={pick.athleteAvatar}
+                        src={pick.picture || '/images/pfp-2.svg'}
                         alt={pick.athleteId}
                         className="w-10 h-10 object-cover rounded-lg"
                         width={24}
@@ -71,13 +70,12 @@ export default function BottomSelectionCart({
         <button
           onClick={onConfirmPicks}
           disabled={selectedPicks.length !== legsRequired || isConfirming}
-          className={`w-full py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-            selectedPicks.length === legsRequired && !isConfirming
+          className={`w-full py-3 rounded-xl font-bold text-sm transition-all duration-300 ${selectedPicks.length === legsRequired && !isConfirming
               ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
               : isConfirming
                 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg'
                 : 'bg-slate-800/50 border border-slate-600/50 text-slate-500 cursor-not-allowed'
-          }`}
+            }`}
         >
           {isConfirming ? (
             <div className="flex items-center justify-center space-x-2">

@@ -11,11 +11,11 @@ export default function ParticipantsSelector({ maxParticipants, onChange }: Part
       value={maxParticipants}
       onChange={onChange}
       min={2}
-      max={20}
+      max={10}
       step={1}
       label="Max Participants"
       description="Maximum participants"
-      placeholder="Players (2-20)"
+      placeholder="Players (2-10)"
       icon="👥"
       colorScheme="orange"
     />

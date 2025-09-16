@@ -1,10 +1,12 @@
+import Wordmark from '@/components/wordmark'
 import BalanceDisplay from './BalanceDisplay'
+import ProfileButton from './ProfileButton'
+import Logo from '@/components/logo'
 
 interface TopNavigationProps {
   onMenuClick: () => void
   isConnected: boolean
   balances: {
-    sol: number
     ralli: number
   }
   balanceLoading: boolean
@@ -35,19 +37,28 @@ export default function TopNavigation({
               />
             </svg>
           </button>
-          <h1 className="text-xl font-bold text-white">
-            <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">Ralli</span>
-          </h1>
+        </div>
+
+        <div className="flex flex-row items-center text-xl font-bold text-white">
+          <Logo height={50} width={50} />
+          <Wordmark fill="#F9AA92" height={20} width={120} />
         </div>
 
         {/* Right: Balance + Profile */}
         <div className="flex items-center space-x-3">
-          <BalanceDisplay
-            isConnected={isConnected}
-            balances={balances}
-            balanceLoading={balanceLoading}
-            balanceError={balanceError}
-          />
+          {isConnected && (
+            <>
+              <div className="hidden lg:block">
+                <BalanceDisplay
+                  isConnected={isConnected}
+                  balances={balances}
+                  balanceLoading={balanceLoading}
+                  balanceError={balanceError}
+                />
+              </div>
+              <ProfileButton />
+            </>
+          )}
         </div>
       </div>
     </div>

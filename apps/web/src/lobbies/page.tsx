@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import LobbyCard from '@/components/main-feed/lobby-card'
 import SidebarNav from '@/components/ui/sidebar-nav'
-import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 
 export default function LobbiesPage() {
   const router = useRouter()
@@ -14,17 +12,10 @@ export default function LobbiesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
-  // Para wallet balance hook
-  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
-
   // Fix hydration issues
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  if (!mounted) {
-    return null
-  }
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -41,6 +32,9 @@ export default function LobbiesPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isProfileDropdownOpen])
 
+  if (!mounted) {
+    return null
+  }
   // Mock lobbies data with different states
   const allLobbies = [
     {
@@ -224,11 +218,6 @@ export default function LobbiesPage() {
       status: 'complete' as const,
     },
   ]
-
-  const handleLobbyJoin = (lobbyId: string, requiredLegs: number) => {
-    // Handle lobby join logic here
-    console.log(`Joining lobby ${lobbyId} with ${requiredLegs} legs`)
-  }
 
   // Filter lobbies based on selected filter and search query
   const filteredLobbies = allLobbies.filter((lobby) => {

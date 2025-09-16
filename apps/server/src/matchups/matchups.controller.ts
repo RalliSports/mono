@@ -5,6 +5,11 @@ import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { MatchupResponseDto } from './dto/matchup-response.dto';
 import { CreateMatchupDto } from './dto/create-matchup.dto';
 import { UpdateMatchupDto } from './dto/update-matchup.dto';
+import { User } from 'src/user/dto/user-response.dto';
+import { UserPayload } from 'src/auth/auth.user.decorator';
+import { CreateLineDto } from 'src/lines/dto/create-line.dto';
+import { CreateLinesDto } from './dto/create-lines.dto';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -34,19 +39,6 @@ export class MatchupsController {
   @Get('/open')
   async getAllOpenMatchups() {
     return this.matchupsService.getAllOpenMatchups();
-  }
-
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Get matchups that should have started' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of matchups that should have started',
-    type: [MatchupResponseDto],
-  })
-  @Get('/should-have-started')
-  async getMatchupsThatShouldHaveStarted() {
-    return this.matchupsService.getMatchupsThatShouldHaveStarted();
   }
 
   @ApiSecurity('x-para-session')
@@ -86,5 +78,39 @@ export class MatchupsController {
   @Post('/create')
   async createMatchup(@Body() dto: CreateMatchupDto) {
     return this.matchupsService.createMatchup(dto);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Create lines for a matchup from Odds API data' })
+  @ApiResponse({
+    status: 201,
+    description: 'Lines created successfully for matchup - ${matchupId}',
+    type: MatchupResponseDto,
+  })
+  @Post('/create-lines')
+  async createMatchupLines(
+    @Body() dto: CreateLinesDto,
+    @UserPayload() user: User,
+  ) {
+    return this.matchupsService.createLinesForMatchup(dto, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary: 'Resolve lines for matchups with ESPN final score data',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lines resolved successfully',
+    type: MatchupResponseDto,
+  })
+  @Post('/resolve-lines')
+  async resolveMatchupLines(
+    @Body() dto: ResolveLineDto,
+    @UserPayload() user: User,
+  ) {
+    return this.matchupsService.resolveLinesForMatchup(dto, user);
   }
 }

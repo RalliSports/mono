@@ -1,34 +1,23 @@
 import Image from 'next/image'
-import { User } from './types'
 
 interface ProfilePictureProps {
-  user: User
   onEditClick: () => void
+  avatar: string
 }
 
-export default function ProfilePicture({ user, onEditClick }: ProfilePictureProps) {
+export default function ProfilePicture({ onEditClick, avatar }: ProfilePictureProps) {
   return (
     <div className="relative group">
       <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
-        {user.avatar && user.avatar !== 'https://static.wikifutbol.com/images/b/b8/AthleteDefault.jpg' ? (
+        {
           <Image
-            src={user.avatar}
+            src={avatar || '/images/pfp-1.svg'}
             alt="Profile Picture"
             width={80}
             height={80}
             className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
           />
-        ) : (
-          <div className="w-full h-full bg-slate-600 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-500">
-            <svg
-              className="w-8 h-8 text-slate-400 transition-colors duration-300 group-hover:text-slate-300"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg>
-          </div>
-        )}
+        }
 
         {/* Subtle overlay on hover */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-center justify-center">

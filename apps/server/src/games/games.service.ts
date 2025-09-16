@@ -5,9 +5,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { bets, game_access, games, lines, participants } from '@repo/db';
+import {
+  bets,
+  friends,
+  game_access,
+  games,
+  lines,
+  participants,
+  users,
+} from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, ne, or, exists } from 'drizzle-orm';
+import { and, count, eq, inArray, ne, or, exists, desc } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -18,6 +26,8 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
+import { NotificationService } from 'src/notification/notification.service';
+import { FriendsService } from 'src/friends/friends.service';
 
 @Injectable()
 export class GamesService {
@@ -26,11 +36,14 @@ export class GamesService {
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
+    private readonly notificationService: NotificationService,
+    private readonly friendsService: FriendsService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
   }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
+    const imageUrl = createGameDto.imageUrl ?? '/images/pfp-2.svg';
 
     const gameData = await this.db.transaction(async (tx) => {
       const [game] = await tx
@@ -40,6 +53,7 @@ export class GamesService {
           creatorId: user.id,
           gameCode,
           numBets: createGameDto.numBets,
+          imageUrl,
           status: GameStatus.WAITING,
         })
         .returning();
@@ -93,6 +107,7 @@ export class GamesService {
       with: {
         gameMode: true,
         creator: true,
+        token: true,
         participants: { with: { user: true, bets: true } },
       },
     });
@@ -102,6 +117,7 @@ export class GamesService {
       where: eq(games.status, GameStatus.WAITING),
       with: {
         gameMode: true,
+        token: true,
         participants: { with: { user: true, bets: true } },
         creator: true,
       },
@@ -138,6 +154,7 @@ export class GamesService {
         ne(games.status, GameStatus.COMPLETED),
       ),
       with: {
+        token: true,
         participants: {
           with: {
             user: true,
@@ -177,6 +194,7 @@ export class GamesService {
         eq(games.status, GameStatus.COMPLETED),
       ),
       with: {
+        token: true,
         participants: {
           with: {
             user: true,
@@ -201,6 +219,7 @@ export class GamesService {
       where: eq(games.id, id),
       with: {
         gameMode: true,
+        token: true,
         participants: {
           with: {
             user: true,
@@ -208,8 +227,17 @@ export class GamesService {
               with: {
                 line: {
                   with: {
-                    athlete: true,
-                    matchup: true,
+                    athlete: {
+                      with: {
+                        team: true,
+                      },
+                    },
+                    matchup: {
+                      with: {
+                        homeTeam: true,
+                        awayTeam: true,
+                      },
+                    },
                     stat: true,
                   },
                 },
@@ -226,7 +254,7 @@ export class GamesService {
     return game;
   }
 
-  async submitBets(user: User, dto: BulkCreateBetsDto) {
+  async submitBets(user: User, gameCode:string, dto: BulkCreateBetsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, dto.gameId),
@@ -240,11 +268,11 @@ export class GamesService {
         );
       }
 
-      // await this.validateGameAccess({
-      //   game,
-      //   userId: user.id,
-      //   providedCode: dto.gameCode,
-      // });
+      await this.validateGameAccess({
+        game,
+        userId: user.id,
+        providedCode: gameCode,
+      });
 
       const existing = await tx.query.participants.findFirst({
         where: and(
@@ -298,7 +326,6 @@ export class GamesService {
           direction: res.predictedDirection as PredictionDirection,
         };
       });
-      console.log('picks', picks);
 
       const submitTxnSig = await this.anchor.submitBetsInstruction(
         dto.gameId,
@@ -311,17 +338,12 @@ export class GamesService {
         );
       }
 
-      const updateedBets = await tx
-        .update(bets)
+      await tx
+        .update(participants)
         .set({
-          createdTxnSignature: submitTxnSig,
+          submitTxnSignature: submitTxnSig,
         })
-        .where(
-          inArray(
-            bets.id,
-            insertedBets.map((b) => b.id),
-          ),
-        )
+        .where(eq(participants.id, insertedParticipant.id ?? ''))
         .returning();
 
       // Transaction will auto-commit if no error is thrown
@@ -329,7 +351,7 @@ export class GamesService {
         success: true,
         message: 'Joined game successfully',
         txnSignature: submitTxnSig,
-        bets: updateedBets,
+        bets: insertedBets,
       };
     });
   }
@@ -371,7 +393,6 @@ export class GamesService {
   }
 
   async resolveGame(id: string) {
-    console.log('resolveGame', id);
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, id),
@@ -398,6 +419,7 @@ export class GamesService {
 
       // Now calculate winners with updated data
       let winners: string[] = [];
+      let winnersIds: string[] = [];
       let betsToWin = 0;
       const allLinesIds = new Set<number>();
       for (const participant of game.participants) {
@@ -439,9 +461,11 @@ export class GamesService {
 
         if (correctPredictions === betsToWin) {
           winners.push(participant.user?.walletAddress!);
+          winnersIds.push(participant.userId!);
         } else if (correctPredictions > betsToWin) {
           betsToWin = correctPredictions;
           winners = [participant.user?.walletAddress!];
+          winnersIds = [participant.userId!];
         }
       }
 
@@ -459,25 +483,131 @@ export class GamesService {
           ),
         );
       }
+      // Calculate winnings
+      const FEE_BASIS_POINTS = 100; // 100 / 10000 = 0.01 = 1%
 
-      console.log('updating game status to completed', id);
-      await tx
-        .update(games)
-        .set({ status: GameStatus.COMPLETED })
-        .where(eq(games.id, id));
+      const totalPlayers = game.participants.length;
+      const numberOfWinners = winnersIds.length;
+      const numberOfLosers = totalPlayers - numberOfWinners;
 
-      const resolveTxnSig = await this.anchor.resolveGameInstruction(
-        id,
-        winners,
-        allWallets,
-        Array.from(allLinesIds),
-      );
+      // Edge case: everyone wins -> return everyone's entry fee, no fees
+      if (numberOfWinners === totalPlayers) {
+        for (const winnerAddr of winnersIds) {
+          await tx
+            .update(participants)
+            .set({ isWinner: true, amountWon: Number(game.depositAmount) })
+            .where(
+              and(eq(participants.userId, winnerAddr), eq(participants.gameId, id)),
+            );
+        }
 
-      if (!resolveTxnSig) {
-        tx.rollback();
-        throw new BadRequestException(
-          'Failed to execute resolve game instruction on-chain',
+        const nonWinners = game.participants.filter(
+          (p) => !winnersIds.includes(p.userId!),
         );
+        for (const participant of nonWinners) {
+          await tx
+            .update(participants)
+            .set({ amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      } else if (numberOfWinners === 0) {
+        // Edge case: no winners -> all money goes to treasury (amountWon stays 0)
+        for (const participant of game.participants) {
+          await tx
+            .update(participants)
+            .set({ isWinner: false, amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      } else {
+        // Normal case
+        const entryFee = Number(game.depositAmount);
+
+        const losersPool = entryFee * numberOfLosers;
+
+        // fee_from_losers = floor((losers_pool * fee_percentage) / 10000)
+        const feeFromLosers = Number(
+          (BigInt(losersPool) * BigInt(FEE_BASIS_POINTS)) / BigInt(10000),
+        );
+
+        const netLosersPool = losersPool - feeFromLosers;
+
+        const winningsPerWinner = Math.floor(netLosersPool / numberOfWinners);
+        const remainderToTreasury = netLosersPool % numberOfWinners;
+        const totalPerWinner = entryFee + winningsPerWinner;
+
+        // Update winners
+        for (const winner of winnersIds) {
+          await tx
+            .update(participants)
+            .set({ isWinner: true, amountWon: totalPerWinner })
+            .where(
+              and(eq(participants.userId, winner), eq(participants.gameId, id)),
+            );
+        }
+
+        // Update non-winners
+        const nonWinners = game.participants.filter(
+          (p) => !winnersIds.includes(p.userId!),
+        );
+        for (const participant of nonWinners) {
+          await tx
+            .update(participants)
+            .set({ isWinner: false, amountWon: 0 })
+            .where(eq(participants.id, participant.id));
+        }
+      }
+
+      try {
+        const resolveTxnSig = await this.anchor.resolveGameInstruction(
+          id,
+          winners,
+          allWallets,
+          Array.from(allLinesIds),
+        );
+
+        if (!resolveTxnSig) {
+          tx.rollback();
+          throw new BadRequestException(
+            'Failed to execute resolve game instruction on-chain',
+          );
+        }
+
+        await tx
+          .update(games)
+          .set({
+            status: GameStatus.COMPLETED,
+            resolvedTxnSignature: resolveTxnSig,
+          })
+          .where(eq(games.id, id));
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back resolve game",
+          error,
+        );
+      }
+
+      // Send notifications AFTER the DB + on-chain update
+      for (const participant of game.participants) {
+        const message = this.notificationService.buildGameResolvedMessage(
+          game.id,
+          game.title ?? '',
+        );
+        try {
+          await this.notificationService.sendNotificationToUser(
+            participant.userId ?? '',
+            message,
+          );
+        } catch (err) {
+          console.warn(
+            `Failed to send notification to user ${participant.userId}:`,
+            err.message || err,
+          );
+        }
       }
 
       return {
@@ -515,7 +645,7 @@ export class GamesService {
 
   async ensureUserOwnsGame(gameId: string, userId: string) {
     const game = await this.db.query.games.findFirst({
-      where: (g, { eq }) => eq(g.id, gameId),
+      where: eq(games.id, gameId),
     });
 
     if (!game) throw new NotFoundException('Game not found');
@@ -557,12 +687,24 @@ export class GamesService {
     userId: string;
     providedCode?: string;
   }) {
-    const { isPrivate, userControlType, gameCode, id: gameId } = game;
+    const {
+      isPrivate,
+      userControlType,
+      gameCode,
+      id: gameId,
+      creatorId,
+    } = game;
 
     if (isPrivate) {
       if (!providedCode || providedCode !== gameCode) {
         throw new ForbiddenException(
           'Private game. Invalid or missing game code.',
+        );
+      }
+
+      if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
+        throw new ForbiddenException(
+          'This is a private game. Follow this user to gain access.',
         );
       }
     }
@@ -592,5 +734,61 @@ export class GamesService {
         throw new ForbiddenException('You are blacklisted from this game');
       }
     }
+  }
+
+
+  async inviteUserToPlay(userId: string, gameId: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, userId),
+      with: { pushSubscriptions: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    const game = await this.db.query.games.findFirst({
+      where: eq(games.id, gameId),
+    });
+
+    if (!game) {
+      throw new NotFoundException('game not found');
+    }
+
+    console.log(game, user, 'invite');
+
+    try {
+      const message = this.notificationService.buildGameInviteMessage(
+        game?.title as string,
+        game.id,
+      );
+
+      await this.notificationService.sendNotificationToUser(user.id, message);
+    } catch (error) {
+      console.log(error, 'unable to send invite');
+    }
+  }
+
+
+   async getPrivateGamesFromFollowing(currentUserId: string) {
+    // 1. Get all the users I am following
+    const following = await this.db.query.friends.findMany({
+      where: eq(friends.followerId, currentUserId),
+    });
+    
+    const followingIds = following.map(f => f.followingId);
+
+    if (followingIds.length === 0) {
+      return [];
+    }
+
+    // 2. Fetch all private games created by those users
+    return this.db.query.games.findMany({
+      where: and(
+        eq(games.isPrivate, true),
+        inArray(games.creatorId, followingIds),
+      ),
+      orderBy: [desc(games.createdAt)],
+    });
   }
 }

@@ -10,11 +10,11 @@ import {
 import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
 import { UserPayload } from 'src/auth/auth.user.decorator';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateWebpushDto } from '../notification/dto/webpush.dto';
+import { SendNotificationDto } from './dto/send-notification.dto';
+import { UpdateUserDto, UpdateUserEmailDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { UserService } from './user.service';
-import { CreateWebpushDto, PushSubscriptionResponse } from './dto/webpush.dto';
-import { SendNotificationDto } from './dto/send-notification.dto';
 
 @Controller('')
 export class UserController {
@@ -41,7 +41,6 @@ export class UserController {
   })
   @Get('user/subscriptions')
   getSubscriptions() {
-    console.log('getSubscriptions');
     return this.userService.getAllSubscriptions();
   }
 
@@ -65,6 +64,19 @@ export class UserController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Update user data' })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated successfully',
+    type: User,
+  })
+  @Patch('update-user-email')
+  updateUserEmail(@Body() dto: UpdateUserEmailDto, @UserPayload() user: User) {
+    return this.userService.updateUserEmail(dto, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @Post('faucet-tokens')
   faucetTokens(@UserPayload() user: User) {
     return this.userService.faucetTokens(user);
@@ -76,7 +88,6 @@ export class UserController {
   })
   @Post('test/webpush')
   testWebPush(@Body() dto: CreateWebpushDto) {
-    console.log(dto, 'test sub');
     return this.userService.testWebpushNotification(dto.payload);
   }
 
@@ -93,6 +104,18 @@ export class UserController {
     @UserPayload() user: User,
   ) {
     return this.userService.subscribeToWebPushNotification(dto.payload, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Unsubscribe from webpush notification' })
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+  })
+  @Post('user/unsubscribe-webpush')
+  unsubscribeFromWebPushNotification(@Body() dto: CreateWebpushDto) {
+    return this.userService.unsubscribeFromWebPushNotification(dto.payload);
   }
 
   @ApiSecurity('x-para-session')

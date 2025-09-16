@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useSessionToken } from '@/hooks/use-session'
 import { useToast } from '@/components/ui/toast'
-import type { Athlete, Game, SelectedPick } from '../components/types'
+import type { Game, SelectedPick } from '../components/types'
 import { MAX_BOOKMARKS } from '../constants/gameDefaults'
+import { AthletesGetActiveWithUnresolvedLinesInstance } from '@repo/server'
 
 export function usePicks() {
   const searchParams = useSearchParams()
@@ -20,7 +21,7 @@ export function usePicks() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [game, setGame] = useState<Game | null>(null)
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
-  const [athletes, setAthletes] = useState<Athlete[]>([])
+  const [athletes, setAthletes] = useState<AthletesGetActiveWithUnresolvedLinesInstance[]>([])
 
   // Get game parameters from URL
   const gameId = searchParams.get('id') || undefined
@@ -40,10 +41,8 @@ export function usePicks() {
             'x-para-session': session || '',
           },
         })
-        console.log('athletes response', response)
         if (response.ok) {
           const data = await response.json()
-          console.log('athletes data', data)
           setAthletes(data)
         } else {
           const errorData = await response.json()
@@ -67,10 +66,8 @@ export function usePicks() {
             'x-para-session': session || '',
           },
         })
-        console.log('game response', response)
         if (response.ok) {
           const data = await response.json()
-          console.log('game data', data)
           setGame(data)
         } else {
           const errorData = await response.json()
@@ -113,7 +110,7 @@ export function usePicks() {
       lineId: line.id,
       athleteId: athlete.id,
       predictedDirection: betType,
-      athleteAvatar: athlete.picture,
+      picture: athlete.picture || '',
     }
 
     setSelectedPicks([...filteredPicks, newPick])
@@ -143,8 +140,7 @@ export function usePicks() {
       },
       body: JSON.stringify(apiData),
     })
-    const result = await response.json()
-    console.log(result, 'result')
+
     if (response.ok) {
       addToast('Bets submitted successfully!', 'success')
     } else {
@@ -152,7 +148,7 @@ export function usePicks() {
       addToast(errorData.error || 'Failed to submit bets', 'error')
     }
     setTimeout(() => {
-      window.location.href = `/view-game?id=${gameId}`
+      window.location.href = `/game?id=${gameId}`
     }, 1000)
     setIsSubmittingPayment(false)
   }

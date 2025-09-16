@@ -1,17 +1,16 @@
 import Image from 'next/image'
-import { Line } from '../types'
-import { sports } from '../../constants/sports'
+import { LineFindAllInstance } from '@repo/server'
 import { useState } from 'react'
 
 interface LineCardProps {
-  line: Line
+  line: LineFindAllInstance & { value: number }
   resolvingLine: string | null
   setResolvingLine: (id: string | null) => void
   resolutionData: {
-    actualValue: string
+    actualValue: number
     resolutionReason: string
   }
-  setResolutionData: (data: any) => void
+  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
   handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
   addToast: (message: string, type: 'success' | 'error') => void
 }
@@ -34,37 +33,36 @@ export default function LineCard({
         {/* Line Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <span className="text-lg">{sports.find((s) => s.name === line.sport)?.icon}</span>
-            <h4 className="text-white font-semibold text-lg">{line.playerName}</h4>
+            <h4 className="text-white font-semibold text-lg">{line.athlete?.name}</h4>
             <span
               className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                line.createdAt > timeNow.toISOString()
+                line.createdAt && line.createdAt > timeNow
                   ? 'bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30'
                   : !!line.actualValue
                     ? 'bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30'
                     : 'bg-red-500/20 text-red-400 border border-red-400/30'
               }`}
             >
-              {line.createdAt > timeNow.toISOString() ? 'Pending' : !!line.actualValue ? 'Resolved' : 'Cancelled'}
+              {line.createdAt && line.createdAt > timeNow ? 'Pending' : !!line.actualValue ? 'Resolved' : 'Cancelled'}
             </span>
           </div>
           <div className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
                 <Image
-                  src={line.athlete.picture}
-                  alt={line.athlete.name}
+                  src={line.athlete?.picture || '/images/pfp-2.svg'}
+                  alt={line.athlete?.name || ''}
                   width={48}
                   height={48}
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
               <div className="flex-1">
-                <h4 className="text-white font-semibold">{line.athlete.name}</h4>
+                <h4 className="text-white font-semibold">{line.athlete?.name}</h4>
                 <div className="flex items-center space-x-2 text-sm">
-                  <span className="text-slate-300">{line.athlete.team}</span>
-                  <span className="text-slate-400">#{line.athlete.jerseyNumber}</span>
-                  <span className="text-slate-400">{line.athlete.position}</span>
+                  <span className="text-slate-300">{line.athlete?.team?.name}</span>
+                  <span className="text-slate-400">#{line.athlete?.jerseyNumber}</span>
+                  <span className="text-slate-400">{line.athlete?.position}</span>
                 </div>
               </div>
             </div>
@@ -79,12 +77,12 @@ export default function LineCard({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-800/30 rounded-lg">
           <div>
             <div className="text-sm text-slate-400">Stat Type</div>
-            <div className="text-white font-semibold">{line.stat.name}</div>
+            <div className="text-white font-semibold">{line.stat?.displayName}</div>
           </div>
           <div>
             <div className="text-sm text-slate-400">Game</div>
             <div className="text-white font-semibold">
-              {line.matchup.homeTeam.name} vs {line.matchup.awayTeam.name}
+              {line.matchup?.homeTeam?.name} vs {line.matchup?.awayTeam?.name}
             </div>
           </div>
         </div>
@@ -103,12 +101,12 @@ export default function LineCard({
                 <div className="text-sm text-slate-300">Result</div>
                 <div
                   className={`font-bold ${
-                    line.actualValue! > line.predictedValue ? 'text-[#00CED1]' : 'text-[#FFAB91]'
+                    line.actualValue! > line.predictedValue! ? 'text-[#00CED1]' : 'text-[#FFAB91]'
                   }`}
                 >
-                  {line.actualValue! > line.predictedValue
+                  {line.actualValue! > line.predictedValue!
                     ? 'OVER'
-                    : line.actualValue! < line.predictedValue
+                    : line.actualValue! < line.predictedValue!
                       ? 'UNDER'
                       : 'PUSH'}
                 </div>
@@ -123,7 +121,7 @@ export default function LineCard({
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">Actual {line.stat.name} Value</label>
+                    <label className="block text-white font-semibold mb-2">Actual {line.stat?.displayName} Value</label>
                     <input
                       type="number"
                       step="0.1"
@@ -131,7 +129,7 @@ export default function LineCard({
                       onChange={(e) =>
                         setResolutionData({
                           ...resolutionData,
-                          actualValue: e.target.value,
+                          actualValue: parseFloat(e.target.value),
                         })
                       }
                       placeholder={`e.g., ${line.predictedValue}`}
@@ -159,7 +157,7 @@ export default function LineCard({
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={async () => {
-                      const actualValue = parseFloat(resolutionData.actualValue)
+                      const actualValue = resolutionData.actualValue
                       if (isNaN(actualValue)) {
                         addToast('Please enter a valid actual value', 'error')
                         return
@@ -168,12 +166,12 @@ export default function LineCard({
                       await handleResolveLine(line.id, actualValue)
                       setResolvingLine(null)
                       setResolutionData({
-                        actualValue: '',
+                        actualValue: 0,
                         resolutionReason: '',
                       })
                       setLoading(false)
                     }}
-                    disabled={!resolutionData.actualValue}
+                    disabled={resolutionData.actualValue < 0}
                     className="px-6 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Resolving...' : 'Auto Resolve'}
@@ -183,7 +181,7 @@ export default function LineCard({
                       handleResolveLine(line.id, 0)
                       setResolvingLine(null)
                       setResolutionData({
-                        actualValue: '',
+                        actualValue: 0,
                         resolutionReason: '',
                       })
                     }}
@@ -195,7 +193,7 @@ export default function LineCard({
                     onClick={() => {
                       setResolvingLine(null)
                       setResolutionData({
-                        actualValue: '',
+                        actualValue: 0,
                         resolutionReason: '',
                       })
                     }}

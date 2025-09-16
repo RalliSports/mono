@@ -1,4 +1,4 @@
-import { PushSubscriptionResponse } from 'src/user/dto/webpush.dto';
+import { PushSubscriptionResponse } from 'src/notification/dto/webpush.dto';
 import * as webpush from 'web-push';
 
 type Payload = {
@@ -23,8 +23,6 @@ export class WebPushService {
     subscription: PushSubscriptionResponse,
     payload: Payload,
   ) {
-    console.log(payload, subscription, 'payload');
-
     return await webpush.sendNotification(
       {
         endpoint: subscription.endpoint,

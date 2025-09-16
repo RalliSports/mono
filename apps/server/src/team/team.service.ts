@@ -36,6 +36,12 @@ export class TeamService {
     return team;
   }
 
+  async findByEspnId(espnTeamId: string) {
+    return await this.db.query.teams.findFirst({
+      where: eq(teams.espnTeamId, espnTeamId),
+    });
+  }
+
   async getAthletesForTeam(teamId: string) {
     return await this.db
       .select()

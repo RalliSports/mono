@@ -19,7 +19,6 @@ export const fetchGames = async () => {
   }
 
   const games = await response.json()
-  console.log('games', games)
 
   return transformGamesToLobbies(games)
 }
@@ -40,7 +39,8 @@ type Game = {
   participants?: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants?: number
   depositAmount?: number
-  maxBet?: number
+  numBets?: number
+  imageUrl?: string
   gameMode?: { label: string }
   creator?: { walletAddress: string; username: string; avatar: string }
   status: 'waiting' | 'active' | 'complete' | 'pending'
@@ -51,6 +51,7 @@ export type Lobby = {
   title: string
   sport: string
   sportIcon: string
+  imageUrl: string
   participants: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
   maxParticipants: number
   buyIn: number
@@ -90,7 +91,6 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
     const participants = game.participants || []
     const maxParticipants = game.maxParticipants || 1
     const buyIn = game.depositAmount || 0
-    const maxBet = game.maxBet ?? buyIn // fallback
     const sport = getSport(game.gameMode?.label || '')
     const username = game.creator?.username || '0x??'
 
@@ -114,9 +114,10 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
       participants,
       maxParticipants,
       buyIn,
-      prizePool: maxParticipants * maxBet,
-      legs: maxBet || 1, // updated here
+      prizePool: maxParticipants * (game.depositAmount || 0),
+      legs: game.numBets || 1, // updated here
       timeLeft: '1h 30m', // static placeholder
+      imageUrl: game.imageUrl || '',
       host: {
         username,
         avatar: game.creator?.avatar || '',

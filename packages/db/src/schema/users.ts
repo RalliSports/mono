@@ -12,6 +12,7 @@ import { participants } from "./participants";
 import { roles } from "./roles";
 import { bets } from "./bets";
 import { pushSubscriptions } from "./push_subscriptions";
+import { friends } from "./friends";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -33,4 +34,6 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   role: one(roles),
   bets: many(bets),
   pushSubscriptions: many(pushSubscriptions),
+  followers: many(friends, { relationName: "followers" }), // people who follow this user
+  following: many(friends, { relationName: "following" }), // people this user follows
 }));

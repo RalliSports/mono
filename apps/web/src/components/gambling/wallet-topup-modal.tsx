@@ -53,15 +53,11 @@ export default function WalletTopUpModalRefactored() {
         <div className="text-center">
           <div className="text-slate-400 text-sm mb-1">Current Balance</div>
           <div className="text-2xl font-bold text-white">
-            {balanceLoading ? 'Loading...' : balanceError ? '$0.00' : `$${formatBalance(balances?.totalUsd || 0)}`}
+            {balanceLoading ? 'Loading...' : balanceError ? '$0.00' : `$${formatBalance(balances?.ralli || 0)}`}
           </div>
-          {/* Additional balance breakdown available from provider */}
-          <div className="text-xs text-slate-400 mt-2 space-x-2">
-            <span>SOL: {balances?.sol.toFixed(4) || '0.0000'}</span>
-            <span>•</span>
-            <span>USDC: ${balances?.usdc.toFixed(2) || '0.00'}</span>
-            <span>•</span>
-            <span>RALLI: {balances?.ralli.toFixed(0) || '0'}</span>
+          {/* RALLI balance */}
+          <div className="text-xs text-slate-400 mt-2">
+            <span>RALLI: {balances?.ralli?.toFixed(0) || '0'}</span>
           </div>
         </div>
       </div>

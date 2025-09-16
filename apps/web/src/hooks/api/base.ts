@@ -1,4 +1,6 @@
+import { useAccount } from '@getpara/react-sdk'
 import { useSessionToken } from '../use-session'
+import { useReferralCode } from '../useReferralCode'
 
 export class ApiClient {
   private baseURL: string = ''
@@ -85,12 +87,24 @@ export const apiClient = new ApiClient()
 
 export function useApiWithAuth() {
   const { session } = useSessionToken()
-
+  const { referralCode } = useReferralCode()
+  const account = useAccount()
   const requestWithAuth = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     const authHeaders: HeadersInit = {}
 
     if (session) {
       authHeaders['x-para-session'] = session
+    }
+
+    // Include referral code if available
+    if (referralCode) {
+      authHeaders['x-referral-code'] = referralCode
+    }
+
+    console.log('account.embedded.email', account.embedded.email)
+
+    if (account.embedded.email) {
+      authHeaders['x-email'] = account.embedded.email
     }
 
     return apiClient.request<T>(endpoint, {

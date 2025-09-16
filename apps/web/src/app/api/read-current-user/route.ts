@@ -11,6 +11,11 @@ export async function GET(request: NextRequest) {
 
     // Extract the JWT token from the request headers
     const tokenString = request.headers.get('x-para-session')
+    const referralCode = request.headers.get('x-referral-code')
+    const email = request.headers.get('x-email')
+
+    console.log('API Route - Session:', tokenString?.substring(0, 10) + '...')
+    console.log('API Route - Referral Code:', referralCode)
 
     // Check if the JWT token is missing
     if (!tokenString) {
@@ -29,6 +34,8 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         ...(tokenString && { 'x-para-session': tokenString }),
+        ...(referralCode && { 'x-referral-code': referralCode }),
+        ...(email && { 'x-email': email }),
       },
     })
 

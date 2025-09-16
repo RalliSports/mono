@@ -8,7 +8,7 @@ export default function BalanceDisplay({ isConnected, balances, isLoading, error
       onClick={() => isConnected && refetch()}
       title={
         isConnected
-          ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nRALLI: $${formatBalance(balances.ralli)}`
+          ? `Click to refresh balance\nRALLI: $${formatBalance(balances.ralli)}`
           : 'Connect wallet to view balance'
       }
     >
@@ -27,13 +27,7 @@ export default function BalanceDisplay({ isConnected, balances, isLoading, error
           )}
         </div>
         <span className="font-bold text-lg bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
-          {isConnected
-            ? isLoading
-              ? 'Loading...'
-              : error
-                ? '$0.00'
-                : `$${formatBalance(balances.totalUsd)}`
-            : '$0.00'}
+          {isConnected ? (isLoading ? 'Loading...' : error ? '$0.00' : `$${formatBalance(balances.ralli)}`) : '$0.00'}
         </span>
       </div>
     </div>

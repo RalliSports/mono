@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 
 interface LobbyCardProps {
   id: string
@@ -10,6 +11,7 @@ interface LobbyCardProps {
   maxParticipants: number
   buyIn: number
   prizePool: number
+  imageUrl: string
   legs: number
   timeLeft: string
   host: {
@@ -17,7 +19,6 @@ interface LobbyCardProps {
     avatar: string
   }
   isUrgent?: boolean
-  shouldOpenViewGame?: boolean
 }
 
 export default function LobbyCard({
@@ -27,15 +28,24 @@ export default function LobbyCard({
   maxParticipants,
   buyIn,
   prizePool,
+  imageUrl,
   legs,
   timeLeft,
   host,
   isUrgent = false,
-  shouldOpenViewGame = false,
 }: LobbyCardProps) {
   const progressPercentage = (participants.length / maxParticipants) * 100
-  const nextPageOnClick = shouldOpenViewGame ? 'view-game' : 'join-game'
+  const nextPageOnClick = 'game'
 
+  const [imageSrc, setImageSrc] = useState(imageUrl || '/images/pfp-2.svg')
+  const [hasErrored, setHasErrored] = useState(false)
+
+  const handleError = () => {
+    if (!hasErrored) {
+      setHasErrored(true)
+      setImageSrc('/images/pfp-1.svg') // Use local fallback
+    }
+  }
   return (
     <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-3xl p-8 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 group hover:transform hover:scale-[1.01] shadow-xl relative min-h-[280px]">
       {/* Background glow effect */}
@@ -45,13 +55,15 @@ export default function LobbyCard({
         {/* Host Info Header */}
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-            {host.avatar ? (
-              <img
-                src={host.avatar}
+            {imageSrc ? (
+              <Image
+                src={imageSrc || '/images/pfp-1.svg'}
                 alt={host.username}
-                className="w-12 h-12 object-cover rounded-full"
+                // className="w-12 h-12 object-cover rounded-full"
+                width={48}
+                height={48}
                 onError={(e) => {
-                  e.currentTarget.onerror = null
+                  e.currentTarget.onerror = handleError
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(host.username)}&background=0D8ABC&color=fff&size=128`
                 }}
               />
@@ -60,15 +72,11 @@ export default function LobbyCard({
             )}
           </div>
           <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-1">
-              {host.avatar && host.avatar !== '' ? (
-                <Image src={host.avatar} alt={host.username} width={24} height={24} />
-              ) : null}
-              <span className="text-slate-400 text-sm">created a lobby</span>
+            <div className="flex items-center space-x-2 mb-1 text-white">
+              {host.username}
+              <span className="text-slate-400 text-sm ml-1">created a lobby</span>
             </div>
-            <p className="text-slate-300 text-xs">
-              <span className="text-[#00CED1]">{timeLeft} left</span>
-            </p>
+            <p className="text-slate-300 text-xs ">{/* <span className="text-[#00CED1]">{timeLeft} left</span> */}</p>
           </div>
         </div>
 

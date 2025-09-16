@@ -4,9 +4,10 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  // IsOptional,
+  IsOptional,
   IsString,
   IsUUID,
+  IsUrl,
 } from 'class-validator';
 
 export class CreateGameDto {
@@ -19,11 +20,6 @@ export class CreateGameDto {
   @IsNotEmpty()
   @IsNumber()
   depositAmount: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  currency: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -43,7 +39,7 @@ export class CreateGameDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  depositToken: string;
+  tokenId: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -62,4 +58,12 @@ export class CreateGameDto {
   @IsNotEmpty()
   @IsUUID()
   gameModeId?: string;
+
+  @ApiProperty({
+    description: 'User avatar URL',
+    example: 'https://example.com/avatar.png',
+  })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

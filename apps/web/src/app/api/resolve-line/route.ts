@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// TypeScript interface for the request data
-interface ResolveLineRequest {
-  lineId: string
-  actualValue: number
-}
+// Validation function with detailed error reporting
+function validateResolveLineData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateResolveLineData(data: any): data is ResolveLineRequest {
-  return typeof data.lineId === 'string' && typeof data.actualValue === 'number'
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.lineId !== 'string') errors.push('lineId must be a string')
+  if (typeof obj.actualValue !== 'number') errors.push('actualValue must be a number')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -24,14 +28,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateResolveLineData(body)) {
+    const validation = validateResolveLineData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            lineId: 'string',
-            actualValue: 'number',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

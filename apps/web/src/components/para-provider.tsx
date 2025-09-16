@@ -3,7 +3,7 @@
 import React from 'react' // Explicitly import React for ReactNode type
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ParaProvider } from '@getpara/react-sdk'
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
+// import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import '@getpara/react-sdk/styles.css'
 import { ENVIRONMENT, API_KEY } from '@/constants-client'
 
@@ -25,20 +25,20 @@ export function Providers({
           appName: 'Ralli',
         }}
         paraModalConfig={{
-          logo: '/images/RALLI.png',
-          oAuthMethods: ['GOOGLE', 'TWITTER', 'DISCORD'],
+          logo: '/images/logo-cream-bg.svg',
+          oAuthMethods: ['GOOGLE'],
           authLayout: ['AUTH:FULL', 'EXTERNAL:CONDENSED'],
         }}
-        externalWalletConfig={{
-          appUrl: 'http://localhost:3000/', // Ensure this matches your app's real URL
-          solanaConnector: {
-            config: {
-              endpoint: 'https://api.devnet.solana.com', // Ensure this matches your desired cluster
-              chain: WalletAdapterNetwork.Devnet, // Devnet | Mainnet | Testnet
-            },
-          },
-          wallets: ['BACKPACK', 'PHANTOM', 'GLOW', 'SOLFLARE', 'METAMASK']
-        }}
+        // externalWalletConfig={{
+        //   appUrl: 'http://localhost:3000/', // Ensure this matches your app's real URL
+        //   solanaConnector: {
+        //     config: {
+        //       endpoint: 'https://api.devnet.solana.com', // Ensure this matches your desired cluster
+        //       chain: WalletAdapterNetwork.Devnet, // Devnet | Mainnet | Testnet
+        //     },
+        //   },
+        //   wallets: ['BACKPACK', 'PHANTOM', 'GLOW', 'SOLFLARE', 'METAMASK']
+        // }}
       >
         {children}
       </ParaProvider>

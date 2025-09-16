@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import Image from 'next/image'
-import type { Athlete, SelectedPick } from './types'
+import type { SelectedPick } from './types'
+import { AthletesGetActiveWithUnresolvedLinesInstance } from '@repo/server'
 
 interface AthletePickCardProps {
-  athlete: Athlete
+  athlete: AthletesGetActiveWithUnresolvedLinesInstance
   onPickSelection: (athleteId: string, statIndex: number, betType: 'over' | 'under') => void
   selectedPick?: SelectedPick
   isSelectionDisabled: boolean
@@ -18,7 +19,7 @@ export default function AthletePickCard({
   const [currentStatIndex, setCurrentStatIndex] = useState(0)
 
   const nextStat = () => {
-    setCurrentStatIndex((prev) => (prev + 1) % athlete.lines.length)
+    setCurrentStatIndex((prev) => (prev + 1) % athlete.lines?.length || 0)
   }
 
   const prevStat = () => {
@@ -45,27 +46,28 @@ export default function AthletePickCard({
             {/* Player Avatar */}
             <div className="relative flex-shrink-0">
               <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
-                {athlete.picture && athlete.picture !== '' ? (
+                {
                   <Image
-                    src={athlete.picture}
-                    alt={athlete.name}
+                    src={athlete.picture || '/images/pfp-2.svg'}
+                    alt={athlete.name || ''}
                     className="w-12 h-12 object-cover rounded-lg"
                     width={48}
                     height={48}
                   />
-                ) : null}
+                }
               </div>
               <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-slate-800 bg-emerald-500"></div>
             </div>
 
             {/* Player Details */}
             <div className="min-w-0 flex-1">
-              <h3 className="text-white font-bold text-lg mb-1 truncate">{athlete.name}</h3>
+              <h3 className="text-white font-bold text-lg truncate">{athlete.name}</h3>
+              <div className="text-white font-bold truncate text-sm">{`${athlete.position} - (${athlete.jerseyNumber})`}</div>
               <div className="flex items-center space-x-2">
-                <span className="text-slate-300 font-semibold text-sm">{athlete.team}</span>
+                <span className="text-slate-300 font-semibold text-sm">{athlete.team?.name || ''}</span>
                 <div className="text-slate-400 font-medium text-sm">
-                  {athlete.lines[currentStatIndex].matchup.homeTeam.abbreviation} vs{' '}
-                  {athlete.lines[currentStatIndex].matchup.awayTeam.abbreviation}
+                  {athlete.lines[currentStatIndex].matchup?.homeTeam?.abbreviation} vs{' '}
+                  {athlete.lines[currentStatIndex].matchup?.awayTeam?.abbreviation}
                 </div>
               </div>
             </div>
@@ -80,7 +82,7 @@ export default function AthletePickCard({
             <div className="flex flex-col mb-3">
               <div
                 className="text-slate-200 font-bold text-base mb-3 tracking-wide text-center px-1 max-h-12 overflow-hidden flex items-center justify-center"
-                title={currentStat.name}
+                title={currentStat?.name || ''}
                 style={{
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
@@ -88,7 +90,7 @@ export default function AthletePickCard({
                   lineHeight: '1.2rem',
                 }}
               >
-                {currentStat.name}
+                {currentStat?.displayName || ''}
               </div>
 
               <div className="flex items-center justify-between">

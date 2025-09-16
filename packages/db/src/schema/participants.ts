@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, timestamp } from "drizzle-orm/pg-core";
+import { boolean, numeric, pgTable, timestamp } from "drizzle-orm/pg-core";
 import { games } from "./games";
 import { bets } from "./bets";
 
@@ -13,6 +13,8 @@ export const participants = pgTable("participants", {
   gameId: uuid("game_id").references(() => games.id),
   joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
   isWinner: boolean("is_winner"),
+  amountWon: numeric("amount_won", { mode: "number" }),
+  submitTxnSignature: text("created_txn_signature"),
 });
 
 export const participantsRelations = relations(
@@ -28,5 +30,5 @@ export const participantsRelations = relations(
       references: [users.id],
     }),
     bets: many(bets),
-  })
+  }),
 );

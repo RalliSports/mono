@@ -15,9 +15,10 @@ import { useMainPage } from './hooks/useMainPage'
 
 export default function MainFeedPage() {
   const { session } = useSessionToken()
+  // console.log(session)
 
   // Custom hooks for separation of concerns
-  const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection()
+  const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection(false)
 
   const { user } = useUserData()
 
@@ -60,8 +61,8 @@ export default function MainFeedPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts */}
-        <LobbiesSection lobbiesData={lobbiesData} user={user ?? null} isMobile={false} />
-        <LobbiesSection lobbiesData={lobbiesData} user={user ?? null} isMobile={true} />
+        <LobbiesSection lobbiesData={lobbiesData} isMobile={false} />
+        <LobbiesSection lobbiesData={lobbiesData} isMobile={true} />
       </div>
 
       {/* Bottom Selection Bar (when in selection mode) */}
@@ -77,7 +78,6 @@ export default function MainFeedPage() {
           onCancel={() => setIsInSelectionMode(false)}
           onContinue={() => {
             // Handle continue logic here
-            console.log('Selected athletes:', selectedAthletes)
             setIsInSelectionMode(false)
           }}
         />

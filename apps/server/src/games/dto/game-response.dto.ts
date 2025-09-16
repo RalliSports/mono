@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/user/dto/user-response.dto';
 import { BetResponseDto } from './bet-response.dto';
+import { Token } from './create-token.dto';
 
 export class GameMode {
   @ApiProperty()
@@ -25,6 +26,9 @@ export class Participant {
 
   @ApiProperty()
   isWinner: boolean;
+
+  @ApiProperty()
+  amountWon: number;
 
   @ApiProperty()
   joinedAt: Date;
@@ -68,7 +72,10 @@ export class GameResponseDto {
   matchupGroup: string;
 
   @ApiProperty()
-  depositToken: string;
+  tokenId: string;
+
+  @ApiProperty()
+  token: Token;
 
   @ApiProperty()
   createdTxnSignature: string;

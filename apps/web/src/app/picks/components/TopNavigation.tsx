@@ -13,7 +13,7 @@ export default function TopNavigation({ gameId, selectedCount, legsRequired }: T
         {/* Left: Back Button + Title */}
         <div className="flex items-center space-x-3">
           <Link
-            href={`/join-game?id=${gameId}`}
+            href={`/game?id=${gameId}`}
             className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

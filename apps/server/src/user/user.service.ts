@@ -7,9 +7,9 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { WebPushService } from 'src/utils/services/webPush';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserEmailDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
-import { PushSubscriptionResponse } from './dto/webpush.dto';
+import { PushSubscriptionResponse } from '../notification/dto/webpush.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
 
 @Injectable()
@@ -56,6 +56,22 @@ export class UserService {
 
     return updatedUser;
   }
+
+  async updateUserEmail(dto: UpdateUserEmailDto, user: User) {
+    // Use the provided avatar URL if available, otherwise keep existing logic for random athlete
+    let email = dto.email;
+
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
+        emailAddress: email,
+      })
+      .where(eq(users.id, user.id))
+      .returning();
+
+    return updatedUser;
+  }
+
   async faucetTokens(user: User) {
     const userPK = new PublicKey(user.walletAddress);
 
@@ -65,9 +81,6 @@ export class UserService {
 
     // If balance is less than 0.01 SOL (10,000,000 lamports), faucet SOL first
     if (balance < 100_000 && !user.hasBeenFaucetedSol) {
-      console.log(
-        `User ${user.walletAddress} has low SOL balance (${balance} lamports), fauceting SOL first`,
-      );
       await this.anchor.faucetSol(userPK);
       await this.db
         .update(users)
@@ -101,10 +114,28 @@ export class UserService {
       .values({
         subscription,
         userId: user.id,
+        isActive: true,
       })
       .returning();
 
     return subscribed;
+  }
+
+  async unsubscribeFromWebPushNotification(dto: PushSubscriptionResponse) {
+    // Find subscription by comparing the keys in the JSONB subscription field
+    const subscription = await this.db.query.pushSubscriptions.findFirst({
+      where: sql`${pushSubscriptions.subscription}->>'endpoint' = ${dto.endpoint} AND ${pushSubscriptions.subscription}->'keys'->>'p256dh' = ${dto.keys.p256dh} AND ${pushSubscriptions.subscription}->'keys'->>'auth' = ${dto.keys.auth}`,
+    });
+
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+
+    await this.db
+      .delete(pushSubscriptions)
+      .where(
+        sql`${pushSubscriptions.subscription}->>'endpoint' = ${dto.endpoint} AND ${pushSubscriptions.subscription}->'keys'->>'p256dh' = ${dto.keys.p256dh} AND ${pushSubscriptions.subscription}->'keys'->>'auth' = ${dto.keys.auth}`,
+      );
   }
 
   async testWebpushNotification(subscription: PushSubscriptionResponse) {
@@ -120,14 +151,12 @@ export class UserService {
     try {
       await this.webPush.sendNotification(subscription, payload);
     } catch (error) {
-      console.log(error, 'error sending web push notification');
+      console.error(error, 'error sending web push notification');
     }
   }
 
   async getAllSubscriptions() {
-    console.log('getAllSubscriptions');
     const subscriptions = await this.db.query.pushSubscriptions.findMany();
-    console.log(subscriptions, 'subscriptions');
     return subscriptions;
 
     // Get user data for each subscription

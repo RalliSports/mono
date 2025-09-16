@@ -14,20 +14,10 @@ import PastParlaysSection from './PastParlaysSection'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
-  const { activeTab, setActiveTab, mounted, editingUsername, setEditingUsername } = useProfileTabs()
+  const { activeTab, setActiveTab, mounted } = useProfileTabs()
 
-  const {
-    username,
-    setUsername,
-    user,
-    setUser,
-    setAvatar,
-    firstName,
-    lastName,
-    myOpenGames,
-    myCompletedGames,
-    handleUpdateUser,
-  } = useProfile(session || null)
+  const { user, myOpenGames, myCompletedGames, username, firstName, lastName, setUser, setAvatar, setForceRefresh } =
+    useProfile(session || null)
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
     session || null,
@@ -57,15 +47,10 @@ export default function ProfileContent() {
       />
 
       <ProfileHeader
-        user={user}
-        username={username}
-        setUsername={setUsername}
-        editingUsername={editingUsername}
-        setEditingUsername={setEditingUsername}
-        onUpdateUser={handleUpdateUser}
-        onEditPictureClick={() => setIsUploadModalOpen(true)}
         balances={balances}
         formatBalance={formatBalance}
+        onEditPictureClick={() => setIsUploadModalOpen(true)}
+        avatar={user.avatar || ''}
       />
 
       {/* Tab Content */}
@@ -86,9 +71,15 @@ export default function ProfileContent() {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         isUploading={isUploading}
-        user={user}
         onFileSelect={handleFileSelect}
         session={session || null}
+        onUploadComplete={() => {
+          setTimeout(() => {
+            setForceRefresh(true)
+          }, 1000)
+        }}
+        avatar={user.avatar || ''}
+        setAvatar={setAvatar}
       />
     </div>
   )

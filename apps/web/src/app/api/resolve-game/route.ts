@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// TypeScript interface for the request data
-interface ResolveGameRequest {
-  gameId: string
-}
+// Validation function with detailed error reporting
+function validateResolveGameData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateResolveGameData(data: ResolveGameRequest): data is ResolveGameRequest {
-  return typeof data.gameId === 'string'
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.gameId !== 'string') errors.push('gameId must be a string')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -23,13 +27,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateResolveGameData(body)) {
+    const validation = validateResolveGameData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            gameId: 'string',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

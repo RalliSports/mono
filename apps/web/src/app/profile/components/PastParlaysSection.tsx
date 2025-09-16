@@ -34,7 +34,7 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
             <div
               key={game.id}
               onClick={() => {
-                router.push(`/view-game?id=${game.id}`)
+                router.push(`/game?id=${game.id}`)
               }}
               className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-xl border border-slate-700/50 p-4 hover:border-slate-600/60 transition-all duration-300"
             >
@@ -72,7 +72,7 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
                     ?.bets.map((bet, index) => (
                       <Image
                         key={bet.id}
-                        src={bet.line.athlete.picture || ''}
+                        src={bet.line.athlete.picture || '/images/pfp-2.svg'}
                         alt={bet.line.athlete.name || ''}
                         width={32}
                         height={32}

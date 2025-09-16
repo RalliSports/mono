@@ -1,9 +1,9 @@
 import LineCard from './LineCard'
 import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { Line } from '../types'
+import { LineFindAllInstance } from '@repo/server'
 
 interface ResolveLinesTabProps {
-  filteredLines: Line[]
+  filteredLines: LineFindAllInstance[]
   searchTerm: string
   setSearchTerm: (term: string) => void
   selectedSport: string
@@ -11,10 +11,10 @@ interface ResolveLinesTabProps {
   resolvingLine: string | null
   setResolvingLine: (id: string | null) => void
   resolutionData: {
-    actualValue: string
+    actualValue: number
     resolutionReason: string
   }
-  setResolutionData: (data: any) => void
+  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
   handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
   addToast: (message: string, type: 'success' | 'error') => void
 }
@@ -68,7 +68,7 @@ export default function ResolveLinesTab({
         {filteredLines.map((line) => (
           <LineCard
             key={line.id}
-            line={line}
+            line={line as LineFindAllInstance & { value: number }}
             resolvingLine={resolvingLine}
             setResolvingLine={setResolvingLine}
             resolutionData={resolutionData}

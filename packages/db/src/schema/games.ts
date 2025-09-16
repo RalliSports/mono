@@ -14,6 +14,7 @@ import { users } from "./users";
 
 import { uuid } from "drizzle-orm/pg-core";
 import { text } from "drizzle-orm/pg-core";
+import { tokens } from "./tokens";
 
 export const gameTypeEnum = pgEnum("type", ["1v1", "limited", "unlimited"]);
 export const userControlTypeEnum = pgEnum("user_control_type", [
@@ -27,20 +28,20 @@ export const games = pgTable("games", {
   title: varchar("title"),
   creatorId: uuid("creator_id"),
   depositAmount: numeric("deposit_amount", { mode: "number" }),
-  currency: varchar("currency"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   status: varchar("status"),
   maxParticipants: integer("max_participants"),
   numBets: integer("num_bets"),
   gameCode: varchar("game_code"),
   matchupGroup: varchar("matchup_group"),
-  depositToken: varchar("deposit_token"),
+  tokenId: uuid("token_id"),
   isPrivate: boolean("isPrivate"),
   type: gameTypeEnum("type"),
   userControlType: userControlTypeEnum("user_control_type"),
   gameModeId: uuid("game_mode_id"),
   createdTxnSignature: text("created_txn_signature"),
   resolvedTxnSignature: text("resolved_txn_signature"),
+  imageUrl: text("image_url"),
 });
 
 export const gamesRelations = relations(games, ({ many, one }) => ({
@@ -48,6 +49,10 @@ export const gamesRelations = relations(games, ({ many, one }) => ({
   gameMode: one(game_mode, {
     fields: [games.gameModeId],
     references: [game_mode.id],
+  }),
+  token: one(tokens, {
+    fields: [games.tokenId],
+    references: [tokens.id],
   }),
   gameAccess: one(game_mode),
   creator: one(users, {

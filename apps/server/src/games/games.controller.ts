@@ -41,7 +41,6 @@ export class GamesController {
   })
   @Post('/create-game')
   create(@Body() createGameDto: CreateGameDto, @UserPayload() user: User) {
-    console.log('user', user);
     return this.gamesService.create(createGameDto, user);
   }
 
@@ -53,7 +52,7 @@ export class GamesController {
   })
   @Get('/games')
   findAll() {
-    return this.gamesService.findAll();
+    return this.gamesService.findAllOpen();
   }
 
   @ApiOperation({ summary: 'Get all games' })
@@ -65,7 +64,6 @@ export class GamesController {
   })
   @Get('/games/my-open-games')
   findMyOpenGames(@UserPayload() user: User) {
-    console.log(user, 'user');
     return this.gamesService.getMyOpenGames(user);
   }
 
@@ -78,7 +76,6 @@ export class GamesController {
   })
   @Get('/games/my-completed-games')
   findMyCompletedGames(@UserPayload() user: User) {
-    console.log(user, 'user');
     return this.gamesService.getMyCompletedGames(user);
   }
 
@@ -133,10 +130,20 @@ export class GamesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'gameCode',
+    required: false,
+    type: String,
+    description: 'Game code if required',
+  })
   @ApiOperation({ summary: 'Submit bets' })
   @Post('/submit-bets')
-  predictGame(@Body() body: BulkCreateBetsDto, @UserPayload() user: User) {
-    return this.gamesService.submitBets(user, body);
+  predictGame(
+    @Body() body: BulkCreateBetsDto,
+    @Query('gameCode') gameCode: string,
+    @UserPayload() user: User,
+  ) {
+    return this.gamesService.submitBets(user, gameCode, body);
   }
 
   // @ApiSecurity('x-para-session')
@@ -214,5 +221,28 @@ export class GamesController {
   @Delete('/game/delete/:id')
   remove(@Param('id') id: string, @UserPayload() user: User) {
     return this.gamesService.remove(id, user);
+  }
+
+  @ApiOperation({ summary: 'Get a game using its unique code' })
+  @ApiResponse({
+    status: 200,
+  })
+  @ApiParam({ name: 'gameId', type: String })
+  @ApiParam({ name: 'userId', type: String })
+  @Get('/game/invite/:gameId/:userId')
+  inviteUser(@Param('gameId') gameId: string, @Param('userId') userId: string) {
+    return this.gamesService.inviteUserToPlay(userId, gameId);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary:
+      'Fetch all private games created by users the current user is following',
+  })
+  @ApiResponse({ status: 200, description: 'success' })
+  @Get('games/private/following')
+  async getPrivateGamesFromFollowing(@UserPayload() user: User) {
+    return this.gamesService.getPrivateGamesFromFollowing(user.id);
   }
 }

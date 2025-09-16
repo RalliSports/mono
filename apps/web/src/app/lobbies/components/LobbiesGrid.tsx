@@ -1,7 +1,7 @@
 import LobbyCard from '@/components/main-feed/lobby-card'
 import type { LobbiesGridProps } from './types'
 
-export default function LobbiesGrid({ lobbies, user }: LobbiesGridProps) {
+export default function LobbiesGrid({ lobbies }: LobbiesGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {lobbies.map((lobby) => (
@@ -13,11 +13,11 @@ export default function LobbiesGrid({ lobbies, user }: LobbiesGridProps) {
           maxParticipants={lobby.maxParticipants}
           buyIn={lobby.buyIn}
           prizePool={lobby.prizePool}
+          imageUrl={lobby.imageUrl}
           legs={lobby.legs}
           timeLeft={lobby.timeLeft}
           host={lobby.host}
           isUrgent={lobby.isUrgent}
-          shouldOpenViewGame={lobby.participants.some((participant: any) => participant.user.id === user?.id)}
         />
       ))}
     </div>

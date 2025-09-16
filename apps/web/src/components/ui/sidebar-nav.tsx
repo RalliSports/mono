@@ -247,9 +247,28 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
               </div>
             ))}
           </div>
-          <button onClick={() => logout()} className="text-red-400 hover:text-red-300">
-            ➜] Logout
-          </button>
+
+          {/* Logout Button */}
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <button
+              onClick={() => logout()}
+              className="flex items-center space-x-3 p-2 sm:p-3 rounded-xl transition-all duration-200 hover:backdrop-blur-sm hover:border hover:border-white/20 group text-red-400 hover:text-red-300 hover:shadow-lg hover:translate-x-1 w-full"
+              style={{
+                background: 'transparent',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'
+                e.currentTarget.style.backdropFilter = 'blur(10px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.backdropFilter = 'none'
+              }}
+            >
+              <span className="text-base sm:text-lg">🚪</span>
+              <span className="font-medium text-sm sm:text-base">Logout</span>
+            </button>
+          </div>
         </div>
 
         {/* Footer */}

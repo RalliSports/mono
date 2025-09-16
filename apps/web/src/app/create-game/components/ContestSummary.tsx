@@ -3,6 +3,7 @@ import { CreatingGameState } from './types'
 interface ContestSummaryProps {
   maxParticipants: number
   depositAmount: number
+  numberOfLegs: number
   creatingGameState: CreatingGameState
   onCreateContest: () => void
 }
@@ -10,6 +11,7 @@ interface ContestSummaryProps {
 export default function ContestSummary({
   maxParticipants,
   depositAmount,
+  numberOfLegs,
   creatingGameState,
   onCreateContest,
 }: ContestSummaryProps) {
@@ -21,16 +23,21 @@ export default function ContestSummary({
           <p className="text-slate-400 text-sm">Total prize pool and details</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-orange-400 bg-clip-text text-transparent">
-            {maxParticipants}
-          </div>
-          <div className="text-xs text-slate-400">Max Participants</div>
-        </div>
-        <div className="text-right">
           <div className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-blue-400 bg-clip-text text-transparent">
             ${depositAmount * maxParticipants}
           </div>
           <div className="text-xs text-slate-400">Total prize pool</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 text-center mb-6">
+        <div className="bg-slate-700/30 rounded-lg p-3">
+          <div className="text-orange-400 font-bold text-lg">{maxParticipants}</div>
+          <div className="text-slate-400 text-xs">Max Players</div>
+        </div>
+        <div className="bg-slate-700/30 rounded-lg p-3">
+          <div className="text-emerald-400 font-bold text-lg">{numberOfLegs}</div>
+          <div className="text-slate-400 text-xs">Required Bets</div>
         </div>
       </div>
 
@@ -40,7 +47,7 @@ export default function ContestSummary({
       >
         <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
         <span className="relative z-10 flex items-center justify-center space-x-2">
-          <span>🚀</span>
+          <span>🎯</span>
           <span>
             {creatingGameState === 'loading'
               ? 'Creating Contest...'
