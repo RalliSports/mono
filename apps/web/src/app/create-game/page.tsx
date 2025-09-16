@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
 import { RALLI_TOKEN } from '@/constants'
+import LottieLoading from '@/components/ui/lottie-loading'
 
 // Components
 import {
@@ -37,11 +38,17 @@ export default function CreateGame() {
   const { isConnected } = useParaWalletBalance()
   const { session } = useSessionToken()
   const [mounted, setMounted] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   const [creatingGameState, setCreatingGameState] = useState<CreatingGameState>('idle')
 
   // Fix hydration issues
   useEffect(() => {
     setMounted(true)
+    // Simulate page loading time
+    const timer = setTimeout(() => {
+      setIsPageLoading(false)
+    }, 1500) // Back to 1.5 seconds
+    return () => clearTimeout(timer)
   }, [])
 
   // Handle wallet connection redirect with better logic for Para integration
@@ -153,6 +160,19 @@ export default function CreateGame() {
       console.error('Unexpected error:', err)
       toast.error('Unexpected error. Please try again.')
     }
+  }
+
+  // Show loading screen while page is loading
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex items-center justify-center">
+        <LottieLoading
+          size="xl"
+          message="Setting up Create Game..."
+          subMessage="Please wait while we prepare everything for you"
+        />
+      </div>
+    )
   }
 
   return (

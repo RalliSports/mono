@@ -14,7 +14,7 @@ interface Friend {
 interface InviteFriendsProps {
   isPrivate: boolean
 }
-
+//yo anyone who is working on this to implement actual functionality, remove the mock data and implement actual API calls to fetch friends and send invites
 // Mock data for friends
 const mockFriends: Friend[] = [
   {
