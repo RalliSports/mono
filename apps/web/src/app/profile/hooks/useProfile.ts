@@ -19,7 +19,6 @@ export function useProfile(session: string | null) {
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId') ?? ''
 
-  console.log(user, userId, "all users")
 
   const handleUpdateUser = async () => {
     const response = await fetch('/api/update-user', {
