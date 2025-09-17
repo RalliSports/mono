@@ -34,6 +34,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, followes })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch followes' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch followers' }, { status: 500 })
   }
 }
