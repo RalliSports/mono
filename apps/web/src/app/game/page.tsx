@@ -1,7 +1,15 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { TopNavigation, GameHeader, GameStats, ParticipantsList, LoadingSpinner, WinnersDisplay } from './components'
+import {
+  TopNavigation,
+  GameHeader,
+  GameStats,
+  ParticipantsList,
+  LoadingSpinner,
+  WinnersDisplay,
+  CreateNewGameButton,
+} from './components'
 import { useGameData } from './hooks/useGameData'
 import JoinGameButton from './components/JoinGameButton'
 import { useUserData } from '@/providers/user-data-provider'
@@ -94,6 +102,7 @@ function ViewGameContent() {
         <GameHeader lobby={lobby} />
         <GameStats lobby={lobby} />
         <WinnersDisplay lobby={lobby} />
+        <CreateNewGameButton lobby={lobby} size="large" />
         <JoinGameButton game={lobby} user={user ?? null} />
 
         <ParticipantsList
