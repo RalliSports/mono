@@ -2,6 +2,7 @@ import { GamesFindOne } from '@repo/server'
 import ParticipantPicks from './ParticipantPicks'
 import Image from 'next/image'
 import { useState } from 'react'
+import Link from 'next/link'
 interface ParticipantCardProps {
   participant: GamesFindOne['participants'][number]
   lobby: GamesFindOne
@@ -33,6 +34,7 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
+                  <Link href={`/profile?userId=${participant.userId}`}>
                   {participant.user?.username ? (
                     <Image
                       src={imageSrc || '/images/pfp-1.svg'}
@@ -50,6 +52,7 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
                       {participant.user?.username || 'Anonymous User'}
                     </span>
                   )}
+                  </Link>
                 </div>
                 {participant.user?.username === lobby.creator?.username && (
                   <div className="absolute -top-1 -left-1 text-sm">👑</div>

@@ -6,6 +6,7 @@ import { MatchupsService } from '../matchups/matchups.service';
 import { StatsService } from '../stats/stats.service';
 import { TeamService } from '../team/team.service';
 import { ReferralService } from '../referral/referral.service';
+import { FriendsService } from 'src/friends/friends.service';
 import { InputType } from 'zlib';
 import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 
@@ -38,6 +39,9 @@ export type GamesGetMyOpenGamesInstance = GamesGetMyOpenGames[number];
 export type UserFindOne = Awaited<ReturnType<UserService['findOne']>>;
 export type UserUpdate = Awaited<ReturnType<UserService['updateUser']>>;
 export type UserFaucetTokens = Awaited<ReturnType<UserService['faucetTokens']>>;
+
+export type FriendsFollowing = Awaited<ReturnType<FriendsService['getFollowing']>>;
+export type FriendsFollower= Awaited<ReturnType<FriendsService['getFollowers']>>;
 
 // Lines Service Types
 export type LineFindAll = Awaited<ReturnType<LinesService['getAllLines']>>;

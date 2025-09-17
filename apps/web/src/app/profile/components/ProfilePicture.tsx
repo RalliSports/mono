@@ -3,9 +3,10 @@ import Image from 'next/image'
 interface ProfilePictureProps {
   onEditClick: () => void
   avatar: string
+  userId: string
 }
 
-export default function ProfilePicture({ onEditClick, avatar }: ProfilePictureProps) {
+export default function ProfilePicture({ onEditClick, avatar, userId }: ProfilePictureProps) {
   return (
     <div className="relative group">
       <div className="w-20 h-20 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border-2 border-slate-600/50 transition-all duration-300 group-hover:border-[#00CED1]/30">
@@ -34,7 +35,7 @@ export default function ProfilePicture({ onEditClick, avatar }: ProfilePicturePr
       </div>
 
       {/* Edit Button */}
-      <button
+     {!userId ? <button
         onClick={onEditClick}
         className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
       >
@@ -52,7 +53,7 @@ export default function ProfilePicture({ onEditClick, avatar }: ProfilePicturePr
           />
         </svg>
         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-      </button>
+      </button> : null}
     </div>
   )
 }

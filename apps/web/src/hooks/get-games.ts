@@ -42,7 +42,7 @@ type Game = {
   numBets?: number
   imageUrl?: string
   gameMode?: { label: string }
-  creator?: { walletAddress: string; username: string; avatar: string }
+  creator?: {id: string, walletAddress: string; username: string; avatar: string }
   status: 'waiting' | 'active' | 'complete' | 'pending'
 }
 
@@ -61,6 +61,7 @@ export type Lobby = {
   host: {
     username: string
     avatar: string
+    id: string
   }
   isUrgent: boolean
   status: 'waiting' | 'active' | 'complete' | 'pending'
@@ -121,6 +122,7 @@ function transformGamesToLobbies(games: Game[]): Lobby[] {
       host: {
         username,
         avatar: game.creator?.avatar || '',
+        id: game.creator?.id || ''
       },
       isUrgent: participants.length / maxParticipants >= 0.75,
       status, // Added status field
