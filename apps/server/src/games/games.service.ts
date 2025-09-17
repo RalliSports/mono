@@ -254,7 +254,7 @@ export class GamesService {
     return game;
   }
 
-  async submitBets(user: User, gameCode:string, dto: BulkCreateBetsDto) {
+  async submitBets(user: User, gameCode: string, dto: BulkCreateBetsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, dto.gameId),
@@ -497,7 +497,10 @@ export class GamesService {
             .update(participants)
             .set({ isWinner: true, amountWon: Number(game.depositAmount) })
             .where(
-              and(eq(participants.userId, winnerAddr), eq(participants.gameId, id)),
+              and(
+                eq(participants.userId, winnerAddr),
+                eq(participants.gameId, id),
+              ),
             );
         }
 
@@ -702,7 +705,12 @@ export class GamesService {
         );
       }
 
-      if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
+      if (
+        !(await this.friendsService.isCreatorFollowing(
+          userId,
+          creatorId as string,
+        ))
+      ) {
         throw new ForbiddenException(
           'This is a private game. Follow this user to gain access.',
         );
@@ -736,7 +744,6 @@ export class GamesService {
     }
   }
 
-
   async inviteUserToPlay(userId: string, gameId: string) {
     const user = await this.db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -755,8 +762,6 @@ export class GamesService {
       throw new NotFoundException('game not found');
     }
 
-    console.log(game, user, 'invite');
-
     try {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
@@ -765,18 +770,17 @@ export class GamesService {
 
       await this.notificationService.sendNotificationToUser(user.id, message);
     } catch (error) {
-      console.log(error, 'unable to send invite');
+      console.error(error, 'unable to send invite');
     }
   }
 
-
-   async getPrivateGamesFromFollowing(currentUserId: string) {
+  async getPrivateGamesFromFollowing(currentUserId: string) {
     // 1. Get all the users I am following
     const following = await this.db.query.friends.findMany({
       where: eq(friends.followerId, currentUserId),
     });
-    
-    const followingIds = following.map(f => f.followingId);
+
+    const followingIds = following.map((f) => f.followingId);
 
     if (followingIds.length === 0) {
       return [];

@@ -7,6 +7,8 @@ import { StatsService } from '../stats/stats.service';
 import { TeamService } from '../team/team.service';
 import { ReferralService } from '../referral/referral.service';
 import { FriendsService } from 'src/friends/friends.service';
+import { InputType } from 'zlib';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 
 // Games Service Types
 export type GamesFindOne = Awaited<ReturnType<GamesService['findOne']>>;
@@ -47,6 +49,7 @@ export type LineCreate = Awaited<ReturnType<LinesService['createLine']>>;
 export type LineFindById = Awaited<ReturnType<LinesService['getLineById']>>;
 export type LineUpdate = Awaited<ReturnType<LinesService['updateLine']>>;
 export type LineResolve = Awaited<ReturnType<LinesService['resolveLine']>>;
+export type LineResolveInput = ResolveLineDto;
 export type LineFindAllInstance = LineFindAll[number];
 
 // Athletes Service Types

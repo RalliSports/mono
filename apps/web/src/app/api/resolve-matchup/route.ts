@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // TypeScript interface for the request data
 // Validation function with detailed error reporting
-function validateCreateMatchupData(data: unknown): { isValid: boolean; errors?: string[] } {
+function validateResolveMatchupData(data: unknown): { isValid: boolean; errors?: string[] } {
   if (!data || typeof data !== 'object') {
     return { isValid: false, errors: ['Request body must be an object'] }
   }
@@ -10,9 +10,7 @@ function validateCreateMatchupData(data: unknown): { isValid: boolean; errors?: 
   const errors: string[] = []
   const obj = data as Record<string, unknown>
 
-  if (typeof obj.homeTeamId !== 'string') errors.push('homeTeamId must be a string')
-  if (typeof obj.awayTeamId !== 'string') errors.push('awayTeamId must be a string')
-  if (typeof obj.startsAtTimestamp !== 'number') errors.push('startsAtTimestamp must be a number')
+  if (typeof obj.matchupId !== 'string') errors.push('matchupId must be a string')
 
   return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
@@ -30,7 +28,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    const validation = validateCreateMatchupData(body)
+    const validation = validateResolveMatchupData(body)
     if (!validation.isValid) {
       return NextResponse.json(
         {
@@ -56,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}/api/v1/matchups/create`, {
+    const response = await fetch(`${backendUrl}/api/v1/matchups/resolve-lines`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

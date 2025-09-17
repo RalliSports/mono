@@ -1,23 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import axios from 'axios';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { MatchupStatus } from '../enum/matchups';
 import { LineStatus } from 'src/lines/enum/lines';
 import { MatchupsService } from '../matchups.service';
-import {
-  EspnStatusType,
-  EspnStatusName,
-  EspnMatchupStatusResponse,
-} from './types/matchup-status-espn-response.types';
 import { LinesService } from 'src/lines/lines.service';
+import {
+  EspnMatchupStatusResponse,
+  EspnStatusName,
+} from './types/matchup-status-espn-response.types';
 import { fetchEspnMatchupStatus } from './utils/espn-event-status-fetcher';
 
 @Injectable()
-export class MatchupStatusUpdaterService {
-  private readonly logger = new Logger(MatchupStatusUpdaterService.name);
+export class MatchupResolveLinesService {
+  private readonly logger = new Logger(MatchupResolveLinesService.name);
 
   constructor(
     @Drizzle() private readonly db: Database,
@@ -29,12 +27,12 @@ export class MatchupStatusUpdaterService {
   // 60 minutes interval
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
-    this.logger.log('Running matchup status update cron job...');
+    this.logger.log('Running matchup resolve lines cron job...');
 
-    const matchupsToUpdate =
-      await this.matchupsService.getMatchupsThatShouldHaveStarted();
+    const matchupsToResolve =
+      await this.matchupsService.getMatchupsInProgress();
 
-    for (const matchup of matchupsToUpdate) {
+    for (const matchup of matchupsToResolve) {
       if (!matchup.espnEventId) {
         this.logger.warn(
           `Skipping matchup ${matchup.id} due to missing espnEventId`,
@@ -42,7 +40,7 @@ export class MatchupStatusUpdaterService {
         continue;
       }
 
-      if (matchup.status !== MatchupStatus.SCHEDULED) {
+      if (matchup.status !== MatchupStatus.IN_PROGRESS) {
         this.logger.warn(
           `Skipping matchup ${matchup.id} due to status ${matchup.status}`,
         );
@@ -56,29 +54,19 @@ export class MatchupStatusUpdaterService {
         continue;
       }
 
-      if (
-        espnStatus.type.name === EspnStatusName.IN_PROGRESS ||
-        espnStatus.type.name === EspnStatusName.CURRENT
-      ) {
+      if (espnStatus.type.name === EspnStatusName.FINAL) {
         for (const line of matchup.lines) {
-          if (line.status !== LineStatus.OPEN) {
-            this.logger.warn(
-              `Skipping line ${line.id} due to status ${line.status}`,
-            );
-            continue;
-          }
-
           await this.linesService.updateLine(line.id, {
-            status: LineStatus.LOCKED,
+            status: LineStatus.RESOLVED,
           });
-          this.logger.log(`Updated line ${line.id} to LOCKED`);
+          this.logger.log(`Resolved line ${line.id}`);
         }
         await this.matchupsService.updateMatchup(matchup.id, {
-          status: MatchupStatus.IN_PROGRESS,
+          status: MatchupStatus.FINISHED,
         });
-        this.logger.log(`Updated matchup ${matchup.id} to IN_PROGRESS`);
+        this.logger.log(`Updated matchup ${matchup.id} to FINISHED`);
       }
     }
-    this.logger.log('Matchup status update cron job completed.');
+    this.logger.log('Matchup resolve lines cron job completed.');
   }
 }
