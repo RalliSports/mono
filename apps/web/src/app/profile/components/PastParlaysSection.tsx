@@ -21,7 +21,7 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
           Past Parlays
         </h3>
         <button
-          onClick={() => setActiveTab('parlays')}
+          onClick={() => router.push('/lobbies')}
           className="text-[#00CED1] hover:text-[#FFAB91] transition-colors text-sm font-medium"
         >
           View All

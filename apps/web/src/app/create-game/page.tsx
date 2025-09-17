@@ -15,6 +15,7 @@ import {
   DepositAmountSelector,
   ParticipantsSelector,
   BetsSelector,
+  TokenSelector,
   ContestSummary,
   sliderStyles,
   GameSettings,
@@ -69,6 +70,12 @@ export default function CreateGame() {
   }, [mounted, isConnected, router])
 
   const [formErrors, setFormErrors] = useState<FormErrors>({})
+  const [selectedToken, setSelectedToken] = useState({
+    symbol: 'USDC',
+    name: 'USD Coin',
+    icon: '🪙',
+    address: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+  })
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     title: '',
     depositAmount: 25,
@@ -76,7 +83,7 @@ export default function CreateGame() {
     matchupGroup: 'TEST',
     isPrivate: false,
     //TODO: Update depositToken when live
-    depositToken: RALLI_TOKEN,
+    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU', // Default to USDC
     type: 'limited',
     userControlType: 'none',
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
@@ -87,6 +94,11 @@ export default function CreateGame() {
 
   const handleInputChange = (field: string, value: any) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleTokenChange = (token: any) => {
+    setSelectedToken(token)
+    handleInputChange('depositToken', token.address)
   }
 
   const handleCreateContest = async () => {
@@ -205,6 +217,8 @@ export default function CreateGame() {
             />
 
             <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
+
+            <TokenSelector selectedToken={selectedToken} onChange={handleTokenChange} />
 
             <PrivateGameToggle
               isPrivate={gameSettings.isPrivate}
