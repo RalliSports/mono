@@ -56,27 +56,35 @@ export class GamesController {
   }
 
   @ApiOperation({ summary: 'Get all games' })
-  @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all games',
     type: [GameResponseDto],
   })
   @Get('/games/my-open-games')
-  findMyOpenGames(@UserPayload() user: User) {
-    return this.gamesService.getMyOpenGames(user);
+  findMyOpenGames(@Query('userId') userId: string) {
+    return this.gamesService.getMyOpenGames(userId);
   }
 
   @ApiOperation({ summary: 'Get all games' })
-  @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all games',
     type: [GameResponseDto],
   })
   @Get('/games/my-completed-games')
-  findMyCompletedGames(@UserPayload() user: User) {
-    return this.gamesService.getMyCompletedGames(user);
+  findMyCompletedGames(@Query('userId') userId: string) {
+    return this.gamesService.getMyCompletedGames(userId);
   }
 
   @ApiOperation({ summary: 'Get all games' })

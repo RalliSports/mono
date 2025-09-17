@@ -134,11 +134,11 @@ export class GamesService {
     });
   }
 
-  async getMyOpenGames(user: User) {
+  async getMyOpenGames(userId: string) {
     return this.db.query.games.findMany({
       where: and(
         or(
-          eq(games.creatorId, user.id),
+          eq(games.creatorId, userId),
           exists(
             this.db
               .select()
@@ -146,7 +146,7 @@ export class GamesService {
               .where(
                 and(
                   eq(participants.gameId, games.id),
-                  eq(participants.userId, user.id),
+                  eq(participants.userId, userId),
                 ),
               ),
           ),
@@ -174,11 +174,11 @@ export class GamesService {
     });
   }
 
-  async getMyCompletedGames(user: User) {
+  async getMyCompletedGames(userId: string) {
     return this.db.query.games.findMany({
       where: and(
         or(
-          eq(games.creatorId, user.id),
+          eq(games.creatorId, userId),
           exists(
             this.db
               .select()
@@ -186,7 +186,7 @@ export class GamesService {
               .where(
                 and(
                   eq(participants.gameId, games.id),
-                  eq(participants.userId, user.id),
+                  eq(participants.userId, userId),
                 ),
               ),
           ),

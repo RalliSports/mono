@@ -1,16 +1,16 @@
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useSessionToken } from '@/hooks/use-session'
-import TopNavigation from './TopNavigation'
-import ProfileHeader from './ProfileHeader'
-import ProfilePictureUploadModal from './ProfilePictureUploadModal'
-import ActiveParlaysSection from './ActiveParlaysSection'
-import HistorySection from './HistorySection'
-import AchievementsSection from './AchievementsSection'
+import { formatBalance } from '@/lib/utils'
 import { useProfile } from '../hooks/useProfile'
 import { useProfilePictureUpload } from '../hooks/useProfilePictureUpload'
 import { useProfileTabs } from '../hooks/useProfileTabs'
-import { formatBalance } from '@/lib/utils'
+import AchievementsSection from './AchievementsSection'
+import ActiveParlaysSection from './ActiveParlaysSection'
+import HistorySection from './HistorySection'
 import PastParlaysSection from './PastParlaysSection'
+import ProfileHeader from './ProfileHeader'
+import ProfilePictureUploadModal from './ProfilePictureUploadModal'
+import TopNavigation from './TopNavigation'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
@@ -28,8 +28,10 @@ export default function ProfileContent() {
     setAvatar,
   )
 
+ 
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
+
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted || !user) {
@@ -47,7 +49,10 @@ export default function ProfileContent() {
       />
 
       <ProfileHeader
+        currentUserId={user.id}
+        isConnected={isConnected}
         balances={balances}
+        session={session ?? ''}
         formatBalance={formatBalance}
         onEditPictureClick={() => setIsUploadModalOpen(true)}
         avatar={user.avatar || ''}

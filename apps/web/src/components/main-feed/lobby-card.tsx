@@ -17,6 +17,7 @@ interface LobbyCardProps {
   host: {
     username: string
     avatar: string
+    id: string
   }
   isUrgent?: boolean
 }
@@ -55,25 +56,27 @@ export default function LobbyCard({
         {/* Host Info Header */}
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-            {imageSrc ? (
-              <Image
-                src={imageSrc || '/images/pfp-1.svg'}
-                alt={host.username}
-                // className="w-12 h-12 object-cover rounded-full"
-                width={48}
-                height={48}
-                onError={(e) => {
-                  e.currentTarget.onerror = handleError
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(host.username)}&background=0D8ABC&color=fff&size=128`
-                }}
-              />
-            ) : (
-              <span className="text-white font-bold text-sm">{host.avatar}</span>
-            )}
+            <Link href={`/profile?userId=${host.id}`}>
+              {imageSrc ? (
+                <Image
+                  src={imageSrc || '/images/pfp-1.svg'}
+                  alt={host.username}
+                  // className="w-12 h-12 object-cover rounded-full"
+                  width={48}
+                  height={48}
+                  onError={(e) => {
+                    e.currentTarget.onerror = handleError
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(host.username)}&background=0D8ABC&color=fff&size=128`
+                  }}
+                />
+              ) : (
+                <span className="text-white font-bold text-sm">{host.avatar}</span>
+              )}
+            </Link>
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1 text-white">
-              {host.username}
+              <Link href={`/profile?userId=${host.id}`}>{host.username}</Link>
               <span className="text-slate-400 text-sm ml-1">created a lobby</span>
             </div>
             <p className="text-slate-300 text-xs ">{/* <span className="text-[#00CED1]">{timeLeft} left</span> */}</p>
