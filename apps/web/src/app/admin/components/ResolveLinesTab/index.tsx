@@ -1,82 +1,62 @@
-import LineCard from './LineCard'
-import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { LineFindAllInstance } from '@repo/server'
+import { useState } from 'react'
+import { Dropdown } from '../../../../components/ui/dropdown'
+import { MatchupsFindAllInstance } from '@repo/server'
 
 interface ResolveLinesTabProps {
-  filteredLines: LineFindAllInstance[]
-  searchTerm: string
-  setSearchTerm: (term: string) => void
-  selectedSport: string
-  setSelectedSport: (sport: string) => void
-  resolvingLine: string | null
-  setResolvingLine: (id: string | null) => void
-  resolutionData: {
-    actualValue: number
-    resolutionReason: string
-  }
-  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
-  handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
-  addToast: (message: string, type: 'success' | 'error') => void
+  handleResolveLinesForMatchup: (lineId: string, actualValue: number) => Promise<void>
+  matchUps: MatchupsFindAllInstance[]
 }
 
-export default function ResolveLinesTab({
-  filteredLines,
-  searchTerm,
-  setSearchTerm,
-  selectedSport,
-  setSelectedSport,
-  resolvingLine,
-  setResolvingLine,
-  resolutionData,
-  setResolutionData,
-  handleResolveLine,
-  addToast,
-}: ResolveLinesTabProps) {
+export default function ResolveLinesTab({ handleResolveLinesForMatchup, matchUps }: ResolveLinesTabProps) {
+  const [isResolving, setIsResolving] = useState(false)
+  const [matchupToResolve, setMatchupToResolve] = useState<MatchupsFindAllInstance>(matchUps[0])
+
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
         <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
-          <span className="text-lg">✅</span>
+          <span className="text-lg">📈</span>
         </span>
         Resolve Lines
       </h2>
 
-      {/* Search and Filter */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by player or stat name..."
-            className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-          />
-        </div>
-
-        <div>
-          <SportsDropdown
-            value={selectedSport}
-            onChange={setSelectedSport}
-            includeAll={true}
-            placeholder="Filter by sport"
-          />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-white font-semibold mb-2">Select Game</label>
+            <Dropdown
+              value={matchupToResolve?.id}
+              onChange={(value: string) =>
+                setMatchupToResolve(matchUps.find((matchUp) => matchUp.id === value) ?? matchUps[0])
+              }
+              placeholder="Select a game"
+              options={[
+                { value: '', label: 'Select a game', disabled: true },
+                ...matchUps.map((matchUp: MatchupsFindAllInstance) => ({
+                  value: matchUp.id,
+                  label: `${matchUp.homeTeam?.name ?? 'Home'} vs ${matchUp.awayTeam?.name ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
+                  icon: '🏈',
+                })),
+              ]}
+              searchable={true}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Lines List */}
-      <div className="space-y-4">
-        {filteredLines.map((line) => (
-          <LineCard
-            key={line.id}
-            line={line as LineFindAllInstance & { value: number }}
-            resolvingLine={resolvingLine}
-            setResolvingLine={setResolvingLine}
-            resolutionData={resolutionData}
-            setResolutionData={setResolutionData}
-            handleResolveLine={handleResolveLine}
-            addToast={addToast}
-          />
-        ))}
+      {/* Create Line Button - Full Width at Bottom */}
+      <div className="mt-6">
+        <button
+          onClick={async () => {
+            setIsResolving(true)
+            await handleResolveLinesForMatchup(matchupToResolve.id, 0)
+            setIsResolving(false)
+          }}
+          disabled={isResolving}
+          className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+        >
+          {isResolving ? 'Resolving Lines...' : 'Resolve Lines'}
+        </button>
       </div>
     </div>
   )

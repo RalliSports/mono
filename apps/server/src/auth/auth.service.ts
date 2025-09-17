@@ -36,7 +36,6 @@ export class AuthService {
     email?: string,
     referralCode?: string,
   ): Promise<User | null> {
-
     // try {
     await this.paraServer.importSession(session);
     const isActive = await this.paraServer.isSessionActive();
@@ -102,7 +101,6 @@ export class AuthService {
         // role: userExisted.role as Role,
       };
     } else {
-      console.log('Creating new user');
       const gamertag = await generateUniqueGamertag(this.db, users);
       const avatar = await getRandomAthleteAvatar(this.db);
 
@@ -122,7 +120,6 @@ export class AuthService {
       if (referralCode) {
         await this.referralService.processReferral(referralCode, newUser[0].id);
       }
-      console.log('New user created');
     }
 
     // fetch the newly created user if needed
@@ -150,18 +147,9 @@ export class AuthService {
       }
     }
 
-    // Process referral if provided and user is new
-    console.log(
-      'AuthService - Referral Code:',
-      referralCode,
-      'User Existed:',
-      userExisted,
-    );
     if (referralCode && !userExisted) {
       try {
-        console.log('Processing referral:', referralCode, 'for user:', user.id);
         await this.referralService.processReferral(referralCode, user.id);
-        console.log('Referral processed successfully');
       } catch (error) {
         console.error('Error processing referral:', error);
       }

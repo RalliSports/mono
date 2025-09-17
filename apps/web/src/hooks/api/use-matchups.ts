@@ -10,7 +10,7 @@ export function useMatchups() {
 
   const query = useQuery({
     queryKey: ['matchups'],
-    queryFn: () => api.get<MatchupsFindAll[]>('/api/read-matchups'),
+    queryFn: () => api.get<MatchupsFindAll>('/api/read-matchups'),
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
 
@@ -21,8 +21,16 @@ export function useMatchups() {
     },
   })
 
+  const resolveMutation = useMutation({
+    mutationFn: (data: { matchupId: string }) => api.post<MatchupsCreate>('/api/resolve-matchup', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['matchups'] })
+    },
+  })
+
   return {
     query,
     create: createMutation,
+    resolve: resolveMutation,
   }
 }

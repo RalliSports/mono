@@ -787,8 +787,6 @@ export class GamesService {
       throw new NotFoundException('game not found');
     }
 
-    console.log(game, user, 'invite');
-
     try {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
@@ -797,7 +795,7 @@ export class GamesService {
 
       await this.notificationService.sendNotificationToUser(user.id, message);
     } catch (error) {
-      console.log(error, 'unable to send invite');
+      console.error(error, 'unable to send invite');
     }
   }
 
