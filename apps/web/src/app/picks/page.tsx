@@ -12,11 +12,11 @@ import {
   LoadingStates,
   AthletesList,
 } from './components'
+import PicksPageSkeleton from './components/PicksPageSkeleton'
 
 // Hooks and Constants
 import { usePicks } from './hooks/usePicks'
 import { DEFAULT_LEGS_REQUIRED, DEFAULT_BUY_IN, DEFAULT_GAME_NAME } from './constants/gameDefaults'
-import { LoadingSpinner } from '../join-game/components'
 
 function PicksContent() {
   const {
@@ -42,7 +42,7 @@ function PicksContent() {
   const gameName = game?.title || DEFAULT_GAME_NAME
 
   if (!game || !mounted) {
-    return <LoadingSpinner />
+    return <PicksPageSkeleton />
   }
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -105,7 +105,7 @@ function PicksContent() {
 
 export default function PicksPage() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<PicksPageSkeleton />}>
       <PicksContent />
     </Suspense>
   )

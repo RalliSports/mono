@@ -7,6 +7,8 @@ export function useProfile(session: string | null) {
   const { addToast } = useToast()
   const [username, setUsername] = useState('')
   const [user, setUser] = useState<User | null>(null)
+  const [userLoading, setUserLoading] = useState(true)
+  const [gamesLoading, setGamesLoading] = useState(true)
   const [avatar, setAvatar] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -36,32 +38,37 @@ export function useProfile(session: string | null) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const response = await fetch('/api/read-current-user', {
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setUser(data)
-        setUsername(data.username)
-        setAvatar(data.avatar)
-        setFirstName(data.firstName || '')
-        setLastName(data.lastName || '')
-        if (!data.emailAddress && account.embedded.isConnected) {
-          await fetch('/api/update-user-email', {
-            method: 'PATCH',
-            headers: {
-              'x-para-session': session || '',
-            },
-            body: JSON.stringify({
-              email: account.embedded.email,
-            }),
-          })
+      try {
+        setUserLoading(true)
+        const response = await fetch('/api/read-current-user', {
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setUser(data)
+          setUsername(data.username)
+          setAvatar(data.avatar)
+          setFirstName(data.firstName || '')
+          setLastName(data.lastName || '')
+          if (!data.emailAddress && account.embedded.isConnected) {
+            await fetch('/api/update-user-email', {
+              method: 'PATCH',
+              headers: {
+                'x-para-session': session || '',
+              },
+              body: JSON.stringify({
+                email: account.embedded.email,
+              }),
+            })
+          }
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch user', 'error')
         }
-      } else {
-        const errorData = await response.json()
-        addToast(errorData.error || 'Failed to fetch user', 'error')
+      } finally {
+        setUserLoading(false)
       }
     }
     if (session && (!user || forceRefresh)) {
@@ -72,17 +79,22 @@ export function useProfile(session: string | null) {
 
   useEffect(() => {
     const fetchMyOpenGames = async () => {
-      const response = await fetch('/api/read-my-open-games', {
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setMyOpenGames(data)
-      } else {
-        const errorData = await response.json()
-        addToast(errorData.error || 'Failed to fetch my open games', 'error')
+      try {
+        setGamesLoading(true)
+        const response = await fetch('/api/read-my-open-games', {
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setMyOpenGames(data)
+        } else {
+          const errorData = await response.json()
+          addToast(errorData.error || 'Failed to fetch my open games', 'error')
+        }
+      } finally {
+        setGamesLoading(false)
       }
     }
     if (session) {
@@ -112,6 +124,8 @@ export function useProfile(session: string | null) {
     username,
     setUsername,
     user,
+    userLoading,
+    gamesLoading,
     setUser,
     avatar,
     setAvatar,

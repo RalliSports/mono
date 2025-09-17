@@ -7,7 +7,7 @@ import { useUserData } from '@/providers/user-data-provider'
 import { useSessionToken } from '@/hooks/use-session'
 
 // Components
-import { TopNavigation, FilterBar, LobbiesSection, LoadingScreen } from './components'
+import { TopNavigation, FilterBar, LobbiesSection, LoadingScreen, LobbiesSectionSkeleton } from './components'
 
 // Hooks
 import { useWalletConnection } from './hooks/useWalletConnection'
@@ -24,6 +24,7 @@ export default function MainFeedPage() {
 
   const {
     lobbiesData,
+    lobbiesLoading,
     selectedAthletes,
     athletes,
     isInSelectionMode,
@@ -61,8 +62,17 @@ export default function MainFeedPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts */}
-        <LobbiesSection lobbiesData={lobbiesData} isMobile={false} />
-        <LobbiesSection lobbiesData={lobbiesData} isMobile={true} />
+        {lobbiesLoading ? (
+          <>
+            <LobbiesSectionSkeleton isMobile={false} />
+            <LobbiesSectionSkeleton isMobile={true} />
+          </>
+        ) : (
+          <>
+            <LobbiesSection lobbiesData={lobbiesData} isMobile={false} />
+            <LobbiesSection lobbiesData={lobbiesData} isMobile={true} />
+          </>
+        )}
       </div>
 
       {/* Bottom Selection Bar (when in selection mode) */}

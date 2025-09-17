@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/toast'
 export function useMainPage(session: string | undefined) {
   const { addToast } = useToast()
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
+  const [lobbiesLoading, setLobbiesLoading] = useState(true)
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
   const [athletes, setAthletes] = useState<Athlete[]>([])
   const [isInSelectionMode, setIsInSelectionMode] = useState(false)
@@ -19,6 +20,7 @@ export function useMainPage(session: string | undefined) {
   useEffect(() => {
     const loadLobbies = async () => {
       try {
+        setLobbiesLoading(true)
         const fetchedLobbies = await fetchGames()
         //filter lobbies that are active
         setLobbiesData(fetchedLobbies.filter((lobby) => ['active'].includes(lobby.status)))
@@ -27,6 +29,8 @@ export function useMainPage(session: string | undefined) {
       } catch (error) {
         console.error('Error fetching lobbies:', error)
         setLobbiesData([])
+      } finally {
+        setLobbiesLoading(false)
       }
     }
 
@@ -78,6 +82,7 @@ export function useMainPage(session: string | undefined) {
 
   return {
     lobbiesData,
+    lobbiesLoading,
     selectedAthletes,
     setSelectedAthletes,
     athletes,

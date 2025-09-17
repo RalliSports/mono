@@ -8,5 +8,14 @@ export { default as ParticipantPicks } from './ParticipantPicks'
 export { default as LoadingSpinner } from './LoadingSpinner'
 export { default as WinnersDisplay } from './WinnersDisplay'
 
+// Export skeleton components
+export { default as GamePageSkeleton } from './GamePageSkeleton'
+export { default as TopNavigationSkeleton } from './TopNavigationSkeleton'
+export { default as GameHeaderSkeleton } from './GameHeaderSkeleton'
+export { default as GameStatsSkeleton } from './GameStatsSkeleton'
+export { default as WinnersDisplaySkeleton } from './WinnersDisplaySkeleton'
+export { default as JoinGameButtonSkeleton } from './JoinGameButtonSkeleton'
+export { default as ParticipantsListSkeleton } from './ParticipantsListSkeleton'
+
 // Export types
 export * from './types'

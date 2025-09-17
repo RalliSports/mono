@@ -38,6 +38,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@repo/db": "workspace:*",
     "@repo/server": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@solana/spl-token": "0.4.13",
     "@solana/wallet-adapter-base": "0.9.26",
     "@solana/wallet-adapter-react": "0.15.38",
