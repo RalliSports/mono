@@ -10,7 +10,6 @@ export default function UsernameEditor({ userId }: Props) {
   const { session } = useSessionToken()
   const { editingUsername, setEditingUsername } = useProfileTabs()
   const { username, setUsername, user, handleUpdateUser } = useProfile(session || null)
-  console.log(username, user, 'user name')
 
   const handleSave = async () => {
     setEditingUsername(false)
