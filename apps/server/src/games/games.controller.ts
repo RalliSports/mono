@@ -56,27 +56,35 @@ export class GamesController {
   }
 
   @ApiOperation({ summary: 'Get all games' })
-  @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all games',
     type: [GameResponseDto],
   })
   @Get('/games/my-open-games')
-  findMyOpenGames(@UserPayload() user: User) {
-    return this.gamesService.getMyOpenGames(user);
+  findMyOpenGames(@Query('userId') userId: string) {
+    return this.gamesService.getMyOpenGames(userId);
   }
 
   @ApiOperation({ summary: 'Get all games' })
-  @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all games',
     type: [GameResponseDto],
   })
   @Get('/games/my-completed-games')
-  findMyCompletedGames(@UserPayload() user: User) {
-    return this.gamesService.getMyCompletedGames(user);
+  findMyCompletedGames(@Query('userId') userId: string) {
+    return this.gamesService.getMyCompletedGames(userId);
   }
 
   @ApiOperation({ summary: 'Get all games' })
@@ -130,10 +138,20 @@ export class GamesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'gameCode',
+    required: false,
+    type: String,
+    description: 'Game code if required',
+  })
   @ApiOperation({ summary: 'Submit bets' })
   @Post('/submit-bets')
-  predictGame(@Body() body: BulkCreateBetsDto, @UserPayload() user: User) {
-    return this.gamesService.submitBets(user, body);
+  predictGame(
+    @Body() body: BulkCreateBetsDto,
+    @Query('gameCode') gameCode: string,
+    @UserPayload() user: User,
+  ) {
+    return this.gamesService.submitBets(user, gameCode, body);
   }
 
   // @ApiSecurity('x-para-session')
@@ -222,5 +240,17 @@ export class GamesController {
   @Get('/game/invite/:gameId/:userId')
   inviteUser(@Param('gameId') gameId: string, @Param('userId') userId: string) {
     return this.gamesService.inviteUserToPlay(userId, gameId);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary:
+      'Fetch all private games created by users the current user is following',
+  })
+  @ApiResponse({ status: 200, description: 'success' })
+  @Get('games/private/following')
+  async getPrivateGamesFromFollowing(@UserPayload() user: User) {
+    return this.gamesService.getPrivateGamesFromFollowing(user.id);
   }
 }

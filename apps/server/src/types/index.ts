@@ -6,6 +6,9 @@ import { MatchupsService } from '../matchups/matchups.service';
 import { StatsService } from '../stats/stats.service';
 import { TeamService } from '../team/team.service';
 import { ReferralService } from '../referral/referral.service';
+import { FriendsService } from 'src/friends/friends.service';
+import { InputType } from 'zlib';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 
 // Games Service Types
 export type GamesFindOne = Awaited<ReturnType<GamesService['findOne']>>;
@@ -23,6 +26,9 @@ export type GamesGetJoinedGames = Awaited<
 export type GamesGetMyOpenGames = Awaited<
   ReturnType<GamesService['getMyOpenGames']>
 >;
+export type GamesGetMyCompletedGames = Awaited<
+  ReturnType<GamesService['getMyCompletedGames']>
+>;
 export type GamesResolveGame = Awaited<ReturnType<GamesService['resolveGame']>>;
 export type GamesFindAllInstance = GamesFindAll[number];
 export type GamesFindAllOpenInstance = GamesFindAllOpen[number];
@@ -34,12 +40,16 @@ export type UserFindOne = Awaited<ReturnType<UserService['findOne']>>;
 export type UserUpdate = Awaited<ReturnType<UserService['updateUser']>>;
 export type UserFaucetTokens = Awaited<ReturnType<UserService['faucetTokens']>>;
 
+export type FriendsFollowing = Awaited<ReturnType<FriendsService['getFollowing']>>;
+export type FriendsFollower= Awaited<ReturnType<FriendsService['getFollowers']>>;
+
 // Lines Service Types
 export type LineFindAll = Awaited<ReturnType<LinesService['getAllLines']>>;
 export type LineCreate = Awaited<ReturnType<LinesService['createLine']>>;
 export type LineFindById = Awaited<ReturnType<LinesService['getLineById']>>;
 export type LineUpdate = Awaited<ReturnType<LinesService['updateLine']>>;
 export type LineResolve = Awaited<ReturnType<LinesService['resolveLine']>>;
+export type LineResolveInput = ResolveLineDto;
 export type LineFindAllInstance = LineFindAll[number];
 
 // Athletes Service Types
@@ -71,6 +81,9 @@ export type MatchupsGetThatShouldHaveStarted = Awaited<
 >;
 export type MatchupsCreate = Awaited<
   ReturnType<MatchupsService['createMatchup']>
+>;
+export type MatchupCreateLinesForMatchup = Awaited<
+  ReturnType<MatchupsService['createLinesForMatchup']>
 >;
 export type MatchupsUpdate = Awaited<
   ReturnType<MatchupsService['updateMatchup']>

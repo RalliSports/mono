@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateMatchupDto } from './create-matchup.dto';
-import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, Min, IsString } from 'class-validator';
 import { MatchupStatus } from '../enum/matchups';
 
 export class UpdateMatchupDto extends PartialType(CreateMatchupDto) {
@@ -15,6 +15,11 @@ export class UpdateMatchupDto extends PartialType(CreateMatchupDto) {
   @IsOptional()
   @Min(0)
   scoreAway?: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  oddsApiEventId?: string;
 
   @ApiProperty({ enum: MatchupStatus })
   @IsEnum(MatchupStatus)

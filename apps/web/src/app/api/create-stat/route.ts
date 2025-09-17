@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// TypeScript interface for the request data
-interface CreateStatRequest {
-  name: string
-  description: string
-  customId: number
-}
+// Validation function with detailed error reporting
+function validateCreateStatData(data: unknown): { isValid: boolean; errors?: string[] } {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, errors: ['Request body must be an object'] }
+  }
 
-// Validation function
-function validateCreateStatData(data: any): data is CreateStatRequest {
-  return typeof data.name === 'string' && typeof data.description === 'string' && typeof data.customId === 'number'
+  const errors: string[] = []
+  const obj = data as Record<string, unknown>
+
+  if (typeof obj.name !== 'string') errors.push('name must be a string')
+  if (typeof obj.description !== 'string') errors.push('description must be a string')
+  if (typeof obj.customId !== 'number') errors.push('customId must be a number')
+
+  return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
 
 export async function POST(request: NextRequest) {
@@ -25,15 +29,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data structure
-    if (!validateCreateStatData(body)) {
+    const validation = validateCreateStatData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Invalid data format',
-          required: {
-            name: 'string',
-            description: 'string',
-            customId: 'number',
-          },
+          issues: validation.errors,
         },
         { status: 400 },
       )

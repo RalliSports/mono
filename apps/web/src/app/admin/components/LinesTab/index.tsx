@@ -1,6 +1,5 @@
 import CreateLineForm from './CreateLineForm'
-import { Player, MatchUp } from '../types'
-import { StatsFindById } from '@repo/server'
+import { MatchupsFindAllInstance, LineCreate } from '@repo/server'
 
 interface LinesTabProps {
   newLine: {
@@ -10,22 +9,13 @@ interface LinesTabProps {
     id: string
     gameDate: string
   }
-  setNewLine: (line: any) => void
+  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void
   handleCreateLine: () => Promise<void>
-  players: Player[]
-  stats: StatsFindById[]
-  matchUps: MatchUp[]
+  matchUps: MatchupsFindAllInstance[]
 }
 
-export default function LinesTab({ newLine, setNewLine, handleCreateLine, players, stats, matchUps }: LinesTabProps) {
+export default function LinesTab({ newLine, setNewLine, handleCreateLine, matchUps }: LinesTabProps) {
   return (
-    <CreateLineForm
-      newLine={newLine}
-      setNewLine={setNewLine}
-      handleCreateLine={handleCreateLine}
-      players={players}
-      stats={stats}
-      matchUps={matchUps}
-    />
+    <CreateLineForm newLine={newLine} setNewLine={setNewLine} handleCreateLine={handleCreateLine} matchUps={matchUps} />
   )
 }

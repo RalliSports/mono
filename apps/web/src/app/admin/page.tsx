@@ -22,6 +22,7 @@ import {
   MatchupsTab,
   TabType,
 } from './components'
+import ManualResolveLinesTab from './components/ManualResolveLinesTab'
 
 export default function AdminPage() {
   return <AdminPageContent />
@@ -87,32 +88,20 @@ function AdminPageContent() {
   })
 
   const [newMatchUp, setNewMatchUp] = useState({
-    homeTeam: {
-      id: '',
-      name: '',
-      city: '',
-      country: '',
-      createdAt: new Date(),
-    },
-    awayTeam: {
-      id: '',
-      name: '',
-      city: '',
-      country: '',
-      createdAt: new Date(),
-    },
+    homeTeamId: '',
+    awayTeamId: '',
     date: '',
   })
 
   // UI states
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSport, setSelectedSport] = useState('all')
+
   const [resolvingLine, setResolvingLine] = useState<string | null>(null)
   const [resolutionData, setResolutionData] = useState({
     actualValue: 0,
     resolutionReason: '',
   })
-
   // Data with proper fallbacks - cast as any to avoid type errors
   const teams = (teamsQuery.data || []) as any
   const players = (athletesQuery.all.data || []) as any
@@ -126,10 +115,22 @@ function AdminPageContent() {
       const matchesSearch =
         line.athlete?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         line.stat?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesSport = selectedSport === 'all' || line.matchup?.homeTeam?.name === selectedSport
-      return matchesSearch && matchesSport
+      const lineAlreadyResolved = line.actualValue !== null
+      return matchesSearch && !lineAlreadyResolved
     })
   }, [linesQuery.query.data, searchTerm, selectedSport])
+
+  // Filtered data using useMemo with proper type casting
+  const filteredMatchups = useMemo(() => {
+    const matchupsData = matchupsQuery.query.data || []
+    return matchupsData.filter((matchup: any) => {
+      // const nowTime = new Date()
+      // const matchupTime = matchup.startsAt
+      // const matchupAlreadyStarted = nowTime >= matchupTime
+      // const matchupAlreadyResolved = matchup.status === 'finished'
+      return true
+    })
+  }, [matchupsQuery.query.data, searchTerm])
 
   const filteredGames = useMemo(() => {
     return (gamesQuery.open.data || []) as any
@@ -289,41 +290,6 @@ function AdminPageContent() {
       addToast('Error creating player', 'error')
     }
   }
-
-  const handleCreateLine = async () => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
-      return
-    }
-
-    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.id) {
-      addToast('Please fill in all fields', 'error')
-      return
-    }
-
-    try {
-      await linesQuery.create.mutateAsync({
-        createdAt: new Date(),
-        status: 'open',
-        createdTxnSignature: null,
-        resolvedTxnSignature: null,
-        athleteId: newLine.playerId,
-        statId: newLine.statTypeId,
-        matchupId: newLine.id,
-        predictedValue: newLine.value,
-        actualValue: 0,
-        isHigher: null,
-        startsAt: new Date(newLine.gameDate),
-      } as any)
-
-      addToast('Line created successfully!', 'success')
-    } catch (error) {
-      console.error('Error creating line:', error)
-      addToast('Error creating line', 'error')
-    }
-  }
-
   const handleResolveLine = async (lineId: string, actualValue: number) => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
@@ -334,6 +300,41 @@ function AdminPageContent() {
     try {
       await linesQuery.resolve.mutateAsync({ lineId, actualValue })
       addToast(`Line resolved successfully! (${actualValue})`, 'success')
+    } catch (error) {
+      console.error('Error resolving line:', error)
+      addToast('Failed to resolve line', 'error')
+    }
+  }
+
+  const handleCreateLine = async () => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
+    try {
+      await linesQuery.create.mutateAsync({
+        matchupId: newLine.id,
+      } as any)
+
+      addToast('Lines created successfully!', 'success')
+    } catch (error) {
+      console.error('Error creating line:', error)
+      addToast('Error creating line', 'error')
+    }
+  }
+
+  const handleResolveLinesForMatchup = async (matchupId: string) => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin wallet required', 'error')
+      return
+    }
+
+    try {
+      await matchupsQuery.resolve.mutateAsync({ matchupId })
+      addToast(`Lines resolved successfully!`, 'success')
     } catch (error) {
       console.error('Error resolving line:', error)
       addToast('Failed to resolve line', 'error')
@@ -363,12 +364,12 @@ function AdminPageContent() {
       return
     }
 
-    if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.date) {
+    if (!newMatchUp.homeTeamId || !newMatchUp.awayTeamId || !newMatchUp.date) {
       addToast('Please fill in all fields', 'error')
       return
     }
 
-    if (newMatchUp.homeTeam === newMatchUp.awayTeam) {
+    if (newMatchUp.homeTeamId === newMatchUp.awayTeamId) {
       addToast('Home and away teams must be different', 'error')
       return
     }
@@ -388,8 +389,8 @@ function AdminPageContent() {
         gameDate: null,
         scoreHome: null,
         scoreAway: null,
-        homeTeamId: newMatchUp.homeTeam.id,
-        awayTeamId: newMatchUp.awayTeam.id,
+        homeTeamId: newMatchUp.homeTeamId,
+        awayTeamId: newMatchUp.awayTeamId,
       } as any)
 
       addToast('Match-up created successfully!', 'success')
@@ -434,16 +435,18 @@ function AdminPageContent() {
           {activeTab === 'lines' && (
             <LinesTab
               newLine={newLine}
-              setNewLine={setNewLine}
+              setNewLine={(line: any) => setNewLine(line)}
               handleCreateLine={handleCreateLine}
-              players={players}
-              stats={stats}
               matchUps={matchUps}
             />
           )}
 
           {activeTab === 'resolve-lines' && (
-            <ResolveLinesTab
+            <ResolveLinesTab handleResolveLinesForMatchup={handleResolveLinesForMatchup} matchUps={filteredMatchups} />
+          )}
+
+          {activeTab === 'manual-resolve-lines' && (
+            <ManualResolveLinesTab
               filteredLines={filteredLines}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}

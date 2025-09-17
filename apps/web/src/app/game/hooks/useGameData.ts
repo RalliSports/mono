@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useToast } from '@/components/ui/toast'
 import { GamesFindOne } from '@repo/server'
+
 export const useGameData = () => {
   const { addToast } = useToast()
   const searchParams = useSearchParams()

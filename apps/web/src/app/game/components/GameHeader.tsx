@@ -1,3 +1,4 @@
+import { useReferral } from '@/hooks/useReferral'
 import { GamesFindOne } from '@repo/server'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -9,8 +10,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
   const [imageSrc, setImageSrc] = useState(lobby.imageUrl)
   const [hasErrored, setHasErrored] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
-
-  const winners = lobby.participants.filter((p) => p.isWinner)
+  const { userReferralCode } = useReferral()
 
   const handleError = () => {
     if (!hasErrored) {
@@ -21,7 +21,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
 
   const handleShare = async () => {
     setIsSharing(true)
-    const shareUrl = `${window.location.origin}/game?id=${lobby.id}`
+    const shareUrl = `${window.location.origin}/game?id=${lobby.id}&ref=${userReferralCode}`
     const shareData = {
       title: lobby.title || 'Ralli Game',
       text: `Check out this game on Ralli: ${lobby.title}`,
@@ -36,14 +36,12 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
         // Desktop: copy to clipboard
         await navigator.clipboard.writeText(shareUrl)
         // You could add a toast notification here
-        console.log('Link copied to clipboard!')
       }
     } catch (error) {
       console.error('Error sharing:', error)
       // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(shareUrl)
-        console.log('Link copied to clipboard!')
       } catch (clipboardError) {
         console.error('Failed to copy to clipboard:', clipboardError)
       }

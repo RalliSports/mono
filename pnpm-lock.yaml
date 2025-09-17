@@ -40,11 +40,11 @@ importers:
         specifier: ^0.31.1
         version: 0.31.1(typescript@5.9.2)
       '@getpara/server-sdk':
-        specifier: ^1.18.0
-        version: 1.18.1
+        specifier: 2.0.0-alpha.55
+        version: 2.0.0-alpha.55
       '@getpara/solana-web3.js-v1-integration':
-        specifier: 1.18.0
-        version: 1.18.0(typescript@5.9.2)
+        specifier: 2.0.0-alpha.55
+        version: 2.0.0-alpha.55(@solana/web3.js@1.98.4)
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.6(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -2960,38 +2960,6 @@ packages:
       qrcode-with-logos: 1.1.1
     dev: false
 
-  /@getpara/core-sdk@1.18.0:
-    resolution: {integrity: sha512-2ozKD/7yPwga/gKITICCiO09RjebMqauwXalSTesqW2c45j8VeM3psd2DD6LscdMA0Ju6MPa5D1S3COhDiqvxA==}
-    dependencies:
-      '@celo/utils': 8.0.3
-      '@cosmjs/encoding': 0.32.4
-      '@ethereumjs/util': 9.1.0
-      '@getpara/user-management-client': 1.18.0
-      '@noble/hashes': 1.8.0
-      base64url: 3.0.1
-      libphonenumber-js: 1.11.2
-      node-forge: 1.3.1
-      uuid: 11.1.0
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
-  /@getpara/core-sdk@1.18.1:
-    resolution: {integrity: sha512-FFh+Rul0sgOyatPs9qgFj1IpsBvn871Hf2odg9NttgYLVYU9Fhx4vFHeogHN9tkMmYiYai3LATYOC676H5LCZA==}
-    dependencies:
-      '@celo/utils': 8.0.3
-      '@cosmjs/encoding': 0.32.4
-      '@ethereumjs/util': 9.1.0
-      '@getpara/user-management-client': 1.18.1
-      '@noble/hashes': 1.8.0
-      base64url: 3.0.1
-      libphonenumber-js: 1.11.2
-      node-forge: 1.3.1
-      uuid: 11.1.0
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
   /@getpara/core-sdk@2.0.0-alpha.43:
     resolution: {integrity: sha512-7z8JBdrvShK6v9I2Ikdz3+ufvhbXRjn1lsFLo93T9fU8iumoGGa5PVWO2adfLiM54RUglOVcrRdiFYgzQ2XkJg==}
     dependencies:
@@ -3471,11 +3439,11 @@ packages:
       - wagmi
     dev: false
 
-  /@getpara/server-sdk@1.18.1:
-    resolution: {integrity: sha512-Qnb5yE9HTIbNX9qkyOoCyHe48QrYHjw8g6RnnKM1els53eslY7YjPZmV67wnAXZWDnVTrx+ng4ZUoBnotAX5gw==}
+  /@getpara/server-sdk@2.0.0-alpha.55:
+    resolution: {integrity: sha512-RCJ5A79f0qsMe6+VyRi8o+kCtrmELSvgszAzbHb7+fFWZ2T5bludi/BlVsUHEQp9eBGDyEu1zyf+PbHzvFPRVw==}
     dependencies:
-      '@getpara/core-sdk': 1.18.1
-      '@getpara/user-management-client': 1.18.1
+      '@getpara/core-sdk': 2.0.0-alpha.55
+      '@getpara/user-management-client': 2.0.0-alpha.55
       uuid: 11.1.0
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
@@ -3592,19 +3560,6 @@ packages:
       - encoding
     dev: false
 
-  /@getpara/solana-web3.js-v1-integration@1.18.0(typescript@5.9.2):
-    resolution: {integrity: sha512-iwl/ttwUKWCR7v+CFnq25J8eQEnfKJ2gmdfOjMsdnh1EtwPNXuHus7VMoLRUN2hDOE50y4sP6VerHuKKccQKXQ==}
-    dependencies:
-      '@getpara/core-sdk': 1.18.0
-      '@solana/web3.js': 1.98.4(typescript@5.9.2)
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - typescript
-      - utf-8-validate
-    dev: false
-
   /@getpara/solana-web3.js-v1-integration@2.0.0-alpha.55(@solana/web3.js@1.98.2):
     resolution: {integrity: sha512-IPG3epCpCsnoXr9UEdrDm1GIFev3AIj3Kx4SjrjiScadzcuzC8AyU9Hg//BSENtvxGJ/flQD3OwJ8phiEG61rg==}
     peerDependencies:
@@ -3616,20 +3571,13 @@ packages:
       - debug
     dev: false
 
-  /@getpara/user-management-client@1.18.0:
-    resolution: {integrity: sha512-P5WjAOauWt/RomfTQsfucFpQqndz8UWm1TzWfEgCXu4r7PM5nshG0Mb9aWkPs+/Eynp5qghGLcc4aubmkqDRhw==}
+  /@getpara/solana-web3.js-v1-integration@2.0.0-alpha.55(@solana/web3.js@1.98.4):
+    resolution: {integrity: sha512-IPG3epCpCsnoXr9UEdrDm1GIFev3AIj3Kx4SjrjiScadzcuzC8AyU9Hg//BSENtvxGJ/flQD3OwJ8phiEG61rg==}
+    peerDependencies:
+      '@solana/web3.js': 1.x
     dependencies:
-      axios: 1.11.0
-      libphonenumber-js: 1.11.2
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
-  /@getpara/user-management-client@1.18.1:
-    resolution: {integrity: sha512-jvmKNlhlVoLz9aeE2gBaFQuKwYZQrlRz/AA+AYfP7upyWLsannItPPBZb+eGVtp9yMHEEFKQuaap5i2nzPGLqw==}
-    dependencies:
-      axios: 1.11.0
-      libphonenumber-js: 1.11.2
+      '@getpara/core-sdk': 2.0.0-alpha.55
+      '@solana/web3.js': 1.98.4(typescript@5.9.2)
     transitivePeerDependencies:
       - debug
     dev: false

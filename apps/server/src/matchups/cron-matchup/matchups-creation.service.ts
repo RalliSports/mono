@@ -4,7 +4,7 @@ import axios from 'axios';
 import { MatchupsService } from '../matchups.service';
 import { TeamService } from 'src/team/team.service';
 import { MatchupStatus } from '../enum/matchups';
-import { EspnEventData } from './types/matchups-creation-espn';
+import { EspnEventData } from './types/matchups-creation-espn-response.types';
 
 @Injectable()
 export class MatchupCreationService {
@@ -16,7 +16,7 @@ export class MatchupCreationService {
   ) {}
 
   // Runs every day
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_WEEK)
   async createAllMatchupsFromEspn() {
     const SEASON_TYPE_MAP = {
       PRESEASON: 1,

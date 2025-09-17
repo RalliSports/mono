@@ -63,6 +63,7 @@ export class CreateGameDto {
     description: 'User avatar URL',
     example: 'https://example.com/avatar.png',
   })
+  @IsOptional()
   @IsString()
   imageUrl?: string;
 }
