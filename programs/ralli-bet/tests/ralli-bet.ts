@@ -83,7 +83,7 @@ describe("RalliBet Comprehensive Tests", () => {
   let user5: Keypair;
   let user6: Keypair;
   let user7: Keypair;
-  let user: Keypair;
+  let user8: Keypair;
   let user1TokenAccount: PublicKey;
   let user2TokenAccount: PublicKey;
   let user3TokenAccount: PublicKey;
@@ -91,7 +91,7 @@ describe("RalliBet Comprehensive Tests", () => {
   let user5TokenAccount: PublicKey;
   let user6TokenAccount: PublicKey;
   let user7TokenAccount: PublicKey;
-  let userTokenAccount: PublicKey;
+  let user8TokenAccount: PublicKey;
   let providerTokenAccount: PublicKey;
   let treasuryTokenAccount: PublicKey;
   let users: Keypair[];
@@ -152,8 +152,8 @@ describe("RalliBet Comprehensive Tests", () => {
     user5 = Keypair.generate();
     user6 = Keypair.generate();
     user7 = Keypair.generate();
-    user = Keypair.generate();
-    users = [user1, user2, user3, user4, user5, user6, user7, user, treasury];
+    user8 = Keypair.generate();
+    users = [user1, user2, user3, user4, user5, user6, user7, user8, treasury];
 
     // Airdrop SOL to test users
     for (const user of users) {
