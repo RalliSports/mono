@@ -53,7 +53,7 @@ export function AccountBalanceCheck({ address }: { address: PublicKey }) {
     return (
       <AppAlert
         action={
-          <Button variant="outline" onClick={() => mutation.mutateAsync(1).catch((err) => console.log(err))}>
+          <Button variant="outline" onClick={() => mutation.mutateAsync(1).catch((err) => console.error(err))}>
             Request Airdrop
           </Button>
         }

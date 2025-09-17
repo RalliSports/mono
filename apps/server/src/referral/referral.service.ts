@@ -77,7 +77,7 @@ export class ReferralService {
       });
 
       if (!referrerCode) {
-        console.log(`Invalid referral code: ${referralCode}`);
+        console.error(`Invalid referral code: ${referralCode}`);
         return false;
       }
 
@@ -90,7 +90,7 @@ export class ReferralService {
       });
 
       if (existingReferral) {
-        console.log(`User ${newUserId} already referred by ${referralCode}`);
+        console.warn(`User ${newUserId} already referred by ${referralCode}`);
         return false;
       }
 
@@ -101,9 +101,6 @@ export class ReferralService {
         status: 'pending',
       });
 
-      console.log(
-        `Successfully processed referral: ${referralCode} -> ${newUserId}`,
-      );
       return true;
     } catch (error) {
       console.error('Error processing referral:', error);

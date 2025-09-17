@@ -17,6 +17,7 @@ import { PublicKey } from '@solana/web3.js';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
+import { line } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class LinesService {
@@ -50,7 +51,7 @@ export class LinesService {
         })
         .returning();
 
-      // Ensure createGameInstruction throws if it fails
+      // Ensure createLineInstruction throws if it fails
       let txn: string;
       const createdAt = inserted.createdAt;
       if (!createdAt) throw new BadRequestException('Line not created');
@@ -85,7 +86,7 @@ export class LinesService {
 
         if (!txn || typeof txn !== 'string') {
           throw new Error(
-            'Invalid transaction ID returned from createGameInstruction',
+            'Invalid transaction ID returned from createLineInstruction',
           );
         }
       } catch (error) {
@@ -95,7 +96,7 @@ export class LinesService {
         );
         // Throw to rollback DB transaction
         throw new BadRequestException(
-          "'Anchor instruction failed, rolling back game creation",
+          "'Anchor instruction failed, rolling back line creation",
           error,
         );
       }
@@ -221,9 +222,43 @@ export class LinesService {
     return this.db.query.lines.findFirst({
       where: eq(lines.id, id),
       with: {
-        stat: true,
-        matchup: true,
-        athlete: true,
+        stat: {
+          columns: {
+            id: true,
+            customId: true,
+            name: true,
+            statOddsName: true,
+          },
+        },
+        matchup: {
+          columns: {
+            id: true,
+            espnEventId: true,
+          },
+          with: {
+            homeTeam: {
+              columns: {
+                id: true,
+                name: true,
+                espnTeamId: true,
+              },
+            },
+            awayTeam: {
+              columns: {
+                id: true,
+                name: true,
+                espnTeamId: true,
+              },
+            },
+          },
+        },
+        athlete: {
+          columns: {
+            id: true,
+            name: true,
+            espnAthleteId: true,
+          },
+        },
       },
     });
   }
@@ -306,6 +341,109 @@ export class LinesService {
         );
       }
       return res[0];
+    });
+  }
+
+  async bulkResolveLines(
+    dto: (ResolveLineDto & { athleteName: string; statName: string })[],
+    user: User,
+  ) {
+    return await this.db.transaction(async (tx) => {
+      let txn: string;
+
+      const linesInformation: {
+        lineId: number;
+        predictedValue: number;
+        actualValue: number;
+        shouldRefundBettors: boolean;
+      }[] = [];
+      for (const [index, lineDataForResole] of dto.entries()) {
+        const lineData = await tx.query.lines.findFirst({
+          where: eq(lines.id, lineDataForResole.lineId),
+        });
+
+        // Check if line exists and is not resolved
+        if (!lineData) {
+          console.warn(
+            `Line not found for ${lineDataForResole.lineId}, athlete: ${lineDataForResole.athleteName}, stat: ${lineDataForResole.statName}`,
+          );
+          continue;
+        }
+        if (lineData.actualValue) {
+          console.warn(
+            `Line already resolved for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
+          continue;
+        }
+        if (!lineData.predictedValue) {
+          console.warn(
+            `Line not predicted for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
+          continue;
+        }
+        if (
+          lineDataForResole.actualValue === null ||
+          lineDataForResole.actualValue === undefined
+        ) {
+          console.warn(
+            `Actual value not provided for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
+          continue;
+        }
+        const lineCreatedAt = lineData.createdAt;
+        if (!lineCreatedAt) {
+          console.warn(
+            `Line not created for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+          );
+          continue;
+        }
+        const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
+        // Update line to mark as resolved
+        const [inserted] = await tx
+          .update(lines)
+          .set({
+            actualValue: lineDataForResole.actualValue.toString(),
+            isHigher:
+              lineDataForResole.actualValue && lineData.predictedValue
+                ? lineDataForResole.actualValue >
+                  Number(lineData.predictedValue)
+                : null,
+            status: LineStatus.RESOLVED,
+          })
+          .where(eq(lines.id, lineDataForResole.lineId))
+          .returning();
+        linesInformation.push({
+          lineId: lineCreatedAtTimestamp,
+          predictedValue: Number(lineData.predictedValue),
+          actualValue: lineDataForResole.actualValue,
+          shouldRefundBettors: false,
+        });
+      }
+
+      try {
+        txn = await this.anchor.bulkResolveLineInstruction(
+          linesInformation,
+          new PublicKey(user.walletAddress),
+        );
+
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction ID returned from bulkResolveLineInstruction',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed, rolling back transaction:',
+          error,
+        );
+        await tx.rollback();
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back lines resolution",
+          error,
+        );
+      }
+      return { success: true };
     });
   }
 }

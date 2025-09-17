@@ -4,7 +4,7 @@ import axios from 'axios';
 import { MatchupsService } from '../matchups.service';
 import { TeamService } from 'src/team/team.service';
 import { MatchupStatus } from '../enum/matchups';
-import { EspnEventData } from './types/matchups-creation-espn';
+import { EspnEventData } from './types/matchups-creation-espn-response.types';
 
 @Injectable()
 export class MatchupCreationService {
