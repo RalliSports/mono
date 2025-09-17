@@ -33,7 +33,7 @@ export function useUser() {
 
   const myCompletedGamesQuery = useQuery({
     queryKey: ['my-completed-games'],
-    queryFn: () => api.get<GamesGetMyCompletedGames[]>('/api/games/my-completed-games'),
+    queryFn: () => api.get<GamesGetMyCompletedGames[]>('/api/read-my-completed-games'),
     staleTime: 60 * 1000, // 1 minute
     enabled: !!isConnected,
   })
