@@ -5,7 +5,7 @@ import { TopNavigation, GameHeader, GameStats, ParticipantsList, LoadingSpinner,
 import { useGameData } from './hooks/useGameData'
 import JoinGameButton from './components/JoinGameButton'
 import { useUserData } from '@/providers/user-data-provider'
-// import { useAccount } from '@getpara/react-sdk'
+import { useAccount } from '@getpara/react-sdk'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
 import { useGameTabs } from './hooks/useGameTabs'
@@ -21,7 +21,7 @@ function ViewGameContent() {
   const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
 
   // Use auth hooks
-  // const account = useAccount()
+  const account = useAccount()
   const { isConnected, isLoading: balanceLoading } = useParaWalletBalance()
 
   // Handle wallet connection with callback URL for join-game
@@ -40,13 +40,11 @@ function ViewGameContent() {
     // Don't redirect if still loading
     if (balanceLoading) return
 
-    if (isLoading) return
-
     // Wait for connection to establish, then redirect with callback URL if not connected
     const timeoutId = setTimeout(() => {
       setHasCheckedConnection(true)
 
-      if (!isConnected && !balanceLoading && lobby?.id && !isLoading) {
+      if (!isConnected && !balanceLoading && lobby?.id) {
         const callbackUrl = `/game?id=${lobby?.id}`
         router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
       }
@@ -58,14 +56,14 @@ function ViewGameContent() {
   }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router, lobby])
 
   // Secondary check for account connection
-  // useEffect(() => {
-  //   if (!mounted) return
+  useEffect(() => {
+    if (!mounted) return
 
-  //   if (hasCheckedConnection && !account?.isConnected && lobby?.id && !isLoading) {
-  //     const callbackUrl = `/game?id=${lobby?.id}`
-  //     router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
-  //   }
-  // }, [mounted, hasCheckedConnection, account?.isConnected, router, lobby, isLoading])
+    if (hasCheckedConnection && !account?.isConnected && lobby?.id) {
+      const callbackUrl = `/game?id=${lobby?.id}`
+      router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+    }
+  }, [mounted, hasCheckedConnection, account?.isConnected, router, lobby])
 
   if (isLoading) {
     return (
