@@ -7,6 +7,7 @@ tracer.init({
   version: process.env.DD_VERSION || '1.0.0',
   logInjection: true,
   runtimeMetrics: true,
+  plugins: false,
 });
 
 export default tracer;
