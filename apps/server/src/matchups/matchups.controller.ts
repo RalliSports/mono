@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { MatchupsService } from './matchups.service';
 import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
@@ -11,6 +19,7 @@ import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { CreateLinesDto } from './dto/create-lines.dto';
 import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
+import { tracer } from 'dd-trace';
 
 @Controller('matchups')
 export class MatchupsController {
@@ -113,5 +122,29 @@ export class MatchupsController {
     @UserPayload() user: User,
   ) {
     return this.matchupsService.resolveLinesForMatchup(dto, user);
+  }
+
+  @Get('test/sync-error')
+  testSyncError() {
+    throw new Error('Test synchronous backend error');
+  }
+
+  @Get('test/async-error')
+  async testAsyncError() {
+    throw new Error('Test asynchronous backend error');
+  }
+
+  @Get('test/http-error')
+  testHttpError() {
+    throw new BadRequestException('Test HTTP exception error');
+  }
+
+  @Get('test/custom-error')
+  async testCustomError() {
+    const span = tracer.scope().active();
+    if (span) {
+      span.setTag('custom.test', 'error_testing');
+    }
+    throw new Error('Test error with custom span tags');
   }
 }
