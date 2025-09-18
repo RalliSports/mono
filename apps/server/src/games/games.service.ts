@@ -347,12 +347,6 @@ export class GamesService {
         await Promise.all(picks),
       );
 
-      if (!submitTxnSig) {
-        throw new BadRequestException(
-          'Failed to execute submit bets instruction on-chain',
-        );
-      }
-
       if (user.id !== game.creatorId) {
         // await connectToChat(user.id);
         const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
@@ -362,6 +356,12 @@ export class GamesService {
         });
 
         await channel.addMembers([user.id]);
+      }
+
+      if (!submitTxnSig) {
+        throw new BadRequestException(
+          'Failed to execute submit bets instruction on-chain',
+        );
       }
 
       await tx
