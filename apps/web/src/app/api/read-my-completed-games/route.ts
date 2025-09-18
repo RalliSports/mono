@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { backendUrl } from '@/constants'
 
 export async function GET(request: NextRequest) {
-     const userId = request.nextUrl.searchParams.get('userId')
+  const userId = request.nextUrl.searchParams.get('userId')
 
   try {
     if (!backendUrl) {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       const errorData = await response.text()
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: errorData,
           status: response.status,
         },

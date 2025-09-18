@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       const errorData = await response.text()
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: errorData,
           status: response.status,
         },
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     if (data.error) {
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: data.error,
           status: response.status,
         },
