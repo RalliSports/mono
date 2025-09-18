@@ -8,13 +8,23 @@ import AchievementsSection from './AchievementsSection'
 import ActiveParlaysSection from './ActiveParlaysSection'
 import HistorySection from './HistorySection'
 import PastParlaysSection from './PastParlaysSection'
+import ChatsSection from './ChatsSection'
 import ProfileHeader from './ProfileHeader'
 import ProfilePictureUploadModal from './ProfilePictureUploadModal'
 import TopNavigation from './TopNavigation'
+import TabNavigation from './TabNavigation'
+import { useUser } from '@/hooks/api'
+import { useEffect, useState } from 'react'
+import { Channel } from 'stream-chat'
+import { useChat } from '@/hooks/api/use-chat'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
+  const [userHasStreamChat, setUserHasStreamChat] = useState(false)
+  const { currentUser } = useUser()
+  const { client } = useChat()
+  const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
 
   const { user, myOpenGames, myCompletedGames, username, firstName, lastName, setUser, setAvatar, setForceRefresh } =
     useProfile(session || null)
@@ -28,11 +38,18 @@ export default function ProfileContent() {
     setAvatar,
   )
 
- 
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
 
-
+  useEffect(() => {
+    const checkUserHasStreamChat = async () => {
+      const response = await client.queryUsers({ id: user?.id })
+      setUserHasStreamChat(response.users.length > 0)
+    }
+    if (user?.id) {
+      checkUserHasStreamChat()
+    }
+  }, [user, client])
   // Don't render until mounted to prevent hydration issues
   if (!mounted || !user) {
     return null
@@ -56,11 +73,22 @@ export default function ProfileContent() {
         formatBalance={formatBalance}
         onEditPictureClick={() => setIsUploadModalOpen(true)}
         avatar={user.avatar || ''}
+        setActiveTab={setActiveTab}
+        setActiveChannel={setActiveChannel}
+        userHasStreamChat={userHasStreamChat}
+      />
+      <TabNavigation
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setActiveChannel={setActiveChannel}
+        isCurrentUser={currentUser.data?.id === user.id}
+        userId={user.id}
+        userHasStreamChat={userHasStreamChat}
       />
 
       {/* Tab Content */}
       <div className="px-4 pb-8">
-        {activeTab === 'overview' && (
+        {activeTab === 'parlays' && (
           <div className="space-y-6">
             <ActiveParlaysSection myOpenGames={myOpenGames} user={user} setActiveTab={setActiveTab} />
             <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
@@ -70,6 +98,14 @@ export default function ProfileContent() {
         {activeTab === 'history' && <HistorySection />}
 
         {activeTab === 'achievements' && <AchievementsSection />}
+
+        {activeTab === 'chats' && (
+          <ChatsSection
+            activeChannel={activeChannel}
+            setActiveChannel={setActiveChannel}
+            isCurrentUser={currentUser.data?.id === user.id}
+          />
+        )}
       </div>
 
       <ProfilePictureUploadModal

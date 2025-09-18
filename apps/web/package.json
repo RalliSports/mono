@@ -64,6 +64,8 @@
     "react-toastify": "^11.0.5",
     "recharts": "^3.1.0",
     "sonner": "^2.0.5",
+    "stream-chat" : "9.19.0",
+    "stream-chat-react" : "13.6.4",
     "tailwind-merge": "^3.3.0",
     "tw-animate-css": "^1.3.4",
     "uploadthing": "^7.7.4",

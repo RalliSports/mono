@@ -41,6 +41,15 @@ export class NotificationService {
     return results;
   }
 
+  async sendChatNotificationToUser(
+    userId: string,
+    payload: NotificationPayload,
+  ) {
+    // Check if user has chat notifications enabled (you might want to add this to user preferences)
+    // For now, we'll send to all their subscriptions
+    return this.sendNotificationToUser(userId, payload);
+  }
+
   async broadcastMessageToAllUsers(payload: NotificationPayload) {
     // Fetch all active subscriptions
     const subscriptions = await this.db.query.pushSubscriptions.findMany({
@@ -107,10 +116,11 @@ export class NotificationService {
   buildNewChatMessage(
     senderName: string,
     conversationId: string,
+    message: string,
   ): NotificationPayload {
     return {
-      title: 'New Message 💌',
-      body: `You’ve got a new message from ${senderName}. Tap to read it now.`,
+      title: `New Message from ${senderName}`,
+      body: message,
       image: 'https://www.ralli.bet/images/new-message.png',
       url: `https://www.ralli.bet/messages/${conversationId}`,
       icon: 'https://www.ralli.bet/icons/message.png',

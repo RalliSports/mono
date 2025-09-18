@@ -11,6 +11,7 @@ import { UpdateUserDto, UpdateUserEmailDto } from './dto/update-user.dto';
 import { User } from './dto/user-response.dto';
 import { PushSubscriptionResponse } from '../notification/dto/webpush.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
+import { StreamChat } from 'stream-chat';
 
 @Injectable()
 export class UserService {
@@ -262,5 +263,23 @@ export class UserService {
       message: `Sent ${successCount} notifications successfully, ${failureCount} failed`,
       results,
     };
+  }
+
+  async getStreamChatToken(user: User) {
+    const userData = await this.db.query.users.findFirst({
+      where: eq(users.id, user.id),
+    });
+
+    if (!userData) {
+      throw new Error('User not found');
+    }
+
+    const chatClient = new StreamChat(
+      process.env.STREAM_CHAT_API_KEY!,
+      process.env.STREAM_CHAT_SECRET_KEY,
+    );
+
+    const token = chatClient.createToken(userData.id);
+    return { token };
   }
 }
