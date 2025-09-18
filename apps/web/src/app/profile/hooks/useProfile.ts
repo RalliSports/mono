@@ -19,7 +19,6 @@ export function useProfile(session: string | null) {
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId') ?? ''
 
-
   const handleUpdateUser = async () => {
     const response = await fetch('/api/update-user', {
       method: 'PATCH',
@@ -48,13 +47,10 @@ export function useProfile(session: string | null) {
 
         if (userId) {
           response = await fetch(`/api/user/${userId}`)
-          
-
-        } else  {
+        } else {
           response = await fetch('/api/read-current-user', {
             headers: { 'x-para-session': session ?? '' },
           })
-             
         }
 
         if (response?.ok) {
@@ -81,7 +77,7 @@ export function useProfile(session: string | null) {
           addToast(errorData.error || 'Failed to fetch user', 'error')
         }
       } catch (err) {
-        console.log(err, "error fetching user")
+        console.log(err, 'error fetching user')
         addToast('Unexpected error fetching user', 'error')
       }
     }
@@ -101,9 +97,10 @@ export function useProfile(session: string | null) {
         // addToast(errorData.error || 'Failed to fetch my open games', 'error')
       }
     }
+    if (user?.id !== undefined) {
       fetchMyOpenGames()
-    
-  }, [ session, user])
+    }
+  }, [session, user])
 
   useEffect(() => {
     const fetchMyCompletedGames = async () => {
@@ -116,7 +113,9 @@ export function useProfile(session: string | null) {
         // addToast(errorData.error || 'Failed to fetch my completed games', 'error')
       }
     }
-    fetchMyCompletedGames()
+    if (user?.id !== undefined) {
+      fetchMyCompletedGames()
+    }
   }, [session, user])
 
   return {

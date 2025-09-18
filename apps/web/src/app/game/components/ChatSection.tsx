@@ -43,10 +43,10 @@ export default function ChatsSection() {
       </h3>
       <div className="space-y-4">
         {isConnectedToClient && (
-          <div style={{ display: 'flex', height: '100vh' }}>
+          <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
             <Chat client={client}>
               {/* Main chat area */}
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, width: '100%' }}>
                 {activeChannel ? (
                   <ChannelComponent channel={activeChannel}>
                     <Window>

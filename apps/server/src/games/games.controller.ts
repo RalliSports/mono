@@ -26,6 +26,7 @@ import { GameResponseDto } from './dto/game-response.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { User } from 'src/user/dto/user-response.dto';
+import { isUUID } from 'class-validator';
 
 @Controller('')
 export class GamesController {
@@ -67,8 +68,15 @@ export class GamesController {
     type: [GameResponseDto],
   })
   @Get('/games/my-open-games')
-  findMyOpenGames(@Query('userId') userId: string) {
-    return this.gamesService.getMyOpenGames(userId);
+  findMyOpenGames(
+    @Query('userId') userId: string | undefined,
+    @UserPayload() user: User,
+  ) {
+    const userIdToUse = userId || user.id;
+    if (userIdToUse && isUUID(userIdToUse)) {
+      return this.gamesService.getMyOpenGames(userIdToUse);
+    }
+    return [];
   }
 
   @ApiOperation({ summary: 'Get all games' })
@@ -83,8 +91,15 @@ export class GamesController {
     type: [GameResponseDto],
   })
   @Get('/games/my-completed-games')
-  findMyCompletedGames(@Query('userId') userId: string) {
-    return this.gamesService.getMyCompletedGames(userId);
+  findMyCompletedGames(
+    @Query('userId') userId: string,
+    @UserPayload() user: User,
+  ) {
+    const userIdToUse = userId || user.id;
+    if (userIdToUse && isUUID(userIdToUse)) {
+      return this.gamesService.getMyCompletedGames(userIdToUse);
+    }
+    return [];
   }
 
   @ApiOperation({ summary: 'Get all games' })

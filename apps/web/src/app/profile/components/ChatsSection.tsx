@@ -11,16 +11,23 @@ import {
 } from 'stream-chat-react'
 import { useProfile } from '../hooks/useProfile'
 import { useSessionToken } from '@/hooks/use-session'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Channel, ChannelFilters } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
 import Image from 'next/image'
 
 import 'stream-chat-react/dist/css/v2/index.css'
-export default function ChatsSection() {
+export default function ChatsSection({
+  activeChannel,
+  setActiveChannel,
+  isCurrentUser,
+}: {
+  activeChannel: Channel | null
+  setActiveChannel: (channel: Channel | null) => void
+  isCurrentUser: boolean
+}) {
   const { session } = useSessionToken()
   const { user } = useProfile(session || null)
-  const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
   const { client, getChannels, isConnectedToClient } = useChat()
   useEffect(() => {
     getChannels()
@@ -72,14 +79,16 @@ export default function ChatsSection() {
           <div style={{ display: 'flex', height: '100vh' }}>
             <Chat client={client}>
               {/* Left sidebar - Channel List */}
-              <div style={{ width: '300px', borderRight: '1px solid #ddd' }}>
-                <ChannelList
-                  filters={filters as ChannelFilters}
-                  // sort={sort}
-                  // onChannelSelect={setActiveChannel}
-                  Preview={(props) => <CustomChannelPreview {...props} />} // Optional custom preview
-                />
-              </div>
+              {isCurrentUser && (
+                <div style={{ width: '300px', borderRight: '1px solid #ddd' }}>
+                  <ChannelList
+                    filters={filters as ChannelFilters}
+                    // sort={sort}
+                    // onChannelSelect={setActiveChannel}
+                    Preview={(props) => <CustomChannelPreview {...props} />} // Optional custom preview
+                  />
+                </div>
+              )}
 
               {/* Main chat area */}
               <div style={{ flex: 1 }}>

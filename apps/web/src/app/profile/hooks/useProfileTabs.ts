@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+export type ProfileTabType = 'parlays' | 'chats' | 'friends' | 'history' | 'achievements'
 
 export function useProfileTabs() {
   const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState('chats')
+  const [activeTab, setActiveTab] = useState<ProfileTabType>('parlays')
   const [mounted, setMounted] = useState(false)
   const [editingUsername, setEditingUsername] = useState(false)
 
@@ -11,8 +12,8 @@ export function useProfileTabs() {
   useEffect(() => {
     setMounted(true)
     const tab = searchParams.get('tab')
-    if (tab && ['parlays', 'chats', 'friends'].includes(tab)) {
-      setActiveTab(tab)
+    if (tab && ['parlays', 'chats', 'friends', 'history', 'achievements'].includes(tab)) {
+      setActiveTab(tab as ProfileTabType)
     }
   }, [searchParams])
 

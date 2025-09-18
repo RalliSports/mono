@@ -24,7 +24,6 @@ export function useChat() {
   })
 
   useEffect(() => {
-    console.log('connectToClient', currentUserChatToken.data, currentUser.data)
     if (currentUserChatToken.data && currentUser.data) {
       client.connectUser(
         { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
@@ -36,7 +35,6 @@ export function useChat() {
   }, [currentUserChatToken.data, currentUser.data])
 
   const connectToClient = useCallback(() => {
-    console.log('connectToClient', currentUserChatToken.data, currentUser.data)
     if (currentUserChatToken.data && currentUser.data) {
       client.connectUser(
         { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
@@ -49,6 +47,29 @@ export function useChat() {
   const disconnectFromClient = useCallback(() => {
     client.disconnectUser()
   }, [])
+
+  const connectToDirectMessage = useCallback(
+    (userId: string) => {
+      if (currentUser.data && userId) {
+        const channel = client.channel('messaging', null, {
+          members: [currentUser.data.id, userId],
+        })
+        channel.create()
+        channel.on('notification.message_new', (event) => {
+          console.log('event', event)
+          console.log('received a new message', event.message?.text)
+          console.log(`Now have ${channel.state.messages.length} stored in local state`)
+        })
+        setCurrentChannel(channel)
+        console.log('connected to channel', channel)
+        return channel
+      } else {
+        console.log('could not connect to direct message')
+        throw new Error('could not connect to direct message')
+      }
+    },
+    [currentUser.data],
+  )
 
   const connectToChannelAndSubscribe = useCallback(
     (channelId: string) => {
@@ -102,5 +123,6 @@ export function useChat() {
     getChannels,
     isConnectedToClient,
     getChannel,
+    connectToDirectMessage,
   }
 }

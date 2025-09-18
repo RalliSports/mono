@@ -123,13 +123,7 @@ function AdminPageContent() {
   // Filtered data using useMemo with proper type casting
   const filteredMatchups = useMemo(() => {
     const matchupsData = matchupsQuery.query.data || []
-    return matchupsData.filter((matchup: any) => {
-      // const nowTime = new Date()
-      // const matchupTime = matchup.startsAt
-      // const matchupAlreadyStarted = nowTime >= matchupTime
-      // const matchupAlreadyResolved = matchup.status === 'finished'
-      return true
-    })
+    return matchupsData
   }, [matchupsQuery.query.data, searchTerm])
 
   const filteredGames = useMemo(() => {

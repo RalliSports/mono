@@ -10,10 +10,11 @@ import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
 import { useGameTabs } from './hooks/useGameTabs'
 import ChatSection from './components/ChatSection'
+import TabNavigation from './components/TabNavigation'
 
 function ViewGameContent() {
   const { lobby, isLoading, expandedParticipants, toggleParticipant } = useGameData()
-  const { activeTab, setActiveTab, mounted } = useGameTabs()
+  const { activeTab, mounted, setActiveTab } = useGameTabs()
   const { user } = useUserData()
   const router = useRouter()
 
@@ -95,8 +96,9 @@ function ViewGameContent() {
         <GameStats lobby={lobby} />
         <WinnersDisplay lobby={lobby} />
         <JoinGameButton game={lobby} user={user ?? null} />
+        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {activeTab === 'players' && (
+        {activeTab === 'parlays' && (
           <ParticipantsList
             lobby={lobby}
             expandedParticipants={expandedParticipants}

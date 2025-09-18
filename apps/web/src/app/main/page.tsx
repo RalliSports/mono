@@ -11,11 +11,9 @@ import { TopNavigation, FilterBar, LobbiesSection, LoadingScreen } from './compo
 // Hooks
 import { useWalletConnection } from './hooks/useWalletConnection'
 import { useMainPage } from './hooks/useMainPage'
-import { useChat } from '@/hooks/api/use-chat'
 
 export default function MainFeedPage() {
   const { session } = useSessionToken()
-  const { connectToClient, disconnectFromClient, connectToChannelAndSubscribe, sendMessageToCurrentChannel } = useChat()
 
   // console.log(session)
 
@@ -60,26 +58,6 @@ export default function MainFeedPage() {
 
       {/* Filters and Search */}
       <FilterBar />
-      {
-        <button className="text-white" onClick={() => connectToClient()}>
-          Connect to Client
-        </button>
-      }
-      {
-        <button className="text-white" onClick={() => disconnectFromClient()}>
-          Disconnect from Client
-        </button>
-      }
-      {
-        <button className="text-white" onClick={() => connectToChannelAndSubscribe('test2')}>
-          Connect to Channel
-        </button>
-      }
-      {
-        <button className="text-white" onClick={() => sendMessageToCurrentChannel('test2')}>
-          Send Message to Channel
-        </button>
-      }
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts */}

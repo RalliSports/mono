@@ -1,21 +1,27 @@
 import { Button } from '@/components/ui/button'
 import { useFriends } from '@/hooks/api/use-friend'
-import { Loader2, UserMinusIcon, UserRoundPlus } from 'lucide-react'
+import { Loader2, UserMinusIcon, UserRoundPlus, MessageCircle } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import NotificationsButton from './NotificationsButton'
 import ProfilePicture from './ProfilePicture'
 import ReferFriendsSection from './ReferFriendsSection'
 import StatsGrid from './StatsGrid'
 import UsernameEditor from './UsernameEditor'
+import { useChat } from '@/hooks/api/use-chat'
+import { ProfileTabType } from '../hooks/useProfileTabs'
+import { Channel } from 'stream-chat'
 
 interface ProfileHeaderProps {
   balances: { ralli: number }
   formatBalance: (amount: number) => string
   onEditPictureClick: () => void
+  setActiveTab: (tab: ProfileTabType) => void
+  setActiveChannel: (channel: Channel | null) => void
   avatar: string
   currentUserId: string
   isConnected: boolean
   session: string
+  userHasStreamChat: boolean
 }
 
 export default function ProfileHeader({
@@ -25,9 +31,13 @@ export default function ProfileHeader({
   avatar,
   isConnected,
   session,
-  currentUserId
+  currentUserId,
+  setActiveTab,
+  setActiveChannel,
+  userHasStreamChat,
 }: ProfileHeaderProps) {
-  const { friend, toggle, followers, following } = useFriends(session as string)
+  const { friend, toggle } = useFriends(session as string)
+  const { connectToDirectMessage } = useChat()
 
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId') ?? ''
@@ -37,6 +47,15 @@ export default function ProfileHeader({
       await toggle.mutateAsync()
     } catch (error) {
       console.log('could not toogle follow:', error)
+    }
+  }
+  const handleConnectToDirectMessage = async () => {
+    try {
+      const channel = await connectToDirectMessage(userId)
+      setActiveTab('chats')
+      setActiveChannel(channel)
+    } catch (error) {
+      console.log('could not connect to direct message:', error)
     }
   }
 
@@ -50,19 +69,28 @@ export default function ProfileHeader({
             {<UsernameEditor userId={userId} />}
             {isConnected && !userId ? <NotificationsButton /> : null}
             {userId && (
-              <Button onClick={handleToggleFollow} disabled={toggle.isPending}>
-                {toggle.isPending ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : friend.data?.isFollowing ? (
-                  <span className="flex items-center gap-2 cursor-pointer">
-                    <UserMinusIcon size={20} /> Unfollow
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2 cursor-pointer">
-                    <UserRoundPlus size={20} /> Follow
-                  </span>
+              <div className="flex items-center gap-2">
+                <Button onClick={handleToggleFollow} disabled={toggle.isPending}>
+                  {toggle.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : friend.data?.isFollowing ? (
+                    <span className="flex items-center gap-2 cursor-pointer">
+                      <UserMinusIcon size={20} /> Unfollow
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 cursor-pointer">
+                      <UserRoundPlus size={20} /> Follow
+                    </span>
+                  )}
+                </Button>
+                {userHasStreamChat && (
+                  <Button onClick={handleConnectToDirectMessage} disabled={toggle.isPending}>
+                    <span className="flex items-center gap-2 cursor-pointer">
+                      <MessageCircle size={20} /> Message
+                    </span>
+                  </Button>
                 )}
-              </Button>
+              </div>
             )}
           </div>
         </div>

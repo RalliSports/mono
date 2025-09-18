@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { backendUrl } from '@/constants'
 
 export async function GET(request: NextRequest) {
-       const userId = request.nextUrl.searchParams.get('userId')
+  const userId = request.nextUrl.searchParams.get('userId')
 
   try {
     if (!backendUrl) {
       return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 })
     }
-
+    console.log('userId', userId)
 
     // Make the request to the backend
     const response = await fetch(`${backendUrl}/api/v1/games/my-open-games?userId=${userId}`, {
