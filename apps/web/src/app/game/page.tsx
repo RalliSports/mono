@@ -40,11 +40,13 @@ function ViewGameContent() {
     // Don't redirect if still loading
     if (balanceLoading) return
 
+    if (isLoading) return
+
     // Wait for connection to establish, then redirect with callback URL if not connected
     const timeoutId = setTimeout(() => {
       setHasCheckedConnection(true)
 
-      if (!isConnected && !balanceLoading && lobby?.id) {
+      if (!isConnected && !balanceLoading && lobby?.id && !isLoading) {
         const callbackUrl = `/game?id=${lobby?.id}`
         router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
       }
