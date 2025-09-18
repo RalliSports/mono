@@ -19,6 +19,13 @@ export default function TestPage() {
     })
   }
 
+  const triggerABackendError = () => {
+    fetch('/api/read-error')
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.error('Error:', error))
+  }
+
   return (
     <div>
       <h1>Datadog Error Testing</h1>
@@ -30,6 +37,9 @@ export default function TestPage() {
       </button>
       <button onClick={triggerCustomError} className="bg-white text-black p-2 rounded-md">
         Trigger Custom Error
+      </button>
+      <button onClick={triggerABackendError} className="bg-white text-black p-2 rounded-md">
+        Trigger Backend Error
       </button>
     </div>
   )
