@@ -29,7 +29,7 @@ export default function TabNavigation({
     // { id: 'achievements', name: 'Achievements', icon: '🏆' },
   ]
 
-  if (!userHasStreamChat) {
+  if (!userHasStreamChat && !isCurrentUser) {
     tabs.splice(1, 1)
   }
 
