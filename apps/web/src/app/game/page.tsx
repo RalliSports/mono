@@ -59,7 +59,7 @@ function ViewGameContent() {
   useEffect(() => {
     if (!mounted) return
 
-    if (hasCheckedConnection && !account?.isConnected && lobby?.id) {
+    if (hasCheckedConnection && !account?.isConnected && lobby?.id && !isLoading) {
       const callbackUrl = `/game?id=${lobby?.id}`
       router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
     }
