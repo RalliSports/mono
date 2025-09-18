@@ -143,13 +143,15 @@ export function usePicks() {
 
     if (response.ok) {
       addToast('Bets submitted successfully!', 'success')
+
+      setTimeout(() => {
+        window.location.href = `/game?id=${gameId}`
+      }, 1000)
     } else {
       const errorData = await response.json()
       addToast(errorData.error || 'Failed to submit bets', 'error')
+      throw new Error(errorData.error || 'Failed to submit bets')
     }
-    setTimeout(() => {
-      window.location.href = `/game?id=${gameId}`
-    }, 1000)
     setIsSubmittingPayment(false)
   }
 
