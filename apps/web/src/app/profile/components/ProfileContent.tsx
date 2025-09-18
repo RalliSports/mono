@@ -37,6 +37,7 @@ export default function ProfileContent() {
     setUser as (user: unknown) => void,
     setAvatar,
   )
+  const isCurrentUser = currentUser.data?.id === user?.id
 
   // Para wallet balance hook
   const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance()
@@ -63,6 +64,7 @@ export default function ProfileContent() {
         balanceLoading={balanceLoading}
         balanceError={balanceError?.message}
         formatBalance={formatBalance}
+        isCurrentUser={isCurrentUser}
       />
 
       <ProfileHeader
@@ -81,7 +83,7 @@ export default function ProfileContent() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         setActiveChannel={setActiveChannel}
-        isCurrentUser={currentUser.data?.id === user.id}
+        isCurrentUser={isCurrentUser}
         userId={user.id}
         userHasStreamChat={userHasStreamChat}
       />
@@ -103,7 +105,7 @@ export default function ProfileContent() {
           <ChatsSection
             activeChannel={activeChannel}
             setActiveChannel={setActiveChannel}
-            isCurrentUser={currentUser.data?.id === user.id}
+            isCurrentUser={isCurrentUser}
           />
         )}
       </div>
