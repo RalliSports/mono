@@ -105,6 +105,7 @@ export function useChat() {
       })
       console.log('User channels:', channels)
       console.log('Channel count:', channels.length)
+      return channels
     }
   }, [client])
 

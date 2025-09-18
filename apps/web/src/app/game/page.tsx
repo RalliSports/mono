@@ -17,6 +17,7 @@ function ViewGameContent() {
   const { activeTab, mounted, setActiveTab } = useGameTabs()
   const { user } = useUserData()
   const router = useRouter()
+  const isUserInGame = lobby?.participants.some((participant) => participant.user?.id === user?.id)
 
   const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
 
@@ -96,7 +97,7 @@ function ViewGameContent() {
         <GameStats lobby={lobby} />
         <WinnersDisplay lobby={lobby} />
         <JoinGameButton game={lobby} user={user ?? null} />
-        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} isUserInGame={isUserInGame ?? false} />
 
         {activeTab === 'parlays' && (
           <ParticipantsList

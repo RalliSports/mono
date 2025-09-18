@@ -11,7 +11,7 @@ import {
 } from 'stream-chat-react'
 import { useProfile } from '../hooks/useProfile'
 import { useSessionToken } from '@/hooks/use-session'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Channel, ChannelFilters } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
 import Image from 'next/image'
@@ -28,14 +28,21 @@ export default function ChatsSection({
 }) {
   const { session } = useSessionToken()
   const { user } = useProfile(session || null)
+  const [channels, setChannels] = useState<Channel[]>([])
   const { client, getChannels, isConnectedToClient } = useChat()
   useEffect(() => {
-    getChannels()
+    getChannels().then((channels) => {
+      setChannels(channels ?? [])
+    })
   }, [getChannels])
 
   const filters = {
     type: { $in: ['messaging', 'team', 'gaming'] },
     members: { $in: [user?.id] },
+  }
+
+  if (channels.length === 0) {
+    return <div className="text-white">No channels found. Join a game to start chatting!</div>
   }
 
   //   const sort = [{ last_message_at: -1 }]
