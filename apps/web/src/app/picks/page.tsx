@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 // Components
 import {
@@ -17,6 +17,9 @@ import PicksPageSkeleton from './components/PicksPageSkeleton'
 // Hooks and Constants
 import { usePicks } from './hooks/usePicks'
 import { DEFAULT_LEGS_REQUIRED, DEFAULT_BUY_IN, DEFAULT_GAME_NAME } from './constants/gameDefaults'
+import { useRouter } from 'next/navigation'
+import { useAccount } from '@getpara/react-sdk'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 
 function PicksContent() {
   const {
@@ -36,6 +39,53 @@ function PicksContent() {
     handlePaymentConfirm,
     handlePaymentCancel,
   } = usePicks()
+  const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
+
+  const account = useAccount()
+  const { isConnected, isLoading: balanceLoading } = useParaWalletBalance()
+
+  const router = useRouter()
+
+  // Handle wallet connection with callback URL for join-game
+  useEffect(() => {
+    if (!mounted) return
+
+    // If we're connected, mark as checked
+    if (isConnected) {
+      setHasCheckedConnection(true)
+      return
+    }
+
+    // Don't check again if we've already performed a connection check
+    if (hasCheckedConnection) return
+
+    // Don't redirect if still loading
+    if (balanceLoading) return
+
+    // Wait for connection to establish, then redirect with callback URL if not connected
+    const timeoutId = setTimeout(() => {
+      setHasCheckedConnection(true)
+
+      if (!isConnected && !balanceLoading && gameId) {
+        const callbackUrl = `/game?id=${gameId}`
+        router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      }
+    }, 2000) // Same timeout as main page
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router, gameId])
+
+  // Secondary check for account connection
+  useEffect(() => {
+    if (!mounted) return
+
+    if (hasCheckedConnection && !account?.isConnected && gameId) {
+      const callbackUrl = `/game?id=${gameId}`
+      router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+    }
+  }, [mounted, hasCheckedConnection, account?.isConnected, router, gameId])
 
   const legsRequired = game?.numBets || DEFAULT_LEGS_REQUIRED
   const buyIn = game?.depositAmount || DEFAULT_BUY_IN

@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest) {
       const errorData = await response.text()
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: errorData,
           status: response.status,
         },

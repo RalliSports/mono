@@ -2,7 +2,11 @@ import { useProfile } from '../hooks/useProfile'
 import { useSessionToken } from '@/hooks/use-session'
 import { useProfileTabs } from '../hooks/useProfileTabs'
 
-export default function UsernameEditor() {
+interface Props {
+  userId: string
+}
+
+export default function UsernameEditor({ userId }: Props) {
   const { session } = useSessionToken()
   const { editingUsername, setEditingUsername } = useProfileTabs()
   const { username, setUsername, user, handleUpdateUser } = useProfile(session || null)
@@ -67,24 +71,26 @@ export default function UsernameEditor() {
           {user?.username || 'Set username'}
         </h2>
         {/* Edit Button */}
-        <button
-          onClick={handleUsernameClick}
-          className="w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
-        >
-          <svg
-            className="w-3.5 h-3.5 text-white transition-transform duration-200 group-hover:rotate-12"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {!userId ? (
+          <button
+            onClick={handleUsernameClick}
+            className="w-8 h-8 bg-gradient-to-br from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 border-slate-800 group"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.5}
-              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-3.5 h-3.5 text-white transition-transform duration-200 group-hover:rotate-12"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+          </button>
+        ) : null}
       </div>
       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <div className="p-2 bg-slate-700/50 rounded-lg">

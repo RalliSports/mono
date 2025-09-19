@@ -1,11 +1,12 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Game, User } from './types'
+import { ProfileTabType } from '../hooks/useProfileTabs'
 
 interface ActiveParleysSectionProps {
   myOpenGames: Game[]
   user: User
-  setActiveTab: (tab: string) => void
+  setActiveTab: (tab: ProfileTabType) => void
 }
 
 export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }: ActiveParleysSectionProps) {

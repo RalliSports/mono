@@ -101,8 +101,6 @@ export function useApiWithAuth() {
       authHeaders['x-referral-code'] = referralCode
     }
 
-    console.log('account.embedded.email', account.embedded.email)
-
     if (account.embedded.email) {
       authHeaders['x-email'] = account.embedded.email
     }

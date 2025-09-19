@@ -1,4 +1,11 @@
-export type TabType = 'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games' | 'matchups'
+export type TabType =
+  | 'stats'
+  | 'lines'
+  | 'players'
+  | 'resolve-lines'
+  | 'manual-resolve-lines'
+  | 'resolve-games'
+  | 'matchups'
 
 interface TabNavigationProps {
   activeTab: TabType
@@ -11,6 +18,7 @@ export default function TabNavigation({ activeTab, setActiveTab }: TabNavigation
     { id: 'players', name: 'Players', icon: '👤' },
     { id: 'lines', name: 'Create Lines', icon: '📈' },
     { id: 'resolve-lines', name: 'Resolve Lines', icon: '✅' },
+    { id: 'manual-resolve-lines', name: 'Manual Resolve Lines', icon: '✅' },
     { id: 'resolve-games', name: 'Resolve Games', icon: '🎮' },
     { id: 'matchups', name: 'Match Up', icon: '⚔️' },
   ]

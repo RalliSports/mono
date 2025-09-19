@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // TypeScript interface for the request data
-interface CreateMatchupRequest {
-  homeTeamId: string
-  awayTeamId: string
-  startsAtTimestamp: number
-}
-
 // Validation function with detailed error reporting
 function validateCreateMatchupData(data: unknown): { isValid: boolean; errors?: string[] } {
   if (!data || typeof data !== 'object') {
@@ -76,7 +70,7 @@ export async function POST(request: NextRequest) {
       const errorData = await response.text()
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: errorData,
           status: response.status,
         },

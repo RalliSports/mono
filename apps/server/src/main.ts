@@ -1,11 +1,15 @@
+import './tracing';
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { DatadogExceptionFilter } from './filters/datadog-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.useGlobalFilters(new DatadogExceptionFilter());
   // Enable CORS for production
   app.enableCors({
     origin:

@@ -6,6 +6,9 @@ import { MatchupsService } from '../matchups/matchups.service';
 import { StatsService } from '../stats/stats.service';
 import { TeamService } from '../team/team.service';
 import { ReferralService } from '../referral/referral.service';
+import { FriendsService } from 'src/friends/friends.service';
+import { InputType } from 'zlib';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 
 // Games Service Types
 export type GamesFindOne = Awaited<ReturnType<GamesService['findOne']>>;
@@ -37,12 +40,16 @@ export type UserFindOne = Awaited<ReturnType<UserService['findOne']>>;
 export type UserUpdate = Awaited<ReturnType<UserService['updateUser']>>;
 export type UserFaucetTokens = Awaited<ReturnType<UserService['faucetTokens']>>;
 
+export type FriendsFollowing = Awaited<ReturnType<FriendsService['getFollowing']>>;
+export type FriendsFollower= Awaited<ReturnType<FriendsService['getFollowers']>>;
+
 // Lines Service Types
 export type LineFindAll = Awaited<ReturnType<LinesService['getAllLines']>>;
 export type LineCreate = Awaited<ReturnType<LinesService['createLine']>>;
 export type LineFindById = Awaited<ReturnType<LinesService['getLineById']>>;
 export type LineUpdate = Awaited<ReturnType<LinesService['updateLine']>>;
 export type LineResolve = Awaited<ReturnType<LinesService['resolveLine']>>;
+export type LineResolveInput = ResolveLineDto;
 export type LineFindAllInstance = LineFindAll[number];
 
 // Athletes Service Types
@@ -122,3 +129,20 @@ export type ReferralApplyCode = Awaited<
 >;
 export type ReferralFindAllReferredUsersInstance =
   ReferralFindAllReferredUsers[number];
+
+// src/types/stream-chat.d.ts
+import 'stream-chat';
+
+declare module 'stream-chat' {
+  interface CustomChannelData {
+    name?: string;
+    image?: string;
+    description?: string;
+    // Ralli-specific properties
+    lobby_id?: string;
+    game_mode?: string;
+    max_players?: number;
+    game_status?: 'waiting' | 'in_progress' | 'finished';
+    lobby_host?: string;
+  }
+}

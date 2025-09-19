@@ -61,4 +61,20 @@ export class FriendsController {
   async getFollowing(@UserPayload() user: User) {
     return this.friendsService.getFollowing(user.id);
   }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiResponse({
+    status: 200,
+  })
+  @ApiParam({ name: 'userId', type: String })
+  @ApiOperation({ summary: 'Check if user is following' })
+  @Get('is-following/:userId')
+  async isFollowing(
+    @Param('userId') userId: string,
+    @UserPayload() currentUser: User,
+  ) {
+    const following = await this.friendsService.isFollowing(currentUser.id, userId);
+    return { isFollowing: following };
+  }
 }

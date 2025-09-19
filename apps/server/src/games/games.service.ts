@@ -27,11 +27,14 @@ import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
 import { NotificationService } from 'src/notification/notification.service';
+import { StreamChat } from 'stream-chat';
+import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
 
 @Injectable()
 export class GamesService {
   private anchor: ParaAnchor;
+  private chatClient: StreamChat;
 
   constructor(
     @Drizzle() private readonly db: Database,
@@ -40,6 +43,7 @@ export class GamesService {
     private readonly friendsService: FriendsService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
+    this.chatClient = chatClient;
   }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
@@ -87,6 +91,17 @@ export class GamesService {
           error,
         );
       }
+      const memberIds = [user.id];
+      // await connectToChat(user.id);
+      const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+        name: game.title ?? `Lobby ${game.id}`,
+        // Custom fields for lobby management
+        lobby_id: game.id,
+        members: memberIds,
+        created_by_id: user.id,
+      });
+
+      await channel.create();
 
       const [updatedGame] = await tx
         .update(games)
@@ -134,11 +149,11 @@ export class GamesService {
     });
   }
 
-  async getMyOpenGames(user: User) {
+  async getMyOpenGames(userId: string) {
     return this.db.query.games.findMany({
       where: and(
         or(
-          eq(games.creatorId, user.id),
+          eq(games.creatorId, userId),
           exists(
             this.db
               .select()
@@ -146,7 +161,7 @@ export class GamesService {
               .where(
                 and(
                   eq(participants.gameId, games.id),
-                  eq(participants.userId, user.id),
+                  eq(participants.userId, userId),
                 ),
               ),
           ),
@@ -174,11 +189,11 @@ export class GamesService {
     });
   }
 
-  async getMyCompletedGames(user: User) {
+  async getMyCompletedGames(userId: string) {
     return this.db.query.games.findMany({
       where: and(
         or(
-          eq(games.creatorId, user.id),
+          eq(games.creatorId, userId),
           exists(
             this.db
               .select()
@@ -186,7 +201,7 @@ export class GamesService {
               .where(
                 and(
                   eq(participants.gameId, games.id),
-                  eq(participants.userId, user.id),
+                  eq(participants.userId, userId),
                 ),
               ),
           ),
@@ -254,7 +269,7 @@ export class GamesService {
     return game;
   }
 
-  async submitBets(user: User, gameCode:string, dto: BulkCreateBetsDto) {
+  async submitBets(user: User, gameCode: string, dto: BulkCreateBetsDto) {
     return await this.db.transaction(async (tx) => {
       const game = await tx.query.games.findFirst({
         where: eq(games.id, dto.gameId),
@@ -331,6 +346,17 @@ export class GamesService {
         dto.gameId,
         await Promise.all(picks),
       );
+
+      if (user.id !== game.creatorId) {
+        // await connectToChat(user.id);
+        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+          name: `Lobby ${game.id}`,
+          // Custom fields for lobby management
+          lobby_id: game.id,
+        });
+
+        await channel.addMembers([user.id]);
+      }
 
       if (!submitTxnSig) {
         throw new BadRequestException(
@@ -497,7 +523,10 @@ export class GamesService {
             .update(participants)
             .set({ isWinner: true, amountWon: Number(game.depositAmount) })
             .where(
-              and(eq(participants.userId, winnerAddr), eq(participants.gameId, id)),
+              and(
+                eq(participants.userId, winnerAddr),
+                eq(participants.gameId, id),
+              ),
             );
         }
 
@@ -702,7 +731,12 @@ export class GamesService {
         );
       }
 
-      if (!(await this.friendsService.isCreatorFollowing(userId, creatorId as string))) {
+      if (
+        !(await this.friendsService.isCreatorFollowing(
+          userId,
+          creatorId as string,
+        ))
+      ) {
         throw new ForbiddenException(
           'This is a private game. Follow this user to gain access.',
         );
@@ -736,7 +770,6 @@ export class GamesService {
     }
   }
 
-
   async inviteUserToPlay(userId: string, gameId: string) {
     const user = await this.db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -755,8 +788,6 @@ export class GamesService {
       throw new NotFoundException('game not found');
     }
 
-    console.log(game, user, 'invite');
-
     try {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
@@ -765,18 +796,17 @@ export class GamesService {
 
       await this.notificationService.sendNotificationToUser(user.id, message);
     } catch (error) {
-      console.log(error, 'unable to send invite');
+      console.error(error, 'unable to send invite');
     }
   }
 
-
-   async getPrivateGamesFromFollowing(currentUserId: string) {
+  async getPrivateGamesFromFollowing(currentUserId: string) {
     // 1. Get all the users I am following
     const following = await this.db.query.friends.findMany({
       where: eq(friends.followerId, currentUserId),
     });
-    
-    const followingIds = following.map(f => f.followingId);
+
+    const followingIds = following.map((f) => f.followingId);
 
     if (followingIds.length === 0) {
       return [];

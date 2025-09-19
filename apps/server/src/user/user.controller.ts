@@ -34,6 +34,18 @@ export class UserController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get chat token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token generated successfully',
+  })
+  @Get('user/get-chat-token')
+  getChatToken(@UserPayload() user: User) {
+    return this.userService.getStreamChatToken(user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get all push subscriptions' })
   @ApiResponse({
     status: 200,

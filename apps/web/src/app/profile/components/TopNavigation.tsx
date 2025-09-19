@@ -8,6 +8,7 @@ interface TopNavigationProps {
   balanceLoading: boolean
   balanceError?: string
   formatBalance: (amount: number) => string
+  isCurrentUser: boolean
 }
 
 export default function TopNavigation({
@@ -16,6 +17,7 @@ export default function TopNavigation({
   balanceLoading,
   balanceError,
   formatBalance,
+  isCurrentUser,
 }: TopNavigationProps) {
   const router = useRouter()
 
@@ -34,7 +36,7 @@ export default function TopNavigation({
           </Link>
           <h1 className="text-xl font-bold text-white">
             <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
-              My Profile
+              {isCurrentUser ? 'My Profile' : 'Profile'}
             </span>
           </h1>
         </div>

@@ -1,0 +1,5 @@
+logs:
+  - type: udp
+    port: 514
+    service: "nestjs-app"
+    source: syslog

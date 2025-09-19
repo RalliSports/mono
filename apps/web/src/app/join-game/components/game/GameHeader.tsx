@@ -32,7 +32,6 @@ const getVisibilityColor = (visibility: string) => {
 }
 
 export default function GameHeader({ game }: GameHeaderProps) {
-  console.log('game', game)
   return (
     <div className="pt-6 pb-4">
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">

@@ -3,7 +3,6 @@
 import SelectionBar from '@/components/main-feed/selection-bar'
 import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
 import SidebarNav from '@/components/ui/sidebar-nav'
-import { useUserData } from '@/providers/user-data-provider'
 import { useSessionToken } from '@/hooks/use-session'
 
 // Components
@@ -15,12 +14,13 @@ import { useMainPage } from './hooks/useMainPage'
 
 export default function MainFeedPage() {
   const { session } = useSessionToken()
+
   // console.log(session)
 
   // Custom hooks for separation of concerns
   const { mounted, isConnected, balances, balanceLoading, balanceError, shouldShowLoading } = useWalletConnection(false)
-
-  const { user } = useUserData()
+  console.log('isConnected', isConnected)
+  // const { user } = useUserData()
 
   const {
     lobbiesData,

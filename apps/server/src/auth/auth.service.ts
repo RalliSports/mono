@@ -14,6 +14,7 @@ import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { generateUniqueGamertag } from 'src/utils/generateGamertag';
 import { getRandomAthleteAvatar } from 'src/utils/getRandomAthleteAvatar';
 import { ReferralService } from 'src/referral/referral.service';
+import { chatClient } from 'src/utils/services/messaging';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +37,6 @@ export class AuthService {
     email?: string,
     referralCode?: string,
   ): Promise<User | null> {
-
     // try {
     await this.paraServer.importSession(session);
     const isActive = await this.paraServer.isSessionActive();
@@ -94,6 +94,10 @@ export class AuthService {
           })
           .where(eq(users.id, userExisted.id));
       }
+
+      // Register/update user with Stream Chat
+      await this.registerUserWithStreamChat(userExisted);
+
       return {
         emailAddress: userExisted.emailAddress as string,
         id: userExisted.id,
@@ -102,7 +106,6 @@ export class AuthService {
         // role: userExisted.role as Role,
       };
     } else {
-      console.log('Creating new user');
       const gamertag = await generateUniqueGamertag(this.db, users);
       const avatar = await getRandomAthleteAvatar(this.db);
 
@@ -122,7 +125,8 @@ export class AuthService {
       if (referralCode) {
         await this.referralService.processReferral(referralCode, newUser[0].id);
       }
-      console.log('New user created');
+      // Register/update user with Stream Chat
+      await this.registerUserWithStreamChat(newUser[0]);
     }
 
     // fetch the newly created user if needed
@@ -137,6 +141,9 @@ export class AuthService {
       });
     }
 
+    // Register/update user with Stream Chat
+    await this.registerUserWithStreamChat(user);
+
     if (!user.hasBeenFaucetedSol) {
       try {
         await this.faucetTokens({
@@ -150,18 +157,9 @@ export class AuthService {
       }
     }
 
-    // Process referral if provided and user is new
-    console.log(
-      'AuthService - Referral Code:',
-      referralCode,
-      'User Existed:',
-      userExisted,
-    );
     if (referralCode && !userExisted) {
       try {
-        console.log('Processing referral:', referralCode, 'for user:', user.id);
         await this.referralService.processReferral(referralCode, user.id);
-        console.log('Referral processed successfully');
       } catch (error) {
         console.error('Error processing referral:', error);
       }
@@ -182,6 +180,34 @@ export class AuthService {
 
   getPara(): ParaServer {
     return this.paraServer;
+  }
+
+  private async registerUserWithStreamChat(user: any): Promise<void> {
+    try {
+      // Check if user already exists in Stream Chat
+      const existingUser = await chatClient.queryUsers({ id: user.paraUserId });
+
+      if (existingUser.users.length === 0) {
+        // User doesn't exist, create them
+        await chatClient.upsertUser({
+          id: user.paraUserId,
+          name: user.username,
+          image: user.avatar,
+        });
+        console.log(`Registered user ${user.username} with Stream Chat`);
+      } else {
+        // User exists, update their info if needed
+        await chatClient.upsertUser({
+          id: user.paraUserId,
+          name: user.username,
+          image: user.avatar,
+        });
+        console.log(`Updated user ${user.username} in Stream Chat`);
+      }
+    } catch (error) {
+      console.error('Failed to register user with Stream Chat:', error);
+      // Don't throw error - Stream Chat registration failure shouldn't break auth
+    }
   }
 
   async faucetTokens(user: User) {
