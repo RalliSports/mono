@@ -28,7 +28,7 @@ interface UserData {
   isConnected: boolean
   isLoading: boolean
   error: Error | null
-  emailAddress: string 
+  emailAddress: string
   hasBeenFaucetedSol: boolean
 }
 

@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   emailAddress: varchar("email_address").unique(),
   paraUserId: text("para_user_id").unique(),
   hasBeenFaucetedSol: boolean("has_been_fauceted_sol").default(false),
+  isFirstLogin: boolean("is_first_login").default(true),
   // roleId: uuid("role_id").references(() => roles.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

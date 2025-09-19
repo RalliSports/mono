@@ -51,6 +51,7 @@ export class UserService {
         lastName: dto.lastName,
         username: dto.username,
         avatar: avatarUrl,
+        isFirstLogin: dto.isFirstLogin,
       })
       .where(eq(users.id, user.id))
       .returning();
