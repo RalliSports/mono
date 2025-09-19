@@ -128,6 +128,12 @@ export function useApiWithAuth() {
         method: 'PUT',
         body: data ? JSON.stringify(data) : undefined,
       }),
+    patch: <T>(endpoint: string, data?: unknown, options?: RequestInit) =>
+      requestWithAuth<T>(endpoint, {
+        ...options,
+        method: 'PATCH',
+        body: data ? JSON.stringify(data) : undefined,
+      }),
     delete: <T>(endpoint: string, options?: RequestInit) =>
       requestWithAuth<T>(endpoint, { ...options, method: 'DELETE' }),
   }
