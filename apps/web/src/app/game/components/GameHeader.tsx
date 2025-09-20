@@ -21,7 +21,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
 
   const handleShare = async () => {
     setIsSharing(true)
-    const shareUrl = `${window.location.origin}/game?id=${lobby.id}&ref=${userReferralCode}`
+    const shareUrl = `${window.location.origin}/game?id=${lobby.id}&ref=${userReferralCode}&code=${lobby.gameCode}`
     const shareData = {
       title: lobby.title || 'Ralli Game',
       text: `Check out this game on Ralli: ${lobby.title}`,

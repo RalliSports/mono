@@ -19,6 +19,7 @@ import {
   GameSettings,
   CreatingGameState,
   FormErrors,
+  PrivacySelector
 } from './components'
 
 // Types and Hooks
@@ -184,6 +185,11 @@ export default function CreateGame() {
 
             <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
           </div>
+
+          <PrivacySelector
+            isPrivate={gameSettings.isPrivate}
+            onChange={(isPrivate) => handleInputChange('isPrivate', isPrivate)}
+          />
 
           <ContestSummary
             maxParticipants={gameSettings.maxParticipants}

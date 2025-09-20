@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { GamesFindOne, UserFindOne } from '@repo/server'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface JoinGameButtonProps {
   game: GamesFindOne
@@ -7,8 +9,21 @@ interface JoinGameButtonProps {
 }
 
 export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
+  const searchParams = useSearchParams()
+  const [hasValidAccess, setHasValidAccess] = useState(true)
   const spotsLeft = game.maxParticipants || 0 - game.participants.length
   const isUserInGame = game.participants.some((participant) => participant.user?.id === user?.id)
+
+  useEffect(() => {
+    if (game.isPrivate) {
+      const codeFromUrl = searchParams.get('code')
+      if (!codeFromUrl || codeFromUrl !== game.gameCode) {
+        setHasValidAccess(false)
+      } else {
+        setHasValidAccess(true)
+      }
+    }
+  }, [game.isPrivate, game.gameCode, searchParams])
 
   if (isUserInGame) {
     return null
@@ -30,16 +45,22 @@ export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
           </div>
         </div>
 
-        <Link
-          href={`/picks?id=${game.id}`}
-          className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 mt-auto"
-        >
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-          <span className="relative z-10">
-            Make Your Picks • {spotsLeft} Spot{spotsLeft !== 1 ? 's' : ''} Left
-          </span>
-        </Link>
+        {hasValidAccess ? (
+          <Link
+            href={`/picks?id=${game.id}`}
+            className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 mt-auto"
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+            <span className="relative z-10">
+              Make Your Picks • {spotsLeft} Spot{spotsLeft !== 1 ? 's' : ''} Left
+            </span>
+          </Link>
+        ) : (
+          <div className="w-full bg-red-500/20 border border-red-500/50 text-red-400 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 mt-auto cursor-not-allowed">
+            <span>❌ Sorry, you need the game code to join</span>
+          </div>
+        )}
 
         {spotsLeft <= 3 && (
           <p className="text-amber-400 text-sm text-center mt-3 font-medium">
