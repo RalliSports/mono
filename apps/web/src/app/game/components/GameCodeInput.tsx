@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/toast'
 
 interface GameCodeInputProps {
   gameId: string
@@ -12,23 +13,22 @@ interface GameCodeInputProps {
 export default function GameCodeInput({ gameId, expectedCode }: GameCodeInputProps) {
   const [code, setCode] = useState('')
   const [isValidating, setIsValidating] = useState(false)
-  const [error, setError] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { addToast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsValidating(true)
-    setError('')
 
     if (!code.trim()) {
-      setError('Please enter a game code')
+      addToast('Please enter a game code', 'error')
       setIsValidating(false)
       return
     }
 
     if (code.trim() !== expectedCode) {
-      setError('Invalid game code. Please try again.')
+      addToast('Invalid game code. Please try again.', 'error')
       setIsValidating(false)
       return
     }
@@ -55,7 +55,6 @@ export default function GameCodeInput({ gameId, expectedCode }: GameCodeInputPro
             className="w-full bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-[#00CED1] focus:ring-[#00CED1]/30"
             disabled={isValidating}
           />
-          {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
         </div>
 
         <button
