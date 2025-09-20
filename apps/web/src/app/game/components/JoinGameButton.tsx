@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { GamesFindOne, UserFindOne } from '@repo/server'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import GameCodeInput from './GameCodeInput'
 
 interface JoinGameButtonProps {
   game: GamesFindOne
@@ -25,7 +26,6 @@ export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
       }
     }
   }, [game.isPrivate, game.gameCode, searchParams])
-
 
   if (isUserInGame || isGameFull) {
     return null
@@ -59,9 +59,7 @@ export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
             </span>
           </Link>
         ) : (
-          <div className="w-full bg-red-500/20 border border-red-500/50 text-red-400 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 mt-auto cursor-not-allowed">
-            <span>❌ Sorry, you need the game code to join</span>
-          </div>
+          <GameCodeInput gameId={game.id} expectedCode={game.gameCode || ''} />
         )}
 
         {spotsLeft <= 3 && (
