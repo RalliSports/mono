@@ -1,6 +1,9 @@
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useSessionToken } from '@/hooks/use-session'
 import { formatBalance } from '@/lib/utils'
+import ProfileHeaderSkeleton from './ProfileHeaderSkeleton'
+import ActiveParleysSectionSkeleton from './ActiveParleysSectionSkeleton'
+import PastParleysSectionSkeleton from './PastParleysSectionSkeleton'
 import { useProfile } from '../hooks/useProfile'
 import { useProfilePictureUpload } from '../hooks/useProfilePictureUpload'
 import { useProfileTabs } from '../hooks/useProfileTabs'
@@ -26,8 +29,19 @@ export default function ProfileContent() {
   const { client } = useChat()
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
 
-  const { user, myOpenGames, myCompletedGames, username, firstName, lastName, setUser, setAvatar, setForceRefresh } =
-    useProfile(session || null)
+  const {
+    user,
+    userLoading,
+    gamesLoading,
+    myOpenGames,
+    myCompletedGames,
+    username,
+    firstName,
+    lastName,
+    setUser,
+    setAvatar,
+    setForceRefresh,
+  } = useProfile(session || null)
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
     session || null,
@@ -52,7 +66,7 @@ export default function ProfileContent() {
     }
   }, [user, client])
   // Don't render until mounted to prevent hydration issues
-  if (!mounted || !user) {
+  if (!mounted || userLoading || !user) {
     return null
   }
 
@@ -67,14 +81,18 @@ export default function ProfileContent() {
         isCurrentUser={isCurrentUser}
       />
 
-      <ProfileHeader
+      {userLoading ? (
+        <ProfileHeaderSkeleton />
+      ) : (
+        <>
+        <ProfileHeader
         currentUserId={user.id}
         isConnected={isConnected}
-        balances={balances}
+          balances={balances}
         session={session ?? ''}
-        formatBalance={formatBalance}
-        onEditPictureClick={() => setIsUploadModalOpen(true)}
-        avatar={user.avatar || ''}
+          formatBalance={formatBalance}
+          onEditPictureClick={() => setIsUploadModalOpen(true)}
+          avatar={user.avatar || ''}
         setActiveTab={setActiveTab}
         setActiveChannel={setActiveChannel}
         userHasStreamChat={userHasStreamChat}
@@ -86,14 +104,25 @@ export default function ProfileContent() {
         isCurrentUser={isCurrentUser}
         userId={user.id}
         userHasStreamChat={userHasStreamChat}
-      />
+        />
+        </>
+      )}
 
       {/* Tab Content */}
       <div className="px-4 pb-8">
         {activeTab === 'parlays' && (
           <div className="space-y-6">
-            <ActiveParlaysSection myOpenGames={myOpenGames} user={user} setActiveTab={setActiveTab} />
-            <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
+            {gamesLoading ? (
+              <>
+                <ActiveParleysSectionSkeleton />
+                <PastParleysSectionSkeleton />
+              </>
+            ) : (
+              <>
+                <ActiveParlaysSection myOpenGames={myOpenGames} user={user} setActiveTab={setActiveTab} />
+                <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
+              </>
+            )}
           </div>
         )}
 

@@ -1,7 +1,15 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { TopNavigation, GameHeader, GameStats, ParticipantsList, LoadingSpinner, WinnersDisplay } from './components'
+import {
+  TopNavigation,
+  GameHeader,
+  GameStats,
+  ParticipantsList,
+  LoadingSpinner,
+  WinnersDisplay,
+  CreateNewGameButton,
+} from './components'
 import { useGameData } from './hooks/useGameData'
 import JoinGameButton from './components/JoinGameButton'
 import { useUserData } from '@/providers/user-data-provider'
@@ -11,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import { useGameTabs } from './hooks/useGameTabs'
 import ChatSection from './components/ChatSection'
 import TabNavigation from './components/TabNavigation'
+import LottieLoading from '@/components/ui/lottie-loading'
 
 function ViewGameContent() {
   const { lobby, isLoading, expandedParticipants, toggleParticipant } = useGameData()
@@ -69,10 +78,7 @@ function ViewGameContent() {
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading game...</p>
-        </div>
+        <LottieLoading size="lg" message="Loading game..." subMessage="Please wait while we prepare your game" />
       </div>
     )
   }
@@ -96,6 +102,7 @@ function ViewGameContent() {
         <GameHeader lobby={lobby} />
         <GameStats lobby={lobby} />
         <WinnersDisplay lobby={lobby} />
+        <CreateNewGameButton lobby={lobby} size="large" />
         <JoinGameButton game={lobby} user={user ?? null} />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} isUserInGame={isUserInGame ?? false} />
 

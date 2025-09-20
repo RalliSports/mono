@@ -22,7 +22,7 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
           Active Parlays
         </h3>
         <button
-          onClick={() => setActiveTab('parlays')}
+          onClick={() => router.push('/lobbies')}
           className="text-[#00CED1] hover:text-[#FFAB91] transition-colors text-sm font-medium"
         >
           View All

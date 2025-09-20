@@ -13,6 +13,7 @@ export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
   const [hasValidAccess, setHasValidAccess] = useState(true)
   const spotsLeft = game.maxParticipants || 0 - game.participants.length
   const isUserInGame = game.participants.some((participant) => participant.user?.id === user?.id)
+  const isGameFull = game.participants.length >= (game.maxParticipants || 0)
 
   useEffect(() => {
     if (game.isPrivate) {
@@ -25,7 +26,8 @@ export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
     }
   }, [game.isPrivate, game.gameCode, searchParams])
 
-  if (isUserInGame) {
+
+  if (isUserInGame || isGameFull) {
     return null
   }
 

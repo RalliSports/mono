@@ -16,6 +16,8 @@ import {
   EmptyState,
   LoadingState,
   ErrorState,
+  LobbiesGridSkeleton,
+  FilterTabsSkeleton,
 } from './components'
 
 // Hooks and Constants
@@ -105,7 +107,11 @@ export default function LobbiesPage() {
       />
 
       {/* Lobby Status Filter Tabs */}
-      <FilterTabs filterTabs={filterTabs} selectedFilter={selectedFilter} onFilterChange={setSelectedFilter} />
+      {lobbiesLoading ? (
+        <FilterTabsSkeleton />
+      ) : (
+        <FilterTabs filterTabs={filterTabs} selectedFilter={selectedFilter} onFilterChange={setSelectedFilter} />
+      )}
 
       {/* Search and Quick Actions */}
       <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
@@ -115,14 +121,18 @@ export default function LobbiesPage() {
         <PageHeader onCreateGame={() => router.push('/create-game')} />
 
         {/* Results Summary */}
-        <ResultsSummary
-          searchQuery={searchQuery}
-          resultCount={filteredLobbies.length}
-          onClearSearch={() => setSearchQuery('')}
-        />
+        {!lobbiesLoading && (
+          <ResultsSummary
+            searchQuery={searchQuery}
+            resultCount={filteredLobbies.length}
+            onClearSearch={() => setSearchQuery('')}
+          />
+        )}
 
         {/* Lobbies Grid or Empty State */}
-        {filteredLobbies.length > 0 ? (
+        {lobbiesLoading ? (
+          <LobbiesGridSkeleton count={8} />
+        ) : filteredLobbies.length > 0 ? (
           <LobbiesGrid lobbies={filteredLobbies} user={user} />
         ) : (
           <EmptyState

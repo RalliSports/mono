@@ -10,5 +10,12 @@ export { default as HistorySection } from './HistorySection'
 export { default as AchievementsSection } from './AchievementsSection'
 export { default as ProfileContent } from './ProfileContent'
 
+// Export skeleton components
+export { default as ProfileContentSkeleton } from './ProfileContentSkeleton'
+export { default as TopNavigationSkeleton } from './TopNavigationSkeleton'
+export { default as ProfileHeaderSkeleton } from './ProfileHeaderSkeleton'
+export { default as ActiveParleysSectionSkeleton } from './ActiveParleysSectionSkeleton'
+export { default as PastParleysSectionSkeleton } from './PastParleysSectionSkeleton'
+
 // Export types
 export * from './types'

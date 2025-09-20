@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
 import { RALLI_TOKEN } from '@/constants'
+import LottieLoading from '@/components/ui/lottie-loading'
 
 // Components
 import {
@@ -14,12 +15,14 @@ import {
   DepositAmountSelector,
   ParticipantsSelector,
   BetsSelector,
+  TokenSelector,
   ContestSummary,
   sliderStyles,
   GameSettings,
   CreatingGameState,
   FormErrors,
-  PrivacySelector
+  PrivateGameToggle,
+  InviteFriends,
 } from './components'
 
 // Types and Hooks
@@ -36,11 +39,17 @@ export default function CreateGame() {
   const { isConnected } = useParaWalletBalance()
   const { session } = useSessionToken()
   const [mounted, setMounted] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   const [creatingGameState, setCreatingGameState] = useState<CreatingGameState>('idle')
 
   // Fix hydration issues
   useEffect(() => {
     setMounted(true)
+    // Simulate page loading time
+    const timer = setTimeout(() => {
+      setIsPageLoading(false)
+    }, 1500) // Back to 1.5 seconds
+    return () => clearTimeout(timer)
   }, [])
 
   // Handle wallet connection redirect with better logic for Para integration
@@ -61,6 +70,12 @@ export default function CreateGame() {
   }, [mounted, isConnected, router])
 
   const [formErrors, setFormErrors] = useState<FormErrors>({})
+  const [selectedToken, setSelectedToken] = useState({
+    symbol: 'USDC',
+    name: 'USD Coin',
+    icon: '🪙',
+    address: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+  })
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     title: '',
     depositAmount: 25,
@@ -68,7 +83,7 @@ export default function CreateGame() {
     matchupGroup: 'TEST',
     isPrivate: false,
     //TODO: Update depositToken when live
-    depositToken: RALLI_TOKEN,
+    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU', // Default to USDC
     type: 'limited',
     userControlType: 'none',
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
@@ -79,6 +94,11 @@ export default function CreateGame() {
 
   const handleInputChange = (field: string, value: any) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleTokenChange = (token: any) => {
+    setSelectedToken(token)
+    handleInputChange('depositToken', token.address)
   }
 
   const handleCreateContest = async () => {
@@ -154,6 +174,19 @@ export default function CreateGame() {
     }
   }
 
+  // Show loading screen while page is loading
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex items-center justify-center">
+        <LottieLoading
+          size="xl"
+          message="Setting up Create Game..."
+          subMessage="Please wait while we prepare everything for you"
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       <style jsx>{sliderStyles}</style>
@@ -167,11 +200,11 @@ export default function CreateGame() {
           <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl space-y-6">
             <GameTitleInput title={gameSettings.title} onChange={(title) => handleInputChange('title', title)} />
 
-          <GamePictureUpload
-            avatar={gameSettings.imageUrl}
-            setAvatar={(imageUrl: string) => handleInputChange('imageUrl', imageUrl)}
-            session={session || ''}
-          />
+            <GamePictureUpload
+              avatar={gameSettings.imageUrl}
+              setAvatar={(imageUrl: string) => handleInputChange('imageUrl', imageUrl)}
+              session={session || ''}
+            />
 
             <DepositAmountSelector
               depositAmount={gameSettings.depositAmount}
@@ -184,12 +217,14 @@ export default function CreateGame() {
             />
 
             <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
-          </div>
 
-          <PrivacySelector
-            isPrivate={gameSettings.isPrivate}
-            onChange={(isPrivate) => handleInputChange('isPrivate', isPrivate)}
-          />
+            <TokenSelector selectedToken={selectedToken} onChange={handleTokenChange} />
+
+            <PrivateGameToggle
+              isPrivate={gameSettings.isPrivate}
+              onChange={(isPrivate) => handleInputChange('isPrivate', isPrivate)}
+            />
+          </div>
 
           <ContestSummary
             maxParticipants={gameSettings.maxParticipants}
@@ -197,7 +232,10 @@ export default function CreateGame() {
             numberOfLegs={gameSettings.numBets}
             creatingGameState={creatingGameState}
             onCreateContest={handleCreateContest}
+            isPrivate={gameSettings.isPrivate}
           />
+
+          <InviteFriends isPrivate={gameSettings.isPrivate} />
         </div>
       </div>
       <ToastContainer />
