@@ -9,8 +9,9 @@ interface JoinGameButtonProps {
 export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
   const spotsLeft = game.maxParticipants || 0 - game.participants.length
   const isUserInGame = game.participants.some((participant) => participant.user?.id === user?.id)
+  const isGameFull = game.participants.length >= (game.maxParticipants || 0)
 
-  if (isUserInGame) {
+  if (isUserInGame || isGameFull) {
     return null
   }
 

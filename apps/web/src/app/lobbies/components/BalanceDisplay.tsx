@@ -1,4 +1,5 @@
 import { formatBalance } from '@/lib/utils'
+import LottieLoading from '@/components/ui/lottie-loading'
 import type { BalanceDisplayProps } from './types'
 
 export default function BalanceDisplay({ isConnected, balances, isLoading, error, refetch }: BalanceDisplayProps) {
@@ -15,7 +16,7 @@ export default function BalanceDisplay({ isConnected, balances, isLoading, error
       <div className="flex items-center space-x-2">
         <div className="w-5 h-5 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-lg flex items-center justify-center">
           {isLoading ? (
-            <div className="w-3 h-3 border-[1.5px] border-white/20 border-t-white rounded-full animate-spin"></div>
+            <LottieLoading size="sm" className="w-8 h-8" />
           ) : (
             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path

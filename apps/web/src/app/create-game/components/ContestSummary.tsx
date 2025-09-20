@@ -6,6 +6,7 @@ interface ContestSummaryProps {
   numberOfLegs: number
   creatingGameState: CreatingGameState
   onCreateContest: () => void
+  isPrivate: boolean
 }
 
 export default function ContestSummary({
@@ -14,6 +15,7 @@ export default function ContestSummary({
   numberOfLegs,
   creatingGameState,
   onCreateContest,
+  isPrivate,
 }: ContestSummaryProps) {
   return (
     <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-[#00CED1]/30 rounded-2xl p-6 shadow-2xl">
@@ -30,7 +32,7 @@ export default function ContestSummary({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 text-center mb-6">
+      <div className="grid grid-cols-3 gap-3 text-center mb-6">
         <div className="bg-slate-700/30 rounded-lg p-3">
           <div className="text-orange-400 font-bold text-lg">{maxParticipants}</div>
           <div className="text-slate-400 text-xs">Max Players</div>
@@ -38,6 +40,12 @@ export default function ContestSummary({
         <div className="bg-slate-700/30 rounded-lg p-3">
           <div className="text-emerald-400 font-bold text-lg">{numberOfLegs}</div>
           <div className="text-slate-400 text-xs">Required Bets</div>
+        </div>
+        <div className="bg-slate-700/30 rounded-lg p-3">
+          <div className={`font-bold text-lg ${isPrivate ? 'text-purple-400' : 'text-blue-400'}`}>
+            {isPrivate ? '🔒' : '🌐'}
+          </div>
+          <div className="text-slate-400 text-xs">{isPrivate ? 'Private' : 'Public'}</div>
         </div>
       </div>
 

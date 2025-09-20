@@ -9,6 +9,8 @@ export function useProfile(session: string | null) {
   const { addToast } = useToast()
   const [username, setUsername] = useState('')
   const [user, setUser] = useState<User | null>(null)
+  const [userLoading, setUserLoading] = useState(true)
+  const [gamesLoading, setGamesLoading] = useState(true)
   const [avatar, setAvatar] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -44,7 +46,7 @@ export function useProfile(session: string | null) {
     const fetchUser = async () => {
       try {
         let response
-
+        setUserLoading(true)
         if (userId) {
           response = await fetch(`/api/user/${userId}`)
         } else {
@@ -79,6 +81,8 @@ export function useProfile(session: string | null) {
       } catch (err) {
         console.log(err, 'error fetching user')
         addToast('Unexpected error fetching user', 'error')
+      } finally {
+        setUserLoading(false)
       }
     }
     if (session || userId) {
@@ -88,13 +92,20 @@ export function useProfile(session: string | null) {
 
   useEffect(() => {
     const fetchMyOpenGames = async () => {
-      const response = await fetch(`/api/read-my-open-games?userId=${user?.id}`)
-      if (response.ok) {
-        const data = await response.json()
-        setMyOpenGames(data)
-      } else {
-        const errorData = await response.json()
-        // addToast(errorData.error || 'Failed to fetch my open games', 'error')
+      try {
+        setGamesLoading(true)
+        const response = await fetch(`/api/read-my-open-games?userId=${user?.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setMyOpenGames(data)
+        } else {
+          const errorData = await response.json()
+          // addToast(errorData.error || 'Failed to fetch my open games', 'error')
+        }
+      } catch (error) {
+        setGamesLoading(false)
+      } finally {
+        setGamesLoading(false)
       }
     }
     if (user?.id !== undefined) {
@@ -104,13 +115,20 @@ export function useProfile(session: string | null) {
 
   useEffect(() => {
     const fetchMyCompletedGames = async () => {
-      const response = await fetch(`/api/read-my-completed-games?userId=${user?.id}`)
-      if (response.ok) {
-        const data = await response.json()
-        setMyCompletedGames(data)
-      } else {
-        const errorData = await response.json()
-        // addToast(errorData.error || 'Failed to fetch my completed games', 'error')
+      try {
+        setGamesLoading(true)
+        const response = await fetch(`/api/read-my-completed-games?userId=${user?.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setMyCompletedGames(data)
+        } else {
+          const errorData = await response.json()
+          // addToast(errorData.error || 'Failed to fetch my completed games', 'error')
+        }
+      } catch (error) {
+        setGamesLoading(false)
+      } finally {
+        setGamesLoading(false)
       }
     }
     if (user?.id !== undefined) {
@@ -122,6 +140,8 @@ export function useProfile(session: string | null) {
     username,
     setUsername,
     user,
+    userLoading,
+    gamesLoading,
     setUser,
     avatar,
     setAvatar,
