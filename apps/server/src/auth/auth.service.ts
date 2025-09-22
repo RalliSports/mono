@@ -107,7 +107,6 @@ export class AuthService {
       };
     } else {
       const gamertag = await generateUniqueGamertag(this.db, users);
-      const avatar = await getRandomAthleteAvatar(this.db);
 
       const newUser = await this.db
         .insert(users)
@@ -116,7 +115,8 @@ export class AuthService {
           emailAddress: userEmail,
           walletAddress: para.availableWallets[0].address,
           username: gamertag,
-          avatar: avatar,
+          avatar: '/images/pfp-1.svg',
+          isFirstLogin: true,
         })
         .onConflictDoNothing()
         .returning();
