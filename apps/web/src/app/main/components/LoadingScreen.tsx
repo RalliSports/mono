@@ -5,9 +5,6 @@ interface LoadingScreenProps {
   subMessage?: string
 }
 
-export default function LoadingScreen({
-  message = 'Connecting to wallet...',
-  subMessage = 'Please wait while we establish your connection',
-}: LoadingScreenProps) {
+export default function LoadingScreen({}: LoadingScreenProps) {
   return <MainPageSkeleton />
 }

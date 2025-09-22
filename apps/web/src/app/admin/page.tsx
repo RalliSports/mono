@@ -210,7 +210,7 @@ function AdminPageContent() {
   const handleCreateStat = async () => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 
@@ -247,7 +247,7 @@ function AdminPageContent() {
   const handleCreatePlayer = async () => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 
@@ -287,7 +287,7 @@ function AdminPageContent() {
   const handleResolveLine = async (lineId: string, actualValue: number) => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 
@@ -303,7 +303,7 @@ function AdminPageContent() {
   const handleCreateLine = async () => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 
@@ -322,7 +322,7 @@ function AdminPageContent() {
   const handleResolveLinesForMatchup = async (matchupId: string) => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 
@@ -338,7 +338,7 @@ function AdminPageContent() {
   const handleResolveGame = async (gameId: string) => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 
@@ -354,7 +354,7 @@ function AdminPageContent() {
   const handleCreateMatchUp = async () => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin wallet required', 'error')
+      addToast('Unauthorized: Admin account required', 'error')
       return
     }
 

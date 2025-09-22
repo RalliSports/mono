@@ -23,7 +23,7 @@ export default function BalanceDisplay({ isConnected, balances, balanceLoading, 
       title={
         isConnected
           ? `Click to refresh balance\nRALLI: $${formatBalance(balances.ralli)}`
-          : 'Connect wallet to view balance'
+          : 'Connect account to view balance'
       }
     >
       <div className="flex items-center space-x-2">
