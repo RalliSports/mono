@@ -29,6 +29,7 @@ import {
   ProcessedData,
 } from './cron-matchup/utils/espnEvent-finalScore-dataProcess';
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
+import { sleep } from 'src/utils';
 
 @Injectable()
 export class MatchupsService {
@@ -256,7 +257,7 @@ export class MatchupsService {
     // Process each chunk sequentially with 500ms delay between chunks
     for (let i = 0; i < chunks.length; i++) {
       if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await sleep(500);
       }
       await this.linesService.bulkCreateLines(chunks[i], user);
     }
@@ -375,7 +376,7 @@ export class MatchupsService {
     // Process each chunk sequentially with 500ms delay between chunks
     for (let i = 0; i < chunks.length; i++) {
       if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await sleep(500);
       }
       await this.linesService.bulkResolveLines(chunks[i], user);
     }

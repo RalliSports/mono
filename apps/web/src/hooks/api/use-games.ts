@@ -39,11 +39,20 @@ export function useGames() {
     },
   })
 
+  const resolveAllPossibleGamesMutation = useMutation({
+    mutationFn: () => api.patch(`/api/resolve-all-possible-games`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['games'] })
+      queryClient.invalidateQueries({ queryKey: ['open-games'] })
+    },
+  })
+
   return {
     all: allGamesQuery,
     open: openGamesQuery,
     create: createMutation,
     resolve: resolveMutation,
+    resolveAllPossibleGames: resolveAllPossibleGamesMutation,
   }
 }
 

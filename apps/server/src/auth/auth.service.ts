@@ -95,8 +95,13 @@ export class AuthService {
           .where(eq(users.id, userExisted.id));
       }
 
-      // Register/update user with Stream Chat
-      await this.registerUserWithStreamChat(userExisted);
+      const alreadyRegisteredWithStreamChat = await chatClient.queryUsers({
+        id: userExisted.paraUserId,
+      });
+      if (alreadyRegisteredWithStreamChat.users.length === 0) {
+        // Register/update user with Stream Chat
+        await this.registerUserWithStreamChat(userExisted);
+      }
 
       return {
         emailAddress: userExisted.emailAddress as string,

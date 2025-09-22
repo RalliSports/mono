@@ -15,7 +15,18 @@ import {
   users,
 } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, ne, or, exists, desc } from 'drizzle-orm';
+import {
+  and,
+  count,
+  eq,
+  inArray,
+  ne,
+  or,
+  exists,
+  desc,
+  not,
+  isNull,
+} from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -30,6 +41,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { StreamChat } from 'stream-chat';
 import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
+import { sleep } from 'src/utils';
 
 @Injectable()
 export class GamesService {
@@ -166,7 +178,10 @@ export class GamesService {
               ),
           ),
         ),
-        ne(games.status, GameStatus.COMPLETED),
+        or(
+          eq(games.status, GameStatus.WAITING),
+          eq(games.status, GameStatus.IN_PROGRESS),
+        ),
       ),
       with: {
         token: true,
@@ -820,5 +835,51 @@ export class GamesService {
       ),
       orderBy: [desc(games.createdAt)],
     });
+  }
+
+  async resolveAllPossibleGames() {
+    const gamesToResolve = await this.db.query.games.findMany({
+      where: and(
+        or(
+          eq(games.status, GameStatus.WAITING),
+          eq(games.status, GameStatus.IN_PROGRESS),
+        ),
+        isNull(games.resolvedTxnSignature),
+        // Only include games where all lines are resolved
+        not(
+          exists(
+            this.db
+              .select()
+              .from(bets)
+              .innerJoin(lines, eq(bets.lineId, lines.id))
+              .where(
+                and(eq(bets.gameId, games.id), ne(lines.status, 'resolved')),
+              ),
+          ),
+        ),
+      ),
+      with: {
+        participants: {
+          with: {
+            bets: {
+              with: {
+                line: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const game of gamesToResolve) {
+      try {
+        console.log('resolving game', game.title);
+        await sleep(500);
+        await this.resolveGame(game.id);
+      } catch (error) {
+        console.error('error resolving game', game.title, error);
+      }
+    }
+    return { message: 'All possible games resolved successfully' };
   }
 }

@@ -9,6 +9,7 @@ interface ResolveGamesTabProps {
   selectedSport: string
   setSelectedSport: (sport: string) => void
   handleResolveGame: (gameId: string) => void
+  handleResolveAllPossibleGames: () => void
 }
 
 export default function ResolveGamesTab({
@@ -18,15 +19,24 @@ export default function ResolveGamesTab({
   selectedSport,
   setSelectedSport,
   handleResolveGame,
+  handleResolveAllPossibleGames,
 }: ResolveGamesTabProps) {
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-      <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
-          <span className="text-lg">🎮</span>
-        </span>
-        Resolve Games
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+          <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
+            <span className="text-lg">🎮</span>
+          </span>
+          Resolve Games
+        </h2>
+        <button
+          onClick={handleResolveAllPossibleGames}
+          className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+        >
+          Resolve All Possible Games
+        </button>
+      </div>
 
       {/* Search and Filter */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
