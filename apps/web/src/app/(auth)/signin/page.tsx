@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useModal, useAccount } from '@getpara/react-sdk'
 import { useReferral } from '@/hooks/useReferral'
+import { useUser } from '@/hooks/api'
 
 export default function SignIn() {
   const router = useRouter()
@@ -12,6 +13,7 @@ export default function SignIn() {
   const { openModal } = modal
   const account = useAccount()
   const { referralCode } = useReferral()
+  const { currentUser } = useUser()
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const modalOpenedRef = useRef(false)
   const toastShownRef = useRef(false)
@@ -26,16 +28,32 @@ export default function SignIn() {
     }
   }
 
-  // Handle authentication state - show success toast when connected
+  // Handle authentication state - navigate after user data loads
   useEffect(() => {
-    // If user just connected, show success toast
-    if (account?.isConnected === true && !toastShownRef.current) {
+    console.log(
+      'SignIn page - account:',
+      account?.isConnected,
+      'user loading:',
+      currentUser.isLoading,
+      'user data:',
+      currentUser.data?.isFirstLogin,
+    )
+
+    // If user just connected and user data is available, navigate accordingly
+    if (account?.isConnected === true && !toastShownRef.current && !currentUser.isLoading) {
       stopModalMonitoring()
       toastShownRef.current = true
-      router.push(callbackUrl)
-      return
+
+      const isFirstLogin = currentUser.data?.isFirstLogin
+      console.log('Navigation after sign-in, isFirstLogin:', isFirstLogin)
+
+      if (isFirstLogin === true) {
+        router.push('/setup')
+      } else {
+        router.push(callbackUrl)
+      }
     }
-  }, [account?.isConnected, router, callbackUrl])
+  }, [account?.isConnected, router, callbackUrl, currentUser.data, currentUser.isLoading])
 
   // Manual modal open handler
   const handleOpenModal = () => {
