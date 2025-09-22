@@ -7,9 +7,105 @@ import { StatsService } from '../stats/stats.service';
 import { TeamService } from '../team/team.service';
 import { ReferralService } from '../referral/referral.service';
 import { FriendsService } from 'src/friends/friends.service';
-import { InputType } from 'zlib';
-import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
+import {
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+  IsArray,
+  IsDate,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsPositive,
+  IsNegative,
+  IsNotEmpty,
+  IsEmpty,
+  IsUUID,
+  IsUrl,
+  IsAlpha,
+  IsAlphanumeric,
+  IsAscii,
+  IsBase64,
+  IsCreditCard,
+  IsCurrency,
+  IsDataURI,
+  IsDecimal,
+  IsEAN,
+  IsEthereumAddress,
+  IsFQDN,
+  IsFirebasePushId,
+  IsFullWidth,
+  IsHalfWidth,
+  IsHash,
+  IsHexadecimal,
+  IsHexColor,
+  IsHSL,
+  IsIBAN,
+  IsIdentityCard,
+  IsIP,
+  IsISBN,
+  IsISIN,
+  IsISO31661Alpha2,
+  IsISO31661Alpha3,
+  IsISO8601,
+  IsISRC,
+  IsISSN,
+  IsJSON,
+  IsJWT,
+  IsLatLong,
+  IsLocale,
+  IsLowercase,
+  IsMACAddress,
+  IsMagnetURI,
+  IsMilitaryTime,
+  IsMimeType,
+  IsMobilePhone,
+  IsMongoId,
+  IsMultibyte,
+  IsNumberString,
+  IsOctal,
+  IsPassportNumber,
+  IsPhoneNumber,
+  IsPort,
+  IsPostalCode,
+  IsRFC3339,
+  IsRgbColor,
+  IsSemVer,
+  IsSurrogatePair,
+  IsUppercase,
+  IsVariableWidth,
+  Length,
+  MinLength,
+  MaxLength,
+  Matches,
+  Min,
+  Max,
+  MinDate,
+  MaxDate,
+  ArrayMinSize,
+  ArrayMaxSize,
+  ArrayUnique,
+  ValidateNested,
+  ValidateIf,
+  Validate,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+  ValidationOptions,
+  registerDecorator,
+  ValidationError,
+  validate,
+  validateOrReject,
+  validateSync,
+  IsObject,
+  IsInstance,
+  Allow,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
+// Import auto-generated DTO types
+export * from './dto-types.auto';
 // Games Service Types
 export type GamesFindOne = Awaited<ReturnType<GamesService['findOne']>>;
 export type GamesFindAll = Awaited<ReturnType<GamesService['findAll']>>;
@@ -40,8 +136,12 @@ export type UserFindOne = Awaited<ReturnType<UserService['findOne']>>;
 export type UserUpdate = Awaited<ReturnType<UserService['updateUser']>>;
 export type UserFaucetTokens = Awaited<ReturnType<UserService['faucetTokens']>>;
 
-export type FriendsFollowing = Awaited<ReturnType<FriendsService['getFollowing']>>;
-export type FriendsFollower= Awaited<ReturnType<FriendsService['getFollowers']>>;
+export type FriendsFollowing = Awaited<
+  ReturnType<FriendsService['getFollowing']>
+>;
+export type FriendsFollower = Awaited<
+  ReturnType<FriendsService['getFollowers']>
+>;
 
 // Lines Service Types
 export type LineFindAll = Awaited<ReturnType<LinesService['getAllLines']>>;
@@ -49,7 +149,6 @@ export type LineCreate = Awaited<ReturnType<LinesService['createLine']>>;
 export type LineFindById = Awaited<ReturnType<LinesService['getLineById']>>;
 export type LineUpdate = Awaited<ReturnType<LinesService['updateLine']>>;
 export type LineResolve = Awaited<ReturnType<LinesService['resolveLine']>>;
-export type LineResolveInput = ResolveLineDto;
 export type LineFindAllInstance = LineFindAll[number];
 
 // Athletes Service Types
@@ -79,6 +178,9 @@ export type MatchupsFindById = Awaited<
 export type MatchupsGetThatShouldHaveStarted = Awaited<
   ReturnType<MatchupsService['getMatchupsThatShouldHaveStarted']>
 >;
+export type MatchupsGetMatchupsWithOpenLines = Awaited<
+  ReturnType<MatchupsService['getMatchupsWithOpenLines']>
+>;
 export type MatchupsCreate = Awaited<
   ReturnType<MatchupsService['createMatchup']>
 >;
@@ -95,7 +197,7 @@ export type MatchupsGetThatShouldHaveStartedInstance =
 // Stats Service Types
 export type StatsFindAll = Awaited<ReturnType<StatsService['getAllStats']>>;
 export type StatsFindById = Awaited<ReturnType<StatsService['getStatById']>>;
-export type StatsCreate = Awaited<ReturnType<StatsService['createStat']>>;
+export type StatsCreateReturn = Awaited<ReturnType<StatsService['createStat']>>;
 export type StatsFindAllInstance = StatsFindAll[number];
 
 // Team Service Types

@@ -2,7 +2,8 @@
   "name": "ralli",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "build": "pnpm copy-dto-types && turbo run build",
+    "copy-dto-types": "node copy-dto-types.js",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -20,7 +21,8 @@
     "typescript": "5.8.2",
     "drizzle-kit": "^0.31.4",
     "tsup": "^8.5.0",
-    "drizzle-orm": "^0.44.4"
+    "drizzle-orm": "^0.44.4",
+    "glob": "^11.0.0"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

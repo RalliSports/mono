@@ -1,22 +1,38 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { LineCreate, MatchupsFindAllInstance } from '@repo/server'
+import { CreateLineDtoType, MatchupsFindAllInstance } from '@repo/server'
+import { useMatchups, useLines } from '@/hooks/api'
+import { useToast } from '@/components/ui/toast'
 
-interface CreateLineFormProps {
-  newLine: {
-    playerId: string
-    statTypeId: string
-    value: number
-    id: string
-    gameDate: string
-  }
-  setNewLine: (line: Partial<LineCreate> & { playerId: string; statTypeId: string; value: number; id: string }) => void
-  handleCreateLine: () => Promise<void>
-  matchUps: MatchupsFindAllInstance[]
-}
+export default function CreateLineForm() {
+  const { addToast } = useToast()
+  const linesQuery = useLines()
+  const [newLine, setNewLine] = useState<CreateLineDtoType>({
+    athleteId: '',
+    statId: '',
+    matchupId: '',
+    predictedValue: 0,
+  })
 
-export default function CreateLineForm({ newLine, setNewLine, handleCreateLine, matchUps }: CreateLineFormProps) {
+  const matchUpsQuery = useMatchups()
+  const matchUps = (matchUpsQuery.query.data || []) as MatchupsFindAllInstance[]
   const [isCreating, setIsCreating] = useState(false)
+
+  const handleCreateLine = async () => {
+    try {
+      await linesQuery.create.mutateAsync({
+        matchupId: newLine.matchupId,
+        athleteId: newLine.athleteId,
+        statId: newLine.statId,
+        predictedValue: newLine.predictedValue,
+      })
+
+      addToast('Lines created successfully!', 'success')
+    } catch (error) {
+      console.error('Error creating line:', error)
+      addToast('Error creating line', 'error')
+    }
+  }
 
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
@@ -32,8 +48,8 @@ export default function CreateLineForm({ newLine, setNewLine, handleCreateLine, 
           <div>
             <label className="block text-white font-semibold mb-2">Select Game</label>
             <Dropdown
-              value={newLine.id}
-              onChange={(value: string) => setNewLine({ ...newLine, id: value })}
+              value={newLine.matchupId}
+              onChange={(value: string) => setNewLine({ ...newLine, matchupId: value })}
               placeholder="Select a game"
               options={[
                 { value: '', label: 'Select a game', disabled: true },

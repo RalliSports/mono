@@ -1,23 +1,53 @@
+import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { TeamFindOne } from '@repo/server'
+import { CreateMatchupDtoType, TeamFindOne } from '@repo/server'
+import { useMatchups, useTeams } from '@/hooks/api'
+import { useToast } from '@/components/ui/toast'
 
-interface CreateMatchupFormProps {
-  newMatchUp: {
-    homeTeamId: string
-    awayTeamId: string
-    date: string
+export default function CreateMatchupForm() {
+  const [newMatchUp, setNewMatchUp] = useState<CreateMatchupDtoType>({
+    homeTeamId: '',
+    awayTeamId: '',
+    startsAtTimestamp: 0,
+    espnEventId: '',
+  })
+  const teamsQuery = useTeams()
+  const { addToast } = useToast()
+  const matchupsQuery = useMatchups()
+
+  const teams = (teamsQuery.data || []) as TeamFindOne[]
+
+  const handleCreateMatchUp = async () => {
+    if (!newMatchUp.homeTeamId || !newMatchUp.awayTeamId || !newMatchUp.startsAtTimestamp) {
+      addToast('Please fill in all fields', 'error')
+      return
+    }
+
+    if (newMatchUp.homeTeamId === newMatchUp.awayTeamId) {
+      addToast('Home and away teams must be different', 'error')
+      return
+    }
+
+    const matchDate = new Date(newMatchUp.startsAtTimestamp)
+    if (isNaN(matchDate.getTime())) {
+      addToast('Please enter a valid date', 'error')
+      return
+    }
+
+    try {
+      await matchupsQuery.create.mutateAsync({
+        startsAtTimestamp: newMatchUp.startsAtTimestamp,
+        espnEventId: newMatchUp.espnEventId,
+        homeTeamId: newMatchUp.homeTeamId,
+        awayTeamId: newMatchUp.awayTeamId,
+      })
+
+      addToast('Match-up created successfully!', 'success')
+    } catch (error) {
+      console.error('Error creating matchup:', error)
+      addToast('Failed to create match-up', 'error')
+    }
   }
-  setNewMatchUp: (matchup: { homeTeamId?: string; awayTeamId?: string; date?: string }) => void
-  handleCreateMatchUp: () => void
-  teams: TeamFindOne[]
-}
-
-export default function CreateMatchupForm({
-  newMatchUp,
-  setNewMatchUp,
-  handleCreateMatchUp,
-  teams,
-}: CreateMatchupFormProps) {
   return (
     <div className="bg-slate-800/50 rounded-xl p-6 mb-6">
       <h4 className="text-lg font-semibold text-white mb-4">Create New Match-up</h4>
@@ -60,8 +90,8 @@ export default function CreateMatchupForm({
           <label className="block text-sm font-medium text-slate-300 mb-2">Date</label>
           <input
             type="datetime-local"
-            value={newMatchUp.date}
-            onChange={(e) => setNewMatchUp({ ...newMatchUp, date: e.target.value })}
+            value={newMatchUp.startsAtTimestamp}
+            onChange={(e) => setNewMatchUp({ ...newMatchUp, startsAtTimestamp: parseInt(e.target.value) })}
             className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
           />
         </div>

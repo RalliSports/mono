@@ -10,7 +10,7 @@ export function useAthletes() {
 
   const allQuery = useQuery({
     queryKey: ['athletes'],
-    queryFn: () => api.get<AthletesFindAll[]>('/api/fetch-athletes'),
+    queryFn: () => api.get<AthletesFindAll>('/api/fetch-athletes'),
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
 

@@ -10,14 +10,14 @@ export function useGames() {
 
   const allGamesQuery = useQuery({
     queryKey: ['games'],
-    queryFn: () => apiClient.get<GamesFindAll[]>('/api/games'),
+    queryFn: () => apiClient.get<GamesFindAll>('/api/games'),
     staleTime: 60 * 1000, // 1 minute
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
   })
 
   const openGamesQuery = useQuery({
     queryKey: ['open-games'],
-    queryFn: () => apiClient.get<GamesFindAllOpen[]>('/api/read-open-games'),
+    queryFn: () => apiClient.get<GamesFindAllOpen>('/api/read-open-games'),
     staleTime: 30 * 1000, // 30 seconds
   })
 

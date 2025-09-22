@@ -7,6 +7,7 @@ import {
   IsUrl,
 } from 'class-validator';
 
+// Create the class that must exactly match the type
 export class UpdateUserDto {
   @ApiProperty()
   @IsString()

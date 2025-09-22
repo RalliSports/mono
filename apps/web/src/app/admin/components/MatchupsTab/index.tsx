@@ -1,26 +1,7 @@
 import CreateMatchupForm from './CreateMatchupForm'
 import MatchupsList from './MatchupsList'
-import { TeamFindOne, MatchupsFindAllInstance } from '@repo/server'
 
-interface MatchupsTabProps {
-  matchUps: MatchupsFindAllInstance[]
-  newMatchUp: {
-    homeTeamId: string
-    awayTeamId: string
-    date: string
-  }
-  setNewMatchUp: (matchup: any) => void
-  handleCreateMatchUp: () => void
-  teams: TeamFindOne[]
-}
-
-export default function MatchupsTab({
-  matchUps,
-  newMatchUp,
-  setNewMatchUp,
-  handleCreateMatchUp,
-  teams,
-}: MatchupsTabProps) {
+export default function MatchupsTab() {
   return (
     <div className="space-y-6">
       {/* Match-ups Section */}
@@ -33,15 +14,10 @@ export default function MatchupsTab({
         </h2>
 
         {/* Create Match-up Form */}
-        <CreateMatchupForm
-          newMatchUp={newMatchUp}
-          setNewMatchUp={setNewMatchUp}
-          handleCreateMatchUp={handleCreateMatchUp}
-          teams={teams}
-        />
+        <CreateMatchupForm />
 
         {/* Match-ups List */}
-        <MatchupsList matchUps={matchUps} />
+        <MatchupsList />
       </div>
     </div>
   )

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApiWithAuth } from './base'
-import { MatchupsFindAll, MatchupsCreate } from '@repo/server'
+import { MatchupsFindAll, MatchupsCreate, MatchupsGetMatchupsWithOpenLines, CreateMatchupDtoType } from '@repo/server'
 
 export function useMatchups() {
   const queryClient = useQueryClient()
@@ -14,8 +14,14 @@ export function useMatchups() {
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
 
+  const matchupsWithOpenLines = useQuery({
+    queryKey: ['matchups-with-open-lines'],
+    queryFn: () => api.get<MatchupsGetMatchupsWithOpenLines>('/api/read-matchups-with-open-lines'),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  })
+
   const createMutation = useMutation({
-    mutationFn: (data: Omit<MatchupsCreate, 'id'>) => api.post<MatchupsCreate>('/api/create-matchup', data),
+    mutationFn: (data: CreateMatchupDtoType) => api.post<MatchupsCreate>('/api/create-matchup', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matchups'] })
     },
@@ -30,6 +36,7 @@ export function useMatchups() {
 
   return {
     query,
+    matchupsWithOpenLines,
     create: createMutation,
     resolve: resolveMutation,
   }

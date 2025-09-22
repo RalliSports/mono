@@ -1,11 +1,10 @@
 import Image from 'next/image'
-import { AthletesFindOne } from '@repo/server'
+import { useAthletes } from '@/hooks/api/use-athletes'
+import { AthletesFindAll } from '@repo/server'
 
-interface PlayersListProps {
-  players: AthletesFindOne[]
-}
-
-export default function PlayersList({ players }: PlayersListProps) {
+export default function PlayersList() {
+  const athletesQuery = useAthletes()
+  const athletes = (athletesQuery.all.data || []) as AthletesFindAll
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -16,13 +15,13 @@ export default function PlayersList({ players }: PlayersListProps) {
       </h2>
 
       <div className="space-y-3 max-h-96 overflow-y-auto">
-        {players.length === 0 ? (
+        {athletes.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-slate-400 mb-2">No players found</div>
             <div className="text-sm text-slate-500">Add players using the form on the left</div>
           </div>
         ) : (
-          players.map((player) => (
+          athletes.map((player) => (
             <div key={player.id} className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
