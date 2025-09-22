@@ -5,7 +5,6 @@ import { useSessionToken } from '@/hooks/use-session'
 import { toast, ToastContainer } from 'react-toastify'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
-import { RALLI_TOKEN } from '@/constants'
 import LottieLoading from '@/components/ui/lottie-loading'
 
 // Components
@@ -69,7 +68,7 @@ export default function CreateGame() {
     }
   }, [mounted, isConnected, router])
 
-  const [formErrors, setFormErrors] = useState<FormErrors>({})
+  const [, setFormErrors] = useState<FormErrors>({})
   const [selectedToken, setSelectedToken] = useState({
     symbol: 'USDC',
     name: 'USD Coin',
@@ -107,7 +106,7 @@ export default function CreateGame() {
     setFormErrors(errors)
 
     if (Object.keys(errors).length > 0) {
-      Object.entries(errors).forEach(([field, message]) => {
+      Object.entries(errors).forEach(([, message]) => {
         toast.error(message)
       })
       return
