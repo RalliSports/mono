@@ -96,7 +96,7 @@ export class AuthService {
       }
 
       // Register/update user with Stream Chat
-      // await this.registerUserWithStreamChat(userExisted);
+      await this.registerUserWithStreamChat(userExisted);
 
       return {
         emailAddress: userExisted.emailAddress as string,
@@ -126,7 +126,7 @@ export class AuthService {
         await this.referralService.processReferral(referralCode, newUser[0].id);
       }
       // Register/update user with Stream Chat
-      // await this.registerUserWithStreamChat(newUser[0]);
+      await this.registerUserWithStreamChat(newUser[0]);
     }
 
     // fetch the newly created user if needed
@@ -142,7 +142,7 @@ export class AuthService {
     }
 
     // Register/update user with Stream Chat
-    // await this.registerUserWithStreamChat(user);
+    await this.registerUserWithStreamChat(user);
 
     if (!user.hasBeenFaucetedSol) {
       try {
