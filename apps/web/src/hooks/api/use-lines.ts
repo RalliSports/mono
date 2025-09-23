@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApiWithAuth } from './base'
-import { LineFindAll, ResolveLineDtoType, CreateLineDtoType, LineCreate } from '@repo/server'
+import { LinesServiceGetAllLines, LinesServiceCreateLine, CreateLineDtoType, ResolveLineDtoType } from '@repo/server'
 
 export function useLines() {
   const queryClient = useQueryClient()
@@ -10,12 +10,12 @@ export function useLines() {
 
   const query = useQuery({
     queryKey: ['lines'],
-    queryFn: () => api.get<LineFindAll>('/api/read-lines'),
+    queryFn: () => api.get<LinesServiceGetAllLines>('/api/read-lines'),
     staleTime: 60 * 1000, // 1 minute
   })
 
   const createMutation = useMutation({
-    mutationFn: (data: CreateLineDtoType) => api.post<LineCreate>('/api/create-lines-for-matchup', data),
+    mutationFn: (data: CreateLineDtoType) => api.post<LinesServiceCreateLine>('/api/create-lines-for-matchup', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lines'] })
       queryClient.invalidateQueries({ queryKey: ['active-athletes'] })

@@ -1,4 +1,4 @@
-import type { FilterTab } from '../components/types'
+import type { FilterTab } from '../components/FilterTabs'
 
 export const createFilterTabs = (lobbiesData: any[]): FilterTab[] => [
   {

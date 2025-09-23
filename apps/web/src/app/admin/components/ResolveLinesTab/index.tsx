@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { MatchupsFindAllInstance, MatchupsGetMatchupsWithOpenLines } from '@repo/server'
+import { MatchupsServiceGetAllMatchupsInstance, MatchupsServiceGetMatchupsWithOpenLines } from '@repo/server'
 import { useMatchups } from '@/hooks/api'
 import { useToast } from '@/components/ui/toast'
 
 export default function ResolveLinesTab() {
   const { addToast } = useToast()
   const matchupsQuery = useMatchups()
-  const matchUps = (matchupsQuery.matchupsWithOpenLines.data || []) as MatchupsGetMatchupsWithOpenLines
+  const matchUps = (matchupsQuery.matchupsWithOpenLines.data || []) as MatchupsServiceGetMatchupsWithOpenLines
   const [isResolving, setIsResolving] = useState(false)
-  const [matchupToResolve, setMatchupToResolve] = useState<MatchupsFindAllInstance>(matchUps[0])
+  const [matchupToResolve, setMatchupToResolve] = useState<MatchupsServiceGetAllMatchupsInstance>(matchUps[0])
 
   const handleResolveLinesForMatchup = async (matchupId: string) => {
     try {
@@ -41,7 +41,7 @@ export default function ResolveLinesTab() {
               placeholder="Select a game"
               options={[
                 { value: '', label: 'Select a game', disabled: true },
-                ...matchUps.map((matchUp: MatchupsFindAllInstance) => ({
+                ...matchUps.map((matchUp: MatchupsServiceGetAllMatchupsInstance) => ({
                   value: matchUp.id,
                   label: `${matchUp.homeTeam?.name ?? 'Home'} vs ${matchUp.awayTeam?.name ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
                   icon: '🏈',

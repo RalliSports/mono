@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
 import { fetchGames } from '@/hooks/get-games'
-import type { Lobby } from '@/hooks/get-games'
-import type { Athlete } from '../components/types'
 import { useToast } from '@/components/ui/toast'
+import { AthletesServiceGetActiveAthletesWithUnresolvedLines, GamesServiceFindAll } from '@repo/server'
 
 export function useMainPage(session: string | undefined) {
   const { addToast } = useToast()
-  const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
+  const [lobbiesData, setLobbiesData] = useState<GamesServiceFindAll>([])
   const [lobbiesLoading, setLobbiesLoading] = useState(true)
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
-  const [athletes, setAthletes] = useState<Athlete[]>([])
+  const [athletes, setAthletes] = useState<AthletesServiceGetActiveAthletesWithUnresolvedLines>([])
   const [isInSelectionMode, setIsInSelectionMode] = useState(false)
   const [requiredSelections, setRequiredSelections] = useState(0)
   const [profilePopupAthleteId, setProfilePopupAthleteId] = useState<string | null>(null)
@@ -23,9 +22,15 @@ export function useMainPage(session: string | undefined) {
         setLobbiesLoading(true)
         const fetchedLobbies = await fetchGames()
         //filter lobbies that are active
-        setLobbiesData(fetchedLobbies.filter((lobby) => ['active'].includes(lobby.status)))
+        setLobbiesData(
+          fetchedLobbies.filter((lobby: GamesServiceFindAll[number]) => ['active'].includes(lobby.status || '')),
+        )
 
-        setLobbiesData(fetchedLobbies.filter((lobby) => lobby.participants.length < lobby.maxParticipants))
+        setLobbiesData(
+          fetchedLobbies.filter(
+            (lobby: GamesServiceFindAll[number]) => lobby.participants.length < (lobby.maxParticipants || 0),
+          ),
+        )
       } catch (error) {
         console.error('Error fetching lobbies:', error)
         setLobbiesData([])

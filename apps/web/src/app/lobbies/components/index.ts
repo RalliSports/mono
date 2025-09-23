@@ -17,6 +17,3 @@ export { default as LobbiesGridSkeleton } from './LobbiesGridSkeleton'
 export { default as FilterTabsSkeleton } from './FilterTabsSkeleton'
 export { default as SearchBarSkeleton } from './SearchBarSkeleton'
 export { default as PageHeaderSkeleton } from './PageHeaderSkeleton'
-
-// Export types
-export * from './types'

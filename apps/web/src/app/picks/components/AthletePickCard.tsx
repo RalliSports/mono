@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import type { SelectedPick } from './types'
-import { AthletesGetActiveWithUnresolvedLinesInstance } from '@repo/server'
+import { AthletesServiceGetActiveAthletesWithUnresolvedLines } from '@repo/server'
 
 interface AthletePickCardProps {
-  athlete: AthletesGetActiveWithUnresolvedLinesInstance
+  athlete: AthletesServiceGetActiveAthletesWithUnresolvedLines[number]
   onPickSelection: (athleteId: string, statIndex: number, betType: 'over' | 'under') => void
   selectedPick?: SelectedPick
   isSelectionDisabled: boolean

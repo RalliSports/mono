@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { GamesFindOne, UserFindOne } from '@repo/server'
+import { GamesServiceFindOne, UserServiceFindOne } from '@repo/server'
 
 interface JoinGameButtonProps {
-  game: GamesFindOne
-  user: UserFindOne | null
+  game: GamesServiceFindOne
+  user: UserServiceFindOne | null
 }
 
 export default function JoinGameButton({ game, user }: JoinGameButtonProps) {

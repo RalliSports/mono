@@ -1,11 +1,11 @@
 import { useStats } from '@/hooks/api'
-import { StatsFindAllInstance } from '@repo/server'
+import { StatsServiceGetAllStatsInstance } from '@repo/server'
 import { useState } from 'react'
 
 export default function StatsList() {
   const statsQuery = useStats()
 
-  const stats = (statsQuery.query.data || []) as StatsFindAllInstance[]
+  const stats = (statsQuery.query.data || []) as StatsServiceGetAllStatsInstance[]
   const [searchTerm, setSearchTerm] = useState('')
   const filteredStats = stats.filter((stat) => {
     const matchesSearch =

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { CreateMatchupDtoType, TeamFindOne } from '@repo/server'
+import { CreateMatchupDtoType, TeamServiceFindOne } from '@repo/server'
 import { useMatchups, useTeams } from '@/hooks/api'
 import { useToast } from '@/components/ui/toast'
 
@@ -15,7 +15,7 @@ export default function CreateMatchupForm() {
   const { addToast } = useToast()
   const matchupsQuery = useMatchups()
 
-  const teams = (teamsQuery.data || []) as TeamFindOne[]
+  const teams = (teamsQuery.data || []) as TeamServiceFindOne[]
 
   const handleCreateMatchUp = async () => {
     if (!newMatchUp.homeTeamId || !newMatchUp.awayTeamId || !newMatchUp.startsAtTimestamp) {

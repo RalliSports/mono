@@ -11,6 +11,3 @@ export { default as MainPageSkeleton } from './MainPageSkeleton'
 export { default as TopNavigationSkeleton } from './TopNavigationSkeleton'
 export { default as FilterBarSkeleton } from './FilterBarSkeleton'
 export { default as LobbiesSectionSkeleton } from './LobbiesSectionSkeleton'
-
-// Export types
-export * from './types'

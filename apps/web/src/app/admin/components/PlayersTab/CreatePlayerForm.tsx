@@ -24,15 +24,13 @@ export default function CreatePlayerForm() {
 
     try {
       await athletesQuery.create.mutateAsync({
-        customId: Math.floor(Math.random() * 10000),
-        espnAthleteId: null,
+        espnAthleteId: '',
         name: newPlayer.name,
         position: newPlayer.position,
         jerseyNumber: newPlayer.jerseyNumber,
         age: newPlayer.age,
-        picture: newPlayer.picture || null,
+        picture: newPlayer.picture || '',
         teamId: newPlayer.teamId,
-        createdAt: new Date(),
       })
 
       setNewPlayer({

@@ -1,10 +1,10 @@
 import Image from 'next/image'
 import { useAthletes } from '@/hooks/api/use-athletes'
-import { AthletesFindAll } from '@repo/server'
+import { AthletesServiceGetAllAthletes } from '@repo/server'
 
 export default function PlayersList() {
   const athletesQuery = useAthletes()
-  const athletes = (athletesQuery.all.data || []) as AthletesFindAll
+  const athletes = (athletesQuery.all.data || []) as AthletesServiceGetAllAthletes
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">

@@ -1,13 +1,13 @@
 import LineCard from './LineCard'
 import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { LineFindAllInstance } from '@repo/server'
+import { LinesServiceGetAllLinesInstance } from '@repo/server'
 import { useState } from 'react'
 import { useLines } from '@/hooks/api'
 
 export default function ResolveLinesTab() {
   const linesQuery = useLines()
 
-  const lines = (linesQuery.query.data || []) as LineFindAllInstance[]
+  const lines = (linesQuery.query.data || []) as LinesServiceGetAllLinesInstance[]
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSport, setSelectedSport] = useState('')
 

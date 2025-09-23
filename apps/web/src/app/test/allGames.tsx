@@ -2,13 +2,18 @@
 
 import React, { useEffect, useState } from 'react'
 // import { Game } from '@repo/db/types'
-import { GamesFindAll, GamesFindAllInstance, LineFindAll, LineFindAllInstance } from '@repo/server'
+import {
+  GamesServiceFindAll,
+  GamesServiceFindAllInstance,
+  LinesServiceGetAllLines,
+  LinesServiceGetAllLinesInstance,
+} from '@repo/server'
 import { useToast } from '@/components/ui/toast'
 
 export default function AllGames() {
   const { addToast } = useToast()
-  const [games, setGames] = useState<GamesFindAll>([])
-  const [lines, setLines] = useState<LineFindAll>([])
+  const [games, setGames] = useState<GamesServiceFindAll>([])
+  const [lines, setLines] = useState<LinesServiceGetAllLines>([])
 
   useEffect(() => {
     ;(async () => {
@@ -56,7 +61,7 @@ export default function AllGames() {
   )
 }
 
-const LineCard = ({ line }: { line: LineFindAllInstance }) => {
+const LineCard = ({ line }: { line: LinesServiceGetAllLinesInstance }) => {
   return (
     <div>
       <h5>{line.athlete?.name}</h5>
@@ -64,7 +69,7 @@ const LineCard = ({ line }: { line: LineFindAllInstance }) => {
   )
 }
 
-const GameCard = ({ game }: { game: GamesFindAllInstance }) => {
+const GameCard = ({ game }: { game: GamesServiceFindAllInstance }) => {
   return (
     <div>
       <h5>{game.title}</h5>

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApiWithAuth } from './base'
-import { AthletesFindAll, AthletesCreate } from '@repo/server'
+import { AthletesServiceGetAllAthletes, AthletesServiceCreateAthlete, CreateAthleteDtoType } from '@repo/server'
 
 export function useAthletes() {
   const queryClient = useQueryClient()
@@ -10,7 +10,7 @@ export function useAthletes() {
 
   const allQuery = useQuery({
     queryKey: ['athletes'],
-    queryFn: () => api.get<AthletesFindAll>('/api/fetch-athletes'),
+    queryFn: () => api.get<AthletesServiceGetAllAthletes>('/api/fetch-athletes'),
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
 
@@ -21,7 +21,7 @@ export function useAthletes() {
   })
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<AthletesCreate, 'id'>) => api.post<AthletesCreate>('/api/create-athlete', data),
+    mutationFn: (data: CreateAthleteDtoType) => api.post<AthletesServiceCreateAthlete>('/api/create-athlete', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['athletes'] })
       queryClient.invalidateQueries({ queryKey: ['active-athletes'] })

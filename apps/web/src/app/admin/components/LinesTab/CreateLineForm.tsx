@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { CreateLineDtoType, MatchupsFindAllInstance } from '@repo/server'
+import { CreateLineDtoType, MatchupsServiceGetAllMatchupsInstance } from '@repo/server'
 import { useMatchups, useLines } from '@/hooks/api'
 import { useToast } from '@/components/ui/toast'
 
@@ -15,7 +15,7 @@ export default function CreateLineForm() {
   })
 
   const matchUpsQuery = useMatchups()
-  const matchUps = (matchUpsQuery.query.data || []) as MatchupsFindAllInstance[]
+  const matchUps = (matchUpsQuery.query.data || []) as MatchupsServiceGetAllMatchupsInstance[]
   const [isCreating, setIsCreating] = useState(false)
 
   const handleCreateLine = async () => {
@@ -53,7 +53,7 @@ export default function CreateLineForm() {
               placeholder="Select a game"
               options={[
                 { value: '', label: 'Select a game', disabled: true },
-                ...matchUps.map((matchUp: MatchupsFindAllInstance) => ({
+                ...matchUps.map((matchUp: MatchupsServiceGetAllMatchupsInstance) => ({
                   value: matchUp.id,
                   label: `${matchUp.homeTeam?.name ?? 'Home'} vs ${matchUp.awayTeam?.name ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
                   icon: '🏈',

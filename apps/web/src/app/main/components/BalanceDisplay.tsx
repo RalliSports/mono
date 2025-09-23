@@ -8,6 +8,7 @@ interface BalanceDisplayProps {
     ralli: number
   }
   balanceLoading: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   balanceError: any
 }
 

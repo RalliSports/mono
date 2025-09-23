@@ -1,6 +1,6 @@
 import GameCard from './GameCard'
 import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { GamesFindAllInstance } from '@repo/server'
+import { GamesServiceFindAllOpenInstance } from '@repo/server'
 import { useGames } from '@/hooks/api'
 import { useState } from 'react'
 import { useToast } from '@/components/ui/toast'
@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/toast'
 export default function ResolveGamesTab() {
   const { addToast } = useToast()
   const gamesQuery = useGames()
-  const games = (gamesQuery.all.data || []) as GamesFindAllInstance[]
+  const games = (gamesQuery.all.data || []) as GamesServiceFindAllOpenInstance[]
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSport, setSelectedSport] = useState('')
 

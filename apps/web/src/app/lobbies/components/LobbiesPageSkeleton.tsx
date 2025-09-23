@@ -1,4 +1,3 @@
-import TopNavigation from './TopNavigation'
 import FilterTabsSkeleton from './FilterTabsSkeleton'
 import SearchBarSkeleton from './SearchBarSkeleton'
 import PageHeaderSkeleton from './PageHeaderSkeleton'

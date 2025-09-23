@@ -2,8 +2,9 @@
   "name": "ralli",
   "private": true,
   "scripts": {
-    "build": "pnpm copy-dto-types && turbo run build",
+    "build": "pnpm copy-dto-types && pnpm copy-service-types && turbo run build",
     "copy-dto-types": "node copy-dto-types.js",
+    "copy-service-types": "node copy-service-types.js",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

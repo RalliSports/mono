@@ -1,7 +1,15 @@
 import { formatBalance } from '@/lib/utils'
 import LottieLoading from '@/components/ui/lottie-loading'
-import type { BalanceDisplayProps } from './types'
-
+interface BalanceDisplayProps {
+  isConnected: boolean
+  balances: {
+    ralli: number
+  }
+  isLoading: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: any
+  refetch: () => void
+}
 export default function BalanceDisplay({ isConnected, balances, isLoading, error, refetch }: BalanceDisplayProps) {
   return (
     <div

@@ -1,5 +1,7 @@
-import type { SearchBarProps } from './types'
-
+export interface SearchBarProps {
+  searchQuery: string
+  onSearchChange: (query: string) => void
+}
 export default function SearchBar({ searchQuery, onSearchChange }: SearchBarProps) {
   return (
     <div className="sticky top-[116px] z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/30 px-4 py-3">

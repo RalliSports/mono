@@ -1,9 +1,9 @@
 import { useMatchups } from '@/hooks/api'
-import { MatchupsFindAllInstance } from '@repo/server'
+import { MatchupsServiceGetAllMatchupsInstance } from '@repo/server'
 
 export default function MatchupsList() {
   const matchupsQuery = useMatchups()
-  const matchUps = (matchupsQuery.query.data || []) as MatchupsFindAllInstance[]
+  const matchUps = (matchupsQuery.query.data || []) as MatchupsServiceGetAllMatchupsInstance[]
   return (
     <div className="space-y-4">
       {matchUps.map((matchUp) => (

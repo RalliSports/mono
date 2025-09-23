@@ -1,11 +1,11 @@
 import Image from 'next/image'
-import { LineFindAllInstance } from '@repo/server'
+import { LinesServiceGetAllLinesInstance } from '@repo/server'
 import { useState } from 'react'
 import { useToast } from '@/components/ui/toast'
 import { useLines } from '@/hooks/api'
 
 interface LineCardProps {
-  line: LineFindAllInstance
+  line: LinesServiceGetAllLinesInstance
 }
 
 export default function LineCard({ line }: LineCardProps) {
