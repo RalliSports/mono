@@ -28,6 +28,7 @@ export const lines = pgTable("lines", {
   matchupId: uuid("matchup_id").references(() => matchups.id),
   predictedValue: decimal("predicted_value"),
   actualValue: decimal("actual_value"),
+  currentValue: decimal("current_value"),
   isHigher: boolean("is_higher"),
   createdAt: timestamp("created_at").defaultNow(),
   startsAt: timestamp("starts_at"),
