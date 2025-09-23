@@ -351,6 +351,22 @@ function AdminPageContent() {
     }
   }
 
+  const handleResolveAllPossibleGames = async () => {
+    // Check wallet authorization before proceeding
+    if (walletAddress?.toString() !== ADMIN_WALLET) {
+      addToast('Unauthorized: Admin account required', 'error')
+      return
+    }
+
+    try {
+      await gamesQuery.resolveAllPossibleGames.mutateAsync()
+      addToast('Game resolved successfully!', 'success')
+    } catch (error) {
+      console.error('Error resolving game:', error)
+      addToast('Failed to resolve game', 'error')
+    }
+  }
+
   const handleCreateMatchUp = async () => {
     // Check wallet authorization before proceeding
     if (walletAddress?.toString() !== ADMIN_WALLET) {
@@ -463,6 +479,7 @@ function AdminPageContent() {
               selectedSport={selectedSport}
               setSelectedSport={setSelectedSport}
               handleResolveGame={handleResolveGame}
+              handleResolveAllPossibleGames={handleResolveAllPossibleGames}
             />
           )}
 
