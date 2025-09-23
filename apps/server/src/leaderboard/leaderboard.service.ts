@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { users, participants, bets, games } from '@repo/db';
-import { eq, sql, and } from 'drizzle-orm';
+import { sql, and, count, eq, desc, sum } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import {
@@ -24,150 +24,156 @@ export class LeaderboardService {
     const offset = (page - 1) * limit;
 
     try {
-      // Get all users first
-      const allUsers = await this.db
+      // Create a subquery for betting stats
+      const bettingStatsSubquery = this.db
+        .select({
+          userId: bets.userId,
+          totalBets: count(bets.id).as('total_bets'),
+          totalCorrectBets: sum(
+            sql`CASE WHEN ${bets.isCorrect} = true THEN 1 ELSE 0 END`,
+          ).as('total_correct_bets'),
+        })
+        .from(bets)
+        .groupBy(bets.userId)
+        .as('betting_stats');
+
+      // Main query using Drizzle syntax
+      const baseQuery = this.db
         .select({
           userId: users.id,
           username: users.username,
           avatar: users.avatar,
+          gamesPlayed:
+            sql<number>`COALESCE(COUNT(DISTINCT ${participants.gameId}), 0)`.as(
+              'games_played',
+            ),
+          gamesWon:
+            sql<number>`COALESCE(SUM(CASE WHEN ${participants.isWinner} = true THEN 1 ELSE 0 END), 0)`.as(
+              'games_won',
+            ),
+          totalAmountWon:
+            sql<number>`COALESCE(SUM(${participants.amountWon}), 0)`.as(
+              'total_amount_won',
+            ),
+          totalAmountDeposited:
+            sql<number>`COALESCE(SUM(${games.depositAmount}), 0)`.as(
+              'total_amount_deposited',
+            ),
+          totalBets:
+            sql<number>`COALESCE(${bettingStatsSubquery.totalBets}, 0)`.as(
+              'total_bets',
+            ),
+          totalCorrectBets:
+            sql<number>`COALESCE(${bettingStatsSubquery.totalCorrectBets}, 0)`.as(
+              'total_correct_bets',
+            ),
+          // Calculated fields using sql expressions
+          winPercentage: sql<number>`
+            CASE 
+              WHEN COUNT(DISTINCT ${participants.gameId}) > 0 
+              THEN ROUND((SUM(CASE WHEN ${participants.isWinner} = true THEN 1 ELSE 0 END)::numeric / COUNT(DISTINCT ${participants.gameId})::numeric) * 100, 2)
+              ELSE 0 
+            END`.as('win_percentage'),
+          bettingAccuracy: sql<number>`
+            CASE 
+              WHEN COALESCE(${bettingStatsSubquery.totalBets}, 0) > 0 
+              THEN ROUND((COALESCE(${bettingStatsSubquery.totalCorrectBets}, 0)::numeric / ${bettingStatsSubquery.totalBets}::numeric) * 100, 2)
+              ELSE 0 
+            END`.as('betting_accuracy'),
+          netProfit: sql<number>`
+            COALESCE(SUM(${participants.amountWon}), 0) - COALESCE(SUM(${games.depositAmount}), 0)
+          `.as('net_profit'),
         })
         .from(users)
+        .leftJoin(participants, eq(users.id, participants.userId))
+        .leftJoin(games, eq(participants.gameId, games.id))
+        .leftJoin(
+          bettingStatsSubquery,
+          eq(users.id, bettingStatsSubquery.userId),
+        )
         .where(
           and(sql`${users.username} IS NOT NULL`, sql`${users.username} != ''`),
-        );
+        )
+        .groupBy(
+          users.id,
+          users.username,
+          users.avatar,
+          bettingStatsSubquery.totalBets,
+          bettingStatsSubquery.totalCorrectBets,
+        )
+        .having(sql`COUNT(DISTINCT ${participants.gameId}) > 0`);
 
-      // Get game statistics for each user
-      const gameStats = await this.db
-        .select({
-          userId: participants.userId,
-          gamesPlayed: sql<number>`COUNT(DISTINCT ${participants.gameId})`,
-          gamesWon: sql<number>`SUM(CASE WHEN ${participants.isWinner} = true THEN 1 ELSE 0 END)`,
-          totalAmountWon: sql<number>`SUM(COALESCE(${participants.amountWon}, 0))`,
-          totalAmountDeposited: sql<number>`SUM(COALESCE(${games.depositAmount}, 0))`,
-        })
-        .from(participants)
-        .leftJoin(games, eq(participants.gameId, games.id))
-        .groupBy(participants.userId);
-
-      // Get betting statistics for each user
-      const bettingStats = await this.db
-        .select({
-          userId: bets.userId,
-          totalBets: sql<number>`COUNT(${bets.id})`,
-          totalCorrectBets: sql<number>`SUM(CASE WHEN ${bets.isCorrect} = true THEN 1 ELSE 0 END)`,
-        })
-        .from(bets)
-        .groupBy(bets.userId);
-
-      // Create lookup maps
-      const gameStatsMap = new Map(gameStats.map((row) => [row.userId, row]));
-      const bettingStatsMap = new Map(
-        bettingStats.map((row) => [row.userId, row]),
-      );
-
-      // Merge all data
-      const rawData = allUsers.map((user) => {
-        const gameData = gameStatsMap.get(user.userId) || {
-          gamesPlayed: 0,
-          gamesWon: 0,
-          totalAmountWon: 0,
-          totalAmountDeposited: 0,
-        };
-        const bettingData = bettingStatsMap.get(user.userId) || {
-          totalBets: 0,
-          totalCorrectBets: 0,
-        };
-
-        return {
-          userId: user.userId,
-          username: user.username,
-          avatar: user.avatar,
-          gamesPlayed: Number(gameData.gamesPlayed) || 0,
-          gamesWon: Number(gameData.gamesWon) || 0,
-          totalAmountWon: Number(gameData.totalAmountWon) || 0,
-          totalAmountDeposited: Number(gameData.totalAmountDeposited) || 0,
-          totalBets: Number(bettingData.totalBets) || 0,
-          totalCorrectBets: Number(bettingData.totalCorrectBets) || 0,
-        };
-      });
-
-      // Calculate derived metrics and filter out inactive users
-      const processedData = rawData
-        .map((row) => {
-          const gamesPlayed = row.gamesPlayed;
-          const gamesWon = row.gamesWon;
-          const totalAmountWon = row.totalAmountWon;
-          const totalBets = row.totalBets;
-          const totalCorrectBets = row.totalCorrectBets;
-          const totalAmountDeposited = row.totalAmountDeposited;
-
-          const winPercentage =
-            gamesPlayed > 0 ? (gamesWon / gamesPlayed) * 100 : 0;
-          const bettingAccuracy =
-            totalBets > 0 ? (totalCorrectBets / totalBets) * 100 : 0;
-          const netProfit = totalAmountWon - totalAmountDeposited;
-
-          return {
-            id: row.userId,
-            username: row.username || 'Anonymous',
-            avatar: row.avatar || '',
-            gamesPlayed,
-            gamesWon,
-            winPercentage: Math.round(winPercentage * 100) / 100,
-            totalAmountWon,
-            totalAmountDeposited,
-            netProfit,
-            totalCorrectBets,
-            totalBets,
-            bettingAccuracy: Math.round(bettingAccuracy * 100) / 100,
-            rank: 0, // Will be set after sorting
-          };
-        })
-        .filter((user) => user.gamesPlayed > 0); // Only show users who have played at least one game
-
-      // Sort based on the specified criteria
-      let sortedData: typeof processedData;
-
+      // Apply sorting based on sortBy parameter
+      let sortedQuery;
       switch (sortBy) {
         case 'winRate':
-          sortedData = processedData.sort((a, b) => {
-            if (b.winPercentage !== a.winPercentage) {
-              return b.winPercentage - a.winPercentage;
-            }
-            return b.gamesPlayed - a.gamesPlayed;
-          });
-          break;
-        case 'totalWinnings':
-          sortedData = processedData.sort(
-            (a, b) => b.totalAmountWon - a.totalAmountWon,
+          sortedQuery = baseQuery.orderBy(
+            desc(sql`win_percentage`),
+            desc(sql`games_played`),
           );
           break;
+        case 'totalWinnings':
+          sortedQuery = baseQuery.orderBy(desc(sql`total_amount_won`));
+          break;
         case 'bettingAccuracy':
-          sortedData = processedData.sort((a, b) => {
-            if (b.bettingAccuracy !== a.bettingAccuracy) {
-              return b.bettingAccuracy - a.bettingAccuracy;
-            }
-            return b.totalBets - a.totalBets;
-          });
+          sortedQuery = baseQuery.orderBy(
+            desc(sql`betting_accuracy`),
+            desc(sql`total_bets`),
+          );
           break;
         case 'netProfit':
         default:
-          sortedData = processedData.sort((a, b) => b.netProfit - a.netProfit);
+          sortedQuery = baseQuery.orderBy(desc(sql`net_profit`));
           break;
       }
 
-      // Add ranks
-      sortedData.forEach((user, index) => {
-        user.rank = index + 1;
-      });
+      // Execute query with pagination
+      const paginatedQuery = sortedQuery.limit(limit).offset(offset);
+      const results = await paginatedQuery;
 
-      // Apply pagination
-      const totalUsers = sortedData.length;
+      // Get total count for pagination
+      const totalCountQuery = this.db
+        .select({
+          count: count(),
+        })
+        .from(users)
+        .leftJoin(participants, eq(users.id, participants.userId))
+        .where(
+          and(sql`${users.username} IS NOT NULL`, sql`${users.username} != ''`),
+        )
+        .groupBy(users.id)
+        .having(sql`COUNT(DISTINCT ${participants.gameId}) > 0`);
+
+      const totalResult = await this.db
+        .select({
+          totalUsers: count(),
+        })
+        .from(totalCountQuery.as('user_count'));
+
+      const totalUsers = totalResult[0]?.totalUsers || 0;
       const totalPages = Math.ceil(totalUsers / limit);
-      const paginatedData = sortedData.slice(offset, offset + limit);
+
+      // Transform results to match DTO
+      const transformedUsers: LeaderboardUserDto[] = results.map(
+        (row, index) => ({
+          id: row.userId,
+          username: row.username || 'Anonymous',
+          avatar: row.avatar || '',
+          gamesPlayed: Number(row.gamesPlayed) || 0,
+          gamesWon: Number(row.gamesWon) || 0,
+          winPercentage: Number(row.winPercentage) || 0,
+          totalAmountWon: Number(row.totalAmountWon) || 0,
+          totalAmountDeposited: Number(row.totalAmountDeposited) || 0,
+          netProfit: Number(row.netProfit) || 0,
+          totalCorrectBets: Number(row.totalCorrectBets) || 0,
+          totalBets: Number(row.totalBets) || 0,
+          bettingAccuracy: Number(row.bettingAccuracy) || 0,
+          rank: offset + index + 1,
+        }),
+      );
 
       return {
-        users: paginatedData,
+        users: transformedUsers,
         totalUsers,
         page,
         limit,
@@ -187,17 +193,28 @@ export class LeaderboardService {
       | 'netProfit'
       | 'bettingAccuracy' = 'netProfit',
   ): Promise<{ rank: number; user: LeaderboardUserDto } | null> {
-    const leaderboard = await this.getLeaderboard(1, 1000, sortBy);
-    const userPosition = leaderboard.users.find((user) => user.id === userId);
+    try {
+      // Get full leaderboard to find user position
+      // For better performance, you might want to use a window function here
+      const fullLeaderboard = await this.getLeaderboard(1, 10000, sortBy);
+      const userPosition = fullLeaderboard.users.find(
+        (user) => user.id === userId,
+      );
 
-    if (!userPosition) {
-      return null;
+      if (!userPosition) {
+        return null;
+      }
+
+      return {
+        rank: userPosition.rank,
+        user: userPosition,
+      };
+    } catch (error) {
+      console.error('User leaderboard position query error:', error);
+      throw new Error(
+        `Failed to fetch user leaderboard position: ${error.message}`,
+      );
     }
-
-    return {
-      rank: userPosition.rank,
-      user: userPosition,
-    };
   }
 
   async getTopPerformers(limit: number = 10): Promise<{
@@ -205,18 +222,24 @@ export class LeaderboardService {
     topByWinRate: LeaderboardUserDto[];
     topByBettingAccuracy: LeaderboardUserDto[];
   }> {
-    const [netProfitLeaders, winRateLeaders, bettingAccuracyLeaders] =
-      await Promise.all([
-        this.getLeaderboard(1, limit, 'netProfit'),
-        this.getLeaderboard(1, limit, 'winRate'),
-        this.getLeaderboard(1, limit, 'bettingAccuracy'),
-      ]);
+    try {
+      // Use Promise.all to run queries in parallel for better performance
+      const [netProfitLeaders, winRateLeaders, bettingAccuracyLeaders] =
+        await Promise.all([
+          this.getLeaderboard(1, limit, 'netProfit'),
+          this.getLeaderboard(1, limit, 'winRate'),
+          this.getLeaderboard(1, limit, 'bettingAccuracy'),
+        ]);
 
-    return {
-      topByNetProfit: netProfitLeaders.users,
-      topByWinRate: winRateLeaders.users,
-      topByBettingAccuracy: bettingAccuracyLeaders.users,
-    };
+      return {
+        topByNetProfit: netProfitLeaders.users,
+        topByWinRate: winRateLeaders.users,
+        topByBettingAccuracy: bettingAccuracyLeaders.users,
+      };
+    } catch (error) {
+      console.error('Top performers query error:', error);
+      throw new Error(`Failed to fetch top performers: ${error.message}`);
+    }
   }
 
   async getLeaderboardStats(): Promise<{
@@ -227,19 +250,42 @@ export class LeaderboardService {
     usersWithWinnings: number;
     totalWinningsDistributed: number;
   }> {
-    const stats = await this.db
-      .select({
-        totalUsers: sql<number>`COUNT(DISTINCT ${users.id})`,
-        totalGames: sql<number>`COUNT(DISTINCT ${games.id})`,
-        totalResolvedGames: sql<number>`COUNT(DISTINCT CASE WHEN ${games.status} = 'completed' OR ${games.resolvedTxnSignature} IS NOT NULL THEN ${games.id} END)`,
-        totalUnresolvedGames: sql<number>`COUNT(DISTINCT CASE WHEN ${games.status} != 'completed' AND ${games.resolvedTxnSignature} IS NULL THEN ${games.id} END)`,
-        usersWithWinnings: sql<number>`COUNT(DISTINCT CASE WHEN ${participants.amountWon} > 0 THEN ${participants.userId} END)`,
-        totalWinningsDistributed: sql<number>`COALESCE(SUM(${participants.amountWon}), 0)`,
-      })
-      .from(users)
-      .leftJoin(participants, eq(users.id, participants.userId))
-      .leftJoin(games, eq(participants.gameId, games.id));
+    try {
+      const stats = await this.db
+        .select({
+          totalUsers: count(sql`DISTINCT ${users.id}`).as('total_users'),
+          totalGames: count(sql`DISTINCT ${games.id}`).as('total_games'),
+          totalResolvedGames: count(
+            sql`DISTINCT CASE WHEN ${games.status} = 'completed' OR ${games.resolvedTxnSignature} IS NOT NULL THEN ${games.id} END`,
+          ).as('total_resolved_games'),
+          totalUnresolvedGames: count(
+            sql`DISTINCT CASE WHEN ${games.status} != 'completed' AND ${games.resolvedTxnSignature} IS NULL THEN ${games.id} END`,
+          ).as('total_unresolved_games'),
+          usersWithWinnings: count(
+            sql`DISTINCT CASE WHEN ${participants.amountWon} > 0 THEN ${participants.userId} END`,
+          ).as('users_with_winnings'),
+          totalWinningsDistributed:
+            sql<number>`COALESCE(SUM(${participants.amountWon}), 0)`.as(
+              'total_winnings_distributed',
+            ),
+        })
+        .from(users)
+        .leftJoin(participants, eq(users.id, participants.userId))
+        .leftJoin(games, eq(participants.gameId, games.id));
 
-    return stats[0];
+      const result = stats[0];
+
+      return {
+        totalUsers: Number(result.totalUsers) || 0,
+        totalGames: Number(result.totalGames) || 0,
+        totalResolvedGames: Number(result.totalResolvedGames) || 0,
+        totalUnresolvedGames: Number(result.totalUnresolvedGames) || 0,
+        usersWithWinnings: Number(result.usersWithWinnings) || 0,
+        totalWinningsDistributed: Number(result.totalWinningsDistributed) || 0,
+      };
+    } catch (error) {
+      console.error('Leaderboard stats query error:', error);
+      throw new Error(`Failed to fetch leaderboard stats: ${error.message}`);
+    }
   }
 }
