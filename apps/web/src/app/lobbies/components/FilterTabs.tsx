@@ -1,5 +1,16 @@
-import type { FilterTabsProps } from './types'
+export interface FilterTab {
+  id: string
+  name: string
+  icon: string
+  count: number
+  color: string
+}
 
+export interface FilterTabsProps {
+  filterTabs: FilterTab[]
+  selectedFilter: string
+  onFilterChange: (filterId: string) => void
+}
 export default function FilterTabs({ filterTabs, selectedFilter, onFilterChange }: FilterTabsProps) {
   return (
     <div className="sticky top-[60px] z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/30 px-4 py-3">

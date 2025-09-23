@@ -1,11 +1,11 @@
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import ParticipantPicks from './ParticipantPicks'
 import Image from 'next/image'
 import { useState } from 'react'
 import Link from 'next/link'
 interface ParticipantCardProps {
-  participant: GamesFindOne['participants'][number]
-  lobby: GamesFindOne
+  participant: GamesServiceFindOne['participants'][number]
+  lobby: GamesServiceFindOne
   isExpanded: boolean
   onToggle: () => void
 }
@@ -35,23 +35,23 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
               <div className="relative">
                 <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
                   <Link href={`/profile?userId=${participant.userId}`}>
-                  {participant.user?.username ? (
-                    <Image
-                      src={imageSrc || '/images/pfp-1.svg'}
-                      alt={participant.user?.username || 'Anonymous User'}
-                      className="w-14 h-14 object-cover rounded-xl"
-                      width={56}
-                      height={56}
-                      onError={(e) => {
-                        e.currentTarget.onerror = handleError
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
-                      }}
-                    />
-                  ) : (
-                    <span className="text-white font-bold text-2xl">
-                      {participant.user?.username || 'Anonymous User'}
-                    </span>
-                  )}
+                    {participant.user?.username ? (
+                      <Image
+                        src={imageSrc || '/images/pfp-1.svg'}
+                        alt={participant.user?.username || 'Anonymous User'}
+                        className="w-14 h-14 object-cover rounded-xl"
+                        width={56}
+                        height={56}
+                        onError={(e) => {
+                          e.currentTarget.onerror = handleError
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
+                        }}
+                      />
+                    ) : (
+                      <span className="text-white font-bold text-2xl">
+                        {participant.user?.username || 'Anonymous User'}
+                      </span>
+                    )}
                   </Link>
                 </div>
                 {participant.user?.username === lobby.creator?.username && (

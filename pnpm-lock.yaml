@@ -21,6 +21,9 @@ importers:
       drizzle-orm:
         specifier: ^0.44.4
         version: 0.44.5(@opentelemetry/api@1.8.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
+      glob:
+        specifier: ^11.0.0
+        version: 11.0.3
       prettier:
         specifier: ^3.5.3
         version: 3.6.2
@@ -9504,7 +9507,7 @@ packages:
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
     deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
     dependencies:
-      minimatch: 9.0.5
+      minimatch: 10.0.3
     dev: true
 
   /@types/ms@2.1.0:

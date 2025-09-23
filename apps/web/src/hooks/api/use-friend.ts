@@ -1,6 +1,6 @@
 'use client'
 
-import { FriendsFollower, FriendsFollowing } from '@repo/server'
+import { FriendsServiceGetFollowers, FriendsServiceGetFollowing } from '@repo/server'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient, useApiWithAuth } from './base'
 import { useSearchParams } from 'next/navigation'
@@ -15,7 +15,7 @@ export function useFriends(session: string) {
   const followerQuery = useQuery({
     queryKey: ['followers'],
     queryFn: () =>
-      apiClient.get<FriendsFollower[]>('/api/friends/followers', {
+      apiClient.get<FriendsServiceGetFollowers>('/api/friends/followers', {
         headers: {
           'x-para-session': session ?? '',
         },
@@ -27,7 +27,7 @@ export function useFriends(session: string) {
   const followingQuery = useQuery({
     queryKey: ['following'],
     queryFn: () =>
-      apiClient.get<FriendsFollowing[]>('/api/friends/following', {
+      apiClient.get<FriendsServiceGetFollowing>('/api/friends/following', {
         headers: {
           'x-para-session': session ?? '',
         },

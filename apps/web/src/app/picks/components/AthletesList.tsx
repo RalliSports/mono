@@ -1,7 +1,7 @@
-import { AthletesGetActiveWithUnresolvedLinesInstance } from '@repo/server'
+import { AthletesServiceGetActiveAthletesWithUnresolvedLines } from '@repo/server'
 
 interface AthletesListProps {
-  athletes: AthletesGetActiveWithUnresolvedLinesInstance[]
+  athletes: AthletesServiceGetActiveAthletesWithUnresolvedLines
   children: React.ReactNode
 }
 

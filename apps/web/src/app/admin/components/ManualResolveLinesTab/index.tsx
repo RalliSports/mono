@@ -1,37 +1,16 @@
 import LineCard from './LineCard'
 import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { LineFindAllInstance } from '@repo/server'
+import { LinesServiceGetAllLinesInstance } from '@repo/server'
+import { useState } from 'react'
+import { useLines } from '@/hooks/api'
 
-interface ResolveLinesTabProps {
-  filteredLines: LineFindAllInstance[]
-  searchTerm: string
-  setSearchTerm: (term: string) => void
-  selectedSport: string
-  setSelectedSport: (sport: string) => void
-  resolvingLine: string | null
-  setResolvingLine: (id: string | null) => void
-  resolutionData: {
-    actualValue: number
-    resolutionReason: string
-  }
-  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
-  handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
-  addToast: (message: string, type: 'success' | 'error') => void
-}
+export default function ResolveLinesTab() {
+  const linesQuery = useLines()
 
-export default function ResolveLinesTab({
-  filteredLines,
-  searchTerm,
-  setSearchTerm,
-  selectedSport,
-  setSelectedSport,
-  resolvingLine,
-  setResolvingLine,
-  resolutionData,
-  setResolutionData,
-  handleResolveLine,
-  addToast,
-}: ResolveLinesTabProps) {
+  const lines = (linesQuery.query.data || []) as LinesServiceGetAllLinesInstance[]
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedSport, setSelectedSport] = useState('')
+
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -65,17 +44,8 @@ export default function ResolveLinesTab({
 
       {/* Lines List */}
       <div className="space-y-4">
-        {filteredLines.map((line) => (
-          <LineCard
-            key={line.id}
-            line={line as LineFindAllInstance & { value: number }}
-            resolvingLine={resolvingLine}
-            setResolvingLine={setResolvingLine}
-            resolutionData={resolutionData}
-            setResolutionData={setResolutionData}
-            handleResolveLine={handleResolveLine}
-            addToast={addToast}
-          />
+        {lines.map((line) => (
+          <LineCard line={line} key={line.id} />
         ))}
       </div>
     </div>

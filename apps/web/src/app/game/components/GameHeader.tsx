@@ -1,10 +1,10 @@
 import { useReferral } from '@/hooks/useReferral'
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import Image from 'next/image'
 import { useState } from 'react'
 import CreateNewGameButton from './CreateNewGameButton'
 interface GameHeaderProps {
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
 }
 
 export default function GameHeader({ lobby }: GameHeaderProps) {

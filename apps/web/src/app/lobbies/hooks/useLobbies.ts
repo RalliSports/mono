@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { fetchGames } from '@/hooks/get-games'
-import type { Lobby } from '@/hooks/get-games'
+
 import { useToast } from '@/components/ui/toast'
+import { GamesServiceFindAll } from '@repo/server'
 
 export const useLobbies = () => {
   const { addToast } = useToast()
-  const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
+  const [lobbiesData, setLobbiesData] = useState<GamesServiceFindAll>([])
   const [lobbiesError, setLobbiesError] = useState<string | null>(null)
   const [lobbiesLoading, setLobbiesLoading] = useState(true)
 

@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAccount } from '@getpara/react-sdk'
-import { useToast } from '../../components/ui/toast'
 import { useSessionToken } from '@/hooks/use-session'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { Button } from '@/components/ui/button'
-import { useAthletes, useGames, useLines, useMatchups, useStats, useTeams } from '@/hooks/api'
 
 // Import modular components
 import {
@@ -31,18 +29,11 @@ export default function AdminPage() {
 function AdminPageContent() {
   const { session } = useSessionToken()
   const router = useRouter()
-  const { addToast } = useToast()
   const account = useAccount()
   const { isConnected, walletAddress } = useParaWalletBalance()
   const ADMIN_WALLET = '2oNQCTWsVdx8Hxis1Aq6kJhfgh8cdo6Biq6m9nxRTVuk'
 
   // Hook queries - must be called before any early returns
-  const teamsQuery = useTeams()
-  const athletesQuery = useAthletes()
-  const gamesQuery = useGames()
-  const linesQuery = useLines()
-  const matchupsQuery = useMatchups()
-  const statsQuery = useStats()
 
   // Active tab state
   const [activeTab, setActiveTab] = useState<TabType>('stats')
@@ -58,77 +49,10 @@ function AdminPageContent() {
       if (authState === 'checking' && session && (account?.isConnected || isConnected)) {
         setAuthState('unauthorized')
       }
-    }, 5000) // 5 second timeout
+    }, 2000) // 5 second timeout
 
     return () => clearTimeout(timeout)
   }, [authState, session, account?.isConnected, isConnected, walletAddress])
-
-  // Form states
-  const [newStat, setNewStat] = useState({
-    name: '',
-    description: '',
-    customId: 0,
-  })
-
-  const [newPlayer, setNewPlayer] = useState({
-    name: '',
-    team: '',
-    position: '',
-    jerseyNumber: 0,
-    age: 0,
-    picture: '',
-  })
-
-  const [newLine, setNewLine] = useState({
-    playerId: '',
-    statTypeId: '',
-    value: 0,
-    id: '',
-    gameDate: '',
-  })
-
-  const [newMatchUp, setNewMatchUp] = useState({
-    homeTeamId: '',
-    awayTeamId: '',
-    date: '',
-  })
-
-  // UI states
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedSport, setSelectedSport] = useState('all')
-
-  const [resolvingLine, setResolvingLine] = useState<string | null>(null)
-  const [resolutionData, setResolutionData] = useState({
-    actualValue: 0,
-    resolutionReason: '',
-  })
-  // Data with proper fallbacks - cast as any to avoid type errors
-  const teams = (teamsQuery.data || []) as any
-  const players = (athletesQuery.all.data || []) as any
-  const matchUps = (matchupsQuery.query.data || []) as any
-  const stats = (statsQuery.query.data || []) as any
-
-  // Filtered data using useMemo with proper type casting
-  const filteredLines = useMemo(() => {
-    const linesData = (linesQuery.query.data || []) as any
-    return linesData.filter((line: any) => {
-      const matchesSearch =
-        line.athlete?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        line.stat?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      const lineAlreadyResolved = line.actualValue !== null
-      return matchesSearch && !lineAlreadyResolved
-    })
-  }, [linesQuery.query.data, searchTerm, selectedSport])
-
-  // Filtered data using useMemo with proper type casting
-  const filteredMatchups = useMemo(() => {
-    const matchupsData = matchupsQuery.query.data || []
-    return matchupsData
-  }, [matchupsQuery.query.data, searchTerm])
-
-  const filteredGames = useMemo(() => {
-    return (gamesQuery.open.data || []) as any
-  }, [gamesQuery.open.data])
 
   // Authentication and authorization logic
   useEffect(() => {
@@ -206,210 +130,6 @@ function AdminPageContent() {
     return null
   }
 
-  // Handlers using mutations
-  const handleCreateStat = async () => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    if (!newStat.name || !newStat.description || !newStat.customId) {
-      addToast('Please fill in all fields', 'error')
-      return
-    }
-
-    try {
-      await statsQuery.create.mutateAsync({
-        customId: newStat.customId,
-        name: newStat.name,
-        description: newStat.description,
-        displayName: newStat.name,
-        shortDisplayName: newStat.name,
-        abbreviation: newStat.name.substring(0, 3).toUpperCase(),
-        statOddsName: newStat.name,
-        createdAt: new Date(),
-      } as any)
-
-      setNewStat({
-        name: '',
-        description: '',
-        customId: 0,
-      })
-
-      addToast('Stat type created successfully!', 'success')
-    } catch (error) {
-      console.error('Error creating stat:', error)
-      addToast('Error creating stat', 'error')
-    }
-  }
-
-  const handleCreatePlayer = async () => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    if (!newPlayer.name || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position || !newPlayer.age) {
-      addToast('Please fill in all required fields', 'error')
-      return
-    }
-
-    try {
-      await athletesQuery.create.mutateAsync({
-        customId: Math.floor(Math.random() * 10000),
-        espnAthleteId: null,
-        name: newPlayer.name,
-        position: newPlayer.position,
-        jerseyNumber: newPlayer.jerseyNumber,
-        age: newPlayer.age,
-        picture: newPlayer.picture || null,
-        teamId: newPlayer.team,
-        createdAt: new Date(),
-      } as any)
-
-      setNewPlayer({
-        name: '',
-        team: '',
-        position: '',
-        jerseyNumber: 0,
-        age: 0,
-        picture: '',
-      })
-
-      addToast('Player added successfully!', 'success')
-    } catch (error) {
-      console.error('Error creating player:', error)
-      addToast('Error creating player', 'error')
-    }
-  }
-  const handleResolveLine = async (lineId: string, actualValue: number) => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    try {
-      await linesQuery.resolve.mutateAsync({ lineId, actualValue })
-      addToast(`Line resolved successfully! (${actualValue})`, 'success')
-    } catch (error) {
-      console.error('Error resolving line:', error)
-      addToast('Failed to resolve line', 'error')
-    }
-  }
-
-  const handleCreateLine = async () => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    try {
-      await linesQuery.create.mutateAsync({
-        matchupId: newLine.id,
-      } as any)
-
-      addToast('Lines created successfully!', 'success')
-    } catch (error) {
-      console.error('Error creating line:', error)
-      addToast('Error creating line', 'error')
-    }
-  }
-
-  const handleResolveLinesForMatchup = async (matchupId: string) => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    try {
-      await matchupsQuery.resolve.mutateAsync({ matchupId })
-      addToast(`Lines resolved successfully!`, 'success')
-    } catch (error) {
-      console.error('Error resolving line:', error)
-      addToast('Failed to resolve line', 'error')
-    }
-  }
-
-  const handleResolveGame = async (gameId: string) => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    try {
-      await gamesQuery.resolve.mutateAsync(gameId)
-      addToast('Game resolved successfully!', 'success')
-    } catch (error) {
-      console.error('Error resolving game:', error)
-      addToast('Failed to resolve game', 'error')
-    }
-  }
-
-  const handleResolveAllPossibleGames = async () => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    try {
-      await gamesQuery.resolveAllPossibleGames.mutateAsync()
-      addToast('Game resolved successfully!', 'success')
-    } catch (error) {
-      console.error('Error resolving game:', error)
-      addToast('Failed to resolve game', 'error')
-    }
-  }
-
-  const handleCreateMatchUp = async () => {
-    // Check wallet authorization before proceeding
-    if (walletAddress?.toString() !== ADMIN_WALLET) {
-      addToast('Unauthorized: Admin account required', 'error')
-      return
-    }
-
-    if (!newMatchUp.homeTeamId || !newMatchUp.awayTeamId || !newMatchUp.date) {
-      addToast('Please fill in all fields', 'error')
-      return
-    }
-
-    if (newMatchUp.homeTeamId === newMatchUp.awayTeamId) {
-      addToast('Home and away teams must be different', 'error')
-      return
-    }
-
-    const matchDate = new Date(newMatchUp.date)
-    if (isNaN(matchDate.getTime())) {
-      addToast('Please enter a valid date', 'error')
-      return
-    }
-
-    try {
-      await matchupsQuery.create.mutateAsync({
-        createdAt: new Date(),
-        status: 'scheduled',
-        startsAt: matchDate,
-        espnEventId: null,
-        gameDate: null,
-        scoreHome: null,
-        scoreAway: null,
-        homeTeamId: newMatchUp.homeTeamId,
-        awayTeamId: newMatchUp.awayTeamId,
-      } as any)
-
-      addToast('Match-up created successfully!', 'success')
-    } catch (error) {
-      console.error('Error creating matchup:', error)
-      addToast('Failed to create match-up', 'error')
-    }
-  }
-
   return (
     <div className="bg-gray-900 min-h-screen">
       {/* Enhanced Top Navigation Bar */}
@@ -422,76 +142,19 @@ function AdminPageContent() {
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
           {/* Tab Content */}
-          {activeTab === 'stats' && (
-            <StatsTab
-              stats={stats}
-              newStat={newStat}
-              setNewStat={setNewStat}
-              handleCreateStat={handleCreateStat}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-            />
-          )}
+          {activeTab === 'stats' && <StatsTab />}
 
-          {activeTab === 'players' && (
-            <PlayersTab
-              players={players}
-              newPlayer={newPlayer}
-              setNewPlayer={setNewPlayer}
-              handleCreatePlayer={handleCreatePlayer}
-            />
-          )}
+          {activeTab === 'players' && <PlayersTab />}
 
-          {activeTab === 'lines' && (
-            <LinesTab
-              newLine={newLine}
-              setNewLine={(line: any) => setNewLine(line)}
-              handleCreateLine={handleCreateLine}
-              matchUps={matchUps}
-            />
-          )}
+          {activeTab === 'lines' && <LinesTab />}
 
-          {activeTab === 'resolve-lines' && (
-            <ResolveLinesTab handleResolveLinesForMatchup={handleResolveLinesForMatchup} matchUps={filteredMatchups} />
-          )}
+          {activeTab === 'resolve-lines' && <ResolveLinesTab />}
 
-          {activeTab === 'manual-resolve-lines' && (
-            <ManualResolveLinesTab
-              filteredLines={filteredLines}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedSport={selectedSport}
-              setSelectedSport={setSelectedSport}
-              resolvingLine={resolvingLine}
-              setResolvingLine={setResolvingLine}
-              resolutionData={resolutionData}
-              setResolutionData={setResolutionData}
-              handleResolveLine={handleResolveLine}
-              addToast={addToast}
-            />
-          )}
+          {activeTab === 'manual-resolve-lines' && <ManualResolveLinesTab />}
 
-          {activeTab === 'resolve-games' && (
-            <ResolveGamesTab
-              filteredGames={filteredGames}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedSport={selectedSport}
-              setSelectedSport={setSelectedSport}
-              handleResolveGame={handleResolveGame}
-              handleResolveAllPossibleGames={handleResolveAllPossibleGames}
-            />
-          )}
+          {activeTab === 'resolve-games' && <ResolveGamesTab />}
 
-          {activeTab === 'matchups' && (
-            <MatchupsTab
-              matchUps={matchUps}
-              newMatchUp={newMatchUp}
-              setNewMatchUp={setNewMatchUp}
-              handleCreateMatchUp={handleCreateMatchUp}
-              teams={teams}
-            />
-          )}
+          {activeTab === 'matchups' && <MatchupsTab />}
         </div>
       </div>
     </div>

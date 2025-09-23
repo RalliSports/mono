@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 
 interface GameHeaderProps {
-  game: GamesFindOne
+  game: GamesServiceFindOne
 }
 
 const getVisibilityIcon = (visibility: string) => {

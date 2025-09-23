@@ -22,7 +22,6 @@ import {
 
 // Hooks and Constants
 import { useLobbies } from './hooks/useLobbies'
-import { useUser } from './hooks/useUser'
 import { useLobbiesFilters } from './hooks/useLobbiesFilters'
 import { createFilterTabs } from './constants/filterTabs'
 
@@ -34,7 +33,6 @@ export default function LobbiesPage() {
 
   // Custom hooks
   const { lobbiesData, lobbiesError, lobbiesLoading, retryFetch } = useLobbies()
-  const { user } = useUser()
   const { selectedFilter, setSelectedFilter, searchQuery, setSearchQuery, filteredLobbies } =
     useLobbiesFilters(lobbiesData)
 
@@ -102,7 +100,6 @@ export default function LobbiesPage() {
         setIsSidebarOpen={setIsSidebarOpen}
         isProfileDropdownOpen={isProfileDropdownOpen}
         setIsProfileDropdownOpen={setIsProfileDropdownOpen}
-        user={user}
         balanceProps={balanceProps}
       />
 
@@ -133,7 +130,7 @@ export default function LobbiesPage() {
         {lobbiesLoading ? (
           <LobbiesGridSkeleton count={8} />
         ) : filteredLobbies.length > 0 ? (
-          <LobbiesGrid lobbies={filteredLobbies} user={user} />
+          <LobbiesGrid lobbies={filteredLobbies} />
         ) : (
           <EmptyState
             searchQuery={searchQuery}

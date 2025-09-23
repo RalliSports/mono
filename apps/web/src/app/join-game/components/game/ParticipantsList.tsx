@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 
 interface ParticipantsListProps {
-  game: GamesFindOne
+  game: GamesServiceFindOne
   expandedParticipants: string[]
   onToggleParticipant: (participantId: string) => void
 }

@@ -1,26 +1,36 @@
 import GameCard from './GameCard'
 import { SportsDropdown } from '../../../../components/ui/dropdown'
-import { GamesFindAllInstance } from '@repo/server'
+import { GamesServiceFindAllOpenInstance } from '@repo/server'
+import { useGames } from '@/hooks/api'
+import { useState } from 'react'
+import { useToast } from '@/components/ui/toast'
 
-interface ResolveGamesTabProps {
-  filteredGames: GamesFindAllInstance[]
-  searchTerm: string
-  setSearchTerm: (term: string) => void
-  selectedSport: string
-  setSelectedSport: (sport: string) => void
-  handleResolveGame: (gameId: string) => void
-  handleResolveAllPossibleGames: () => void
-}
+export default function ResolveGamesTab() {
+  const { addToast } = useToast()
+  const gamesQuery = useGames()
+  const games = (gamesQuery.all.data || []) as GamesServiceFindAllOpenInstance[]
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedSport, setSelectedSport] = useState('')
 
-export default function ResolveGamesTab({
-  filteredGames,
-  searchTerm,
-  setSearchTerm,
-  selectedSport,
-  setSelectedSport,
-  handleResolveGame,
-  handleResolveAllPossibleGames,
-}: ResolveGamesTabProps) {
+  const handleResolveGame = async (gameId: string) => {
+    try {
+      await gamesQuery.resolve.mutateAsync(gameId)
+      addToast('Game resolved successfully!', 'success')
+    } catch (error) {
+      console.error('Error resolving game:', error)
+      addToast('Failed to resolve game', 'error')
+    }
+  }
+
+  const handleResolveAllPossibleGames = async () => {
+    try {
+      await gamesQuery.resolveAllPossibleGames.mutateAsync()
+      addToast('Game resolved successfully!', 'success')
+    } catch (error) {
+      console.error('Error resolving game:', error)
+      addToast('Failed to resolve game', 'error')
+    }
+  }
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <div className="flex items-center justify-between">
@@ -62,7 +72,7 @@ export default function ResolveGamesTab({
 
       {/* Games List */}
       <div className="space-y-4">
-        {filteredGames.map((game) => (
+        {games.map((game) => (
           <GameCard key={game.id} game={game} handleResolveGame={handleResolveGame} />
         ))}
       </div>

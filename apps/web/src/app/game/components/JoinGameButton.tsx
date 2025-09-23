@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import { GamesFindOne, UserFindOne } from '@repo/server'
+import { GamesServiceFindOne, UserServiceFindOne } from '@repo/server'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import GameCodeInput from './GameCodeInput'
 
 interface JoinGameButtonProps {
-  game: GamesFindOne
-  user: UserFindOne | null
+  game: GamesServiceFindOne
+  user: UserServiceFindOne | null
 }
 
 export default function JoinGameButton({ game, user }: JoinGameButtonProps) {

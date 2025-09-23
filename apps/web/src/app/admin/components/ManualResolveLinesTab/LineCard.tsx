@@ -1,32 +1,33 @@
 import Image from 'next/image'
-import { LineFindAllInstance } from '@repo/server'
+import { LinesServiceGetAllLinesInstance } from '@repo/server'
 import { useState } from 'react'
+import { useToast } from '@/components/ui/toast'
+import { useLines } from '@/hooks/api'
 
 interface LineCardProps {
-  line: LineFindAllInstance & { value: number }
-  resolvingLine: string | null
-  setResolvingLine: (id: string | null) => void
-  resolutionData: {
-    actualValue: number
-    resolutionReason: string
-  }
-  setResolutionData: (data: { actualValue: number; resolutionReason: string }) => void
-  handleResolveLine: (lineId: string, actualValue: number) => Promise<void>
-  addToast: (message: string, type: 'success' | 'error') => void
+  line: LinesServiceGetAllLinesInstance
 }
 
-export default function LineCard({
-  line,
-  resolvingLine,
-  setResolvingLine,
-  resolutionData,
-  setResolutionData,
-  handleResolveLine,
-  addToast,
-}: LineCardProps) {
+export default function LineCard({ line }: LineCardProps) {
   const timeNow = new Date()
+  const linesQuery = useLines()
+  const [resolvingLine, setResolvingLine] = useState<string | null>(null)
+  const [resolutionData, setResolutionData] = useState<{ actualValue: number; resolutionReason: string }>({
+    actualValue: 0,
+    resolutionReason: '',
+  })
+  const { addToast } = useToast()
   const [loading, setLoading] = useState(false)
 
+  const handleResolveLine = async (lineId: string, actualValue: number) => {
+    try {
+      await linesQuery.resolve.mutateAsync({ lineId, actualValue })
+      addToast(`Line resolved successfully! (${actualValue})`, 'success')
+    } catch (error) {
+      console.error('Error resolving line:', error)
+      addToast('Failed to resolve line', 'error')
+    }
+  }
   return (
     <div className="bg-slate-700/30 rounded-xl p-6 hover:bg-slate-700/50 transition-colors border border-slate-600/20">
       <div className="space-y-4">
@@ -135,7 +136,7 @@ export default function LineCard({
                       placeholder={`e.g., ${line.predictedValue}`}
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
-                    <div className="mt-1 text-sm text-slate-400">Line value: {line.value}</div>
+                    <div className="mt-1 text-sm text-slate-400">Line value: {line.predictedValue}</div>
                   </div>
                   <div>
                     <label className="block text-white font-semibold mb-2">Resolution Reason (Optional)</label>

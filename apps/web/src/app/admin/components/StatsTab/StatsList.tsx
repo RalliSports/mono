@@ -1,12 +1,12 @@
-import { StatsFindById } from '@repo/server'
+import { useStats } from '@/hooks/api'
+import { StatsServiceGetAllStatsInstance } from '@repo/server'
+import { useState } from 'react'
 
-interface StatsListProps {
-  stats: StatsFindById[]
-  searchTerm: string
-  setSearchTerm: (term: string) => void
-}
+export default function StatsList() {
+  const statsQuery = useStats()
 
-export default function StatsList({ stats, searchTerm, setSearchTerm }: StatsListProps) {
+  const stats = (statsQuery.query.data || []) as StatsServiceGetAllStatsInstance[]
+  const [searchTerm, setSearchTerm] = useState('')
   const filteredStats = stats.filter((stat) => {
     const matchesSearch =
       stat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
