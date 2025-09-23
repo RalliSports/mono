@@ -36,7 +36,7 @@ export default function ProfileHeader({
   setActiveChannel,
   userHasStreamChat,
 }: ProfileHeaderProps) {
-  const { friend, toggle } = useFriends(session as string)
+  const { friend, toggle } = useFriends(session as string, currentUserId)
   const { connectToDirectMessage } = useChat()
 
   const searchParams = useSearchParams()
@@ -49,6 +49,7 @@ export default function ProfileHeader({
       console.log('could not toogle follow:', error)
     }
   }
+
   const handleConnectToDirectMessage = async () => {
     try {
       const channel = await connectToDirectMessage(userId)

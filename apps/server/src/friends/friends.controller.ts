@@ -36,30 +36,40 @@ export class FriendsController {
     return this.friendsService.toggleFollow(currentUser.id, userId);
   }
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
+
   @ApiOperation({ summary: 'Get followers' })
+   @ApiQuery({
+    name: 'userId',
+    required: true,
+    type: String,
+    description: 'User ID to follow/unfollow',
+  })
   @ApiResponse({
     status: 200,
     description: 'Get all my followers',
     type: [Friend],
   })
   @Get('followers')
-  async getFollowers(@UserPayload() user: User) {
-    return this.friendsService.getFollowers(user.id);
+  async getFollowers(  @Query('userId') userId: string,) {
+    return this.friendsService.getFollowers(userId);
   }
 
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
+ 
   @ApiOperation({ summary: 'Get followers' })
+   @ApiQuery({
+    name: 'userId',
+    required: true,
+    type: String,
+    description: 'User ID to follow/unfollow',
+  })
   @ApiResponse({
     status: 200,
     description: 'Get all friends following me',
     type: [Friend],
   })
   @Get('following')
-  async getFollowing(@UserPayload() user: User) {
-    return this.friendsService.getFollowing(user.id);
+  async getFollowing(  @Query('userId') userId: string,) {
+    return this.friendsService.getFollowing(userId);
   }
 
   @ApiSecurity('x-para-session')
