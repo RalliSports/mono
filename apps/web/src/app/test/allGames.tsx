@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-// import { Game } from '@repo/db/types'
 import {
   GamesServiceFindAll,
   GamesServiceFindAllInstance,
