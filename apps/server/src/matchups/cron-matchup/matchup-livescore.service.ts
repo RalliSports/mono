@@ -174,7 +174,7 @@ export class MatchupLivescoreService {
 
     this.schedulerRegistry.addCronJob(
       liveScoreCronJob,
-      liveScoreCronJobInstance,
+      liveScoreCronJobInstance as any, // Type cast to avoid version mismatch between cron@4.3.0 and cron@4.3.3
     );
     liveScoreCronJobInstance.start();
     this.logger.log(`Started live-score-update CRON for matchup: ${matchupId}`);

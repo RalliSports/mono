@@ -23,14 +23,18 @@ export class SessionAuthGuard implements CanActivate {
       throw new UnauthorizedException('Session ID missing');
     }
 
-    const user = await this.authService.validateSession(
-      sessionId,
-      typeof email === 'string' ? email : undefined,
-      typeof referralCode === 'string' ? referralCode : undefined,
-    );
+    try {
+      const user = await this.authService.validateSession(
+        sessionId,
+        typeof email === 'string' ? email : undefined,
+        typeof referralCode === 'string' ? referralCode : undefined,
+      );
 
-    req.user = user;
-    return true;
+      req.user = user;
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Session validation failed');
+    }
   }
 }
 
