@@ -1,18 +1,3 @@
-export interface GameSettings {
-  title: string
-  depositAmount: number
-  maxParticipants: number
-  matchupGroup: string
-  isPrivate: boolean
-  depositToken: string
-  type: 'limited' | '1v1' | 'unlimited'
-  userControlType: 'none' | 'whitelist' | 'blacklist'
-  gameMode: string
-  numBets: number
-  tokenId: string
-  imageUrl: string
-}
-
 export interface FormErrors {
   [key: string]: string
 }
