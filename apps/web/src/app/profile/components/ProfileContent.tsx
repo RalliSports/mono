@@ -119,7 +119,7 @@ export default function ProfileContent() {
             ) : (
               <>
                 <ActiveParlaysSection myOpenGames={myOpenGames} user={user} />
-                <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
+                <PastParlaysSection myCompletedGames={myCompletedGames} user={user} />
               </>
             )}
           </div>

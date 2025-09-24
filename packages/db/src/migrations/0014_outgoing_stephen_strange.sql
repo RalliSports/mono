@@ -1,0 +1,1 @@
+ALTER TABLE "lines" ADD COLUMN "current_value" numeric;

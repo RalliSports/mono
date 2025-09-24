@@ -2,25 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useReferralCode } from './useReferralCode'
 import { useSessionToken } from './use-session'
 import { apiClient } from './api/base'
-
-interface ReferralStats {
-  totalReferrals: number
-  completedReferrals: number
-  pendingReferrals: number
-  referralCode: string
-}
-
-interface ReferralResponse {
-  code: string
-}
-
-interface ReferredUser {
-  id: string
-  username: string
-  emailAddress: string
-  status: 'pending' | 'completed'
-  referredAt: string
-}
+import {
+  ReferralServiceGetReferralCode,
+  ReferralServiceGetReferralStats,
+  ReferralServiceGenerateReferralCode,
+  ReferralServiceFindAllReferredUsers,
+} from '@repo/server'
 
 export function useReferral() {
   const { referralCode, setReferralCode, clearReferralCode } = useReferralCode()
@@ -34,7 +21,7 @@ export function useReferral() {
 
     console.log('Fetching user referral code with session:', session.substring(0, 10) + '...')
 
-    const response = await apiClient.request<ReferralResponse>('/api/referral/code', {
+    const response = await apiClient.request<ReferralServiceGetReferralCode>('/api/referral/code', {
       method: 'GET',
       headers: {
         'x-para-session': session,
@@ -56,17 +43,17 @@ export function useReferral() {
   }
 
   // API Queries - automatically fetch data
-  const referralCodeQuery = useQuery<ReferralResponse>({
+  const referralCodeQuery = useQuery<ReferralServiceGetReferralCode>({
     queryKey: ['referral-code'],
     queryFn: fetchUserReferralCode,
     enabled: !!session, // Only run when we have a session
   })
 
-  const referralStatsQuery = useQuery<ReferralStats>({
+  const referralStatsQuery = useQuery<ReferralServiceGetReferralStats>({
     queryKey: ['referral-stats'],
     queryFn: async () => {
       if (!session) throw new Error('No session')
-      return apiClient.request<ReferralStats>('/api/referral/stats', {
+      return apiClient.request<ReferralServiceGetReferralStats>('/api/referral/stats', {
         method: 'GET',
         headers: {
           'x-para-session': session,
@@ -76,11 +63,11 @@ export function useReferral() {
     enabled: !!session,
   })
 
-  const referredUsersQuery = useQuery<ReferredUser[]>({
+  const referredUsersQuery = useQuery<ReferralServiceFindAllReferredUsers[]>({
     queryKey: ['referred-users'],
     queryFn: async () => {
       if (!session) throw new Error('No session')
-      return apiClient.request<ReferredUser[]>('/api/referral/referred-users', {
+      return apiClient.request<ReferralServiceFindAllReferredUsers[]>('/api/referral/referred-users', {
         method: 'GET',
         headers: {
           'x-para-session': session,
@@ -91,10 +78,10 @@ export function useReferral() {
   })
 
   // API Mutations
-  const generateReferralCodeMutation = useMutation<ReferralResponse, Error, void>({
+  const generateReferralCodeMutation = useMutation<ReferralServiceGenerateReferralCode, Error, void>({
     mutationFn: async () => {
       if (!session) throw new Error('No session')
-      return apiClient.request<ReferralResponse>('/api/referral/generate', {
+      return apiClient.request<ReferralServiceGenerateReferralCode>('/api/referral/generate', {
         method: 'POST',
         headers: {
           'x-para-session': session,
@@ -130,7 +117,7 @@ export function useReferral() {
     generateGameReferralLink,
 
     // API Data (automatically fetched)
-    userReferralCode: referralCodeQuery.data?.code,
+    userReferralCode: referralCodeQuery.data,
     referralStats: referralStatsQuery.data,
     referredUsers: referredUsersQuery.data,
 

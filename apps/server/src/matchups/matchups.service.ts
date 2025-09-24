@@ -169,9 +169,6 @@ export class MatchupsService {
           columns: {
             id: true,
             status: true,
-            statId: true,
-            athleteId: true,
-            matchupId: true,
           },
         },
       },

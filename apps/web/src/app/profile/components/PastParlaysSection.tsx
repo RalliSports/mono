@@ -1,16 +1,14 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ProfileTabType } from '../hooks/useProfileTabs'
 import { GamesServiceGetMyCompletedGames } from '@repo/server'
 import { UserServiceFindOne } from '@repo/server'
 
 interface PastParlaysSectionProps {
   myCompletedGames: GamesServiceGetMyCompletedGames
   user: UserServiceFindOne
-  setActiveTab: (tab: ProfileTabType) => void
 }
 
-export default function PastParlaysSection({ myCompletedGames, user, setActiveTab }: PastParlaysSectionProps) {
+export default function PastParlaysSection({ myCompletedGames, user }: PastParlaysSectionProps) {
   const router = useRouter()
 
   return (
@@ -79,9 +77,9 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
                         width={32}
                         height={32}
                         className={`rounded-full border-2 object-cover bg-slate-800 ${
-                          new Date(bet.line?.matchup?.startsAt || '') > new Date()
+                          bet.line?.status === 'open'
                             ? 'border-slate-600'
-                            : !!bet.line?.actualValue
+                            : bet.line?.status === 'locked'
                               ? 'border-blue-500'
                               : bet.isCorrect
                                 ? 'border-emerald-500'

@@ -873,7 +873,6 @@ export class GamesService {
 
     for (const game of gamesToResolve) {
       try {
-        console.log('resolving game', game.title);
         await sleep(500);
         await this.resolveGame(game.id);
       } catch (error) {
