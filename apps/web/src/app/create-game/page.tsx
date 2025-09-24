@@ -78,12 +78,12 @@ export default function CreateGame() {
   const [gameSettings, setGameSettings] = useState<CreateGameDtoType>({
     title: '',
     depositAmount: 25,
-    maxParticipants: 8,
+    maxParticipants: 4,
     matchupGroup: 'TEST',
     isPrivate: false,
     type: 'limited',
     userControlType: 'none',
-    numBets: 10, // Default Number of Bets
+    numBets: 4, // Default Number of Bets
     imageUrl: '/images/pfp-2.svg',
   })
 

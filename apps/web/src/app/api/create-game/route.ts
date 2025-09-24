@@ -20,7 +20,6 @@ function validateCreateGameData(data: CreateGameDtoType): { isValid: boolean; er
   if (typeof obj.isPrivate !== 'boolean') errors.push('isPrivate must be a boolean')
   if (typeof obj.type !== 'string') errors.push('type must be a string')
   if (typeof obj.userControlType !== 'string') errors.push('userControlType must be a string')
-  if (typeof obj.tokenId !== 'string') errors.push('tokenId must be a string')
 
   // Optional fields (only validate type if present)
   if (obj.gameModeId !== undefined && typeof obj.gameModeId !== 'string') {
