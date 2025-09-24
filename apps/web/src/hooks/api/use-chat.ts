@@ -24,7 +24,12 @@ export function useChat() {
   })
 
   useEffect(() => {
-    if (currentUserChatToken.data && currentUser.data) {
+    if (
+      currentUserChatToken.data?.token &&
+      currentUser.data?.id &&
+      currentUser.data?.username &&
+      currentUser.data?.avatar
+    ) {
       client.connectUser(
         { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
         currentUserChatToken.data.token,
