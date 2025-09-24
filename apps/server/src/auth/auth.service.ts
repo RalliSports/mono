@@ -95,8 +95,13 @@ export class AuthService {
           .where(eq(users.id, userExisted.id));
       }
 
-      // Register/update user with Stream Chat
-      await this.registerUserWithStreamChat(userExisted);
+      const alreadyRegisteredWithStreamChat = await chatClient.queryUsers({
+        id: userExisted.paraUserId,
+      });
+      if (alreadyRegisteredWithStreamChat.users.length === 0) {
+        // Register/update user with Stream Chat
+        await this.registerUserWithStreamChat(userExisted);
+      }
 
       return {
         emailAddress: userExisted.emailAddress as string,
@@ -107,7 +112,6 @@ export class AuthService {
       };
     } else {
       const gamertag = await generateUniqueGamertag(this.db, users);
-      const avatar = await getRandomAthleteAvatar(this.db);
 
       const newUser = await this.db
         .insert(users)
@@ -116,7 +120,8 @@ export class AuthService {
           emailAddress: userEmail,
           walletAddress: para.availableWallets[0].address,
           username: gamertag,
-          avatar: avatar,
+          avatar: '/images/pfp-1.svg',
+          isFirstLogin: true,
         })
         .onConflictDoNothing()
         .returning();

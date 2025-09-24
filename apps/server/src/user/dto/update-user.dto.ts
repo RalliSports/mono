@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, IsUrl } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
+// Create the class that must exactly match the type
 export class UpdateUserDto {
   @ApiProperty()
   @IsString()
@@ -24,6 +31,14 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUrl({}, { message: 'Avatar must be a valid URL' })
   avatar?: string;
+
+  @ApiProperty({
+    description: "Whether this is the user's first login",
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFirstLogin?: boolean;
 }
 
 export class UpdateUserEmailDto {

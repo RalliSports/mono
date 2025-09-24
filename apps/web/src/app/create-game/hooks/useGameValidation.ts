@@ -1,10 +1,11 @@
-import { GameSettings, FormErrors } from '../components/types'
+import { FormErrors } from '../components/types'
+import { CreateGameDtoType } from '@repo/server'
 
 export const useGameValidation = () => {
   const isValidUUID = (uuid: string) =>
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid)
 
-  const validateForm = (gameSettings: GameSettings): FormErrors => {
+  const validateForm = (gameSettings: CreateGameDtoType): FormErrors => {
     const errors: FormErrors = {}
 
     if (!gameSettings.title.trim()) errors.title = 'Title is required.'
@@ -18,8 +19,6 @@ export const useGameValidation = () => {
     if (!['1v1', 'limited', 'unlimited'].includes(gameSettings.type)) errors.type = 'Invalid contest type.'
     if (!['none', 'whitelist', 'blacklist'].includes(gameSettings.userControlType))
       errors.userControlType = 'Invalid user control type.'
-    if (!gameSettings.gameMode || !isValidUUID(gameSettings.gameMode))
-      errors.gameMode = 'Game Mode ID must be a valid UUID.'
 
     return errors
   }

@@ -40,7 +40,6 @@ export default function ProfileContent() {
     lastName,
     setUser,
     setAvatar,
-    setForceRefresh,
   } = useProfile(session || null)
 
   const { isUploadModalOpen, setIsUploadModalOpen, isUploading, handleFileSelect } = useProfilePictureUpload(
@@ -85,26 +84,26 @@ export default function ProfileContent() {
         <ProfileHeaderSkeleton />
       ) : (
         <>
-        <ProfileHeader
-        currentUserId={user.id}
-        isConnected={isConnected}
-          balances={balances}
-        session={session ?? ''}
-          formatBalance={formatBalance}
-          onEditPictureClick={() => setIsUploadModalOpen(true)}
-          avatar={user.avatar || ''}
-        setActiveTab={setActiveTab}
-        setActiveChannel={setActiveChannel}
-        userHasStreamChat={userHasStreamChat}
-      />
-      <TabNavigation
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        setActiveChannel={setActiveChannel}
-        isCurrentUser={isCurrentUser}
-        userId={user.id}
-        userHasStreamChat={userHasStreamChat}
-        />
+          <ProfileHeader
+            currentUserId={user.id}
+            isConnected={isConnected}
+            balances={balances}
+            session={session ?? ''}
+            formatBalance={formatBalance}
+            onEditPictureClick={() => setIsUploadModalOpen(true)}
+            avatar={user.avatar || ''}
+            setActiveTab={setActiveTab}
+            setActiveChannel={setActiveChannel}
+            userHasStreamChat={userHasStreamChat}
+          />
+          <TabNavigation
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            setActiveChannel={setActiveChannel}
+            isCurrentUser={isCurrentUser}
+            userId={user.id}
+            userHasStreamChat={userHasStreamChat}
+          />
         </>
       )}
 
@@ -119,7 +118,7 @@ export default function ProfileContent() {
               </>
             ) : (
               <>
-                <ActiveParlaysSection myOpenGames={myOpenGames} user={user} setActiveTab={setActiveTab} />
+                <ActiveParlaysSection myOpenGames={myOpenGames} user={user} />
                 <PastParlaysSection myCompletedGames={myCompletedGames} user={user} setActiveTab={setActiveTab} />
               </>
             )}
@@ -146,9 +145,7 @@ export default function ProfileContent() {
         onFileSelect={handleFileSelect}
         session={session || null}
         onUploadComplete={() => {
-          setTimeout(() => {
-            setForceRefresh(true)
-          }, 1000)
+          setTimeout(() => {}, 1000)
         }}
         avatar={user.avatar || ''}
         setAvatar={setAvatar}

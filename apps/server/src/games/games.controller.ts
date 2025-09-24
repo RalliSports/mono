@@ -237,6 +237,19 @@ export class GamesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Resolves all possible games' })
+  @ApiResponse({
+    status: 200,
+    description: 'All possible games resolved successfully',
+    type: GameResponseDto,
+  })
+  @Patch('/game/resolve-all-possible-games')
+  resolveAllPossibleGames() {
+    return this.gamesService.resolveAllPossibleGames();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a game' })
   @ApiParam({ name: 'id', type: String })

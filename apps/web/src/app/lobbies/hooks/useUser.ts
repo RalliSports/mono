@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSessionToken } from '@/hooks/use-session'
-import type { User } from '../components/types'
 import { useToast } from '@/components/ui/toast'
+import { UserServiceFindOne } from '@repo/server'
 
 export const useUser = () => {
   const { addToast } = useToast()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserServiceFindOne | null>(null)
   const { session } = useSessionToken()
 
   useEffect(() => {

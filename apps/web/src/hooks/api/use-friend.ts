@@ -1,6 +1,6 @@
 'use client'
 
-import { FriendsFollower, FriendsFollowing } from '@repo/server'
+import { FriendsServiceGetFollowers, FriendsServiceGetFollowing } from '@repo/server'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient, useApiWithAuth } from './base'
 

@@ -1,16 +1,25 @@
 import { useState } from 'react'
 import { Dropdown } from '../../../../components/ui/dropdown'
-import { MatchupsFindAllInstance } from '@repo/server'
+import { MatchupsServiceGetAllMatchupsInstance, MatchupsServiceGetMatchupsWithOpenLines } from '@repo/server'
+import { useMatchups } from '@/hooks/api'
+import { useToast } from '@/components/ui/toast'
 
-interface ResolveLinesTabProps {
-  handleResolveLinesForMatchup: (lineId: string, actualValue: number) => Promise<void>
-  matchUps: MatchupsFindAllInstance[]
-}
-
-export default function ResolveLinesTab({ handleResolveLinesForMatchup, matchUps }: ResolveLinesTabProps) {
+export default function ResolveLinesTab() {
+  const { addToast } = useToast()
+  const matchupsQuery = useMatchups()
+  const matchUps = (matchupsQuery.matchupsWithOpenLines.data || []) as MatchupsServiceGetMatchupsWithOpenLines
   const [isResolving, setIsResolving] = useState(false)
-  const [matchupToResolve, setMatchupToResolve] = useState<MatchupsFindAllInstance>(matchUps[0])
+  const [matchupToResolve, setMatchupToResolve] = useState<MatchupsServiceGetAllMatchupsInstance>(matchUps[0])
 
+  const handleResolveLinesForMatchup = async (matchupId: string) => {
+    try {
+      await matchupsQuery.resolve.mutateAsync({ matchupId })
+      addToast(`Lines resolved successfully!`, 'success')
+    } catch (error) {
+      console.error('Error resolving line:', error)
+      addToast('Failed to resolve line', 'error')
+    }
+  }
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -32,7 +41,7 @@ export default function ResolveLinesTab({ handleResolveLinesForMatchup, matchUps
               placeholder="Select a game"
               options={[
                 { value: '', label: 'Select a game', disabled: true },
-                ...matchUps.map((matchUp: MatchupsFindAllInstance) => ({
+                ...matchUps.map((matchUp: MatchupsServiceGetAllMatchupsInstance) => ({
                   value: matchUp.id,
                   label: `${matchUp.homeTeam?.name ?? 'Home'} vs ${matchUp.awayTeam?.name ?? 'Away'} (${matchUp.startsAt ? new Date(matchUp.startsAt).toLocaleDateString() : ''})`,
                   icon: '🏈',
@@ -49,7 +58,7 @@ export default function ResolveLinesTab({ handleResolveLinesForMatchup, matchUps
         <button
           onClick={async () => {
             setIsResolving(true)
-            await handleResolveLinesForMatchup(matchupToResolve.id, 0)
+            await handleResolveLinesForMatchup(matchupToResolve.id)
             setIsResolving(false)
           }}
           disabled={isResolving}

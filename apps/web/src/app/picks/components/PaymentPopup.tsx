@@ -1,11 +1,12 @@
-import type { Game, SelectedPick } from './types'
+import { GamesServiceFindAll } from '@repo/server'
+import type { SelectedPick } from './types'
 
 interface PaymentPopupProps {
   showPaymentPopup: boolean
   paymentSuccess: boolean
   isPaymentProcessing: boolean
   isSubmittingPayment: boolean
-  game: Game
+  game: GamesServiceFindAll[number]
   selectedPicks: SelectedPick[]
   buyIn: number
   gameName: string
@@ -64,7 +65,7 @@ export default function PaymentPopup({
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-300">Potential Payout</span>
-                <span className="text-emerald-400 font-bold">~${Math.round(buyIn * game.maxParticipants)}</span>
+                <span className="text-emerald-400 font-bold">~${Math.round(buyIn * (game.maxParticipants || 0))}</span>
               </div>
             </div>
 

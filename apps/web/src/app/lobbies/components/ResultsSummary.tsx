@@ -1,4 +1,8 @@
-import type { ResultsSummaryProps } from './types'
+export interface ResultsSummaryProps {
+  searchQuery: string
+  resultCount: number
+  onClearSearch: () => void
+}
 
 export default function ResultsSummary({ searchQuery, resultCount, onClearSearch }: ResultsSummaryProps) {
   if (!searchQuery) return null

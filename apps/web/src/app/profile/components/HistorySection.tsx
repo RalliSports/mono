@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from '@/hooks/api/use-user'
-import type { GamesGetMyCompletedGames } from '@repo/server'
+import type { GamesServiceGetMyCompletedGames } from '@repo/server'
 
 export default function HistorySection() {
   const { myCompletedGames, currentUser } = useUser()
@@ -22,8 +22,8 @@ export default function HistorySection() {
         </div>
       ) : myCompletedGames.data && myCompletedGames.data.length > 0 ? (
         <div className="space-y-4">
-          {(myCompletedGames.data as unknown as GamesGetMyCompletedGames).map((game) => {
-            const userParticipant = game.participants?.find((p: any) => p.userId === currentUser.data?.id)
+          {(myCompletedGames.data as unknown as GamesServiceGetMyCompletedGames).map((game) => {
+            const userParticipant = game.participants?.find((p) => p.userId === currentUser.data?.id)
             const isWinner = userParticipant?.isWinner
             const amountWon = userParticipant?.amountWon || 0
 

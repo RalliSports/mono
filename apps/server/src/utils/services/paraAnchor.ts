@@ -392,7 +392,7 @@ export class ParaAnchor {
       shouldRefundBettors: boolean;
     }[],
     creator: PublicKey,
-  ): Promise<string> {
+  ): Promise<{ success: boolean; txSig?: string; error?: string }> {
     const program = await this.getProgram(false); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
@@ -451,10 +451,10 @@ export class ParaAnchor {
 
       console.log(txSig, 'transaction signature');
 
-      return txSig;
+      return { success: true, txSig };
     } catch (error) {
       console.error('Transaction Error:', error);
-      return '';
+      return { success: false, error: error.toString() };
     }
   }
 

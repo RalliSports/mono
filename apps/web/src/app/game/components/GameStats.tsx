@@ -1,8 +1,8 @@
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import { getVisibilityIcon, getVisibilityColor } from '../utils/gameHelpers'
 
 interface GameStatsProps {
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
 }
 
 export default function GameStats({ lobby }: GameStatsProps) {

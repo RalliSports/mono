@@ -1,9 +1,9 @@
 import Image from 'next/image'
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import { capitalize, getShortenedPosition } from '@/lib/utils'
 
 interface ParticipantPicksProps {
-  participant: GamesFindOne['participants'][number]
+  participant: GamesServiceFindOne['participants'][number]
 }
 
 export default function ParticipantPicks({ participant }: ParticipantPicksProps) {

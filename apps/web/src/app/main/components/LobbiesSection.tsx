@@ -1,9 +1,8 @@
 import { useRouter } from 'next/navigation'
 import LobbyCard from '@/components/main-feed/lobby-card'
-import type { Lobby } from '@/hooks/get-games'
-
+import { GamesServiceFindAll, GamesServiceFindAllInstance } from '@repo/server'
 interface LobbiesSectionProps {
-  lobbiesData: Lobby[]
+  lobbiesData: GamesServiceFindAll
   isMobile?: boolean
 }
 
@@ -68,21 +67,8 @@ export default function LobbiesSection({ lobbiesData, isMobile = false }: Lobbie
           </div>
 
           <div className="space-y-3">
-            {lobbiesData.slice(0, 10).map((lobby: Lobby) => (
-              <LobbyCard
-                key={lobby.id}
-                id={lobby.id}
-                title={lobby.title}
-                participants={lobby.participants}
-                maxParticipants={lobby.maxParticipants}
-                buyIn={lobby.buyIn}
-                prizePool={lobby.prizePool}
-                imageUrl={lobby.imageUrl}
-                legs={lobby.legs}
-                timeLeft={lobby.timeLeft}
-                host={lobby.host}
-                isUrgent={lobby.isUrgent}
-              />
+            {lobbiesData.slice(0, 10).map((lobby: GamesServiceFindAllInstance) => (
+              <LobbyCard key={lobby.id} lobby={lobby} />
             ))}
           </div>
 
@@ -112,20 +98,7 @@ export default function LobbiesSection({ lobbiesData, isMobile = false }: Lobbie
 
         <div className="space-y-3 mb-6">
           {lobbiesData.slice(0, 10).map((lobby) => (
-            <LobbyCard
-              key={lobby.id}
-              id={lobby.id}
-              title={lobby.title}
-              imageUrl={lobby.imageUrl}
-              participants={lobby.participants}
-              maxParticipants={lobby.maxParticipants}
-              buyIn={lobby.buyIn}
-              prizePool={lobby.prizePool}
-              legs={lobby.legs}
-              timeLeft={lobby.timeLeft}
-              host={lobby.host}
-              isUrgent={lobby.isUrgent}
-            />
+            <LobbyCard key={lobby.id} lobby={lobby} />
           ))}
         </div>
 

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { matchups, stats, athletes, lines } from '@repo/db';
-import { and, eq, gt, lt, gte, lte, or, inArray } from 'drizzle-orm';
+import { matchups, stats, athletes, lines, lineStatusEnum } from '@repo/db';
+import { and, eq, gt, lt, gte, lte, or, inArray, exists } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -29,6 +29,8 @@ import {
   ProcessedData,
 } from './cron-matchup/utils/espnEvent-finalScore-dataProcess';
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
+import { sleep } from 'src/utils';
+import { LineStatus } from 'src/lines/enum/lines';
 
 @Injectable()
 export class MatchupsService {
@@ -71,6 +73,43 @@ export class MatchupsService {
         },
       },
       where: and(eq(matchups.status, MatchupStatus.SCHEDULED)),
+    });
+  }
+
+  async getMatchupsWithOpenLines() {
+    return this.db.query.matchups.findMany({
+      with: {
+        lines: {
+          columns: {
+            id: true,
+            status: true,
+          },
+        },
+        homeTeam: {
+          columns: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+      where: and(
+        eq(matchups.status, MatchupStatus.SCHEDULED),
+        exists(
+          this.db
+            .select()
+            .from(lines)
+            .where(
+              and(
+                eq(lines.matchupId, matchups.id),
+                eq(lines.status, LineStatus.OPEN),
+              ),
+            ),
+        ),
+      ),
     });
   }
 
@@ -256,7 +295,7 @@ export class MatchupsService {
     // Process each chunk sequentially with 500ms delay between chunks
     for (let i = 0; i < chunks.length; i++) {
       if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await sleep(500);
       }
       await this.linesService.bulkCreateLines(chunks[i], user);
     }
@@ -375,7 +414,7 @@ export class MatchupsService {
     // Process each chunk sequentially with 500ms delay between chunks
     for (let i = 0; i < chunks.length; i++) {
       if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await sleep(500);
       }
       await this.linesService.bulkResolveLines(chunks[i], user);
     }
