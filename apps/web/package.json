@@ -26,6 +26,7 @@
     "@datadog/browser-rum": "^6.20.0",
     "@datadog/browser-rum-react": "^6.20.0",
     "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@farcaster/mini-app-solana": "1.0.7",
     "@farcaster/miniapp-sdk": "0.1.8",
     "@farcaster/miniapp-wagmi-connector": "1.0.0",
