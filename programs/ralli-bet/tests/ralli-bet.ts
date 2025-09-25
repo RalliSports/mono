@@ -348,7 +348,7 @@ describe("RalliBet Comprehensive Tests", () => {
     gameVault = getAssociatedTokenAddressSync(mint, game, true);
   });
 
-  describe.skip("Create Game Tests", () => {
+  describe("Create Game Tests", () => {
     it("should create a game successfully", async () => {
       const accounts = {
         creator: user1.publicKey,
@@ -528,7 +528,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Create Line Tests", () => {
+  describe("Create Line Tests", () => {
     it("should create lines successfully", async () => {
       const [line1] = PublicKey.findProgramAddressSync(
         [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
@@ -796,7 +796,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Update Line Tests", () => {
+  describe("Update Line Tests", () => {
     it("should update the line successfully", async () => {
       try {
         const [line3] = PublicKey.findProgramAddressSync(
@@ -974,7 +974,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Join Game Tests", () => {
+  describe("Join Game Tests", () => {
     beforeEach(async () => {
       // Create a game before each join test
       const tx = await program.methods
@@ -1255,7 +1255,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Submit Bet Tests", () => {
+  describe("Submit Bet Tests", () => {
     beforeEach(async () => {
       // Create a game before each join test
       const tx = await program.methods
@@ -1856,7 +1856,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Resolve Line Tests", () => {
+  describe("Resolve Line Tests", () => {
     it("should prevent resolution with wrong direction", async () => {
       try {
         const tx = await program.methods
@@ -2000,7 +2000,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Calculate Correct Tests", () => {
+  describe("Calculate Correct Tests", () => {
     let calcLine1PK: PublicKey;
     let calcLine2PK: PublicKey;
     let calcLine3PK: PublicKey;
@@ -2424,7 +2424,7 @@ describe("RalliBet Comprehensive Tests", () => {
     });
   });
 
-  describe.skip("Calculate Winners Tests", () => {
+  describe("Calculate Winners Tests", () => {
     beforeEach(async () => {
       try {
         gameId = new BN(Math.floor(Math.random() * 1000000));
@@ -3786,8 +3786,8 @@ describe("RalliBet Comprehensive Tests", () => {
         .rpc();
 
       newGame3PK = newGame3;
-      newGameEscrow1PK = newGameEscrow1;
-      newGameVault1PK = newGameVault1;
+      newGameEscrow3PK = newGameEscrow3;
+      newGameVault3PK = newGameVault3;
 
       const newGameId4 = new BN(2004);
 
@@ -5121,56 +5121,52 @@ describe("RalliBet Comprehensive Tests", () => {
       ).to.be.closeTo(totalPayoutToWinner, 0.000001);
     });
 
-    // it("should fail to resolve a game that is already resolved", async () => {
-    //   const accounts = {
-    //     admin: adminKeypair.publicKey,
-    //     game: newGame1PK,
-    //     gameEscrow: newGameEscrow1PK,
-    //     mint: mint,
-    //     gameVault: newGameVault1PK,
-    //     treasury: treasury.publicKey,
-    //     treasuryVault: treasuryTokenAccount,
-    //     systemProgram: SystemProgram.programId,
-    //     tokenProgram: TOKEN_PROGRAM_ID,
-    //     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //   };
+    it("should fail to resolve a game that is already resolved", async () => {
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame1PK,
+        gameEscrow: newGameEscrow1PK,
+        mint: mint,
+        gameVault: newGameVault1PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    //   await program.methods
-    //     .resolveGame(entryFeePercentage)
-    //     .accounts(accounts)
-    //     .remainingAccounts([
-    //       {
-    //         pubkey: user1TokenAccount,
-    //         isWritable: true,
-    //         isSigner: false,
-    //       },
-    //     ])
-    //     .signers([adminKeypair])
-    //     .rpc();
+      await program.methods
+        .resolveGame(entryFeePercentage)
+        .accounts(accounts)
+        .remainingAccounts([
+          {
+            pubkey: user1TokenAccount,
+            isWritable: true,
+            isSigner: false,
+          },
+        ])
+        .signers([adminKeypair])
+        .rpc();
 
-    //   try {
-    //     await program.methods
-    //       .resolveGame(entryFeePercentage)
-    //       .accounts(accounts)
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .signers([adminKeypair])
-    //       .rpc();
+      try {
+        await program.methods
+          .resolveGame(entryFeePercentage)
+          .accounts(accounts)
+          .remainingAccounts([
+            {
+              pubkey: user1TokenAccount,
+              isWritable: true,
+              isSigner: false,
+            },
+          ])
+          .signers([adminKeypair])
+          .rpc();
 
-    //     expect.fail("Should have failed with GameAlreadyResolved error");
-    //   } catch (error) {
-    //     expect(error).to.be.instanceOf(AnchorError);
-    //     const anchorError = error as AnchorError;
-    //     expect(anchorError.error.errorCode.code).to.equal(
-    //       "GameAlreadyResolved"
-    //     );
-    //   }
-    // });
+        expect.fail("Should have failed with GameAlreadyResolved error");
+      } catch (error) {
+        expect(error.error.errorMessage).to.equal("Game is already resolved");
+      }
+    });
 
     it("should successfully resolve a game between two users where there is a draw", async () => {
       const user1BalanceBefore = await connection.getTokenAccountBalance(
@@ -5347,1015 +5343,374 @@ describe("RalliBet Comprehensive Tests", () => {
         user4BalanceBefore.value.amount
       );
     });
-    // it("should fail to resolve game if not admin", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(0, 3)
-    //       .accountsPartial({
-    //         admin: user1.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame3PK,
-    //         gameEscrow: newGameEscrow3PK,
-    //         gameVault: newGameVault3PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([user1])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with UnauthorizedGameResolution");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include(
-    //       "Error Code: UnauthorizedGameResolution"
-    //     );
-    //   }
-    // });
+    it("should fail to resolve game if not admin", async () => {
+      const accounts = {
+        admin: user1.publicKey,
+        game: newGame3PK,
+        gameEscrow: newGameEscrow3PK,
+        mint: mint,
+        gameVault: newGameVault3PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    // it("should fail to resolve game if fee is too high", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(1001, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      try {
+        await program.methods
+          .resolveGame(0)
+          .accounts(accounts)
+          .remainingAccounts([
+            { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+            { pubkey: user2TokenAccount, isWritable: true, isSigner: false },
+            { pubkey: user3TokenAccount, isWritable: true, isSigner: false },
+          ])
+          .signers([user1])
+          .rpc();
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with ExcessiveFee");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: ExcessiveFee");
-    //   }
-    // });
+        expect.fail("Should have failed with UnauthorizedGameResolution error");
+      } catch (error) {
+        expect(error).to.be.instanceOf(anchor.AnchorError);
+        const anchorError = error as anchor.AnchorError;
+        expect(anchorError.error.errorCode.code).to.equal(
+          "UnauthorizedGameResolution"
+        );
+      }
+    });
 
-    // it("should fail to resolve game if line account missing", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+    it("should fail to resolve game if fee is too high", async () => {
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame4PK,
+        gameEscrow: newGameEscrow4PK,
+        mint: mint,
+        gameVault: newGameVault4PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with MissingLineAccounts");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include(
-    //       "Error Code: MissingLineAccounts"
-    //     );
-    //   }
-    // });
+      try {
+        await program.methods
+          .resolveGame(1001)
+          .accounts(accounts)
+          .remainingAccounts([
+            { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+          ])
+          .signers([adminKeypair])
+          .rpc();
 
-    // it("should fail to resolve game if line account is invalid", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+        expect.fail("Should have failed with ExcessiveFee error");
+      } catch (error) {
+        expect(error).to.be.instanceOf(anchor.AnchorError);
+        const anchorError = error as anchor.AnchorError;
+        expect(anchorError.error.errorCode.code).to.equal("ExcessiveFee");
+      }
+    });
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+    it("should fail to resolve an empty game because calculations are not complete", async () => {
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame5PK,
+        gameEscrow: newGameEscrow5PK,
+        mint: mint,
+        gameVault: newGameVault5PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    //         {
-    //           pubkey: providerTokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with InvalidLineAccount");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: InvalidLineAccount");
-    //   }
-    // });
+      try {
+        await program.methods
+          .resolveGame(entryFeePercentage)
+          .accounts(accounts)
+          .remainingAccounts([])
+          .signers([adminKeypair])
+          .rpc();
 
-    // it("should fail to resolve game if line account is not resolved", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+        expect.fail(
+          "Should have failed because the calculation complete flag is false"
+        );
+      } catch (error) {
+        expect(error).to.be.instanceOf(anchor.AnchorError);
+        const anchorError = error as anchor.AnchorError;
+        expect(anchorError.error.errorCode.code).to.equal(
+          "CalculationNotComplete"
+        );
+      }
+    });
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+    it("should fail to resolve game with insufficient token accounts for winners", async () => {
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame7PK,
+        gameEscrow: newGameEscrow7PK,
+        mint: mint,
+        gameVault: newGameVault7PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: line3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with LineNotResolved");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: LineNotResolved");
-    //   }
-    // });
+      try {
+        await program.methods
+          .resolveGame(entryFeePercentage)
+          .accounts(accounts)
+          .remainingAccounts([
+            { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+          ])
+          .signers([adminKeypair])
+          .rpc();
 
-    // it("should fail to resolve game if line account is not in game", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+        expect.fail(
+          "Should have failed due to incorrect number of winner accounts"
+        );
+      } catch (error) {
+        expect(error).to.be.instanceOf(anchor.AnchorError);
+        const anchorError = error as anchor.AnchorError;
+        expect(anchorError.error.errorCode.code).to.equal(
+          "IncorrectWinnerAccountCount"
+        );
+      }
+    });
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+    it("should successfully resolve a 7-user game where 2 win with low fees", async () => {
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user2BalanceBefore = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
 
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine5PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with LineNotInGame");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: LineNotInGame");
-    //   }
-    // });
-    // it("should fail to resolve game if bet account is not valid", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: line1PK,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      const lowFeePercentage = 100;
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame7PK,
+        gameEscrow: newGameEscrow7PK,
+        mint: mint,
+        gameVault: newGameVault7PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with InvalidBetAccount");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: InvalidBetAccount");
-    //   }
-    // });
+      await program.methods
+        .resolveGame(lowFeePercentage)
+        .accounts(accounts)
+        .remainingAccounts([
+          { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+          { pubkey: user2TokenAccount, isWritable: true, isSigner: false },
+        ])
+        .signers([adminKeypair])
+        .rpc();
 
-    // it("should fail to resolve game if bet account is not valid", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 3)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame4PK,
-    //         gameEscrow: newGameEscrow4PK,
-    //         gameVault: newGameVault4PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game1,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      const numberOfLosers = new anchor.BN(5);
+      const numberOfWinners = new anchor.BN(2);
+      const entryFeeBN = new anchor.BN(entryFeeRaw);
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      const losersPool = entryFeeBN.mul(numberOfLosers);
+      const feeFromLosers = losersPool
+        .mul(new anchor.BN(lowFeePercentage))
+        .div(new anchor.BN(10000));
+      const netLosersPool = losersPool.sub(feeFromLosers);
 
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with BetNotInGame");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: BetNotInGame");
-    //   }
-    // });
+      const winningsPerWinner = netLosersPool.div(numberOfWinners);
+      const remainderToTreasury = netLosersPool.mod(numberOfWinners);
+      const totalPayoutPerWinner = entryFeeBN.add(winningsPerWinner);
+      const expectedTreasuryAmount = feeFromLosers.add(remainderToTreasury);
 
-    // it("should fail to resolve game if no bets have been made", async () => {
-    //   try {
-    //     const tx = await program.methods
-    //       .resolveGame(entryFeePercentage, 0)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame5PK,
-    //         gameEscrow: newGameEscrow5PK,
-    //         gameVault: newGameVault5PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         {
-    //           pubkey: newBet1Game1,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet2Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newBet3Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      // Check that the treasury received the correct fees + remainder
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      const treasuryChange = new anchor.BN(
+        treasuryBalanceAfter.value.amount
+      ).sub(new anchor.BN(treasuryBalanceBefore.value.amount));
+      expect(treasuryChange.toString()).to.equal(
+        expectedTreasuryAmount.toString()
+      );
 
-    //         {
-    //           pubkey: newBet4Game3,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user1TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user2TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: user3TokenAccount,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
+      // Check that the winners received the correct payout
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user1Change = new anchor.BN(user1BalanceAfter.value.amount).sub(
+        new anchor.BN(user1BalanceBefore.value.amount)
+      );
+      expect(user1Change.toString()).to.equal(totalPayoutPerWinner.toString());
 
-    //         {
-    //           pubkey: newLine1PK,
-    //           isWritable: true,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine2PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //         {
-    //           pubkey: newLine3PK,
-    //           isWritable: false,
-    //           isSigner: false,
-    //         },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with NoLinesInGame");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include("Error Code: NoLinesInGame");
-    //   }
-    // });
+      const user2BalanceAfter = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const user2Change = new anchor.BN(user2BalanceAfter.value.amount).sub(
+        new anchor.BN(user2BalanceBefore.value.amount)
+      );
+      expect(user2Change.toString()).to.equal(totalPayoutPerWinner.toString());
+    });
 
-    // it("should fail to resolve game with insufficient token accounts for winners", async () => {
-    //   try {
-    //     // Create a scenario where the actual number of winners is 2, but we expect 2 winners
-    //     // and only provide 1 winner token account. This should cause array slicing issues.
-    //     await program.methods
-    //       .resolveGame(entryFeePercentage, 2)
-    //       .accountsPartial({
-    //         admin: adminKeypair.publicKey,
-    //         treasury: treasury.publicKey,
-    //         treasuryVault: treasuryTokenAccount,
-    //         mint: mint,
-    //         game: newGame7PK, // Game with 7 users
-    //         gameEscrow: newGameEscrow7PK,
-    //         gameVault: newGameVault7PK,
-    //         systemProgram: SystemProgram.programId,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       })
-    //       .signers([adminKeypair])
-    //       .remainingAccounts([
-    //         // First 7 accounts: Bet accounts for all users
-    //         { pubkey: newBet1Game7, isWritable: true, isSigner: false },
-    //         { pubkey: newBet2Game7, isWritable: true, isSigner: false },
-    //         { pubkey: newBet3Game7, isWritable: true, isSigner: false },
-    //         { pubkey: newBet4Game7, isWritable: true, isSigner: false },
-    //         { pubkey: newBet5Game7, isWritable: true, isSigner: false },
-    //         { pubkey: newBet6Game7, isWritable: true, isSigner: false },
-    //         { pubkey: newBet7Game7, isWritable: true, isSigner: false },
+    it("should successfully resolve a 5-user game where 4 win with medium fees", async () => {
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user2BalanceBefore = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const user3BalanceBefore = await connection.getTokenAccountBalance(
+        user3TokenAccount
+      );
+      const providerBalanceBefore = await connection.getTokenAccountBalance(
+        providerTokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
 
-    //         // Next accounts: Winner token accounts (providing only 1 instead of expected 2)
-    //         { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+      const mediumFeePercentage = 400;
 
-    //         // Last 3 accounts: Line accounts
-    //         { pubkey: newLine1PK, isWritable: false, isSigner: false },
-    //         { pubkey: newLine2PK, isWritable: false, isSigner: false },
-    //         { pubkey: newLine3PK, isWritable: false, isSigner: false },
-    //       ])
-    //       .rpc();
-    //     expect.fail("Should have failed with insufficient token accounts");
-    //   } catch (error) {
-    //     expect(error.toString()).to.include(
-    //       "Error Code: MissingLineAccounts"
-    //     );
-    //   }
-    // });
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame8PK,
+        gameEscrow: newGameEscrow8PK,
+        mint: mint,
+        gameVault: newGameVault8PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    // it("should successfully resolve game with 7 users where 2 win with low fees", async () => {
-    //   const user1BalanceBefore = await connection.getTokenAccountBalance(
-    //     user1TokenAccount
-    //   );
-    //   const user2BalanceBefore = await connection.getTokenAccountBalance(
-    //     user2TokenAccount
-    //   );
-    //   const treasuryBalanceBefore = await connection.getTokenAccountBalance(
-    //     treasuryTokenAccount
-    //   );
+      await program.methods
+        .resolveGame(mediumFeePercentage)
+        .accounts(accounts)
+        .remainingAccounts([
+          { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+          { pubkey: user2TokenAccount, isWritable: true, isSigner: false },
+          { pubkey: providerTokenAccount, isWritable: true, isSigner: false },
+          { pubkey: user4TokenAccount, isWritable: true, isSigner: false },
+        ])
+        .signers([adminKeypair])
+        .rpc();
 
-    //   const lowFeePercentage = 100; // 1% (100 basis points)
+      const numberOfLosers = new anchor.BN(1);
+      const numberOfWinners = new anchor.BN(4);
+      const entryFeeBN = new anchor.BN(entryFeeRaw);
 
-    //   const tx = await program.methods
-    //     .resolveGame(lowFeePercentage, 2)
-    //     .accountsPartial({
-    //       admin: adminKeypair.publicKey,
-    //       treasury: treasury.publicKey,
-    //       treasuryVault: treasuryTokenAccount,
-    //       mint: mint,
-    //       game: newGame7PK,
-    //       gameEscrow: newGameEscrow7PK,
-    //       gameVault: newGameVault7PK,
-    //       systemProgram: SystemProgram.programId,
-    //       tokenProgram: TOKEN_PROGRAM_ID,
-    //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     })
-    //     .signers([adminKeypair])
-    //     .remainingAccounts([
-    //       { pubkey: newBet1Game7, isWritable: true, isSigner: false },
-    //       { pubkey: newBet2Game7, isWritable: true, isSigner: false },
-    //       { pubkey: newBet3Game7, isWritable: true, isSigner: false },
-    //       { pubkey: newBet4Game7, isWritable: true, isSigner: false },
-    //       { pubkey: newBet5Game7, isWritable: true, isSigner: false },
-    //       { pubkey: newBet6Game7, isWritable: true, isSigner: false },
-    //       { pubkey: newBet7Game7, isWritable: true, isSigner: false },
-    //       { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: user2TokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: newLine1PK, isWritable: false, isSigner: false },
-    //       { pubkey: newLine2PK, isWritable: false, isSigner: false },
-    //       { pubkey: newLine3PK, isWritable: false, isSigner: false },
-    //     ])
-    //     .rpc();
+      const losersPool = entryFeeBN.mul(numberOfLosers);
+      const feeFromLosers = losersPool
+        .mul(new anchor.BN(mediumFeePercentage))
+        .div(new anchor.BN(10000));
+      const netLosersPool = losersPool.sub(feeFromLosers);
 
-    //   const gameAccount = await program.account.game.fetch(newGame7PK);
-    //   expect(gameAccount.status).to.deep.equal({ resolved: {} });
+      const winningsPerWinner = netLosersPool.div(numberOfWinners);
+      const remainderToTreasury = netLosersPool.mod(numberOfWinners);
+      const totalPayoutPerWinner = entryFeeBN.add(winningsPerWinner);
+      const expectedTreasuryAmount = feeFromLosers.add(remainderToTreasury);
 
-    //   // Calculate expected payouts based on the Rust logic
-    //   const totalPlayers = 7;
-    //   const numberOfWinners = 2;
-    //   const numberOfLosers = totalPlayers - numberOfWinners; // 5
+      // Check that the treasury received the correct fees + remainder
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      const treasuryChange = new anchor.BN(
+        treasuryBalanceAfter.value.amount
+      ).sub(new anchor.BN(treasuryBalanceBefore.value.amount));
+      expect(treasuryChange.toString()).to.equal(
+        expectedTreasuryAmount.toString()
+      );
 
-    //   const losersPool = entryFeeRaw * numberOfLosers; // entry_fee * 5
-    //   const feeFromLosers = Math.floor(
-    //     (losersPool * lowFeePercentage) / 10000
-    //   ); // 1% of losers pool
-    //   const netLosersPool = losersPool - feeFromLosers;
-    //   const winningsPerWinner = Math.floor(netLosersPool / numberOfWinners);
-    //   const remainderToTreasury = netLosersPool % numberOfWinners;
-    //   const totalPerWinner = entryFeeRaw + winningsPerWinner; // entry_fee + winnings
+      // Check that the winners received the correct payout
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user1Change = new anchor.BN(user1BalanceAfter.value.amount).sub(
+        new anchor.BN(user1BalanceBefore.value.amount)
+      );
+      expect(user1Change.toString()).to.equal(totalPayoutPerWinner.toString());
 
-    //   // Check treasury received fees + remainder
-    //   const treasuryBalanceAfter = await connection.getTokenAccountBalance(
-    //     treasuryTokenAccount
-    //   );
-    //   const treasuryIncrease =
-    //     treasuryBalanceAfter.value.uiAmount! -
-    //     treasuryBalanceBefore.value.uiAmount!;
-    //   const expectedTreasuryAmount =
-    //     (feeFromLosers + remainderToTreasury) / 10 ** MINT_DECIMALS;
-    //   expect(treasuryIncrease).to.be.closeTo(
-    //     expectedTreasuryAmount,
-    //     0.000001
-    //   );
+      const user2BalanceAfter = await connection.getTokenAccountBalance(
+        user2TokenAccount
+      );
+      const user2Change = new anchor.BN(user2BalanceAfter.value.amount).sub(
+        new anchor.BN(user2BalanceBefore.value.amount)
+      );
+      expect(user2Change.toString()).to.equal(totalPayoutPerWinner.toString());
 
-    //   // Check winners received correct payouts
-    //   const user1BalanceAfter = await connection.getTokenAccountBalance(
-    //     user1TokenAccount
-    //   );
-    //   const user1Increase =
-    //     user1BalanceAfter.value.uiAmount! -
-    //     user1BalanceBefore.value.uiAmount!;
-    //   const expectedWinnerPayout = totalPerWinner / 10 ** MINT_DECIMALS;
-    //   expect(user1Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
+      const providerBalanceAfter = await connection.getTokenAccountBalance(
+        providerTokenAccount
+      );
+      const providerChange = new anchor.BN(
+        providerBalanceAfter.value.amount
+      ).sub(new anchor.BN(providerBalanceBefore.value.amount));
+      expect(providerChange.toString()).to.equal(
+        totalPayoutPerWinner.toString()
+      );
+    });
 
-    //   const user2BalanceAfter = await connection.getTokenAccountBalance(
-    //     user2TokenAccount
-    //   );
-    //   const user2Increase =
-    //     user2BalanceAfter.value.uiAmount! -
-    //     user2BalanceBefore.value.uiAmount!;
-    //   expect(user2Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
+    it("should successfully resolve a single-user game", async () => {
+      const user1BalanceBefore = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const treasuryBalanceBefore = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
 
-    //   // Verify both winners got the same amount
-    //   expect(user1Increase).to.equal(user2Increase);
-    // });
+      const accounts = {
+        admin: adminKeypair.publicKey,
+        game: newGame14PK,
+        gameEscrow: newGameEscrow14PK,
+        mint: mint,
+        gameVault: newGameVault14PK,
+        treasury: treasury.publicKey,
+        treasuryVault: treasuryTokenAccount,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      };
 
-    // it("should successfully resolve game with 5 users where 4 win with medium fees", async () => {
-    //   const user1BalanceBefore = await connection.getTokenAccountBalance(
-    //     user1TokenAccount
-    //   );
-    //   const user2BalanceBefore = await connection.getTokenAccountBalance(
-    //     user2TokenAccount
-    //   );
-    //   const user3BalanceBefore = await connection.getTokenAccountBalance(
-    //     user3TokenAccount
-    //   );
-    //   const providerBalanceBefore = await connection.getTokenAccountBalance(
-    //     providerTokenAccount
-    //   );
-    //   const treasuryBalanceBefore = await connection.getTokenAccountBalance(
-    //     treasuryTokenAccount
-    //   );
+      await program.methods
+        .resolveGame(0)
+        .accounts(accounts)
+        .remainingAccounts([
+          { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+        ])
+        .signers([adminKeypair])
+        .rpc();
 
-    //   const mediumFeePercentage = 400; // 4%
+      // Assert that the user got their exact entry fee back
+      const user1BalanceAfter = await connection.getTokenAccountBalance(
+        user1TokenAccount
+      );
+      const user1Change = new anchor.BN(user1BalanceAfter.value.amount).sub(
+        new anchor.BN(user1BalanceBefore.value.amount)
+      );
+      expect(user1Change.toString()).to.equal(entryFeeRaw.toString());
 
-    //   const tx = await program.methods
-    //     .resolveGame(mediumFeePercentage, 4)
-    //     .accountsPartial({
-    //       admin: adminKeypair.publicKey,
-    //       treasury: treasury.publicKey,
-    //       treasuryVault: treasuryTokenAccount,
-    //       mint: mint,
-    //       game: newGame8PK,
-    //       gameEscrow: newGameEscrow8PK,
-    //       gameVault: newGameVault8PK,
-    //       systemProgram: SystemProgram.programId,
-    //       tokenProgram: TOKEN_PROGRAM_ID,
-    //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     })
-    //     .signers([adminKeypair])
-    //     .remainingAccounts([
-    //       { pubkey: newBet1Game8, isWritable: true, isSigner: false },
-    //       { pubkey: newBet2Game8, isWritable: true, isSigner: false },
-    //       { pubkey: newBet3Game8, isWritable: true, isSigner: false },
-    //       { pubkey: newBet4Game8, isWritable: true, isSigner: false },
-    //       { pubkey: newBet5Game8, isWritable: true, isSigner: false },
-    //       { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: user2TokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: user3TokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: providerTokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: newLine1PK, isWritable: false, isSigner: false },
-    //       { pubkey: newLine2PK, isWritable: false, isSigner: false },
-    //       { pubkey: newLine3PK, isWritable: false, isSigner: false },
-    //     ])
-    //     .rpc();
+      // Assert that the treasury balance is unchanged
+      const treasuryBalanceAfter = await connection.getTokenAccountBalance(
+        treasuryTokenAccount
+      );
+      const treasuryChange = new anchor.BN(
+        treasuryBalanceAfter.value.amount
+      ).sub(new anchor.BN(treasuryBalanceBefore.value.amount));
+      expect(treasuryChange.toNumber()).to.equal(0);
 
-    //   // Calculate expected payouts based on the Rust logic
-    //   const totalPlayers = 5;
-    //   const numberOfWinners = 4;
-    //   const numberOfLosers = totalPlayers - numberOfWinners; // 1
-
-    //   const losersPool = entryFeeRaw * numberOfLosers; // entry_fee * 1
-    //   const feeFromLosers = Math.floor(
-    //     (losersPool * mediumFeePercentage) / 10000
-    //   ); // 4% of losers pool
-    //   const netLosersPool = losersPool - feeFromLosers;
-    //   const winningsPerWinner = Math.floor(netLosersPool / numberOfWinners);
-    //   const remainderToTreasury = netLosersPool % numberOfWinners;
-    //   const totalPerWinner = entryFeeRaw + winningsPerWinner; // entry_fee + winnings
-
-    //   // Check treasury received fees + remainder
-    //   const treasuryBalanceAfter = await connection.getTokenAccountBalance(
-    //     treasuryTokenAccount
-    //   );
-    //   const treasuryIncrease =
-    //     treasuryBalanceAfter.value.uiAmount! -
-    //     treasuryBalanceBefore.value.uiAmount!;
-    //   const expectedTreasuryAmount =
-    //     (feeFromLosers + remainderToTreasury) / 10 ** MINT_DECIMALS;
-    //   expect(treasuryIncrease).to.be.closeTo(
-    //     expectedTreasuryAmount,
-    //     0.000001
-    //   );
-
-    //   // Check each winner's payout
-    //   const user1BalanceAfter = await connection.getTokenAccountBalance(
-    //     user1TokenAccount
-    //   );
-    //   const user1Increase =
-    //     user1BalanceAfter.value.uiAmount! -
-    //     user1BalanceBefore.value.uiAmount!;
-    //   const expectedWinnerPayout = totalPerWinner / 10 ** MINT_DECIMALS;
-    //   expect(user1Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
-
-    //   const user2BalanceAfter = await connection.getTokenAccountBalance(
-    //     user2TokenAccount
-    //   );
-    //   const user2Increase =
-    //     user2BalanceAfter.value.uiAmount! -
-    //     user2BalanceBefore.value.uiAmount!;
-    //   expect(user2Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
-
-    //   const user3BalanceAfter = await connection.getTokenAccountBalance(
-    //     user3TokenAccount
-    //   );
-    //   const user3Increase =
-    //     user3BalanceAfter.value.uiAmount! -
-    //     user3BalanceBefore.value.uiAmount!;
-    //   expect(user3Increase).to.be.closeTo(expectedWinnerPayout, 0.000001);
-
-    //   const providerBalanceAfter = await connection.getTokenAccountBalance(
-    //     providerTokenAccount
-    //   );
-    //   const providerIncrease =
-    //     providerBalanceAfter.value.uiAmount! -
-    //     providerBalanceBefore.value.uiAmount!;
-    //   expect(providerIncrease).to.be.closeTo(expectedWinnerPayout, 0.000001);
-
-    //   // Verify all winners got the same amount
-    //   expect(user1Increase).to.equal(user2Increase);
-    //   expect(user2Increase).to.equal(user3Increase);
-    //   expect(user3Increase).to.equal(providerIncrease);
-    // });
-
-    // it("should successfully resolve single user game", async () => {
-    //   const user1BalanceBefore = await connection.getTokenAccountBalance(
-    //     user1TokenAccount
-    //   );
-    //   const treasuryBalanceBefore = await connection.getTokenAccountBalance(
-    //     treasuryTokenAccount
-    //   );
-
-    //   const tx = await program.methods
-    //     .resolveGame(0, 1) // Single winner, no fees
-    //     .accountsPartial({
-    //       admin: adminKeypair.publicKey,
-    //       treasury: treasury.publicKey,
-    //       treasuryVault: treasuryTokenAccount,
-    //       mint: mint,
-    //       game: newGame14PK,
-    //       gameEscrow: newGameEscrow14PK,
-    //       gameVault: newGameVault14PK,
-    //       systemProgram: SystemProgram.programId,
-    //       tokenProgram: TOKEN_PROGRAM_ID,
-    //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     })
-    //     .signers([adminKeypair])
-    //     .remainingAccounts([
-    //       { pubkey: newBet1Game14, isWritable: true, isSigner: false },
-    //       { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
-    //       { pubkey: newLine1PK, isWritable: false, isSigner: false },
-    //       { pubkey: newLine2PK, isWritable: false, isSigner: false },
-    //       { pubkey: newLine3PK, isWritable: false, isSigner: false },
-    //     ])
-    //     .rpc();
-
-    //   // User should get their entry fee back (since they're the only player and winner)
-    //   const user1BalanceAfter = await connection.getTokenAccountBalance(
-    //     user1TokenAccount
-    //   );
-    //   expect(
-    //     user1BalanceAfter.value.uiAmount! - user1BalanceBefore.value.uiAmount!
-    //   ).to.be.closeTo(entryFeeRaw / 10 ** MINT_DECIMALS, 0.000001);
-
-    //   // Treasury should get nothing since no fees
-    //   const treasuryBalanceAfter = await connection.getTokenAccountBalance(
-    //     treasuryTokenAccount
-    //   );
-    //   expect(
-    //     treasuryBalanceAfter.value.uiAmount! -
-    //       treasuryBalanceBefore.value.uiAmount!
-    //   ).to.equal(0);
-
-    //   const gameAccount = await program.account.game.fetch(newGame14PK);
-    //   expect(gameAccount.status).to.deep.equal({ resolved: {} });
-    // });
+      // Assert that the game is marked as resolved
+      const gameAccount = await program.account.game.fetch(newGame14PK);
+      expect(gameAccount.status).to.deep.equal({ resolved: {} });
+    });
   });
 });
