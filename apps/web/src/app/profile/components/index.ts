@@ -8,6 +8,7 @@ export { default as StatsGrid } from './StatsGrid'
 export { default as ActiveParlaysSection } from './ActiveParlaysSection'
 export { default as HistorySection } from './HistorySection'
 export { default as AchievementsSection } from './AchievementsSection'
+export { default as FriendsSection } from './FriendsSection'
 export { default as ProfileContent } from './ProfileContent'
 
 // Export skeleton components

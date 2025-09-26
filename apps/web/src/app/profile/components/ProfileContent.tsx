@@ -12,6 +12,7 @@ import ActiveParlaysSection from './ActiveParlaysSection'
 import HistorySection from './HistorySection'
 import PastParlaysSection from './PastParlaysSection'
 import ChatsSection from './ChatsSection'
+import FriendsSection from './FriendsSection'
 import ProfileHeader from './ProfileHeader'
 import ProfilePictureUploadModal from './ProfilePictureUploadModal'
 import TopNavigation from './TopNavigation'
@@ -136,6 +137,8 @@ export default function ProfileContent() {
             isCurrentUser={isCurrentUser}
           />
         )}
+
+        {activeTab === 'friends' && <FriendsSection />}
       </div>
 
       <ProfilePictureUploadModal
