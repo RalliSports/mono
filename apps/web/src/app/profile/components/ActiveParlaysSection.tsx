@@ -76,11 +76,11 @@ export default function ActiveParlaysSection({ myOpenGames, user }: ActiveParley
                         width={32}
                         height={32}
                         className={`rounded-full border-2 object-cover bg-slate-800 ${
-                          new Date(bet.line?.matchup?.startsAt || '') > new Date()
+                          bet.line?.status === 'open'
                             ? 'border-slate-600'
-                            : !!bet.line?.actualValue
+                            : bet.line?.status === 'locked'
                               ? 'border-blue-500'
-                              : bet.isCorrect
+                              : bet.line?.status === 'resolved'
                                 ? 'border-emerald-500'
                                 : 'border-red-500'
                         }`}

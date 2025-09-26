@@ -11,11 +11,11 @@ export default function BetsSelector({ numBets, onChange }: BetsSelectorProps) {
       value={numBets}
       onChange={onChange}
       min={2}
-      max={10}
+      max={6}
       step={1}
       label="Number of Bets"
       description="Maximum bets allowed per participant"
-      placeholder="Bets (2-10)"
+      placeholder="Bets (2-6)"
       icon="🎲"
       colorScheme="teal"
     />

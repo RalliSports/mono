@@ -91,9 +91,9 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
                   <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full bg-gradient-to-r ${
-                        new Date(pick.line?.matchup?.startsAt || '') > new Date()
+                        pick.line?.status === 'open'
                           ? 'bg-slate-600'
-                          : pick.line?.status !== 'resolved'
+                          : pick.line?.status === 'locked'
                             ? 'bg-blue-500'
                             : pick.isCorrect
                               ? 'bg-emerald-500'

@@ -3,15 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 
 // Components
-import {
-  TopNavigation,
-  GameInfoHeader,
-  AthletePickCard,
-  BottomSelectionCart,
-  PaymentPopup,
-  LoadingStates,
-  AthletesList,
-} from './components'
+import { TopNavigation, GameInfoHeader, BottomSelectionCart, PaymentPopup, AthletesList } from './components'
 import PicksPageSkeleton from './components/PicksPageSkeleton'
 
 // Hooks and Constants
@@ -105,24 +97,15 @@ function PicksContent() {
         <GameInfoHeader game={game} legsRequired={legsRequired} buyIn={buyIn} />
 
         {/* Athletes Grid */}
-        <AthletesList athletes={athletes}>
+        <AthletesList
+          athletes={athletes}
+          handlePickSelection={handlePickSelection}
+          selectedPicks={selectedPicks}
+          legsRequired={legsRequired}
+        >
           {/* Show athletes only when not loading */}
-          {athletes
-            .filter((athlete, index, array) => array.findIndex((a) => a.id === athlete.id) === index)
-            .map((athlete) => (
-              <AthletePickCard
-                key={athlete.id}
-                athlete={athlete}
-                onPickSelection={handlePickSelection}
-                selectedPick={selectedPicks.find((pick) => pick.athleteId === athlete.id)}
-                isSelectionDisabled={
-                  selectedPicks.length >= legsRequired && !selectedPicks.find((pick) => pick.athleteId === athlete.id)
-                }
-              />
-            ))}
 
           {/* Loading indicator for initial load */}
-          <LoadingStates athletesCount={athletes.length} />
         </AthletesList>
       </div>
 

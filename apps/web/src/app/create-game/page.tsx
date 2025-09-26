@@ -78,21 +78,20 @@ export default function CreateGame() {
   const [gameSettings, setGameSettings] = useState<CreateGameDtoType>({
     title: '',
     depositAmount: 25,
-    maxParticipants: 8,
+    maxParticipants: 4,
     matchupGroup: 'TEST',
     isPrivate: false,
     type: 'limited',
     userControlType: 'none',
-    numBets: 10, // Default Number of Bets
-    tokenId: '6028ea26-9f12-40ca-9333-2250b4524670',
+    numBets: 4, // Default Number of Bets
     imageUrl: '/images/pfp-2.svg',
   })
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleTokenChange = (token: any) => {
+  const handleTokenChange = (token: { symbol: string; name: string; icon: string; address: string }) => {
     setSelectedToken(token)
     handleInputChange('depositToken', token.address)
   }
@@ -119,7 +118,6 @@ export default function CreateGame() {
       isPrivate: gameSettings.isPrivate,
       type: gameSettings.type,
       userControlType: gameSettings.userControlType,
-      tokenId: gameSettings.tokenId,
       imageUrl: gameSettings.imageUrl,
     }
 
