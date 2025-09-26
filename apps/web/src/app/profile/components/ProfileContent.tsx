@@ -20,6 +20,7 @@ import { useUser } from '@/hooks/api'
 import { useEffect, useState } from 'react'
 import { Channel } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
+import FriendsSection from './FriendsSection'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
@@ -128,6 +129,7 @@ export default function ProfileContent() {
         {activeTab === 'history' && <HistorySection />}
 
         {activeTab === 'achievements' && <AchievementsSection />}
+        {activeTab === 'friends' && <FriendsSection currentUserId={user.id} session={session ?? ''} />}
 
         {activeTab === 'chats' && (
           <ChatsSection
