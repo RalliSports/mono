@@ -72,9 +72,7 @@ export default function ProfileHeader({
             {userId && (
               <div className="flex items-center gap-2">
                 <Button onClick={handleToggleFollow} disabled={toggle.isPending}>
-                  {toggle.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : friend.data?.isFollowing ? (
+                  {friend.data?.isFollowing ? (
                     <span className="flex items-center gap-2 cursor-pointer">
                       <UserMinusIcon size={20} /> Unfollow
                     </span>

@@ -51,7 +51,8 @@ export class FriendsController {
   })
   @Get('followers')
   async getFollowers(  @Query('userId') userId: string,) {
-    return this.friendsService.getFollowers(userId);
+    const friends = await this.friendsService.getFollowers(userId);
+return friends
   }
 
  
@@ -69,7 +70,8 @@ export class FriendsController {
   })
   @Get('following')
   async getFollowing(  @Query('userId') userId: string,) {
-    return this.friendsService.getFollowing(userId);
+    const friends = await this.friendsService.getFollowing(userId);
+    return friends
   }
 
   @ApiSecurity('x-para-session')
