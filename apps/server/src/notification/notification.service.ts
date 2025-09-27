@@ -101,10 +101,15 @@ export class NotificationService {
   buildGameInviteMessage(
     gameTitle: string,
     gameId: string,
+    gameCode: string,
   ): NotificationPayload {
     return {
       title: `You’ve Been Invited to join ${gameTitle}`,
-      body: `You have been invited to join a new game. Don’t keep them waiting!`,
+      body: `
+      You have been invited to join a new game,
+      the game code is ${gameCode}
+      Don’t keep them waiting!
+      `,
       // image: 'https://www.ralli.bet/images/game-invite.png',
       url: `https://www.ralli.bet/game?id=${gameId}`,
       // icon: 'https://www.ralli.bet/icons/invite.png',
