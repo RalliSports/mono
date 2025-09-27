@@ -1,128 +1,72 @@
 'use client'
 
+import { useToast } from '@/components/ui/toast'
+import { useGames, useUser } from '@/hooks/api'
+import { useFriends } from '@/hooks/api/use-friend'
+import { useSessionToken } from '@/hooks/use-session'
+import { useReferral } from '@/hooks/useReferral'
+import { GamesServiceFindOne } from '@repo/server'
 import { useState } from 'react'
 
-interface Friend {
-  id: string
-  name: string
-  username: string
-  avatar: string
-  isOnline: boolean
-  lastInvited?: Date
-}
-
 interface InviteFriendsProps {
-  isPrivate: boolean
+  game: GamesServiceFindOne
 }
-//yo anyone who is working on this to implement actual functionality, remove the mock data and implement actual API calls to fetch friends and send invites
-// Mock data for friends
-const mockFriends: Friend[] = [
-  {
-    id: '1',
-    name: 'Alex Johnson',
-    username: '@alexj',
-    avatar: '/images/pfp-1.svg',
-    isOnline: true,
-    lastInvited: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-  },
-  {
-    id: '2',
-    name: 'Sarah Chen',
-    username: '@sarahc',
-    avatar: '/images/pfp-2.svg',
-    isOnline: true,
-  },
-  {
-    id: '3',
-    name: 'Mike Rodriguez',
-    username: '@miker',
-    avatar: '/images/pfp-3.svg',
-    isOnline: false,
-    lastInvited: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-  },
-  {
-    id: '4',
-    name: 'Emma Wilson',
-    username: '@emmaw',
-    avatar: '/images/pfp-4.svg',
-    isOnline: true,
-  },
-  {
-    id: '5',
-    name: 'David Kim',
-    username: '@davidk',
-    avatar: '/images/pfp-5.svg',
-    isOnline: false,
-  },
-  {
-    id: '6',
-    name: 'Lisa Thompson',
-    username: '@lisat',
-    avatar: '/images/pfp-6.svg',
-    isOnline: true,
-    lastInvited: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
-  },
-]
 
-// Mock searchable users (only appear in search)
-const searchableUsers: Friend[] = [
-  {
-    id: 'search-1',
-    name: 'ImmortalSul',
-    username: '@immortalsul',
-    avatar: '/images/pfp-1.svg',
-    isOnline: true,
-  },
-  {
-    id: 'search-2',
-    name: 'Sturt',
-    username: '@sturt',
-    avatar: '/images/pfp-2.svg',
-    isOnline: false,
-  },
-  {
-    id: 'search-3',
-    name: 'Dave',
-    username: '@dave',
-    avatar: '/images/pfp-3.svg',
-    isOnline: true,
-  },
-]
-
-export default function InviteFriends({ isPrivate }: InviteFriendsProps) {
+export default function InviteFriends({ game }: InviteFriendsProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'recent' | 'all' | 'search'>('recent')
   const [onlineFilter, setOnlineFilter] = useState<'all' | 'online' | 'offline'>('all')
   const [invitedFriends, setInvitedFriends] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
+  const { currentUser } = useUser()
+  const { gameInvite } = useGames()
+  const { session } = useSessionToken()
+  const { userReferralCode } = useReferral()
+  const { addToast } = useToast()
 
-  const recentlyInvited = mockFriends.filter((friend) => friend.lastInvited)
-  const allFriends = mockFriends.filter((friend) => {
-    if (onlineFilter === 'online') return friend.isOnline
-    if (onlineFilter === 'offline') return !friend.isOnline
-    return true
-  })
+  const { followers, following } = useFriends(session as string, currentUser.data?.id as string)
+
+  const allFriends = [...(followers.data?.flat() ?? []), ...(following.data?.flat() ?? [])]
+  const recentlyInvited = allFriends.filter((friend) => friend.createdAt)
+
+  const inviteLink = `${window.location.origin}/game?id=${game.id}&ref=${userReferralCode}&code=${game.gameCode}`
 
   // Search functionality
   const searchResults = searchQuery.trim()
-    ? searchableUsers.filter(
+    ? allFriends?.filter(
         (user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.username.toLowerCase().includes(searchQuery.toLowerCase()),
+          user?.follower?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user?.follower?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user?.following?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user?.following?.username?.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : []
 
-  const handleInvite = (friendId: string) => {
-    setInvitedFriends((prev) => new Set([...prev, friendId]))
-    // Here you would make the API call to invite the friend
+  const handleInvite = async (friendId: string) => {
+    try {
+      await gameInvite.mutateAsync({
+        userId: friendId,
+        gameId: game.id,
+      })
+
+      setInvitedFriends((prev) => new Set([...prev, friendId]))
+      addToast(`Invite sent`, 'success')
+    } catch (error) {
+      console.log(error, 'error sending invite')
+    }
   }
 
-  if (!isPrivate) {
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    addToast(`Invite link copied`, 'success')
+  }
+
+  if (!game.isPrivate && !(game.creatorId === currentUser.data?.id)) {
     return null // Only show for private games
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md mb-3 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -264,40 +208,47 @@ export default function InviteFriends({ isPrivate }: InviteFriendsProps) {
                 background: #64748b;
               }
             `}</style>
-            {(activeTab === 'recent' ? recentlyInvited : activeTab === 'all' ? allFriends : searchResults).map(
-              (friend) => (
-                <div
-                  key={friend.id}
-                  className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-all duration-200"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <img src={friend.avatar} alt={friend.name} className="w-8 h-8 rounded-full" />
-                      <div
-                        className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800 ${
-                          friend.isOnline ? 'bg-green-400' : 'bg-slate-500'
-                        }`}
-                      />
-                    </div>
-                    <div>
-                      <div className="text-white text-sm font-medium">{friend.name}</div>
-                      <div className="text-slate-400 text-xs">{friend.username}</div>
-                    </div>
+            {(activeTab === 'recent'
+              ? (recentlyInvited ?? [])
+              : activeTab === 'all'
+                ? (allFriends ?? [])
+                : searchResults
+            ).map((friend) => (
+              <div
+                key={friend.id}
+                className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-all duration-200"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <img
+                      src={friend.follower.avatar ?? ''}
+                      alt={friend.follower.firstName ?? ''}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <div
+                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800 ${
+                        friend.follower ? 'bg-green-400' : 'bg-slate-500'
+                      }`}
+                    />
                   </div>
-                  <button
-                    onClick={() => handleInvite(friend.id)}
-                    disabled={invitedFriends.has(friend.id)}
-                    className={`px-4 py-2 rounded-xl transition-all duration-200 font-semibold ${
-                      invitedFriends.has(friend.id)
-                        ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-400/30 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 border border-blue-400/30 hover:from-blue-500/30 hover:to-cyan-500/30 transform hover:scale-[1.02]'
-                    }`}
-                  >
-                    {invitedFriends.has(friend.id) ? '✓ Invited' : 'Invite'}
-                  </button>
+                  <div>
+                    <div className="text-white text-sm font-medium">{friend.follower.firstName}</div>
+                    <div className="text-slate-400 text-xs">{friend.follower.username}</div>
+                  </div>
                 </div>
-              ),
-            )}
+                <button
+                  onClick={() => handleInvite(friend.follower.id)}
+                  disabled={invitedFriends.has(friend.follower.id) || gameInvite.isPending}
+                  className={`px-4 py-2 rounded-xl transition-all duration-200 font-semibold ${
+                    invitedFriends.has(friend.id)
+                      ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-400/30 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 border border-blue-400/30 hover:from-blue-500/30 hover:to-cyan-500/30 transform hover:scale-[1.02]'
+                  }`}
+                >
+                  {invitedFriends.has(friend.id) ? '✓ Invited' : gameInvite.isPending ? "Sending...": 'Invite'}
+                </button>
+              </div>
+            ))}
 
             {/* Search empty state */}
             {activeTab === 'search' && searchQuery.trim() && searchResults.length === 0 && (
@@ -319,7 +270,10 @@ export default function InviteFriends({ isPrivate }: InviteFriendsProps) {
           </div>
 
           {/* Copy Link Button */}
-          <button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg">
+          <button
+            onClick={() => copyToClipboard(inviteLink)}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+          >
             <span className="flex items-center justify-center space-x-2">
               <span>🔗</span>
               <span>Copy Invite Link</span>

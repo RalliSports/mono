@@ -1,14 +1,14 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApiWithAuth, apiClient } from './base'
 import {
-  GamesServiceFindAllOpen,
-  GamesServiceCreate,
-  GamesServiceFindOne,
-  GamesServiceFindAll,
   CreateGameDtoType,
+  GamesServiceCreate,
+  GamesServiceFindAll,
+  GamesServiceFindAllOpen,
+  GamesServiceFindOne
 } from '@repo/server'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiClient, useApiWithAuth } from './base'
 
 export function useGames() {
   const queryClient = useQueryClient()
@@ -53,12 +53,17 @@ export function useGames() {
     },
   })
 
+   const gameInviteMutation = useMutation({
+    mutationFn: (data:  { userId: string, gameId: string }) => api.post('/api/game-invite', data),
+  })
+
   return {
     all: allGamesQuery,
     open: openGamesQuery,
     create: createMutation,
     resolve: resolveMutation,
     resolveAllPossibleGames: resolveAllPossibleGamesMutation,
+    gameInvite: gameInviteMutation
   }
 }
 

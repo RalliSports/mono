@@ -20,6 +20,7 @@ import { useGameTabs } from './hooks/useGameTabs'
 import ChatSection from './components/ChatSection'
 import TabNavigation from './components/TabNavigation'
 import LottieLoading from '@/components/ui/lottie-loading'
+import InviteFriends from './components/InviteFriends'
 
 function ViewGameContent() {
   const { lobby, isLoading, expandedParticipants, toggleParticipant } = useGameData()
@@ -104,6 +105,7 @@ function ViewGameContent() {
         <WinnersDisplay lobby={lobby} />
         <CreateNewGameButton lobby={lobby} size="large" />
         <JoinGameButton game={lobby} user={user ?? null} />
+        <InviteFriends  game={lobby} />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} isUserInGame={isUserInGame ?? false} />
 
         {activeTab === 'parlays' && (

@@ -8,7 +8,7 @@ export { default as TokenSelector } from './TokenSelector'
 export { default as ContestSummary } from './ContestSummary'
 export { default as InputSelector } from './InputSelector'
 export { default as PrivateGameToggle } from './PrivateGameToggle'
-export { default as InviteFriends } from './InviteFriends'
+export { default as InviteFriends } from '../../game/components/InviteFriends'
 
 // Export types
 export * from './types'

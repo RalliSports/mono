@@ -86,7 +86,8 @@ export default function ProfileContent() {
       ) : (
         <>
           <ProfileHeader
-            currentUserId={user.id}
+            isCurrentUser={isCurrentUser}
+            userId={user.id}
             isConnected={isConnected}
             balances={balances}
             session={session ?? ''}

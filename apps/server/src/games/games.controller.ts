@@ -259,13 +259,15 @@ export class GamesController {
     return this.gamesService.remove(id, user);
   }
 
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get a game using its unique code' })
   @ApiResponse({
     status: 200,
   })
   @ApiParam({ name: 'gameId', type: String })
   @ApiParam({ name: 'userId', type: String })
-  @Get('/game/invite/:gameId/:userId')
+  @Post('/game/invite/:gameId/:userId')
   inviteUser(@Param('gameId') gameId: string, @Param('userId') userId: string) {
     return this.gamesService.inviteUserToPlay(userId, gameId);
   }

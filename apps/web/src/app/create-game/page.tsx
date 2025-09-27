@@ -226,7 +226,6 @@ export default function CreateGame() {
             isPrivate={gameSettings.isPrivate}
           />
 
-          <InviteFriends isPrivate={gameSettings.isPrivate} />
         </div>
       </div>
       <ToastContainer />
