@@ -16,6 +16,7 @@ import { TeamModule } from './team/team.module';
 import { NotificationModule } from './notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FriendsModule } from './friends/friends.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { FriendsModule } from './friends/friends.module';
     TeamModule,
     NotificationModule,
     FriendsModule,
+    LeaderboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
