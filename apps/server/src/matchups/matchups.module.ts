@@ -9,6 +9,7 @@ import { MatchupCreationService } from './cron-matchup/matchups-creation.service
 import { TeamService } from 'src/team/team.service';
 import { SyncMatchupsWithOddsEventIdService } from './cron-matchup/sync-matchups-with-odds-event-id.service';
 import { StatsService } from 'src/stats/stats.service';
+import { MatchupLivescoreService } from './cron-matchup/matchup-livescore.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
@@ -18,6 +19,7 @@ import { StatsService } from 'src/stats/stats.service';
     MatchupStatusUpdaterService,
     MatchupCreationService,
     SyncMatchupsWithOddsEventIdService,
+    MatchupLivescoreService,
     LinesService,
     TeamService,
     StatsService,

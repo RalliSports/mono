@@ -1,15 +1,13 @@
-"use client";
+'use client'
+
+import { AthletesServiceGetActiveAthletesWithUnresolvedLines } from '@repo/server'
 
 interface SelectionBarProps {
-  selectedAthletes: string[];
-  requiredSelections: number;
-  athletes: Array<{
-    id: string;
-    name: string;
-    team: string;
-  }>;
-  onCancel: () => void;
-  onContinue: () => void;
+  selectedAthletes: string[]
+  requiredSelections: number
+  athletes: AthletesServiceGetActiveAthletesWithUnresolvedLines
+  onCancel: () => void
+  onContinue: () => void
 }
 
 export default function SelectionBar({
@@ -20,19 +18,16 @@ export default function SelectionBar({
   onContinue,
 }: SelectionBarProps) {
   const getAthleteInitials = (athleteId: string) => {
-    const athlete = athletes.find((a) => a.id === athleteId);
+    const athlete = athletes.find((a) => a.id === athleteId)
     return (
-      athlete?.name
-        .split(" ")
+      athlete?.name ||
+      ''
+        .split(' ')
         .map((n) => n[0])
-        .join("") || "??"
-    );
-  };
-
-  const getAthleteTeam = (athleteId: string) => {
-    const athlete = athletes.find((a) => a.id === athleteId);
-    return athlete?.team || "";
-  };
+        .join('') ||
+      '??'
+    )
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/98 to-slate-800/98 backdrop-blur-md border-t border-slate-700/50 p-4 shadow-2xl">
@@ -45,41 +40,34 @@ export default function SelectionBar({
               <div className="text-white font-bold text-lg mb-1">
                 {selectedAthletes.length}/{requiredSelections} Selected
               </div>
-              <div className="text-slate-400 text-sm">
-                Choose your athletes for this battle
-              </div>
+              <div className="text-slate-400 text-sm">Choose your athletes for this battle</div>
             </div>
 
             {/* Avatar Stack */}
             <div className="flex justify-center space-x-2">
               {Array.from({ length: requiredSelections }).map((_, index) => {
-                const isSelected = index < selectedAthletes.length;
-                const athleteId = selectedAthletes[index];
+                const isSelected = index < selectedAthletes.length
+                const athleteId = selectedAthletes[index]
+                const team = athletes.find((a) => a.id === athleteId)?.team
 
                 return (
                   <div key={index} className="text-center">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                         isSelected
-                          ? "bg-gradient-to-br from-[#00CED1] to-[#FFAB91] border-white text-white shadow-lg"
-                          : "bg-slate-800 border-slate-600 text-slate-400"
+                          ? 'bg-gradient-to-br from-[#00CED1] to-[#FFAB91] border-white text-white shadow-lg'
+                          : 'bg-slate-800 border-slate-600 text-slate-400'
                       }`}
                     >
                       {isSelected ? (
-                        <span className="text-xs font-bold">
-                          {getAthleteInitials(athleteId)}
-                        </span>
+                        <span className="text-xs font-bold">{getAthleteInitials(athleteId)}</span>
                       ) : (
                         <span className="text-lg">?</span>
                       )}
                     </div>
-                    {isSelected && (
-                      <div className="text-[#00CED1] text-xs mt-1 font-semibold">
-                        {getAthleteTeam(athleteId)}
-                      </div>
-                    )}
+                    {isSelected && <div className="text-[#00CED1] text-xs mt-1 font-semibold">{team?.name}</div>}
                   </div>
-                );
+                )
               })}
             </div>
 
@@ -96,8 +84,8 @@ export default function SelectionBar({
                 disabled={selectedAthletes.length !== requiredSelections}
                 className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   selectedAthletes.length === requiredSelections
-                    ? "bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg hover:shadow-xl"
-                    : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                    ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg hover:shadow-xl'
+                    : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                 }`}
               >
                 Continue to Battle
@@ -112,33 +100,27 @@ export default function SelectionBar({
           <div className="flex items-center space-x-4">
             <div className="flex space-x-2">
               {Array.from({ length: requiredSelections }).map((_, index) => {
-                const isSelected = index < selectedAthletes.length;
-                const athleteId = selectedAthletes[index];
-
+                const isSelected = index < selectedAthletes.length
+                const athleteId = selectedAthletes[index]
+                const team = athletes.find((a) => a.id === athleteId)?.team
                 return (
                   <div key={index} className="text-center">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                         isSelected
-                          ? "bg-gradient-to-br from-[#00CED1] to-[#FFAB91] border-white text-white shadow-lg"
-                          : "bg-slate-800 border-slate-600 text-slate-400"
+                          ? 'bg-gradient-to-br from-[#00CED1] to-[#FFAB91] border-white text-white shadow-lg'
+                          : 'bg-slate-800 border-slate-600 text-slate-400'
                       }`}
                     >
                       {isSelected ? (
-                        <span className="text-xs font-bold">
-                          {getAthleteInitials(athleteId)}
-                        </span>
+                        <span className="text-xs font-bold">{getAthleteInitials(athleteId)}</span>
                       ) : (
                         <span className="text-lg">?</span>
                       )}
                     </div>
-                    {isSelected && (
-                      <div className="text-[#00CED1] text-xs mt-1 font-semibold">
-                        {getAthleteTeam(athleteId)}
-                      </div>
-                    )}
+                    {isSelected && <div className="text-[#00CED1] text-xs mt-1 font-semibold">{team?.name}</div>}
                   </div>
-                );
+                )
               })}
             </div>
 
@@ -146,9 +128,7 @@ export default function SelectionBar({
               <div className="text-sm font-semibold">
                 {selectedAthletes.length}/{requiredSelections} Selected
               </div>
-              <div className="text-xs text-slate-400">
-                Choose your athletes for this battle
-              </div>
+              <div className="text-xs text-slate-400">Choose your athletes for this battle</div>
             </div>
           </div>
 
@@ -165,8 +145,8 @@ export default function SelectionBar({
               disabled={selectedAthletes.length !== requiredSelections}
               className={`px-6 py-2 rounded-xl font-semibold transition-all duration-300 ${
                 selectedAthletes.length === requiredSelections
-                  ? "bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg hover:shadow-xl"
-                  : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                  ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg hover:shadow-xl'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed'
               }`}
             >
               Continue to Battle
@@ -175,5 +155,5 @@ export default function SelectionBar({
         </div>
       </div>
     </div>
-  );
+  )
 }

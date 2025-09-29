@@ -1,15 +1,13 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Game, User } from './types'
-import { ProfileTabType } from '../hooks/useProfileTabs'
+import { UserServiceFindOne, GamesServiceGetMyOpenGames } from '@repo/server'
 
 interface ActiveParleysSectionProps {
-  myOpenGames: Game[]
-  user: User
-  setActiveTab: (tab: ProfileTabType) => void
+  myOpenGames: GamesServiceGetMyOpenGames
+  user: UserServiceFindOne
 }
 
-export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }: ActiveParleysSectionProps) {
+export default function ActiveParlaysSection({ myOpenGames, user }: ActiveParleysSectionProps) {
   const router = useRouter()
 
   return (
@@ -52,14 +50,14 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
                             : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                       }`}
                     >
-                      {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
+                      {game.status && game.status.charAt(0).toUpperCase() + game.status.slice(1)}
                     </span>
                     <span className="text-slate-400 text-sm">{game.participants.length} players</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-[#00CED1] font-bold text-lg">
-                    ${game.depositAmount * game.participants.length}
+                    ${(game.depositAmount || 0) * (game.participants.length || 0)}
                   </div>
                   <div className="text-slate-400 text-xs">Potential</div>
                 </div>
@@ -69,20 +67,20 @@ export default function ActiveParlaysSection({ myOpenGames, user, setActiveTab }
               <div className="flex justify-between items-center">
                 <div className="flex -space-x-2">
                   {game.participants
-                    .find((participant) => participant.user.id === user.id)
+                    .find((participant) => participant.user?.id === user?.id)
                     ?.bets.map((bet, index) => (
                       <Image
                         key={bet.id}
-                        src={bet.line.athlete.picture || '/images/pfp-2.svg'}
-                        alt={bet.line.athlete.name || ''}
+                        src={bet.line?.athlete?.picture || '/images/pfp-2.svg'}
+                        alt={bet.line?.athlete?.name || ''}
                         width={32}
                         height={32}
                         className={`rounded-full border-2 object-cover bg-slate-800 ${
-                          new Date(bet.line.matchup.startsAt) > new Date()
+                          bet.line?.status === 'open'
                             ? 'border-slate-600'
-                            : !!bet.line.actualValue
+                            : bet.line?.status === 'locked'
                               ? 'border-blue-500'
-                              : bet.isCorrect
+                              : bet.line?.status === 'resolved'
                                 ? 'border-emerald-500'
                                 : 'border-red-500'
                         }`}

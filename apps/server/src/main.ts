@@ -9,6 +9,11 @@ import { DatadogExceptionFilter } from './filters/datadog-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Add request logging middleware
+  app.use((req, res, next) => {
+    next();
+  });
+
   app.useGlobalFilters(new DatadogExceptionFilter());
   // Enable CORS for production
   app.enableCors({
@@ -27,6 +32,10 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
+      exceptionFactory: (errors) => {
+        console.error('ValidationPipe - Validation errors:', errors);
+        return new ValidationPipe().createExceptionFactory()(errors);
+      },
     }),
   );
 

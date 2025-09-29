@@ -8,6 +8,7 @@ interface BalanceDisplayProps {
     ralli: number
   }
   balanceLoading: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   balanceError: any
 }
 
@@ -23,7 +24,7 @@ export default function BalanceDisplay({ isConnected, balances, balanceLoading, 
       title={
         isConnected
           ? `Click to refresh balance\nRALLI: $${formatBalance(balances.ralli)}`
-          : 'Connect wallet to view balance'
+          : 'Connect account to view balance'
       }
     >
       <div className="flex items-center space-x-2">

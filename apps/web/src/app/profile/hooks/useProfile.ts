@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react'
-import { User, Game } from '../components/types'
 import { useToast } from '@/components/ui/toast'
 import { useAccount } from '@getpara/react-sdk'
 import { useSearchParams } from 'next/navigation'
-
+import { GamesServiceGetMyOpenGames, UserServiceFindOne, GamesServiceGetMyCompletedGames } from '@repo/server'
 export function useProfile(session: string | null) {
   const account = useAccount()
   const { addToast } = useToast()
   const [username, setUsername] = useState('')
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserServiceFindOne | null>(null)
   const [userLoading, setUserLoading] = useState(true)
   const [gamesLoading, setGamesLoading] = useState(true)
   const [avatar, setAvatar] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [myOpenGames, setMyOpenGames] = useState<Game[]>([])
-  const [myCompletedGames, setMyCompletedGames] = useState<Game[]>([])
-  const [forceRefresh, setForceRefresh] = useState(false)
+  const [myOpenGames, setMyOpenGames] = useState<GamesServiceGetMyOpenGames>([])
+  const [myCompletedGames, setMyCompletedGames] = useState<GamesServiceGetMyCompletedGames>([])
 
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId') ?? ''
@@ -100,6 +98,7 @@ export function useProfile(session: string | null) {
           setMyOpenGames(data)
         } else {
           const errorData = await response.json()
+          console.error(errorData)
           // addToast(errorData.error || 'Failed to fetch my open games', 'error')
         }
       } catch (error) {
@@ -152,6 +151,5 @@ export function useProfile(session: string | null) {
     myOpenGames,
     myCompletedGames,
     handleUpdateUser,
-    setForceRefresh,
   }
 }

@@ -1,7 +1,15 @@
 import { formatBalance } from '@/lib/utils'
 import LottieLoading from '@/components/ui/lottie-loading'
-import type { BalanceDisplayProps } from './types'
-
+interface BalanceDisplayProps {
+  isConnected: boolean
+  balances: {
+    ralli: number
+  }
+  isLoading: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: any
+  refetch: () => void
+}
 export default function BalanceDisplay({ isConnected, balances, isLoading, error, refetch }: BalanceDisplayProps) {
   return (
     <div
@@ -10,7 +18,7 @@ export default function BalanceDisplay({ isConnected, balances, isLoading, error
       title={
         isConnected
           ? `Click to refresh balance\nRALLI: $${formatBalance(balances.ralli)}`
-          : 'Connect wallet to view balance'
+          : 'Connect account to view balance'
       }
     >
       <div className="flex items-center space-x-2">

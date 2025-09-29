@@ -1,13 +1,17 @@
 import {
   Channel as ChannelComponent,
-  ChannelHeader,
   ChannelList,
   Chat,
   MessageInput,
   MessageList,
   Window,
   ChannelPreviewUIComponentProps,
-  Thread, // List of user's channels/conversations
+  Thread,
+  useChannelStateContext,
+  ChannelHeaderProps,
+  useTranslationContext,
+  useChannelPreviewInfo, // List of user's channels/conversations
+  Avatar as DefaultAvatar,
 } from 'stream-chat-react'
 import { useProfile } from '../hooks/useProfile'
 import { useSessionToken } from '@/hooks/use-session'
@@ -17,6 +21,7 @@ import { useChat } from '@/hooks/api/use-chat'
 import Image from 'next/image'
 
 import 'stream-chat-react/dist/css/v2/index.css'
+import { useScreenSize } from '@/hooks/useScreenSize'
 export default function ChatsSection({
   activeChannel,
   setActiveChannel,
@@ -29,20 +34,68 @@ export default function ChatsSection({
   const { session } = useSessionToken()
   const { user } = useProfile(session || null)
   const [channels, setChannels] = useState<Channel[]>([])
+  const [hideChannelList, setHideChannelList] = useState(false)
   const { client, getChannels, isConnectedToClient } = useChat()
+  const isMobile = useScreenSize()
+
   useEffect(() => {
     getChannels().then((channels) => {
       setChannels(channels ?? [])
     })
   }, [getChannels])
+  if (!user) {
+    return <div className="text-white">Loading...</div>
+  }
 
   const filters = {
     type: { $in: ['messaging', 'team', 'gaming'] },
-    members: { $in: [user?.id] },
+    members: { $in: [user.id] },
   }
 
   if (channels.length === 0) {
     return <div className="text-white">No channels found. Join a game to start chatting!</div>
+  }
+
+  const CustomChannelHeader = (props: ChannelHeaderProps) => {
+    const { Avatar = DefaultAvatar, image: overrideImage, live, title: overrideTitle } = props
+
+    const { channel, watcher_count } = useChannelStateContext('ChannelHeader')
+    const { t } = useTranslationContext('ChannelHeader')
+    const { displayImage, displayTitle, groupChannelDisplayInfo } = useChannelPreviewInfo({
+      channel,
+      overrideImage,
+      overrideTitle,
+    })
+
+    const { member_count } = channel?.data || {}
+
+    return (
+      <div className="str-chat__channel-header">
+        <button onClick={() => setHideChannelList(false)}>◀ Back</button>
+        <Avatar
+          className="str-chat__avatar--channel-header"
+          groupChannelDisplayInfo={groupChannelDisplayInfo}
+          image={displayImage}
+          name={displayTitle}
+        />
+        <div className="str-chat__channel-header-end">
+          <p className="str-chat__channel-header-title">
+            {displayTitle} {live && <span className="str-chat__header-livestream-livelabel">{t('live')}</span>}
+          </p>
+          <p className="str-chat__channel-header-info">
+            {!live && !!member_count && member_count > 0 && (
+              <>
+                {t('{{ memberCount }} members', {
+                  memberCount: member_count,
+                })}
+                ,{' '}
+              </>
+            )}
+            {t('{{ watcherCount }} online', { watcherCount: watcher_count })}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   //   const sort = [{ last_message_at: -1 }]
@@ -50,6 +103,7 @@ export default function ChatsSection({
     const { channel, latestMessagePreview, unread, displayImage } = props
     const channelName = channel.data?.name
     const handleChannelClick = () => {
+      setHideChannelList(true)
       setActiveChannel(channel)
     }
 
@@ -86,8 +140,9 @@ export default function ChatsSection({
           <div style={{ display: 'flex', height: '100vh' }}>
             <Chat client={client}>
               {/* Left sidebar - Channel List */}
-              {isCurrentUser && (
+              {isCurrentUser && (!isMobile || (isMobile && !hideChannelList)) && (
                 <div style={{ width: '300px', borderRight: '1px solid #ddd' }}>
+                  <div className="bg-white p-2 text-xl"> Select a conversation</div>
                   <ChannelList
                     filters={filters as ChannelFilters}
                     // sort={sort}
@@ -99,17 +154,16 @@ export default function ChatsSection({
 
               {/* Main chat area */}
               <div style={{ flex: 1 }}>
-                {activeChannel ? (
+                {activeChannel && (!isMobile || (isMobile && hideChannelList)) && (
                   <ChannelComponent channel={activeChannel}>
                     <Window>
-                      <ChannelHeader />
+                      <CustomChannelHeader />
+
                       <MessageList />
                       <MessageInput />
                     </Window>
                     <Thread />
                   </ChannelComponent>
-                ) : (
-                  <div className="text-white">Select a conversation</div>
                 )}
               </div>
             </Chat>

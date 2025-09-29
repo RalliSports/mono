@@ -1,16 +1,58 @@
-import { StatsCreate } from '@repo/server'
+import { useToast } from '@/components/ui/toast'
+import { useStats } from '@/hooks/api'
+import { CreateStatDtoType } from '@repo/server'
+import { useState } from 'react'
 
-interface CreateStatFormProps {
-  newStat: {
-    name: string
-    description: string
-    customId: number
+export default function CreateStatForm() {
+  const { addToast } = useToast()
+  // Form states
+  const [newStat, setNewStat] = useState<CreateStatDtoType>({
+    name: '',
+    description: '',
+    displayName: '',
+    shortDisplayName: '',
+    abbreviation: '',
+    statOddsName: '',
+    customId: 0,
+  })
+
+  const statsQuery = useStats()
+
+  // Handlers using mutations
+  const handleCreateStat = async () => {
+    if (!newStat.name || !newStat.description || !newStat.customId) {
+      addToast('Please fill in all fields', 'error')
+      return
+    }
+
+    try {
+      await statsQuery.create.mutateAsync({
+        customId: newStat.customId,
+        name: newStat.name,
+        description: newStat.description,
+        displayName: newStat.displayName,
+        shortDisplayName: newStat.shortDisplayName,
+        abbreviation: newStat.abbreviation,
+        statOddsName: newStat.statOddsName,
+      })
+
+      setNewStat({
+        name: '',
+        description: '',
+        customId: 0,
+        displayName: '',
+        shortDisplayName: '',
+        abbreviation: '',
+        statOddsName: '',
+      })
+
+      addToast('Stat type created successfully!', 'success')
+    } catch (error) {
+      console.error('Error creating stat:', error)
+      addToast('Error creating stat', 'error')
+    }
   }
-  setNewStat: (stat: any) => void
-  handleCreateStat: () => void
-}
 
-export default function CreateStatForm({ newStat, setNewStat, handleCreateStat }: CreateStatFormProps) {
   return (
     <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">

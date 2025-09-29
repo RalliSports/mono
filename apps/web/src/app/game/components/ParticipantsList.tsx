@@ -1,8 +1,8 @@
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import ParticipantCard from './ParticipantCard'
 
 interface ParticipantsListProps {
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
   expandedParticipants: string[]
   toggleParticipant: (participantId: string) => void
 }

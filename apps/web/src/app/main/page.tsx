@@ -80,11 +80,7 @@ export default function MainFeedPage() {
         <SelectionBar
           selectedAthletes={selectedAthletes}
           requiredSelections={requiredSelections}
-          athletes={athletes.map((a) => ({
-            id: a.id,
-            name: a.name,
-            team: a.team,
-          }))}
+          athletes={athletes}
           onCancel={() => setIsInSelectionMode(false)}
           onContinue={() => {
             // Handle continue logic here

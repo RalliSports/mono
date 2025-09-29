@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useRouter } from 'next/navigation'
 import LottieLoading from '@/components/ui/lottie-loading'
+import { CreateGameDtoType } from '@repo/server'
 
 // Components
 import {
@@ -17,7 +18,6 @@ import {
   TokenSelector,
   ContestSummary,
   sliderStyles,
-  GameSettings,
   CreatingGameState,
   FormErrors,
   PrivateGameToggle,
@@ -75,27 +75,23 @@ export default function CreateGame() {
     icon: '🪙',
     address: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
   })
-  const [gameSettings, setGameSettings] = useState<GameSettings>({
+  const [gameSettings, setGameSettings] = useState<CreateGameDtoType>({
     title: '',
     depositAmount: 25,
-    maxParticipants: 8,
+    maxParticipants: 4,
     matchupGroup: 'TEST',
     isPrivate: false,
-    //TODO: Update depositToken when live
-    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU', // Default to USDC
     type: 'limited',
     userControlType: 'none',
-    gameMode: '550e8400-e29b-41d4-a716-446655440020',
-    numBets: 10, // Default Number of Bets
-    tokenId: '6028ea26-9f12-40ca-9333-2250b4524670',
+    numBets: 4, // Default Number of Bets
     imageUrl: '/images/pfp-2.svg',
   })
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleTokenChange = (token: any) => {
+  const handleTokenChange = (token: { symbol: string; name: string; icon: string; address: string }) => {
     setSelectedToken(token)
     handleInputChange('depositToken', token.address)
   }
@@ -119,13 +115,9 @@ export default function CreateGame() {
       maxParticipants: gameSettings.maxParticipants,
       numBets: gameSettings.numBets,
       matchupGroup: gameSettings.matchupGroup,
-      //TODO: Update depositToken when live
-      depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
       isPrivate: gameSettings.isPrivate,
       type: gameSettings.type,
       userControlType: gameSettings.userControlType,
-      gameModeId: gameSettings.gameMode,
-      tokenId: gameSettings.tokenId,
       imageUrl: gameSettings.imageUrl,
     }
 
@@ -200,7 +192,7 @@ export default function CreateGame() {
             <GameTitleInput title={gameSettings.title} onChange={(title) => handleInputChange('title', title)} />
 
             <GamePictureUpload
-              avatar={gameSettings.imageUrl}
+              avatar={gameSettings.imageUrl || ''}
               setAvatar={(imageUrl: string) => handleInputChange('imageUrl', imageUrl)}
               session={session || ''}
             />

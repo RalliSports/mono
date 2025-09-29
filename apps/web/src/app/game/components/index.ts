@@ -17,6 +17,3 @@ export { default as GameStatsSkeleton } from './GameStatsSkeleton'
 export { default as WinnersDisplaySkeleton } from './WinnersDisplaySkeleton'
 export { default as JoinGameButtonSkeleton } from './JoinGameButtonSkeleton'
 export { default as ParticipantsListSkeleton } from './ParticipantsListSkeleton'
-
-// Export types
-export * from './types'

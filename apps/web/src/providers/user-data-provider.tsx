@@ -8,9 +8,9 @@ import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { useMemo } from 'react'
 import { RALLI_TOKEN, USDC_MINT } from '@/constants'
 import { useUser } from '@/hooks/api/use-user'
-import { useLobbies as useLobbiesHook, type Lobby } from '@/hooks/get-games'
+import { useLobbies as useLobbiesHook } from '@/hooks/get-games'
 //import type { Game, UpdateUserData } from '@/hooks/api/types'
-import { UserUpdate, GamesGetMyOpenGames, UserFindOne } from '@repo/server'
+import { UpdateUserDtoType, GamesServiceGetMyOpenGames, UserServiceFindOne, GamesServiceFindAll } from '@repo/server'
 
 interface WalletBalances {
   sol: number
@@ -20,11 +20,11 @@ interface WalletBalances {
 }
 
 interface UserData {
-  user: UserFindOne | null
+  user: UserServiceFindOne | null
   walletAddress: PublicKey | null
   balances: WalletBalances
-  myOpenGames: GamesGetMyOpenGames[]
-  lobbies: Lobby[]
+  myOpenGames: GamesServiceGetMyOpenGames
+  lobbies: GamesServiceFindAll
   isConnected: boolean
   isLoading: boolean
   error: Error | null
@@ -38,7 +38,7 @@ interface UserDataContextType extends UserData {
   refetchLobbies: () => void
   refetchMyGames: () => void
   refetchAll: () => void
-  updateUser: (data: UserUpdate) => Promise<UserFindOne>
+  updateUser: (data: UpdateUserDtoType) => Promise<UserServiceFindOne>
 }
 
 const UserDataContext = createContext<UserDataContextType | undefined>(undefined)

@@ -421,12 +421,18 @@ export class LinesService {
       }
 
       try {
-        txn = await this.anchor.bulkResolveLineInstruction(
-          linesInformation,
-          new PublicKey(user.walletAddress),
-        );
+        const { success, txSig, error } =
+          await this.anchor.bulkResolveLineInstruction(
+            linesInformation,
+            new PublicKey(user.walletAddress),
+          );
 
-        if (!txn || typeof txn !== 'string') {
+        if (!success || typeof txSig !== 'string') {
+          if (error?.includes('LineAlreadyResolved')) {
+            // Ix went through but backend timed out, just update BE and return
+            console.warn('Line already resolved');
+            return { success: true };
+          }
           throw new Error(
             'Invalid transaction ID returned from bulkResolveLineInstruction',
           );

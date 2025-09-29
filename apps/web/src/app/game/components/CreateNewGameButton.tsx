@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 
 interface CreateNewGameButtonProps {
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
   size?: 'large' | 'small'
 }
 
