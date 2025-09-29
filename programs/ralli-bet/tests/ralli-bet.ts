@@ -5164,7 +5164,7 @@ describe("RalliBet Comprehensive Tests", () => {
 
         expect.fail("Should have failed with GameAlreadyResolved error");
       } catch (error) {
-        expect(error.error.errorMessage).to.equal("Game is already resolved");
+        expect(error.toString()).to.include("Error Code: GameAlreadyResolved");
       }
     });
 
