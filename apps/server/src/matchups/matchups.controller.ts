@@ -15,15 +15,44 @@ import { CreateMatchupDto } from './dto/create-matchup.dto';
 import { UpdateMatchupDto } from './dto/update-matchup.dto';
 import { User } from 'src/user/dto/user-response.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
-import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { CreateLinesDto } from './dto/create-lines.dto';
-import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 import { tracer } from 'dd-trace';
 
 @Controller('matchups')
 export class MatchupsController {
   constructor(private readonly matchupsService: MatchupsService) {}
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get matchups with open lines' })
+  @ApiResponse({
+    status: 200,
+    description: 'Matchups with open lines fetched successfully',
+    type: [MatchupResponseDto],
+  })
+  @Get('/read-matchups-with-open-lines')
+  async getMatchupsWithOpenLines() {
+    console.log('=== CONTROLLER METHOD CALLED ===');
+    console.log(
+      'Controller: getMatchupsWithOpenLines called at',
+      new Date().toISOString(),
+    );
+    try {
+      console.log('Controller: About to call service method...');
+      const result = await this.matchupsService.getMatchupsWithOpenLines();
+      console.log(
+        'Controller: getMatchupsWithOpenLines success, returning',
+        result.length,
+        'matchups',
+      );
+      return result;
+    } catch (error) {
+      console.error('Controller: getMatchupsWithOpenLines error:', error);
+      console.error('Controller: Error details:', error.message);
+      throw error;
+    }
+  }
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
@@ -48,7 +77,25 @@ export class MatchupsController {
   })
   @Get('/open')
   async getAllOpenMatchups() {
-    return this.matchupsService.getAllOpenMatchups();
+    console.log('=== CONTROLLER METHOD CALLED ===');
+    console.log(
+      'Controller: getAllOpenMatchups called at',
+      new Date().toISOString(),
+    );
+    try {
+      console.log('Controller: About to call service method...');
+      const result = await this.matchupsService.getAllOpenMatchups();
+      console.log(
+        'Controller: getAllOpenMatchups success, returning',
+        result.length,
+        'matchups',
+      );
+      return result;
+    } catch (error) {
+      console.error('Controller: getAllOpenMatchups error:', error);
+      console.error('Controller: Error details:', error.message);
+      throw error;
+    }
   }
 
   @ApiSecurity('x-para-session')
@@ -122,29 +169,5 @@ export class MatchupsController {
     @UserPayload() user: User,
   ) {
     return this.matchupsService.resolveLinesForMatchup(dto, user);
-  }
-
-  @Get('test/sync-error')
-  testSyncError() {
-    throw new Error('Test synchronous backend error');
-  }
-
-  @Get('test/async-error')
-  async testAsyncError() {
-    throw new Error('Test asynchronous backend error');
-  }
-
-  @Get('test/http-error')
-  testHttpError() {
-    throw new BadRequestException('Test HTTP exception error');
-  }
-
-  @Get('test/custom-error')
-  async testCustomError() {
-    const span = tracer.scope().active();
-    if (span) {
-      span.setTag('custom.test', 'error_testing');
-    }
-    throw new Error('Test error with custom span tags');
   }
 }

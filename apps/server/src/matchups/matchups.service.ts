@@ -1,6 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { matchups, stats, athletes, lines, lineStatusEnum } from '@repo/db';
-import { and, eq, gt, lt, gte, lte, or, inArray, exists } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  gt,
+  lt,
+  gte,
+  lte,
+  or,
+  inArray,
+  exists,
+  isNull,
+} from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -59,58 +70,112 @@ export class MatchupsService {
   }
 
   async getAllOpenMatchups() {
-    return this.db.query.matchups.findMany({
-      with: {
-        homeTeam: {
-          columns: {
-            name: true,
+    try {
+      console.log('Service: getAllOpenMatchups called');
+      console.log('Service: About to execute database query...');
+
+      const result = await this.db.query.matchups.findMany({
+        with: {
+          homeTeam: {
+            columns: {
+              name: true,
+            },
+          },
+          awayTeam: {
+            columns: {
+              name: true,
+            },
           },
         },
-        awayTeam: {
-          columns: {
-            name: true,
-          },
-        },
-      },
-      where: and(eq(matchups.status, MatchupStatus.SCHEDULED)),
-    });
+        where: and(eq(matchups.status, MatchupStatus.SCHEDULED)),
+      });
+
+      console.log(
+        'Service: getAllOpenMatchups success, found',
+        result.length,
+        'matchups',
+      );
+      return result;
+    } catch (error) {
+      console.error('Service: getAllOpenMatchups error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Error name:', error.name);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
+      throw error;
+    }
   }
 
   async getMatchupsWithOpenLines() {
-    return this.db.query.matchups.findMany({
-      with: {
-        lines: {
-          columns: {
-            id: true,
-            status: true,
+    try {
+      console.log('Service: getMatchupsWithOpenLines called');
+
+      console.log('Service: About to execute database query...');
+
+      // Test with a simple query first
+      console.log('Service: Testing simple query...');
+      const testMatchups = await this.db.query.matchups.findMany({
+        limit: 1,
+      });
+      console.log(
+        'Service: Simple query successful, got',
+        testMatchups.length,
+        'matchups',
+      );
+
+      // Now try the full query
+      console.log('Service: About to execute full query...');
+      const allMatchups = await this.db.query.matchups.findMany({
+        with: {
+          lines: {
+            columns: {
+              id: true,
+              status: true,
+              actualValue: true,
+            },
+          },
+          homeTeam: {
+            columns: {
+              name: true,
+            },
+          },
+          awayTeam: {
+            columns: {
+              name: true,
+            },
           },
         },
-        homeTeam: {
-          columns: {
-            name: true,
-          },
-        },
-        awayTeam: {
-          columns: {
-            name: true,
-          },
-        },
-      },
-      where: and(
-        eq(matchups.status, MatchupStatus.SCHEDULED),
-        exists(
-          this.db
-            .select()
-            .from(lines)
-            .where(
-              and(
-                eq(lines.matchupId, matchups.id),
-                eq(lines.status, LineStatus.OPEN),
-              ),
-            ),
-        ),
-      ),
-    });
+      });
+
+      console.log(
+        'Service: Database query completed, got',
+        allMatchups.length,
+        'matchups',
+      );
+
+      // Filter matchups that have at least one line with null actualValue
+      console.log('Service: About to filter matchups...');
+      const matchupsWithOpenLines = allMatchups.filter(
+        (matchup) =>
+          matchup.lines &&
+          matchup.lines.some((line) => line.actualValue === null),
+      );
+
+      console.log('Service: Filtering completed');
+      console.log(
+        'Service: getMatchupsWithOpenLines success, found',
+        matchupsWithOpenLines.length,
+        'matchups',
+      );
+      return matchupsWithOpenLines;
+    } catch (error) {
+      console.error('Service: getMatchupsWithOpenLines error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Error name:', error.name);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
+      throw error;
+    }
   }
 
   async getMatchupsThatShouldHaveStarted() {

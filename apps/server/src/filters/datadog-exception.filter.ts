@@ -14,6 +14,16 @@ export class DatadogExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // Log the exception to console for debugging
+    console.error('=== EXCEPTION CAUGHT BY DATADOG FILTER ===');
+    console.error('Request:', request.method, request.url);
+    console.error('Exception:', exception);
+    if (exception instanceof Error) {
+      console.error('Error message:', exception.message);
+      console.error('Error stack:', exception.stack);
+    }
+    console.error('==========================================');
+
     // Tag the current span with error information
     const span = tracer.scope().active();
     if (span) {

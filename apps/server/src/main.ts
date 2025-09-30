@@ -11,6 +11,14 @@ async function bootstrap() {
 
   // Add request logging middleware
   app.use((req, res, next) => {
+    console.log(`=== INCOMING REQUEST ===`);
+    console.log(`Method: ${req.method}`);
+    console.log(`URL: ${req.url}`);
+    console.log(`Headers:`, req.headers);
+    if (req.body) {
+      console.log(`Body:`, JSON.stringify(req.body, null, 2));
+    }
+    console.log(`========================`);
     next();
   });
 
