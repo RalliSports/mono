@@ -9,6 +9,7 @@ interface TabNavigationProps {
 export default function TabNavigation({ activeTab, setActiveTab, isUserInGame }: TabNavigationProps) {
   const tabs = [
     { id: 'parlays', name: 'Parlays', icon: '🎯' },
+    { id: 'invite-friends', name: 'Invite Friends', icon: '👥' },
     { id: 'chats', name: 'Chat', icon: '💬' },
     // { id: 'friends', name: 'Friends', icon: '👥' },
     // { id: 'history', name: 'History', icon: '📋' },
@@ -16,7 +17,7 @@ export default function TabNavigation({ activeTab, setActiveTab, isUserInGame }:
   ]
 
   if (!isUserInGame) {
-    tabs.splice(1, 1)
+    tabs.splice(2, 1) // Remove chats tab when not in game
   }
 
   return (

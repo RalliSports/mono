@@ -8,6 +8,7 @@ export { default as ParticipantPicks } from './ParticipantPicks'
 export { default as LoadingSpinner } from './LoadingSpinner'
 export { default as WinnersDisplay } from './WinnersDisplay'
 export { default as CreateNewGameButton } from './CreateNewGameButton'
+export { default as GameInviteFriends } from './GameInviteFriends'
 
 // Export skeleton components
 export { default as GamePageSkeleton } from './GamePageSkeleton'
