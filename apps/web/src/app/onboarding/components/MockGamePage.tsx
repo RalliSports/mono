@@ -10,6 +10,7 @@ import JoinOnboardingGameButton from './JoinOnboardingGameButton'
 import TabNavigation from '@/app/game/components/TabNavigation'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { GameTabType } from '@/app/game/hooks/useGameTabs'
 
 interface MockGamePageProps {
   lobby: any
@@ -18,7 +19,7 @@ interface MockGamePageProps {
 
 export default function MockGamePage({ lobby, onBack }: MockGamePageProps) {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'parlays' | 'chats'>('parlays')
+  const [activeTab, setActiveTab] = useState<GameTabType>('parlays')
   const [expandedParticipants, setExpandedParticipants] = useState<string[]>([])
   const [showFinalPopup, setShowFinalPopup] = useState(false)
 
@@ -82,6 +83,11 @@ export default function MockGamePage({ lobby, onBack }: MockGamePageProps) {
         {/* You can add a mock ChatSection here if needed */}
         {activeTab === 'chats' && (
           <div className="bg-slate-800/60 rounded-xl p-6 mt-6 text-white text-center">Mock chat coming soon!</div>
+        )}
+        {activeTab === 'invite-friends' && (
+          <div className="bg-slate-800/60 rounded-xl p-6 mt-6 text-white text-center">
+            Invite friends feature coming soon!
+          </div>
         )}
         <button
           onClick={() => router.push('/onboarding/game-1')}
