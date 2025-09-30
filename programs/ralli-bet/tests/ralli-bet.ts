@@ -2135,86 +2135,6 @@ describe("RalliBet Comprehensive Tests", () => {
       await new Promise((resolve) => setTimeout(resolve, 4000));
     });
 
-    it("should calculate correct count for bet successfully", async () => {
-      const [bet] = PublicKey.findProgramAddressSync(
-        [Buffer.from("bet"), game.toBuffer(), user1.publicKey.toBuffer()],
-        program.programId
-      );
-      // Resolve all lines that the bet depends on
-      await program.methods
-        .resolveLine({ over: {} }, 19.0, false)
-        .accountsPartial({
-          admin: adminKeypair.publicKey,
-          line: calcLine1PK,
-        })
-        .signers([adminKeypair])
-        .rpc();
-
-      await program.methods
-        .resolveLine({ under: {} }, 20.0, false)
-        .accountsPartial({
-          admin: adminKeypair.publicKey,
-          line: calcLine2PK,
-        })
-        .signers([adminKeypair])
-        .rpc();
-
-      await program.methods
-        .resolveLine({ under: {} }, 55.0, false)
-        .accountsPartial({
-          admin: adminKeypair.publicKey,
-          line: calcLine3PK,
-        })
-        .signers([adminKeypair])
-        .rpc();
-      try {
-        // Verify initial state - bet should have 0 correct initially
-        const betAccountBefore = await program.account.bet.fetch(bet);
-        expect(betAccountBefore.numCorrect).to.equal(0);
-
-        // Calculate correct count
-        await program.methods
-          .calculateCorrect()
-          .accountsPartial({
-            admin: adminKeypair.publicKey,
-            game: game,
-            bet: bet,
-          })
-          .signers([adminKeypair])
-          .remainingAccounts([
-            { pubkey: calcLine1PK, isWritable: false, isSigner: false },
-            { pubkey: calcLine2PK, isWritable: false, isSigner: false },
-            { pubkey: calcLine3PK, isWritable: false, isSigner: false },
-          ])
-          .rpc();
-
-        // Verify the bet now has correct count calculated
-        const betAccountAfter = await program.account.bet.fetch(bet);
-        expect(betAccountAfter.numCorrect).to.equal(2); // 2 correct picks out of 3
-
-        // Verify the picks are still intact
-        expect(betAccountAfter.picks).to.have.length(3);
-        expect(betAccountAfter.picks[0].lineId.toString()).to.equal(
-          calcLine1PK.toString()
-        );
-        expect(betAccountAfter.picks[0].direction).to.deep.equal({ over: {} });
-        expect(betAccountAfter.picks[1].lineId.toString()).to.equal(
-          calcLine2PK.toString()
-        );
-        expect(betAccountAfter.picks[1].direction).to.deep.equal({ under: {} });
-        expect(betAccountAfter.picks[2].lineId.toString()).to.equal(
-          calcLine3PK.toString()
-        );
-        expect(betAccountAfter.picks[2].direction).to.deep.equal({ over: {} });
-
-        // Verify game is still open
-        const gameAccount = await program.account.game.fetch(game);
-        expect(gameAccount.status).to.deep.equal({ open: {} });
-      } catch (err) {
-        throw err;
-      }
-    });
-
     it("should fail if non-admin is trying to calculate correct count", async () => {
       const [bet] = PublicKey.findProgramAddressSync(
         [Buffer.from("bet"), game.toBuffer(), user1.publicKey.toBuffer()],
@@ -2422,247 +2342,351 @@ describe("RalliBet Comprehensive Tests", () => {
         expect(error.toString()).to.include("Error Code: ConstraintSeeds");
       }
     });
+
+    it("should calculate correct count for bet successfully", async () => {
+      const [bet] = PublicKey.findProgramAddressSync(
+        [Buffer.from("bet"), game.toBuffer(), user1.publicKey.toBuffer()],
+        program.programId
+      );
+      // Resolve all lines that the bet depends on
+      await program.methods
+        .resolveLine({ over: {} }, 19.0, false)
+        .accountsPartial({
+          admin: adminKeypair.publicKey,
+          line: calcLine1PK,
+        })
+        .signers([adminKeypair])
+        .rpc();
+
+      await program.methods
+        .resolveLine({ under: {} }, 20.0, false)
+        .accountsPartial({
+          admin: adminKeypair.publicKey,
+          line: calcLine2PK,
+        })
+        .signers([adminKeypair])
+        .rpc();
+
+      await program.methods
+        .resolveLine({ under: {} }, 55.0, false)
+        .accountsPartial({
+          admin: adminKeypair.publicKey,
+          line: calcLine3PK,
+        })
+        .signers([adminKeypair])
+        .rpc();
+      try {
+        // Verify initial state - bet should have 0 correct initially
+        const betAccountBefore = await program.account.bet.fetch(bet);
+        expect(betAccountBefore.numCorrect).to.equal(0);
+
+        // Calculate correct count
+        await program.methods
+          .calculateCorrect()
+          .accountsPartial({
+            admin: adminKeypair.publicKey,
+            game: game,
+            bet: bet,
+          })
+          .signers([adminKeypair])
+          .remainingAccounts([
+            { pubkey: calcLine1PK, isWritable: false, isSigner: false },
+            { pubkey: calcLine2PK, isWritable: false, isSigner: false },
+            { pubkey: calcLine3PK, isWritable: false, isSigner: false },
+          ])
+          .rpc();
+
+        // Verify the bet now has correct count calculated
+        const betAccountAfter = await program.account.bet.fetch(bet);
+        expect(betAccountAfter.numCorrect).to.equal(2); // 2 correct picks out of 3
+
+        // Verify the picks are still intact
+        expect(betAccountAfter.picks).to.have.length(3);
+        expect(betAccountAfter.picks[0].lineId.toString()).to.equal(
+          calcLine1PK.toString()
+        );
+        expect(betAccountAfter.picks[0].direction).to.deep.equal({ over: {} });
+        expect(betAccountAfter.picks[1].lineId.toString()).to.equal(
+          calcLine2PK.toString()
+        );
+        expect(betAccountAfter.picks[1].direction).to.deep.equal({ under: {} });
+        expect(betAccountAfter.picks[2].lineId.toString()).to.equal(
+          calcLine3PK.toString()
+        );
+        expect(betAccountAfter.picks[2].direction).to.deep.equal({ over: {} });
+
+        // Verify game is still open
+        const gameAccount = await program.account.game.fetch(game);
+        expect(gameAccount.status).to.deep.equal({ open: {} });
+      } catch (err) {
+        throw err;
+      }
+    });
   });
 
   describe("Calculate Winners Tests", () => {
     beforeEach(async () => {
-      try {
-        gameId = new BN(Math.floor(Math.random() * 1000000));
-        lineId1 = new BN(Math.floor(Math.random() * 1000000) + 2000);
-        lineId2 = new BN(Math.floor(Math.random() * 1000000) + 3000);
-        const startsAtSoon = new BN(Math.floor(Date.now() / 1000) + 4);
+      const maxRetries = 3;
+      let retryCount = 0;
 
-        // Derive PDAs
-        [game] = PublicKey.findProgramAddressSync(
-          [Buffer.from("game"), gameId.toArrayLike(Buffer, "le", 8)],
-          program.programId
-        );
-        [gameEscrow] = PublicKey.findProgramAddressSync(
-          [Buffer.from("escrow"), game.toBuffer()],
-          program.programId
-        );
-        gameVault = getAssociatedTokenAddressSync(mint, game, true);
-        [line1PK] = PublicKey.findProgramAddressSync(
-          [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
-          program.programId
-        );
-        [line2PK] = PublicKey.findProgramAddressSync(
-          [Buffer.from("line"), lineId2.toArrayLike(Buffer, "le", 8)],
-          program.programId
-        );
+      while (retryCount < maxRetries) {
+        try {
+          gameId = new BN(Math.floor(Math.random() * 1000000));
+          lineId1 = new BN(Math.floor(Math.random() * 1000000) + 2000);
+          lineId2 = new BN(Math.floor(Math.random() * 1000000) + 3000);
+          const startsAtSoon = new BN(Math.floor(Date.now() / 1000) + 4);
 
-        // 1. Create Game and Lines
-        await program.methods
-          .createGame(gameId, 3, entryFee, 2, provider.wallet.publicKey)
-          .accountsPartial({
-            creator: adminKeypair.publicKey,
-            game,
-            gameEscrow,
-            gameVault,
-            mint,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          })
-          .signers([adminKeypair])
-          .rpc();
-        await program.methods
-          .createLine(lineId1, 1, 10.5, new BN(1), startsAtSoon)
-          .accountsPartial({
-            line: line1PK,
-            admin: adminKeypair.publicKey,
-            systemProgram: SystemProgram.programId,
-          })
-          .signers([adminKeypair])
-          .rpc();
-        await program.methods
-          .createLine(lineId2, 2, 20.5, new BN(2), startsAtSoon)
-          .accountsPartial({
-            line: line2PK,
-            admin: adminKeypair.publicKey,
-            systemProgram: SystemProgram.programId,
-          })
-          .signers([adminKeypair])
-          .rpc();
+          // Derive PDAs
+          [game] = PublicKey.findProgramAddressSync(
+            [Buffer.from("game"), gameId.toArrayLike(Buffer, "le", 8)],
+            program.programId
+          );
+          [gameEscrow] = PublicKey.findProgramAddressSync(
+            [Buffer.from("escrow"), game.toBuffer()],
+            program.programId
+          );
+          gameVault = getAssociatedTokenAddressSync(mint, game, true);
+          [line1PK] = PublicKey.findProgramAddressSync(
+            [Buffer.from("line"), lineId1.toArrayLike(Buffer, "le", 8)],
+            program.programId
+          );
+          [line2PK] = PublicKey.findProgramAddressSync(
+            [Buffer.from("line"), lineId2.toArrayLike(Buffer, "le", 8)],
+            program.programId
+          );
 
-        // 2. Users Join and Submit Bets
-        await program.methods
-          .joinGame()
-          .accountsPartial({
-            user: user1.publicKey,
-            game,
-            gameEscrow,
-            gameVault,
-            mint,
-            userTokens: user1TokenAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-          })
-          .signers([user1])
-          .rpc();
-        await program.methods
-          .joinGame()
-          .accountsPartial({
-            user: user2.publicKey,
-            game,
-            gameEscrow,
-            gameVault,
-            mint,
-            userTokens: user2TokenAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-          })
-          .signers([user2])
-          .rpc();
-        await program.methods
-          .joinGame()
-          .accountsPartial({
-            user: user3.publicKey,
-            game,
-            gameEscrow,
-            gameVault,
-            mint,
-            userTokens: user3TokenAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-          })
-          .signers([user3])
-          .rpc();
+          // 1. Create Game and Lines
+          await program.methods
+            .createGame(gameId, 3, entryFee, 2, provider.wallet.publicKey)
+            .accountsPartial({
+              creator: adminKeypair.publicKey,
+              game,
+              gameEscrow,
+              gameVault,
+              mint,
+              systemProgram: SystemProgram.programId,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            })
+            .signers([adminKeypair])
+            .rpc();
+          await program.methods
+            .createLine(lineId1, 1, 10.5, new BN(1), startsAtSoon)
+            .accountsPartial({
+              line: line1PK,
+              admin: adminKeypair.publicKey,
+              systemProgram: SystemProgram.programId,
+            })
+            .signers([adminKeypair])
+            .rpc();
+          await program.methods
+            .createLine(lineId2, 2, 20.5, new BN(2), startsAtSoon)
+            .accountsPartial({
+              line: line2PK,
+              admin: adminKeypair.publicKey,
+              systemProgram: SystemProgram.programId,
+            })
+            .signers([adminKeypair])
+            .rpc();
 
-        const [bet1] = PublicKey.findProgramAddressSync(
-          [Buffer.from("bet"), game.toBuffer(), user1.publicKey.toBuffer()],
-          program.programId
-        );
-        const [bet2] = PublicKey.findProgramAddressSync(
-          [Buffer.from("bet"), game.toBuffer(), user2.publicKey.toBuffer()],
-          program.programId
-        );
-        const [bet3] = PublicKey.findProgramAddressSync(
-          [Buffer.from("bet"), game.toBuffer(), user3.publicKey.toBuffer()],
-          program.programId
-        );
+          // 2. Users Join and Submit Bets
+          await program.methods
+            .joinGame()
+            .accountsPartial({
+              user: user1.publicKey,
+              game,
+              gameEscrow,
+              gameVault,
+              mint,
+              userTokens: user1TokenAccount,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              systemProgram: SystemProgram.programId,
+            })
+            .signers([user1])
+            .rpc();
+          await program.methods
+            .joinGame()
+            .accountsPartial({
+              user: user2.publicKey,
+              game,
+              gameEscrow,
+              gameVault,
+              mint,
+              userTokens: user2TokenAccount,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              systemProgram: SystemProgram.programId,
+            })
+            .signers([user2])
+            .rpc();
+          await program.methods
+            .joinGame()
+            .accountsPartial({
+              user: user3.publicKey,
+              game,
+              gameEscrow,
+              gameVault,
+              mint,
+              userTokens: user3TokenAccount,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              systemProgram: SystemProgram.programId,
+            })
+            .signers([user3])
+            .rpc();
 
-        // User 1 (Winner): 2 correct
-        await program.methods
-          .submitBet([
-            { lineId: line1PK, direction: { over: {} } },
-            { lineId: line2PK, direction: { over: {} } },
-          ])
-          .accountsPartial({
-            user: user1.publicKey,
-            game,
-            bet: bet1,
-            systemProgram: SystemProgram.programId,
-          })
-          .remainingAccounts([
-            { pubkey: line1PK, isWritable: false, isSigner: false },
-            { pubkey: line2PK, isWritable: false, isSigner: false },
-          ])
-          .signers([user1])
-          .rpc();
+          const [bet1] = PublicKey.findProgramAddressSync(
+            [Buffer.from("bet"), game.toBuffer(), user1.publicKey.toBuffer()],
+            program.programId
+          );
+          const [bet2] = PublicKey.findProgramAddressSync(
+            [Buffer.from("bet"), game.toBuffer(), user2.publicKey.toBuffer()],
+            program.programId
+          );
+          const [bet3] = PublicKey.findProgramAddressSync(
+            [Buffer.from("bet"), game.toBuffer(), user3.publicKey.toBuffer()],
+            program.programId
+          );
 
-        // User 2 (Loser): 1 correct
-        await program.methods
-          .submitBet([
-            { lineId: line1PK, direction: { over: {} } },
-            { lineId: line2PK, direction: { under: {} } },
-          ])
-          .accountsPartial({
-            user: user2.publicKey,
-            game,
-            bet: bet2,
-            systemProgram: SystemProgram.programId,
-          })
-          .remainingAccounts([
-            { pubkey: line1PK, isWritable: false, isSigner: false },
-            { pubkey: line2PK, isWritable: false, isSigner: false },
-          ])
-          .signers([user2])
-          .rpc();
+          // User 1 (Winner): 2 correct
+          await program.methods
+            .submitBet([
+              { lineId: line1PK, direction: { over: {} } },
+              { lineId: line2PK, direction: { over: {} } },
+            ])
+            .accountsPartial({
+              user: user1.publicKey,
+              game,
+              bet: bet1,
+              systemProgram: SystemProgram.programId,
+            })
+            .remainingAccounts([
+              { pubkey: line1PK, isWritable: false, isSigner: false },
+              { pubkey: line2PK, isWritable: false, isSigner: false },
+            ])
+            .signers([user1])
+            .rpc();
 
-        // User 3 (Winner): 2 correct
-        await program.methods
-          .submitBet([
-            { lineId: line1PK, direction: { over: {} } },
-            { lineId: line2PK, direction: { over: {} } },
-          ])
-          .accountsPartial({
-            user: user3.publicKey,
-            game,
-            bet: bet3,
-            systemProgram: SystemProgram.programId,
-          })
-          .remainingAccounts([
-            { pubkey: line1PK, isWritable: false, isSigner: false },
-            { pubkey: line2PK, isWritable: false, isSigner: false },
-          ])
-          .signers([user3])
-          .rpc();
+          // User 2 (Loser): 1 correct
+          await program.methods
+            .submitBet([
+              { lineId: line1PK, direction: { over: {} } },
+              { lineId: line2PK, direction: { under: {} } },
+            ])
+            .accountsPartial({
+              user: user2.publicKey,
+              game,
+              bet: bet2,
+              systemProgram: SystemProgram.programId,
+            })
+            .remainingAccounts([
+              { pubkey: line1PK, isWritable: false, isSigner: false },
+              { pubkey: line2PK, isWritable: false, isSigner: false },
+            ])
+            .signers([user2])
+            .rpc();
 
-        const bet1Account = await program.account.bet.fetch(bet1);
-        const bet2Account = await program.account.bet.fetch(bet2);
-        const bet3Account = await program.account.bet.fetch(bet3);
+          // User 3 (Winner): 2 correct
+          await program.methods
+            .submitBet([
+              { lineId: line1PK, direction: { over: {} } },
+              { lineId: line2PK, direction: { over: {} } },
+            ])
+            .accountsPartial({
+              user: user3.publicKey,
+              game,
+              bet: bet3,
+              systemProgram: SystemProgram.programId,
+            })
+            .remainingAccounts([
+              { pubkey: line1PK, isWritable: false, isSigner: false },
+              { pubkey: line2PK, isWritable: false, isSigner: false },
+            ])
+            .signers([user3])
+            .rpc();
 
-        // 3. Resolve Lines and Grade Each Bet
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await program.methods
-          .resolveLine({ over: {} }, 11.0, false)
-          .accountsPartial({ admin: adminKeypair.publicKey, line: line1PK })
-          .signers([adminKeypair])
-          .rpc();
-        await program.methods
-          .resolveLine({ over: {} }, 21.0, false)
-          .accountsPartial({ admin: adminKeypair.publicKey, line: line2PK })
-          .signers([adminKeypair])
-          .rpc();
+          const bet1Account = await program.account.bet.fetch(bet1);
+          const bet2Account = await program.account.bet.fetch(bet2);
+          const bet3Account = await program.account.bet.fetch(bet3);
 
-        // Call calculateCorrect for EVERY bet to prepare the game state
-        await program.methods
-          .calculateCorrect()
-          .accountsPartial({ admin: adminKeypair.publicKey, game, bet: bet1 })
-          .remainingAccounts([
-            { pubkey: line1PK, isWritable: false, isSigner: false },
-            { pubkey: line2PK, isWritable: false, isSigner: false },
-          ])
-          .signers([adminKeypair])
-          .rpc();
+          // 3. Resolve Lines and Grade Each Bet
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await program.methods
+            .resolveLine({ over: {} }, 11.0, false)
+            .accountsPartial({ admin: adminKeypair.publicKey, line: line1PK })
+            .signers([adminKeypair])
+            .rpc();
+          await program.methods
+            .resolveLine({ over: {} }, 21.0, false)
+            .accountsPartial({ admin: adminKeypair.publicKey, line: line2PK })
+            .signers([adminKeypair])
+            .rpc();
 
-        await program.methods
-          .calculateCorrect()
-          .accountsPartial({ admin: adminKeypair.publicKey, game, bet: bet2 })
-          .remainingAccounts([
-            { pubkey: line1PK, isWritable: false, isSigner: false },
-            { pubkey: line2PK, isWritable: false, isSigner: false },
-          ])
-          .signers([adminKeypair])
-          .rpc();
+          // Call calculateCorrect for EVERY bet to prepare the game state
+          await program.methods
+            .calculateCorrect()
+            .accountsPartial({ admin: adminKeypair.publicKey, game, bet: bet1 })
+            .remainingAccounts([
+              { pubkey: line1PK, isWritable: false, isSigner: false },
+              { pubkey: line2PK, isWritable: false, isSigner: false },
+            ])
+            .signers([adminKeypair])
+            .rpc();
 
-        await program.methods
-          .calculateCorrect()
-          .accountsPartial({ admin: adminKeypair.publicKey, game, bet: bet3 })
-          .remainingAccounts([
-            { pubkey: line1PK, isWritable: false, isSigner: false },
-            { pubkey: line2PK, isWritable: false, isSigner: false },
-          ])
-          .signers([adminKeypair])
-          .rpc();
+          await program.methods
+            .calculateCorrect()
+            .accountsPartial({ admin: adminKeypair.publicKey, game, bet: bet2 })
+            .remainingAccounts([
+              { pubkey: line1PK, isWritable: false, isSigner: false },
+              { pubkey: line2PK, isWritable: false, isSigner: false },
+            ])
+            .signers([adminKeypair])
+            .rpc();
 
-        const bet1AfterCalc = await program.account.bet.fetch(bet1);
-        const bet2AfterCalc = await program.account.bet.fetch(bet2);
-        const bet3AfterCalc = await program.account.bet.fetch(bet3);
+          await program.methods
+            .calculateCorrect()
+            .accountsPartial({ admin: adminKeypair.publicKey, game, bet: bet3 })
+            .remainingAccounts([
+              { pubkey: line1PK, isWritable: false, isSigner: false },
+              { pubkey: line2PK, isWritable: false, isSigner: false },
+            ])
+            .signers([adminKeypair])
+            .rpc();
 
-        global.testBet1 = bet1;
-        global.testBet2 = bet2;
-        global.testBet3 = bet3;
-      } catch (err) {
-        if (err instanceof anchor.AnchorError) {
-          console.log("AnchorError:", err.error.errorMessage);
-          console.log("Error Code:", err.error.errorCode.number);
-          console.log("Origin:", err.error.origin);
-        } else {
-          console.error("Unknown error:", err);
+          const bet1AfterCalc = await program.account.bet.fetch(bet1);
+          const bet2AfterCalc = await program.account.bet.fetch(bet2);
+          const bet3AfterCalc = await program.account.bet.fetch(bet3);
+
+          global.testBet1 = bet1;
+          global.testBet2 = bet2;
+          global.testBet3 = bet3;
+
+          // If we get here, the setup was successful, break out of retry loop
+          break;
+        } catch (err) {
+          const errorMessage = err.toString();
+          const isRetryableError = errorMessage.includes(
+            "SendTransactionError: Unknown action 'undefined'"
+          );
+
+          if (isRetryableError && retryCount < maxRetries - 1) {
+            retryCount++;
+            console.log(
+              `Retryable error occurred (attempt ${retryCount}/${maxRetries}):`,
+              errorMessage
+            );
+            console.log("Retrying in 2 seconds...");
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            continue;
+          }
+
+          if (err instanceof anchor.AnchorError) {
+            console.log("AnchorError:", err.error.errorMessage);
+            console.log("Error Code:", err.error.errorCode.number);
+            console.log("Origin:", err.error.origin);
+          } else {
+            console.error("Unknown error:", err);
+          }
+          throw err;
         }
-        throw err;
       }
     });
 
@@ -2743,7 +2767,7 @@ describe("RalliBet Comprehensive Tests", () => {
 
       await program.methods
         .calculateWinners()
-        .accountsPartial({ game })
+        .accountsPartial({ admin: adminKeypair.publicKey, game })
         .remainingAccounts([
           { pubkey: bet1, isWritable: false, isSigner: false },
           { pubkey: bet2, isWritable: false, isSigner: false },
@@ -2755,7 +2779,7 @@ describe("RalliBet Comprehensive Tests", () => {
       try {
         await program.methods
           .calculateWinners()
-          .accountsPartial({ game })
+          .accountsPartial({ admin: adminKeypair.publicKey, game })
           .remainingAccounts([
             { pubkey: bet1, isWritable: false, isSigner: false },
             { pubkey: bet2, isWritable: false, isSigner: false },
@@ -2776,6 +2800,7 @@ describe("RalliBet Comprehensive Tests", () => {
         await program.methods
           .calculateWinners()
           .accountsPartial({
+            admin: adminKeypair.publicKey,
             game,
           })
           .remainingAccounts([])
@@ -2896,7 +2921,7 @@ describe("RalliBet Comprehensive Tests", () => {
       try {
         await program.methods
           .calculateWinners()
-          .accountsPartial({ game: game })
+          .accountsPartial({ admin: adminKeypair.publicKey, game: game })
           .remainingAccounts([
             { pubkey: bet1, isWritable: false, isSigner: false },
             { pubkey: bet2, isWritable: false, isSigner: false },
@@ -5122,33 +5147,32 @@ describe("RalliBet Comprehensive Tests", () => {
     });
 
     it("should fail to resolve a game that is already resolved", async () => {
-      const accounts = {
-        admin: adminKeypair.publicKey,
-        game: newGame1PK,
-        gameEscrow: newGameEscrow1PK,
-        mint: mint,
-        gameVault: newGameVault1PK,
-        treasury: treasury.publicKey,
-        treasuryVault: treasuryTokenAccount,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      };
-
-      await program.methods
-        .resolveGame(entryFeePercentage)
-        .accounts(accounts)
-        .remainingAccounts([
-          {
-            pubkey: user1TokenAccount,
-            isWritable: true,
-            isSigner: false,
-          },
-        ])
-        .signers([adminKeypair])
-        .rpc();
-
       try {
+        const accounts = {
+          admin: adminKeypair.publicKey,
+          game: newGame1PK,
+          gameEscrow: newGameEscrow1PK,
+          mint: mint,
+          gameVault: newGameVault1PK,
+          treasury: treasury.publicKey,
+          treasuryVault: treasuryTokenAccount,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        };
+
+        await program.methods
+          .resolveGame(entryFeePercentage)
+          .accounts(accounts)
+          .remainingAccounts([
+            {
+              pubkey: user1TokenAccount,
+              isWritable: true,
+              isSigner: false,
+            },
+          ])
+          .signers([adminKeypair])
+          .rpc();
         await program.methods
           .resolveGame(entryFeePercentage)
           .accounts(accounts)
