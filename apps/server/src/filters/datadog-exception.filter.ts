@@ -14,6 +14,25 @@ export class DatadogExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // LOG ERROR TO CONSOLE FIRST
+    console.error('=== BACKEND ERROR CAUGHT ===');
+    console.error(
+      'Error type:',
+      exception instanceof Error ? exception.constructor.name : 'Unknown',
+    );
+    console.error(
+      'Error message:',
+      exception instanceof Error ? exception.message : 'No message',
+    );
+    console.error(
+      'Error stack:',
+      exception instanceof Error ? exception.stack : 'No stack',
+    );
+    console.error('Request method:', request.method);
+    console.error('Request URL:', request.url);
+    console.error('Full error object:', JSON.stringify(exception, null, 2));
+    console.error('=== END ERROR LOG ===');
+
     // Tag the current span with error information
     const span = tracer.scope().active();
     if (span) {

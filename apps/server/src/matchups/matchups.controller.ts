@@ -27,6 +27,24 @@ export class MatchupsController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get matchups with open lines' })
+  @ApiResponse({
+    status: 200,
+    description: 'Matchups with open lines fetched successfully',
+    type: [MatchupResponseDto],
+  })
+  @Get('/read-matchups-with-open-lines')
+  async getMatchupsWithOpenLines() {
+    try {
+      const result = await this.matchupsService.getMatchupsWithOpenLines();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get all matchups' })
   @ApiResponse({
     status: 200,
@@ -48,7 +66,13 @@ export class MatchupsController {
   })
   @Get('/open')
   async getAllOpenMatchups() {
-    return this.matchupsService.getAllOpenMatchups();
+    try {
+      return await this.matchupsService.getAllOpenMatchups();
+    } catch (error) {
+      console.error('Controller: getAllOpenMatchups error:', error);
+      console.error('Controller: Error details:', error.message);
+      throw error;
+    }
   }
 
   @ApiSecurity('x-para-session')
