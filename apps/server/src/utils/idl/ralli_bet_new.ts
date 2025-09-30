@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ralli_bet.json`.
  */
 export type RalliBet = {
-  address: 'GpTLdZGPWVx81HhpQ4fzLzKagE4ZQgeG56d9vf5QDLHG';
+  address: 'CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN';
   metadata: {
     name: 'ralliBet';
     version: '0.1.0';
