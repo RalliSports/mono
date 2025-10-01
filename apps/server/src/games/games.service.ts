@@ -807,9 +807,11 @@ export class GamesService {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
         game.id,
+        game.gameCode as string
       );
 
       await this.notificationService.sendNotificationToUser(user.id, message);
+            return { success: true, message: 'Notification sent successfully' };
     } catch (error) {
       console.error(error, 'unable to send invite');
     }

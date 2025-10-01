@@ -18,7 +18,8 @@ interface ProfileHeaderProps {
   setActiveTab: (tab: ProfileTabType) => void
   setActiveChannel: (channel: Channel | null) => void
   avatar: string
-  currentUserId: string
+  isCurrentUser: boolean
+  userId: string
   isConnected: boolean
   session: string
   userHasStreamChat: boolean
@@ -31,16 +32,14 @@ export default function ProfileHeader({
   avatar,
   isConnected,
   session,
-  currentUserId,
+  isCurrentUser,
   setActiveTab,
   setActiveChannel,
   userHasStreamChat,
+  userId
 }: ProfileHeaderProps) {
-  const { friend, toggle } = useFriends(session as string, currentUserId)
+  const { friend, toggle } = useFriends(session as string, userId)
   const { connectToDirectMessage } = useChat()
-
-  const searchParams = useSearchParams()
-  const userId = searchParams.get('userId') ?? ''
 
   const handleToggleFollow = async () => {
     try {
@@ -69,8 +68,8 @@ export default function ProfileHeader({
 
           <div className="flex-1">
             {<UsernameEditor userId={userId} />}
-            {isConnected && !userId ? <NotificationsButton /> : null}
-            {userId && (
+            {isConnected && isCurrentUser ? <NotificationsButton /> : null}
+            {!isCurrentUser && (
               <div className="flex items-center gap-2">
                 <Button onClick={handleToggleFollow} disabled={toggle.isPending}>
                   {friend.data?.isFollowing ? (
@@ -95,7 +94,7 @@ export default function ProfileHeader({
           </div>
         </div>
 
-        {!userId ? <StatsGrid balances={balances} formatBalance={formatBalance} /> : null}
+        {isCurrentUser ? <StatsGrid balances={balances} formatBalance={formatBalance} /> : null}
 
         {/* Refer Friends Section */}
         <div className="mt-4">
