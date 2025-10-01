@@ -9,7 +9,6 @@ interface TabNavigationProps {
 export default function TabNavigation({ activeTab, setActiveTab, isUserInGame }: TabNavigationProps) {
   const tabs = [
     { id: 'parlays', name: 'Parlays', icon: '🎯' },
-    { id: 'invite-friends', name: 'Invite Friends', icon: '👥' },
     { id: 'chats', name: 'Chat', icon: '💬' },
     // { id: 'friends', name: 'Friends', icon: '👥' },
     // { id: 'history', name: 'History', icon: '📋' },

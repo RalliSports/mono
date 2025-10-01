@@ -84,11 +84,6 @@ export default function MockGamePage({ lobby, onBack }: MockGamePageProps) {
         {activeTab === 'chats' && (
           <div className="bg-slate-800/60 rounded-xl p-6 mt-6 text-white text-center">Mock chat coming soon!</div>
         )}
-        {activeTab === 'invite-friends' && (
-          <div className="bg-slate-800/60 rounded-xl p-6 mt-6 text-white text-center">
-            Invite friends feature coming soon!
-          </div>
-        )}
         <button
           onClick={() => router.push('/onboarding/game-1')}
           className="mt-8 px-6 py-2 bg-slate-700 text-white rounded-xl"
