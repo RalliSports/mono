@@ -543,6 +543,7 @@ export class ParaAnchor {
     gameId: string,
     bets: { lineId: number; direction: PredictionDirection }[],
   ): Promise<string> {
+    console.log('submitBetsInstruction');
     const program = await this.getProgram();
     const gamePDA = await this.getGamePDA(gameId, program.programId);
     const betPDA = await this.getBetPDA(
@@ -550,20 +551,23 @@ export class ParaAnchor {
       program.provider.wallet?.publicKey as PublicKey,
       program.programId,
     );
+    console.log('betPDA', betPDA);
 
     const gameEscrowPDA = await this.getGameEscrowPDA(
       gamePDA,
       program.programId,
     );
+    console.log('gameEscrowPDA', gameEscrowPDA);
 
     const gameVault = await this.getGameVault(this.mint, gamePDA);
-
+    console.log('gameVault', gameVault);
     const userAta = await getOrCreateAssociatedTokenAccount(
       program.provider.connection,
       program.provider.wallet?.payer as Signer,
       this.mint,
       program.provider.wallet?.publicKey as PublicKey,
     );
+    console.log('userAta', userAta);
 
     const extraAccounts: any[] = [];
 
@@ -589,7 +593,7 @@ export class ParaAnchor {
         };
       }),
     );
-
+    console.log('picks', picks);
     try {
       const joinIx = await program.methods
         .joinGame()
@@ -605,7 +609,7 @@ export class ParaAnchor {
           systemProgram: SystemProgram.programId,
         })
         .instruction();
-
+      console.log('joinIx', joinIx);
       const submitIx = await program.methods
         .submitBet(picks)
         .accountsStrict({
@@ -616,7 +620,7 @@ export class ParaAnchor {
         })
         .remainingAccounts(extraAccounts)
         .instruction();
-
+      console.log('submitIx', submitIx);
       // Get latest blockhash
       const { blockhash, lastValidBlockHeight } =
         await program.provider.connection.getLatestBlockhash('finalized');

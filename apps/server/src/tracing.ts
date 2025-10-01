@@ -10,4 +10,6 @@ tracer.init({
   //   plugins: false,
 });
 
+// tracer.use('ws', { enabled: false });
+
 export default tracer;
