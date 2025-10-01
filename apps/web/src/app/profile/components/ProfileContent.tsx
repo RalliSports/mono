@@ -27,7 +27,7 @@ export default function ProfileContent() {
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
   const [userHasStreamChat, setUserHasStreamChat] = useState(false)
   const { currentUser } = useUser()
-  const { client } = useChat()
+  const { client, isConnectedToClient } = useChat()
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
 
   const {
@@ -61,10 +61,10 @@ export default function ProfileContent() {
       const response = await client.queryUsers({ id: user?.id })
       setUserHasStreamChat(response.users.length > 0)
     }
-    if (user?.id) {
+    if (user?.id && isConnectedToClient) {
       checkUserHasStreamChat()
     }
-  }, [user, client])
+  }, [user, client, isConnectedToClient])
   // Don't render until mounted to prevent hydration issues
   if (!mounted || userLoading || !user) {
     return null

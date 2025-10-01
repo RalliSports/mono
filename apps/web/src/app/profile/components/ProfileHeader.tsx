@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useFriends } from '@/hooks/api/use-friend'
-import { Loader2, UserMinusIcon, UserRoundPlus, MessageCircle } from 'lucide-react'
+import { UserMinusIcon, UserRoundPlus, MessageCircle } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import NotificationsButton from './NotificationsButton'
 import ProfilePicture from './ProfilePicture'
@@ -53,6 +53,7 @@ export default function ProfileHeader({
   const handleConnectToDirectMessage = async () => {
     try {
       const channel = await connectToDirectMessage(userId)
+      console.log('channel', channel)
       setActiveTab('chats')
       setActiveChannel(channel)
     } catch (error) {
