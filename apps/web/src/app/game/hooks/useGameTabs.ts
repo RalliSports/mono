@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-export type GameTabType = 'parlays' | 'chats' | 'invite-friends'
+export type GameTabType = 'parlays' | 'chats'
 
 export function useGameTabs() {
   const searchParams = useSearchParams()
@@ -11,7 +11,7 @@ export function useGameTabs() {
   useEffect(() => {
     setMounted(true)
     const tab = searchParams.get('tab')
-    if (tab && ['parlays', 'chats', 'invite-friends'].includes(tab)) {
+    if (tab && ['parlays', 'chats'].includes(tab)) {
       setActiveTab(tab as GameTabType)
     }
   }, [searchParams])

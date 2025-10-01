@@ -9,7 +9,6 @@ import {
   LoadingSpinner,
   WinnersDisplay,
   CreateNewGameButton,
-  GameInviteFriends,
 } from './components'
 import { useGameData } from './hooks/useGameData'
 import JoinGameButton from './components/JoinGameButton'
@@ -106,7 +105,7 @@ function ViewGameContent() {
         <WinnersDisplay lobby={lobby} />
         <CreateNewGameButton lobby={lobby} size="large" />
         <JoinGameButton game={lobby} user={user ?? null} />
-        <InviteFriends  game={lobby} />
+        <InviteFriends game={lobby} />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} isUserInGame={isUserInGame ?? false} />
 
         {activeTab === 'parlays' && (
@@ -116,8 +115,6 @@ function ViewGameContent() {
             toggleParticipant={toggleParticipant}
           />
         )}
-
-        {activeTab === 'invite-friends' && <GameInviteFriends gameId={lobby.id} />}
 
         {activeTab === 'chats' && <ChatSection />}
       </div>
