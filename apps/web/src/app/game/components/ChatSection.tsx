@@ -13,6 +13,8 @@ import { useChat } from '@/hooks/api/use-chat'
 
 import 'stream-chat-react/dist/css/v2/index.css'
 import { useGameData } from '../hooks/useGameData'
+import { customChatStyles } from '@/styles/chat'
+
 export default function ChatsSection() {
   const { lobby } = useGameData()
 
@@ -34,36 +36,39 @@ export default function ChatsSection() {
   }, [lobby, getChannel])
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
-      <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-4 flex items-center justify-center">
-          <span className="text-lg">💬</span>
-        </span>
-        Chat
-      </h3>
-      <div className="space-y-4">
-        {isConnectedToClient && (
-          <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
-            <Chat client={client}>
-              {/* Main chat area */}
-              <div style={{ flex: 1, width: '100%' }}>
-                {activeChannel ? (
-                  <ChannelComponent channel={activeChannel}>
-                    <Window>
-                      <ChannelHeader />
-                      <MessageList />
-                      <MessageInput />
-                    </Window>
-                    <Thread />
-                  </ChannelComponent>
-                ) : (
-                  <div className="text-white">Select a conversation</div>
-                )}
-              </div>
-            </Chat>
-          </div>
-        )}
+    <>
+      <style dangerouslySetInnerHTML={{ __html: customChatStyles }} />
+      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
+        <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+          <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-4 flex items-center justify-center">
+            <span className="text-lg">💬</span>
+          </span>
+          Chat
+        </h3>
+        <div className="space-y-4">
+          {isConnectedToClient && (
+            <div className="h-[600px] custom-chat-container">
+              <Chat client={client}>
+                {/* Main chat area */}
+                <div style={{ flex: 1, width: '100%' }}>
+                  {activeChannel ? (
+                    <ChannelComponent channel={activeChannel}>
+                      <Window>
+                        <ChannelHeader />
+                        <MessageList />
+                        <MessageInput />
+                      </Window>
+                      <Thread />
+                    </ChannelComponent>
+                  ) : (
+                    <div className="text-white">Select a conversation</div>
+                  )}
+                </div>
+              </Chat>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
