@@ -51,14 +51,14 @@ const mockFriends: Friend[] = [
     id: '5',
     name: 'David Kim',
     username: '@davidk',
-    avatar: '/images/pfp-5.svg',
+    avatar: '/images/pfp-1.svg',
     isOnline: false,
   },
   {
     id: '6',
     name: 'Lisa Thompson',
     username: '@lisat',
-    avatar: '/images/pfp-6.svg',
+    avatar: '/images/pfp-2.svg',
     isOnline: true,
     lastInvited: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
   },

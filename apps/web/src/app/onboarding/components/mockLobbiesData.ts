@@ -142,7 +142,7 @@ const mockLobbiesData = {
                   name: 'Giannis Antetokounmpo',
                   position: 'C',
                   jerseyNumber: 34,
-                  picture: '/images/pfp-5.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'MIL', id: 't4' },
                 },
                 matchup: {
@@ -168,7 +168,7 @@ const mockLobbiesData = {
                   name: 'Joel Embiid',
                   position: 'C',
                   jerseyNumber: 21,
-                  picture: '/images/pfp-6.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'PHI', id: 't5' },
                 },
                 matchup: {
@@ -202,7 +202,7 @@ const mockLobbiesData = {
                   name: 'Jayson Tatum',
                   position: 'SF',
                   jerseyNumber: 0,
-                  picture: '/images/pfp-7.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'BOS', id: 't6' },
                 },
                 matchup: {
@@ -228,7 +228,7 @@ const mockLobbiesData = {
                   name: 'Jimmy Butler',
                   position: 'SG',
                   jerseyNumber: 22,
-                  picture: '/images/pfp-8.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'MIA', id: 't7' },
                 },
                 matchup: {
@@ -254,7 +254,7 @@ const mockLobbiesData = {
                   name: 'Nikola Jokic',
                   position: 'C',
                   jerseyNumber: 15,
-                  picture: '/images/pfp-9.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'DEN', id: 't8' },
                 },
                 matchup: {
@@ -288,7 +288,7 @@ const mockLobbiesData = {
                   name: 'Zion Williamson',
                   position: 'PF',
                   jerseyNumber: 1,
-                  picture: '/images/pfp-10.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'NOP', id: 't9' },
                 },
                 matchup: {
@@ -314,7 +314,7 @@ const mockLobbiesData = {
                   name: 'Luka Doncic',
                   position: 'PG',
                   jerseyNumber: 77,
-                  picture: '/images/pfp-11.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'DAL', id: 't10' },
                 },
                 matchup: {
@@ -340,7 +340,7 @@ const mockLobbiesData = {
                   name: 'Devin Booker',
                   position: 'SG',
                   jerseyNumber: 1,
-                  picture: '/images/pfp-12.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'PHX', id: 't3' },
                 },
                 matchup: {
@@ -394,7 +394,7 @@ const mockLobbiesData = {
                   name: 'Erling Haaland',
                   position: 'ST',
                   jerseyNumber: 9,
-                  picture: '/images/pfp-5.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -420,7 +420,7 @@ const mockLobbiesData = {
                   name: 'Mohamed Salah',
                   position: 'RW',
                   jerseyNumber: 11,
-                  picture: '/images/pfp-6.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -446,7 +446,7 @@ const mockLobbiesData = {
                   name: 'Kevin De Bruyne',
                   position: 'CM',
                   jerseyNumber: 17,
-                  picture: '/images/pfp-7.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -472,7 +472,7 @@ const mockLobbiesData = {
                   name: 'John Stones',
                   position: 'CB',
                   jerseyNumber: 5,
-                  picture: '/images/pfp-8.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -498,7 +498,7 @@ const mockLobbiesData = {
                   name: 'James Milner',
                   position: 'CM',
                   jerseyNumber: 7,
-                  picture: '/images/pfp-9.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -532,7 +532,7 @@ const mockLobbiesData = {
                   name: 'Virgil van Dijk',
                   position: 'CB',
                   jerseyNumber: 4,
-                  picture: '/images/pfp-8.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -558,7 +558,7 @@ const mockLobbiesData = {
                   name: 'Phil Foden',
                   position: 'LW',
                   jerseyNumber: 47,
-                  picture: '/images/pfp-9.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -584,7 +584,7 @@ const mockLobbiesData = {
                   name: 'Alisson Becker',
                   position: 'GK',
                   jerseyNumber: 1,
-                  picture: '/images/pfp-10.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -610,7 +610,7 @@ const mockLobbiesData = {
                   name: 'Rodri',
                   position: 'CDM',
                   jerseyNumber: 16,
-                  picture: '/images/pfp-11.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -636,7 +636,7 @@ const mockLobbiesData = {
                   name: 'Andy Robertson',
                   position: 'LB',
                   jerseyNumber: 26,
-                  picture: '/images/pfp-12.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -670,7 +670,7 @@ const mockLobbiesData = {
                   name: 'Andrew Robertson',
                   position: 'LB',
                   jerseyNumber: 26,
-                  picture: '/images/pfp-11.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -696,7 +696,7 @@ const mockLobbiesData = {
                   name: 'Jack Grealish',
                   position: 'LW',
                   jerseyNumber: 10,
-                  picture: '/images/pfp-12.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -722,7 +722,7 @@ const mockLobbiesData = {
                   name: 'Bernardo Silva',
                   position: 'CM',
                   jerseyNumber: 20,
-                  picture: '/images/pfp-13.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -748,7 +748,7 @@ const mockLobbiesData = {
                   name: 'Ilkay Gundogan',
                   position: 'CM',
                   jerseyNumber: 8,
-                  picture: '/images/pfp-14.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -774,7 +774,7 @@ const mockLobbiesData = {
                   name: 'Diogo Jota',
                   position: 'CF',
                   jerseyNumber: 20,
-                  picture: '/images/pfp-15.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -808,7 +808,7 @@ const mockLobbiesData = {
                   name: 'Ederson',
                   position: 'GK',
                   jerseyNumber: 31,
-                  picture: '/images/pfp-14.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -834,7 +834,7 @@ const mockLobbiesData = {
                   name: 'Trent Alexander-Arnold',
                   position: 'RB',
                   jerseyNumber: 66,
-                  picture: '/images/pfp-15.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -860,7 +860,7 @@ const mockLobbiesData = {
                   name: 'Fabinho',
                   position: 'CDM',
                   jerseyNumber: 3,
-                  picture: '/images/pfp-16.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -886,7 +886,7 @@ const mockLobbiesData = {
                   name: 'Joel Matip',
                   position: 'CB',
                   jerseyNumber: 32,
-                  picture: '/images/pfp-17.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -912,7 +912,7 @@ const mockLobbiesData = {
                   name: 'Nathan Ake',
                   position: 'CB',
                   jerseyNumber: 6,
-                  picture: '/images/pfp-18.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -929,7 +929,7 @@ const mockLobbiesData = {
         {
           id: 'p9',
           userId: 'p9',
-          user: { id: 'p9', username: 'Player9', avatar: '/images/pfp-5.svg' },
+          user: { id: 'p9', username: 'Player9', avatar: '/images/pfp-1.svg' },
           joinedAt: new Date().toISOString(),
           bets: [
             {
@@ -946,7 +946,7 @@ const mockLobbiesData = {
                   name: 'Riyad Mahrez',
                   position: 'RW',
                   jerseyNumber: 26,
-                  picture: '/images/pfp-17.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -972,7 +972,7 @@ const mockLobbiesData = {
                   name: 'Jordan Henderson',
                   position: 'CM',
                   jerseyNumber: 14,
-                  picture: '/images/pfp-18.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -998,7 +998,7 @@ const mockLobbiesData = {
                   name: 'Aymeric Laporte',
                   position: 'CB',
                   jerseyNumber: 14,
-                  picture: '/images/pfp-19.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -1024,7 +1024,7 @@ const mockLobbiesData = {
                   name: 'Curtis Jones',
                   position: 'CM',
                   jerseyNumber: 17,
-                  picture: '/images/pfp-20.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'LIV', id: 't12' },
                 },
                 matchup: {
@@ -1050,7 +1050,7 @@ const mockLobbiesData = {
                   name: 'Gabriel Jesus',
                   position: 'CF',
                   jerseyNumber: 9,
-                  picture: '/images/pfp-21.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'MCI', id: 't11' },
                 },
                 matchup: {
@@ -1067,7 +1067,7 @@ const mockLobbiesData = {
         {
           id: 'p10',
           userId: 'p10',
-          user: { id: 'p10', username: 'Player10', avatar: '/images/pfp-6.svg' },
+          user: { id: 'p10', username: 'Player10', avatar: '/images/pfp-2.svg' },
           joinedAt: new Date().toISOString(),
           bets: [
             {
@@ -1084,7 +1084,7 @@ const mockLobbiesData = {
                   name: 'Edouard Mendy',
                   position: 'GK',
                   jerseyNumber: 16,
-                  picture: '/images/pfp-20.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'CHE', id: 't13' },
                 },
                 matchup: {
@@ -1110,7 +1110,7 @@ const mockLobbiesData = {
                   name: 'Mason Mount',
                   position: 'CAM',
                   jerseyNumber: 19,
-                  picture: '/images/pfp-21.svg',
+                  picture: '/images/pfp-1.svg',
                   team: { abbreviation: 'CHE', id: 't13' },
                 },
                 matchup: {
@@ -1136,7 +1136,7 @@ const mockLobbiesData = {
                   name: 'Thiago Silva',
                   position: 'CB',
                   jerseyNumber: 6,
-                  picture: '/images/pfp-22.svg',
+                  picture: '/images/pfp-2.svg',
                   team: { abbreviation: 'CHE', id: 't13' },
                 },
                 matchup: {
@@ -1162,7 +1162,7 @@ const mockLobbiesData = {
                   name: 'Ben Chilwell',
                   position: 'LB',
                   jerseyNumber: 21,
-                  picture: '/images/pfp-23.svg',
+                  picture: '/images/pfp-3.svg',
                   team: { abbreviation: 'CHE', id: 't13' },
                 },
                 matchup: {
@@ -1188,7 +1188,7 @@ const mockLobbiesData = {
                   name: 'Hakim Ziyech',
                   position: 'RW',
                   jerseyNumber: 22,
-                  picture: '/images/pfp-24.svg',
+                  picture: '/images/pfp-4.svg',
                   team: { abbreviation: 'CHE', id: 't13' },
                 },
                 matchup: {
