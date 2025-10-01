@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
 
     const following = await response.json()
-    
+
     return NextResponse.json(following)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch following' }, { status: 500 })
