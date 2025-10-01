@@ -8,10 +8,6 @@ import {
   ChannelPreviewUIComponentProps,
   Thread,
   useChannelStateContext,
-  ChannelHeaderProps,
-  useTranslationContext,
-  useChannelPreviewInfo, // List of user's channels/conversations
-  Avatar as DefaultAvatar,
 } from 'stream-chat-react'
 import { useProfile } from '../hooks/useProfile'
 import { useSessionToken } from '@/hooks/use-session'
@@ -512,7 +508,7 @@ export default function ChatsSection({
   const { session } = useSessionToken()
   const { user } = useProfile(session || null)
   const [channels, setChannels] = useState<Channel[]>([])
-  const [hideChannelList, setHideChannelList] = useState(false)
+  const [hideChannelList, setHideChannelList] = useState(!isCurrentUser)
   const { client, getChannels, isConnectedToClient } = useChat()
   const isMobile = useScreenSize()
 
@@ -521,6 +517,9 @@ export default function ChatsSection({
       setChannels(channels ?? [])
     })
   }, [getChannels])
+
+  console.log('activeChannel', activeChannel)
+
   if (!user) {
     return (
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
@@ -628,7 +627,7 @@ export default function ChatsSection({
             <h4 className={`font-semibold text-sm truncate ${isActive ? 'text-[#00CED1]' : 'text-white'}`}>
               {channelName}
             </h4>
-            <p className="text-slate-400 text-xs truncate">{latestMessagePreview || 'No messages yet'}</p>
+            <div className="text-slate-400 text-xs truncate">{latestMessagePreview || 'No messages yet'}</div>
           </div>
         </div>
       </div>

@@ -12,7 +12,6 @@ import ActiveParlaysSection from './ActiveParlaysSection'
 import HistorySection from './HistorySection'
 import PastParlaysSection from './PastParlaysSection'
 import ChatsSection from './ChatsSection'
-import FriendsSection from './FriendsSection'
 import ProfileHeader from './ProfileHeader'
 import ProfilePictureUploadModal from './ProfilePictureUploadModal'
 import TopNavigation from './TopNavigation'
@@ -21,13 +20,14 @@ import { useUser } from '@/hooks/api'
 import { useEffect, useState } from 'react'
 import { Channel } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
+import FriendsSection from './FriendsSection'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
   const [userHasStreamChat, setUserHasStreamChat] = useState(false)
   const { currentUser } = useUser()
-  const { client } = useChat()
+  const { client, isConnectedToClient } = useChat()
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
 
   const {
@@ -61,10 +61,10 @@ export default function ProfileContent() {
       const response = await client.queryUsers({ id: user?.id })
       setUserHasStreamChat(response.users.length > 0)
     }
-    if (user?.id) {
+    if (user?.id && isConnectedToClient) {
       checkUserHasStreamChat()
     }
-  }, [user, client])
+  }, [user, client, isConnectedToClient])
   // Don't render until mounted to prevent hydration issues
   if (!mounted || userLoading || !user) {
     return null
@@ -129,6 +129,7 @@ export default function ProfileContent() {
         {activeTab === 'history' && <HistorySection />}
 
         {activeTab === 'achievements' && <AchievementsSection />}
+        {activeTab === 'friends' && <FriendsSection currentUserId={user.id} session={session ?? ''} />}
 
         {activeTab === 'chats' && (
           <ChatsSection
@@ -137,8 +138,6 @@ export default function ProfileContent() {
             isCurrentUser={isCurrentUser}
           />
         )}
-
-        {activeTab === 'friends' && <FriendsSection />}
       </div>
 
       <ProfilePictureUploadModal

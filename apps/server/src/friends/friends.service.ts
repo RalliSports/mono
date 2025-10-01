@@ -56,14 +56,14 @@ export class FriendsService {
   async getFollowers(userId: string) {
     return this.db.query.friends.findMany({
       where: eq(friends.followingId, userId),
-      with: { follower: true },
+      with: { follower: true, following: true },
     });
   }
 
   async getFollowing(userId: string) {
     return this.db.query.friends.findMany({
       where: eq(friends.followerId, userId),
-      with: { following: true },
+      with: { following: true, follower: true },
     });
   }
 

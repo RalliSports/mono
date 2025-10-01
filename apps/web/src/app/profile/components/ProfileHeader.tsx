@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useFriends } from '@/hooks/api/use-friend'
-import { Loader2, UserMinusIcon, UserRoundPlus, MessageCircle } from 'lucide-react'
+import { UserMinusIcon, UserRoundPlus, MessageCircle } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import NotificationsButton from './NotificationsButton'
 import ProfilePicture from './ProfilePicture'
@@ -36,7 +36,7 @@ export default function ProfileHeader({
   setActiveChannel,
   userHasStreamChat,
 }: ProfileHeaderProps) {
-  const { friend, toggle } = useFriends(session as string)
+  const { friend, toggle } = useFriends(session as string, currentUserId)
   const { connectToDirectMessage } = useChat()
 
   const searchParams = useSearchParams()
@@ -49,9 +49,11 @@ export default function ProfileHeader({
       console.log('could not toogle follow:', error)
     }
   }
+
   const handleConnectToDirectMessage = async () => {
     try {
       const channel = await connectToDirectMessage(userId)
+      console.log('channel', channel)
       setActiveTab('chats')
       setActiveChannel(channel)
     } catch (error) {
@@ -71,9 +73,7 @@ export default function ProfileHeader({
             {userId && (
               <div className="flex items-center gap-2">
                 <Button onClick={handleToggleFollow} disabled={toggle.isPending}>
-                  {toggle.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : friend.data?.isFollowing ? (
+                  {friend.data?.isFollowing ? (
                     <span className="flex items-center gap-2 cursor-pointer">
                       <UserMinusIcon size={20} /> Unfollow
                     </span>

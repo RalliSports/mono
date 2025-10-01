@@ -3,26 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // GET one user
 export async function GET(req: NextRequest) {
-  const tokenString = req.headers.get('x-para-session')
-
-  // Check if the JWT token is missing
-  if (!tokenString) {
-    return NextResponse.json(
-      {
-        error: 'Session ID missing',
-        message: 'Unauthorized access. Please provide a valid session ID.',
-      },
-      { status: 401 },
-    )
-  }
+  const userId = req.nextUrl.searchParams.get('userId')
 
   try {
     // Call your server API to get user by id
-    const response = await fetch(`${backendUrl}/api/v1/friends/following`, {
+    const response = await fetch(`${backendUrl}/api/v1/friends/following?userId=${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...(tokenString && { 'x-para-session': tokenString }),
       },
     })
 
@@ -32,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const following = await response.json()
     
-    return NextResponse.json({ success: true, following })
+    return NextResponse.json(following)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch following' }, { status: 500 })
   }
