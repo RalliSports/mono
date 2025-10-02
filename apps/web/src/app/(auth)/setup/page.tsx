@@ -19,6 +19,7 @@ export default function Setup() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const userEditedRef = useRef(false)
+  const hasNavigatedRef = useRef(false) // Track if we've already navigated
 
   // Initialize local state from current user data once
   useEffect(() => {
@@ -35,7 +36,10 @@ export default function Setup() {
 
   // Redirect if not connected
   if (!account?.isConnected) {
-    router.push('/signin')
+    if (!hasNavigatedRef.current) {
+      hasNavigatedRef.current = true
+      router.push('/signin')
+    }
     return null
   }
 
@@ -52,7 +56,9 @@ export default function Setup() {
   }
 
   // Skip setup if user has already completed first login setup
-  if (currentUser.data && currentUser.data.isFirstLogin === false) {
+  // Only redirect if we're sure the data is fresh (not during/after mutation)
+  if (currentUser.data && currentUser.data.isFirstLogin === false && !isSubmitting && !hasNavigatedRef.current) {
+    hasNavigatedRef.current = true
     router.push('/main')
     return null
   }
@@ -107,6 +113,7 @@ export default function Setup() {
         throw new Error(errorData.message || 'Failed to update profile')
       }
 
+      // Navigate immediately after successful response to prevent race conditions
       router.push('/main')
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -143,21 +150,23 @@ export default function Setup() {
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-700">Profile Picture (Optional)</p>
               <UploadButton
-                endpoint="profilePicture"
-                input={{ sessionId: session || '' }}
-                onClientUploadComplete={(res) => {
-                  if (res?.[0]?.url) {
-                    setAvatar(res[0].url)
+                {...({
+                  endpoint: "profilePicture",
+                  input: { sessionId: session || '' },
+                  onClientUploadComplete: (res: { url: string }[]) => {
+                    if (res?.[0]?.url) {
+                      setAvatar(res[0].url)
+                    }
+                  },
+                  onUploadError: () => {
+                    setError('Failed to upload image. Please try again.')
+                  },
+                  appearance: {
+                    button:
+                      'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white text-sm px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 border-none cursor-pointer',
+                    allowedContent: 'text-xs text-gray-500 mt-1',
                   }
-                }}
-                onUploadError={() => {
-                  setError('Failed to upload image. Please try again.')
-                }}
-                appearance={{
-                  button:
-                    'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white text-sm px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 border-none cursor-pointer',
-                  allowedContent: 'text-xs text-gray-500 mt-1',
-                }}
+                } as Record<string, unknown>)}
               />
             </div>
           </div>

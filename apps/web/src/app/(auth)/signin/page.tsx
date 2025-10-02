@@ -17,6 +17,7 @@ export default function SignIn() {
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const modalOpenedRef = useRef(false)
   const toastShownRef = useRef(false)
+  const hasNavigatedRef = useRef(false) // Track if we've already navigated
 
   const callbackUrl = searchParams.get('callbackUrl') || '/main'
 
@@ -40,18 +41,23 @@ export default function SignIn() {
     )
 
     // If user just connected and user data is available, navigate accordingly
-    if (account?.isConnected === true && !toastShownRef.current && !currentUser.isLoading) {
+    // Add a small delay to ensure data is stable and avoid race conditions
+    if (account?.isConnected === true && !toastShownRef.current && !currentUser.isLoading && currentUser.data && !hasNavigatedRef.current) {
       stopModalMonitoring()
       toastShownRef.current = true
+      hasNavigatedRef.current = true
 
-      const isFirstLogin = currentUser.data?.isFirstLogin
+      const isFirstLogin = currentUser.data.isFirstLogin
       console.log('Navigation after sign-in, isFirstLogin:', isFirstLogin)
 
-      if (isFirstLogin === true) {
-        router.push('/setup')
-      } else {
-        router.push(callbackUrl)
-      }
+      // Use setTimeout to prevent race conditions with setup page
+      setTimeout(() => {
+        if (isFirstLogin === true) {
+          router.push('/setup')
+        } else {
+          router.push(callbackUrl)
+        }
+      }, 100) // Small delay to prevent race condition
     }
   }, [account?.isConnected, router, callbackUrl, currentUser.data, currentUser.isLoading])
 
