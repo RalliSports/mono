@@ -34,25 +34,27 @@ export class DatadogExceptionFilter implements ExceptionFilter {
     console.error('=== END ERROR LOG ===');
 
     // Tag the current span with error information
-    const span = tracer.scope().active();
-    if (span) {
-      span.setTag('error', true);
-      span.setTag(
-        'error.type',
-        exception instanceof Error ? exception.constructor.name : 'Unknown',
-      );
+    if (process.env.NODE_ENV === 'production') {
+      const span = tracer.scope().active();
+      if (span) {
+        span.setTag('error', true);
+        span.setTag(
+          'error.type',
+          exception instanceof Error ? exception.constructor.name : 'Unknown',
+        );
 
-      if (exception instanceof HttpException) {
-        span.setTag('error.message', exception.message);
-        span.setTag('http.status_code', exception.getStatus());
-      } else if (exception instanceof Error) {
-        span.setTag('error.message', exception.message);
-        span.setTag('error.stack', exception.stack);
+        if (exception instanceof HttpException) {
+          span.setTag('error.message', exception.message);
+          span.setTag('http.status_code', exception.getStatus());
+        } else if (exception instanceof Error) {
+          span.setTag('error.message', exception.message);
+          span.setTag('error.stack', exception.stack);
+        }
+
+        // Add request context
+        span.setTag('http.method', request.method);
+        span.setTag('http.url', request.url);
       }
-
-      // Add request context
-      span.setTag('http.method', request.method);
-      span.setTag('http.url', request.url);
     }
 
     // Return error response

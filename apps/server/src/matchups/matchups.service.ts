@@ -284,6 +284,20 @@ export class MatchupsService {
           continue;
         }
 
+        const possibleExistingLine = await this.db.query.lines.findFirst({
+          where: and(
+            eq(lines.athleteId, athleteId),
+            eq(lines.statId, statId),
+            eq(lines.matchupId, matchup?.id!),
+          ),
+        });
+        if (possibleExistingLine) {
+          console.warn(
+            `Line already exists for ${matchup?.espnEventId} ${athleteId} ${statId}`,
+          );
+          continue;
+        }
+
         formattedLines.push({
           statId: statId,
           athleteId: athleteId,

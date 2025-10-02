@@ -162,7 +162,7 @@ export default function MockMainPage() {
   return (
     <div className="bg-gray-900 min-h-screen">
       <TopNavigation {...mockProps} />
-      <FilterBar />
+      {/* <FilterBar /> */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">

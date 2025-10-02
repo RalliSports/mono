@@ -58,7 +58,7 @@ export default function MainFeedPage() {
       />
 
       {/* Filters and Search */}
-      <FilterBar />
+      {/* <FilterBar /> */}
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts */}
