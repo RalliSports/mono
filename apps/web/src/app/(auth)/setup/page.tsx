@@ -150,23 +150,21 @@ export default function Setup() {
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-700">Profile Picture (Optional)</p>
               <UploadButton
-                {...({
-                  endpoint: "profilePicture",
-                  input: { sessionId: session || '' },
-                  onClientUploadComplete: (res: { url: string }[]) => {
-                    if (res?.[0]?.url) {
-                      setAvatar(res[0].url)
-                    }
-                  },
-                  onUploadError: () => {
-                    setError('Failed to upload image. Please try again.')
-                  },
-                  appearance: {
-                    button:
-                      'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white text-sm px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 border-none cursor-pointer',
-                    allowedContent: 'text-xs text-gray-500 mt-1',
+                endpoint="profilePicture"
+                input={{ sessionId: session || '' }}
+                onClientUploadComplete={(res: { url: string }[]) => {
+                  if (res?.[0]?.url) {
+                    setAvatar(res[0].url)
                   }
-                } as Record<string, unknown>)}
+                }}
+                onUploadError={() => {
+                  setError('Failed to upload image. Please try again.')
+                }}
+                appearance={{
+                  button:
+                    'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white text-sm px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 border-none cursor-pointer',
+                  allowedContent: 'text-xs text-gray-500 mt-1',
+                }}
               />
             </div>
           </div>
