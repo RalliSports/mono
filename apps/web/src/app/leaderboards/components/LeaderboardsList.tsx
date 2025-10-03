@@ -1,127 +1,8 @@
 import Image from 'next/image'
 import { LeaderboardFilter, SportFilter } from '../page'
-
-interface LeaderboardPlayer {
-  id: string
-  username: string
-  avatar: string
-  rank: number
-  totalWins: number
-  totalEarnings: number
-  winRate: number
-  gamesPlayed: number
-  favoriteeSport: string
-  recentActivity: string
-  achievements: string[]
-}
-
-// Mock leaderboard data
-const mockLeaderboardData: LeaderboardPlayer[] = [
-  {
-    id: '1',
-    username: 'parlayking99',
-    avatar: '/images/pfp-1.svg',
-    rank: 1,
-    totalWins: 287,
-    totalEarnings: 45650,
-    winRate: 78.3,
-    gamesPlayed: 367,
-    favoriteeSport: 'NFL',
-    recentActivity: '2 hours ago',
-    achievements: ['🏆 Top Earner', '🔥 Win Streak Champion'],
-  },
-  {
-    id: '2',
-    username: 'sportsguru',
-    avatar: '/images/pfp-2.svg',
-    rank: 2,
-    totalWins: 251,
-    totalEarnings: 38920,
-    winRate: 74.6,
-    gamesPlayed: 336,
-    favoriteeSport: 'NBA',
-    recentActivity: '5 hours ago',
-    achievements: ['🎯 Accuracy Master', '💎 VIP Player'],
-  },
-  {
-    id: '3',
-    username: 'betwhisperer',
-    avatar: '/images/pfp-3.svg',
-    rank: 3,
-    totalWins: 234,
-    totalEarnings: 35470,
-    winRate: 71.2,
-    gamesPlayed: 329,
-    favoriteeSport: 'MLB',
-    recentActivity: '1 day ago',
-    achievements: ['📈 Consistent Performer', '⚡ Quick Draw'],
-  },
-  {
-    id: '4',
-    username: 'rallipro2024',
-    avatar: '/images/pfp-4.svg',
-    rank: 4,
-    totalWins: 198,
-    totalEarnings: 29850,
-    winRate: 69.8,
-    gamesPlayed: 284,
-    favoriteeSport: 'NHL',
-    recentActivity: '3 hours ago',
-    achievements: ['🥇 Monthly Winner', '🎪 Risk Taker'],
-  },
-  {
-    id: '5',
-    username: 'cryptosports',
-    avatar: '/images/pfp-1.svg',
-    rank: 5,
-    totalWins: 189,
-    totalEarnings: 27320,
-    winRate: 67.5,
-    gamesPlayed: 280,
-    favoriteeSport: 'NFL',
-    recentActivity: '6 hours ago',
-    achievements: ['💰 Big Spender', '🏅 Veteran Player'],
-  },
-  {
-    id: '6',
-    username: 'gamechangr',
-    avatar: '/images/pfp-2.svg',
-    rank: 6,
-    totalWins: 176,
-    totalEarnings: 24890,
-    winRate: 65.9,
-    gamesPlayed: 267,
-    favoriteeSport: 'NBA',
-    recentActivity: '4 hours ago',
-    achievements: ['🌟 Rising Star', '🔥 Hot Streak'],
-  },
-  {
-    id: '7',
-    username: 'statmaster',
-    avatar: '/images/pfp-3.svg',
-    rank: 7,
-    totalWins: 163,
-    totalEarnings: 22150,
-    winRate: 64.2,
-    gamesPlayed: 254,
-    favoriteeSport: 'MLB',
-    recentActivity: '8 hours ago',
-    achievements: ['📊 Analytics Pro', '🎯 Precision Player'],
-  },
-  {
-    id: '8',
-    username: 'luckylegend',
-    avatar: '/images/pfp-4.svg',
-    rank: 8,
-    totalWins: 152,
-    totalEarnings: 19680,
-    winRate: 62.8,
-    gamesPlayed: 242,
-    favoriteeSport: 'NHL',
-    recentActivity: '1 hour ago',
-    achievements: ['🍀 Lucky Charm', '⭐ Fan Favorite'],
-  },
-]
+import { useLeaderboard } from '@/hooks/api/use-leaderboard'
+import { LeaderboardSortBy } from '@/hooks/api/types'
+import LottieLoading from '@/components/ui/lottie-loading'
 
 interface LeaderboardsListProps {
   filter: LeaderboardFilter
@@ -129,29 +10,45 @@ interface LeaderboardsListProps {
 }
 
 export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsListProps) {
-  // Filter and sort data based on selected filters
-  const getSortedData = () => {
-    let filteredData = [...mockLeaderboardData]
-
-    // Filter by sport if sports filter is active
-    if (filter === 'sports' && sportFilter !== 'all') {
-      filteredData = filteredData.filter((player) => player.favoriteeSport.toLowerCase() === sportFilter.toUpperCase())
-    }
-
-    // Sort based on filter type
+  const getSortBy = (): LeaderboardSortBy => {
     switch (filter) {
       case 'wins':
-        return filteredData.sort((a, b) => b.totalWins - a.totalWins)
+        return 'winRate'
       case 'earnings':
-        return filteredData.sort((a, b) => b.totalEarnings - a.totalEarnings)
-      case 'sports':
-      case 'overall':
+        return 'totalWinnings'
       default:
-        return filteredData.sort((a, b) => a.rank - b.rank)
+        return 'netProfit'
     }
   }
 
-  const sortedPlayers = getSortedData()
+  const sortBy = getSortBy()
+  const { data, isLoading, error } = useLeaderboard(1, 50, sortBy)
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="flex items-center justify-center py-12">
+          <LottieLoading message="Loading leaderboard..." />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <h3 className="text-white font-semibold text-lg mb-2">Error loading leaderboard</h3>
+          <p className="text-slate-400">Please try again later.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const sortedPlayers = data?.users || []
 
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return '🥇'
@@ -224,7 +121,7 @@ export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsLi
                   </div>
                   <div className="flex items-center space-x-4 mt-1">
                     <span className="text-slate-400 text-sm">
-                      {player.favoriteeSport} • {player.recentActivity}
+                      {player.gamesPlayed} games played • {player.winPercentage.toFixed(1)}% win rate
                     </span>
                   </div>
                 </div>
@@ -236,19 +133,21 @@ export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsLi
                 <div className="text-right">
                   {filter === 'wins' && (
                     <>
-                      <div className="text-lg font-bold text-[#00CED1]">{player.totalWins}</div>
+                      <div className="text-lg font-bold text-[#00CED1]">{player.gamesWon}</div>
                       <div className="text-xs text-slate-400">wins</div>
                     </>
                   )}
                   {filter === 'earnings' && (
                     <>
-                      <div className="text-lg font-bold text-emerald-400">${player.totalEarnings.toLocaleString()}</div>
+                      <div className="text-lg font-bold text-emerald-400">
+                        ${player.totalAmountWon.toLocaleString()}
+                      </div>
                       <div className="text-xs text-slate-400">earned</div>
                     </>
                   )}
                   {(filter === 'overall' || filter === 'sports') && (
                     <>
-                      <div className="text-lg font-bold text-[#FFAB91]">{player.winRate}%</div>
+                      <div className="text-lg font-bold text-[#FFAB91]">{player.winPercentage.toFixed(1)}%</div>
                       <div className="text-xs text-slate-400">win rate</div>
                     </>
                   )}
@@ -257,10 +156,10 @@ export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsLi
                 {/* Secondary stats */}
                 <div className="text-right hidden sm:block">
                   <div className="text-sm text-slate-300">
-                    <span className="text-emerald-400 font-medium">${player.totalEarnings.toLocaleString()}</span>
+                    <span className="text-emerald-400 font-medium">${player.totalAmountWon.toLocaleString()}</span>
                   </div>
                   <div className="text-sm text-slate-300">
-                    <span className="text-[#00CED1] font-medium">{player.totalWins}</span> wins
+                    <span className="text-[#00CED1] font-medium">{player.gamesWon}</span> wins
                   </div>
                 </div>
 
