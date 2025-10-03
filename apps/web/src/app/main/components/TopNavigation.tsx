@@ -1,5 +1,5 @@
 import Wordmark from '@/components/wordmark'
-import BalanceDisplay from './BalanceDisplay'
+import BalanceDisplay from '@/components/BalanceDisplay'
 import ProfileButton from './ProfileButton'
 import Logo from '@/components/logo'
 
