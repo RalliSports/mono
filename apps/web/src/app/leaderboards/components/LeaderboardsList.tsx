@@ -1,15 +1,13 @@
 import Image from 'next/image'
-import { LeaderboardFilter, SportFilter } from '../page'
-import { useLeaderboard } from '@/hooks/api/use-leaderboard'
-import { LeaderboardSortBy } from '@/hooks/api/types'
+import { LeaderboardFilter } from '../page'
+import { useLeaderboard, LeaderboardSortBy } from '@/hooks/api/use-leaderboard'
 import LottieLoading from '@/components/ui/lottie-loading'
 
 interface LeaderboardsListProps {
   filter: LeaderboardFilter
-  sportFilter: SportFilter
 }
 
-export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsListProps) {
+export default function LeaderboardsList({ filter }: LeaderboardsListProps) {
   const getSortBy = (): LeaderboardSortBy => {
     switch (filter) {
       case 'wins':
@@ -63,8 +61,6 @@ export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsLi
         return 'Top Winners'
       case 'earnings':
         return 'Highest Earners'
-      case 'sports':
-        return `${sportFilter === 'all' ? 'All Sports' : sportFilter.toUpperCase()} Rankings`
       default:
         return 'Overall Rankings'
     }
@@ -145,7 +141,7 @@ export default function LeaderboardsList({ filter, sportFilter }: LeaderboardsLi
                       <div className="text-xs text-slate-400">earned</div>
                     </>
                   )}
-                  {(filter === 'overall' || filter === 'sports') && (
+                  {filter === 'overall' && (
                     <>
                       <div className="text-lg font-bold text-[#FFAB91]">{player.winPercentage.toFixed(1)}%</div>
                       <div className="text-xs text-slate-400">win rate</div>
