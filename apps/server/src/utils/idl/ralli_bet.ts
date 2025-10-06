@@ -1,138 +1,297 @@
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/ralli_bet.json`.
- */
-export type RalliBet = {
-  address: '3P2wnyoxACHcnUg3sVfSQA1Fwz4ssGKcQ9b6XXZC2vcG'
-  metadata: {
-    name: 'ralliBet'
-    version: '0.1.0'
-    spec: '0.1.0'
-    description: 'Created with Anchor'
-  }
-  instructions: [
+{
+  "address": "CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN",
+  "metadata": {
+    "name": "ralli_bet",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
     {
-      name: 'cancelGame'
-      discriminator: [121, 194, 154, 118, 103, 235, 149, 52]
-      accounts: [
+      "name": "calculate_correct",
+      "discriminator": [
+        70,
+        99,
+        189,
+        145,
+        120,
+        54,
+        25,
+        190
+      ],
+      "accounts": [
         {
-          name: 'game'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [103, 97, 109, 101]
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'game.game_id'
-                account: 'game'
-              },
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
             ]
           }
         },
         {
-          name: 'gameEscrow'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [101, 115, 99, 114, 111, 119]
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
               },
               {
-                kind: 'account'
-                path: 'game'
+                "kind": "account",
+                "path": "game"
               },
+              {
+                "kind": "account",
+                "path": "bet.player",
+                "account": "Bet"
+              }
             ]
           }
-        },
-        {
-          name: 'gameResult'
-          pda: {
-            seeds: [
-              {
-                kind: 'const'
-                value: [103, 97, 109, 101, 95, 114, 101, 115, 117, 108, 116]
-              },
-              {
-                kind: 'account'
-                path: 'game'
-              },
-            ]
-          }
-        },
-        {
-          name: 'adminOrUser'
-          writable: true
-          signer: true
-        },
-        {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
-        },
-      ]
-      args: []
+        }
+      ],
+      "args": []
     },
     {
-      name: 'createGame'
-      discriminator: [124, 69, 75, 66, 184, 220, 72, 206]
-      accounts: [
+      "name": "calculate_winners",
+      "discriminator": [
+        140,
+        11,
+        52,
+        209,
+        154,
+        217,
+        87,
+        194
+      ],
+      "accounts": [
         {
-          name: 'creator'
-          writable: true
-          signer: true
+          "name": "admin",
+          "writable": true,
+          "signer": true
         },
         {
-          name: 'game'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [103, 97, 109, 101]
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
               {
-                kind: 'arg'
-                path: 'gameId'
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_game",
+      "discriminator": [
+        121,
+        194,
+        154,
+        118,
+        103,
+        235,
+        149,
+        52
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
             ]
           }
         },
         {
-          name: 'gameEscrow'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [101, 115, 99, 114, 111, 119]
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
-                kind: 'account'
-                path: 'game'
-              },
+                "kind": "account",
+                "path": "game"
+              }
             ]
           }
         },
         {
-          name: 'mint'
-        },
-        {
-          name: 'gameVault'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_result",
+          "pda": {
+            "seeds": [
               {
-                kind: 'account'
-                path: 'game'
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  95,
+                  114,
+                  101,
+                  115,
+                  117,
+                  108,
+                  116
+                ]
               },
               {
-                kind: 'const'
-                value: [
+                "kind": "account",
+                "path": "game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_or_user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_game",
+      "discriminator": [
+        124,
+        69,
+        75,
+        66,
+        184,
+        220,
+        72,
+        206
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "game_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "game_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "game"
+              },
+              {
+                "kind": "const",
+                "value": [
                   6,
                   221,
                   246,
@@ -164,17 +323,17 @@ export type RalliBet = {
                   126,
                   255,
                   0,
-                  169,
+                  169
                 ]
               },
               {
-                kind: 'account'
-                path: 'mint'
-              },
-            ]
-            program: {
-              kind: 'const'
-              value: [
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
                 140,
                 151,
                 37,
@@ -206,158 +365,193 @@ export type RalliBet = {
                 219,
                 233,
                 248,
-                89,
+                89
               ]
             }
           }
         },
         {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         },
         {
-          name: 'tokenProgram'
+          "name": "token_program"
         },
         {
-          name: 'associatedTokenProgram'
-          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-        },
-      ]
-      args: [
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
         {
-          name: 'gameId'
-          type: 'u64'
-        },
-        {
-          name: 'maxUsers'
-          type: 'u8'
+          "name": "game_id",
+          "type": "u64"
         },
         {
-          name: 'entryFee'
-          type: 'u64'
+          "name": "max_users",
+          "type": "u8"
         },
         {
-          name: 'numberOfLines'
-          type: 'u8'
+          "name": "entry_fee",
+          "type": "u64"
         },
         {
-          name: 'admin'
-          type: {
-            option: 'pubkey'
+          "name": "number_of_lines",
+          "type": "u8"
+        },
+        {
+          "name": "admin",
+          "type": {
+            "option": "pubkey"
           }
-        },
-      ]
-    },
-    {
-      name: 'createLine'
-      discriminator: [252, 151, 106, 66, 40, 17, 105, 73]
-      accounts: [
-        {
-          name: 'admin'
-          writable: true
-          signer: true
-        },
-        {
-          name: 'line'
-          writable: true
-          pda: {
-            seeds: [
-              {
-                kind: 'const'
-                value: [108, 105, 110, 101]
-              },
-              {
-                kind: 'arg'
-                path: 'lineSeed'
-              },
-            ]
-          }
-        },
-        {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
-        },
-      ]
-      args: [
-        {
-          name: 'lineSeed'
-          type: 'u64'
-        },
-        {
-          name: 'statId'
-          type: 'u16'
-        },
-        {
-          name: 'predictedValue'
-          type: 'f64'
-        },
-        {
-          name: 'athleteId'
-          type: 'u64'
-        },
-        {
-          name: 'startsAt'
-          type: 'i64'
-        },
+        }
       ]
     },
     {
-      name: 'joinGame'
-      discriminator: [107, 112, 18, 38, 56, 173, 60, 128]
-      accounts: [
+      "name": "create_line",
+      "discriminator": [
+        252,
+        151,
+        106,
+        66,
+        40,
+        17,
+        105,
+        73
+      ],
+      "accounts": [
         {
-          name: 'user'
-          writable: true
-          signer: true
+          "name": "admin",
+          "writable": true,
+          "signer": true
         },
         {
-          name: 'game'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "line",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [103, 97, 109, 101]
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  110,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'game.game_id'
-                account: 'game'
-              },
+                "kind": "arg",
+                "path": "line_seed"
+              }
             ]
           }
         },
         {
-          name: 'gameEscrow'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "line_seed",
+          "type": "u64"
+        },
+        {
+          "name": "stat_id",
+          "type": "u16"
+        },
+        {
+          "name": "predicted_value",
+          "type": "f64"
+        },
+        {
+          "name": "athlete_id",
+          "type": "u64"
+        },
+        {
+          "name": "starts_at",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "join_game",
+      "discriminator": [
+        107,
+        112,
+        18,
+        38,
+        56,
+        173,
+        60,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [101, 115, 99, 114, 111, 119]
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'game'
-              },
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
             ]
           }
         },
         {
-          name: 'mint'
-        },
-        {
-          name: 'userTokens'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'account'
-                path: 'user'
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
-                kind: 'const'
-                value: [
+                "kind": "account",
+                "path": "game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "user_tokens",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
                   6,
                   221,
                   246,
@@ -389,17 +583,17 @@ export type RalliBet = {
                   126,
                   255,
                   0,
-                  169,
+                  169
                 ]
               },
               {
-                kind: 'account'
-                path: 'mint'
-              },
-            ]
-            program: {
-              kind: 'const'
-              value: [
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
                 140,
                 151,
                 37,
@@ -431,23 +625,23 @@ export type RalliBet = {
                 219,
                 233,
                 248,
-                89,
+                89
               ]
             }
           }
         },
         {
-          name: 'gameVault'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'account'
-                path: 'game'
+                "kind": "account",
+                "path": "game"
               },
               {
-                kind: 'const'
-                value: [
+                "kind": "const",
+                "value": [
                   6,
                   221,
                   246,
@@ -479,17 +673,17 @@ export type RalliBet = {
                   126,
                   255,
                   0,
-                  169,
+                  169
                 ]
               },
               {
-                kind: 'account'
-                path: 'mint'
-              },
-            ]
-            program: {
-              kind: 'const'
-              value: [
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
                 140,
                 151,
                 37,
@@ -521,82 +715,103 @@ export type RalliBet = {
                 219,
                 233,
                 248,
-                89,
+                89
               ]
             }
           }
         },
         {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         },
         {
-          name: 'tokenProgram'
+          "name": "token_program"
         },
         {
-          name: 'associatedTokenProgram'
-          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-        },
-      ]
-      args: []
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": []
     },
     {
-      name: 'resolveGame'
-      discriminator: [25, 119, 183, 229, 196, 69, 169, 79]
-      accounts: [
+      "name": "resolve_game",
+      "discriminator": [
+        25,
+        119,
+        183,
+        229,
+        196,
+        69,
+        169,
+        79
+      ],
+      "accounts": [
         {
-          name: 'admin'
-          writable: true
-          signer: true
+          "name": "admin",
+          "writable": true,
+          "signer": true
         },
         {
-          name: 'game'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [103, 97, 109, 101]
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'game.game_id'
-                account: 'game'
-              },
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
             ]
           }
         },
         {
-          name: 'gameEscrow'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [101, 115, 99, 114, 111, 119]
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
-                kind: 'account'
-                path: 'game'
-              },
+                "kind": "account",
+                "path": "game"
+              }
             ]
           }
         },
         {
-          name: 'mint'
+          "name": "mint"
         },
         {
-          name: 'gameVault'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'account'
-                path: 'game'
+                "kind": "account",
+                "path": "game"
               },
               {
-                kind: 'const'
-                value: [
+                "kind": "const",
+                "value": [
                   6,
                   221,
                   246,
@@ -628,17 +843,17 @@ export type RalliBet = {
                   126,
                   255,
                   0,
-                  169,
+                  169
                 ]
               },
               {
-                kind: 'account'
-                path: 'mint'
-              },
-            ]
-            program: {
-              kind: 'const'
-              value: [
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
                 140,
                 151,
                 37,
@@ -670,27 +885,27 @@ export type RalliBet = {
                 219,
                 233,
                 248,
-                89,
+                89
               ]
             }
           }
         },
         {
-          name: 'treasury'
-          writable: true
+          "name": "treasury",
+          "writable": true
         },
         {
-          name: 'treasuryVault'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "treasury_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'account'
-                path: 'treasury'
+                "kind": "account",
+                "path": "treasury"
               },
               {
-                kind: 'const'
-                value: [
+                "kind": "const",
+                "value": [
                   6,
                   221,
                   246,
@@ -722,17 +937,17 @@ export type RalliBet = {
                   126,
                   255,
                   0,
-                  169,
+                  169
                 ]
               },
               {
-                kind: 'account'
-                path: 'mint'
-              },
-            ]
-            program: {
-              kind: 'const'
-              value: [
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
                 140,
                 151,
                 37,
@@ -764,886 +979,1089 @@ export type RalliBet = {
                 219,
                 233,
                 248,
-                89,
+                89
               ]
             }
           }
         },
         {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         },
         {
-          name: 'tokenProgram'
+          "name": "token_program"
         },
         {
-          name: 'associatedTokenProgram'
-          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-        },
-      ]
-      args: [
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
         {
-          name: 'feePercentage'
-          type: 'u16'
-        },
-        {
-          name: 'numberOfWinnersExpected'
-          type: 'u16'
-        },
+          "name": "fee_percentage",
+          "type": "u16"
+        }
       ]
     },
     {
-      name: 'resolveLine'
-      discriminator: [249, 172, 97, 191, 184, 158, 240, 145]
-      accounts: [
+      "name": "resolve_line",
+      "discriminator": [
+        249,
+        172,
+        97,
+        191,
+        184,
+        158,
+        240,
+        145
+      ],
+      "accounts": [
         {
-          name: 'admin'
-          writable: true
-          signer: true
+          "name": "admin",
+          "writable": true,
+          "signer": true
         },
         {
-          name: 'line'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "line",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [108, 105, 110, 101]
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  110,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'line.seed'
-                account: 'line'
-              },
+                "kind": "account",
+                "path": "line.seed",
+                "account": "Line"
+              }
             ]
           }
-        },
-      ]
-      args: [
+        }
+      ],
+      "args": [
         {
-          name: 'result'
-          type: {
-            defined: {
-              name: 'direction'
+          "name": "result",
+          "type": {
+            "defined": {
+              "name": "Direction"
             }
           }
         },
         {
-          name: 'actualValue'
-          type: 'f64'
+          "name": "actual_value",
+          "type": "f64"
         },
         {
-          name: 'shouldRefundBettors'
-          type: 'bool'
-        },
+          "name": "should_refund_bettors",
+          "type": "bool"
+        }
       ]
     },
     {
-      name: 'submitBet'
-      discriminator: [1, 3, 52, 11, 77, 136, 116, 139]
-      accounts: [
+      "name": "submit_bet",
+      "discriminator": [
+        1,
+        3,
+        52,
+        11,
+        77,
+        136,
+        116,
+        139
+      ],
+      "accounts": [
         {
-          name: 'user'
-          writable: true
-          signer: true
+          "name": "user",
+          "writable": true,
+          "signer": true
         },
         {
-          name: 'game'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [103, 97, 109, 101]
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'game.game_id'
-                account: 'game'
-              },
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
             ]
           }
         },
         {
-          name: 'bet'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [98, 101, 116]
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
               },
               {
-                kind: 'account'
-                path: 'game'
+                "kind": "account",
+                "path": "game"
               },
               {
-                kind: 'account'
-                path: 'user'
-              },
+                "kind": "account",
+                "path": "user"
+              }
             ]
           }
         },
         {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
-        },
-      ]
-      args: [
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
         {
-          name: 'picks'
-          type: {
-            vec: {
-              defined: {
-                name: 'pick'
+          "name": "picks",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "Pick"
               }
             }
           }
-        },
+        }
       ]
     },
     {
-      name: 'withdrawSubmission'
-      discriminator: [242, 62, 195, 3, 192, 241, 52, 174]
-      accounts: [
+      "name": "update_line",
+      "discriminator": [
+        232,
+        80,
+        58,
+        171,
+        8,
+        177,
+        146,
+        160
+      ],
+      "accounts": [
         {
-          name: 'game'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "line",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [103, 97, 109, 101]
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  110,
+                  101
+                ]
               },
               {
-                kind: 'account'
-                path: 'game.game_id'
-                account: 'game'
+                "kind": "arg",
+                "path": "line_seed"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "line_seed",
+          "type": "u64"
+        },
+        {
+          "name": "new_predicted_value",
+          "type": "f64"
+        },
+        {
+          "name": "should_refund_bettors",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "withdraw_submission",
+      "discriminator": [
+        242,
+        62,
+        195,
+        3,
+        192,
+        241,
+        52,
+        174
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
               },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
             ]
           }
         },
         {
-          name: 'gameEscrow'
-          writable: true
-          pda: {
-            seeds: [
+          "name": "game_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
               {
-                kind: 'const'
-                value: [101, 115, 99, 114, 111, 119]
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
-                kind: 'account'
-                path: 'game'
-              },
+                "kind": "account",
+                "path": "game"
+              }
             ]
           }
         },
         {
-          name: 'user'
-          writable: true
-          signer: true
+          "name": "user",
+          "writable": true,
+          "signer": true
         },
         {
-          name: 'newEarliestLine'
-          docs: ['Optional: Line account with the new earliest start time (if provided)']
-          optional: true
+          "name": "new_earliest_line",
+          "docs": [
+            "Optional: Line account with the new earliest start time (if provided)"
+          ],
+          "optional": true
         },
         {
-          name: 'systemProgram'
-          address: '11111111111111111111111111111111'
-        },
-      ]
-      args: [
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
         {
-          name: 'newFirstLineStartsAt'
-          type: {
-            option: 'i64'
+          "name": "new_first_line_starts_at",
+          "type": {
+            "option": "i64"
           }
-        },
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Bet",
+      "discriminator": [
+        147,
+        23,
+        35,
+        59,
+        15,
+        75,
+        155,
+        32
       ]
     },
-  ]
-  accounts: [
     {
-      name: 'bet'
-      discriminator: [147, 23, 35, 59, 15, 75, 155, 32]
+      "name": "Game",
+      "discriminator": [
+        27,
+        90,
+        166,
+        125,
+        74,
+        100,
+        121,
+        18
+      ]
     },
     {
-      name: 'game'
-      discriminator: [27, 90, 166, 125, 74, 100, 121, 18]
+      "name": "GameEscrow",
+      "discriminator": [
+        37,
+        195,
+        2,
+        234,
+        81,
+        128,
+        248,
+        133
+      ]
     },
     {
-      name: 'gameEscrow'
-      discriminator: [37, 195, 2, 234, 81, 128, 248, 133]
+      "name": "GameResult",
+      "discriminator": [
+        154,
+        160,
+        133,
+        130,
+        0,
+        179,
+        92,
+        10
+      ]
     },
     {
-      name: 'gameResult'
-      discriminator: [154, 160, 133, 130, 0, 179, 92, 10]
+      "name": "Line",
+      "discriminator": [
+        15,
+        73,
+        125,
+        153,
+        180,
+        13,
+        80,
+        187
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "GameFull",
+      "msg": "Game is full"
+    },
+    {
+      "code": 6001,
+      "name": "GameNotOpen",
+      "msg": "Game is not open for joining"
+    },
+    {
+      "code": 6002,
+      "name": "GameNotLocked",
+      "msg": "Game is not locked"
+    },
+    {
+      "code": 6003,
+      "name": "GameAlreadyResolved",
+      "msg": "Game is already resolved"
+    },
+    {
+      "code": 6004,
+      "name": "UserAlreadyJoined",
+      "msg": "User already joined"
     },
     {
-      name: 'line'
-      discriminator: [15, 73, 125, 153, 180, 13, 80, 187]
+      "code": 6005,
+      "name": "UserNotInGame",
+      "msg": "User not in game"
     },
-  ]
-  errors: [
     {
-      code: 6000
-      name: 'gameFull'
-      msg: 'Game is full'
+      "code": 6006,
+      "name": "InvalidPickCount",
+      "msg": "Invalid pick count (must be between 2 and 6)"
     },
     {
-      code: 6001
-      name: 'gameNotOpen'
-      msg: 'Game is not open for joining'
+      "code": 6007,
+      "name": "DuplicateStatInPicks",
+      "msg": "Duplicate stat in picks"
     },
     {
-      code: 6002
-      name: 'gameNotLocked'
-      msg: 'Game is not locked'
+      "code": 6008,
+      "name": "BetAlreadySubmitted",
+      "msg": "Bet already submitted"
     },
     {
-      code: 6003
-      name: 'gameAlreadyResolved'
-      msg: 'Game is already resolved'
+      "code": 6009,
+      "name": "InvalidLineStartTime",
+      "msg": "Invalid line start time - must be in the future"
     },
     {
-      code: 6004
-      name: 'userAlreadyJoined'
-      msg: 'User already joined'
+      "code": 6010,
+      "name": "LineStartTimeMismatch",
+      "msg": "Line start time does not match provided line account"
     },
     {
-      code: 6005
-      name: 'userNotInGame'
-      msg: 'User not in game'
+      "code": 6011,
+      "name": "LineNotInGame",
+      "msg": "Line is not part of this game"
     },
     {
-      code: 6006
-      name: 'invalidPickCount'
-      msg: 'Invalid pick count (must be between 2 and 6)'
+      "code": 6012,
+      "name": "UnauthorizedLineCreation",
+      "msg": "Unauthorized to create lines - admin only"
     },
     {
-      code: 6007
-      name: 'duplicateStatInPicks'
-      msg: 'Duplicate stat in picks'
+      "code": 6013,
+      "name": "GameNotOpenforLine",
+      "msg": "Game is not open for line creation"
     },
     {
-      code: 6008
-      name: 'betAlreadySubmitted'
-      msg: 'Bet already submitted'
+      "code": 6014,
+      "name": "MaxLinesReached",
+      "msg": "Maximum lines per game reached"
     },
     {
-      code: 6009
-      name: 'invalidLineStartTime'
-      msg: 'Invalid line start time - must be in the future'
+      "code": 6015,
+      "name": "UnauthorizedLineResolution",
+      "msg": "Unauthorized to resolve line"
     },
     {
-      code: 6010
-      name: 'lineStartTimeMismatch'
-      msg: 'Line start time does not match provided line account'
+      "code": 6016,
+      "name": "LineAlreadyResolved",
+      "msg": "Line has already been resolved"
     },
     {
-      code: 6011
-      name: 'lineNotInGame'
-      msg: 'Line is not part of this game'
+      "code": 6017,
+      "name": "LineShouldBeRefunded",
+      "msg": "Line should be refunded"
     },
     {
-      code: 6012
-      name: 'unauthorizedLineCreation'
-      msg: 'Unauthorized to create lines - admin only'
+      "code": 6018,
+      "name": "LineNotStarted",
+      "msg": "Line has not started yet"
     },
     {
-      code: 6013
-      name: 'gameNotOpenforLine'
-      msg: 'Game is not open for line creation'
+      "code": 6019,
+      "name": "InvalidPredictedValue",
+      "msg": "Invalid predicted value - must be greater than 0"
     },
     {
-      code: 6014
-      name: 'maxLinesReached'
-      msg: 'Maximum lines per game reached'
+      "code": 6020,
+      "name": "DirectionMismatch",
+      "msg": "Direction has a mismatch!"
     },
     {
-      code: 6015
-      name: 'unauthorizedLineResolution'
-      msg: 'Unauthorized to resolve line'
+      "code": 6021,
+      "name": "InvalidStatId",
+      "msg": "Invalid stat ID - must be greater than 0"
     },
     {
-      code: 6016
-      name: 'lineAlreadyResolved'
-      msg: 'Line has already been resolved'
+      "code": 6022,
+      "name": "NotEnoughUsers",
+      "msg": "Not enough users to lock game"
     },
     {
-      code: 6017
-      name: 'lineShouldBeRefunded'
-      msg: 'Line should be refunded'
+      "code": 6023,
+      "name": "OnlyCreator",
+      "msg": "Only game creator can perform this action"
     },
     {
-      code: 6018
-      name: 'lineNotStarted'
-      msg: 'Line has not started yet'
+      "code": 6024,
+      "name": "GameMustBeOpen",
+      "msg": "Game must be open to cancel"
     },
     {
-      code: 6019
-      name: 'invalidPredictedValue'
-      msg: 'Invalid predicted value - must be greater than 0'
+      "code": 6025,
+      "name": "CannotJoinOwnGame",
+      "msg": "Cannot join own game"
     },
     {
-      code: 6020
-      name: 'directionMismatch'
-      msg: 'Direction has a mismatch!'
+      "code": 6026,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
     },
     {
-      code: 6021
-      name: 'invalidStatId'
-      msg: 'Invalid stat ID - must be greater than 0'
+      "code": 6027,
+      "name": "GameAlreadyLocked",
+      "msg": "Game already locked"
     },
     {
-      code: 6022
-      name: 'notEnoughUsers'
-      msg: 'Not enough users to lock game'
+      "code": 6028,
+      "name": "InvalidStatResult",
+      "msg": "Invalid stat result"
     },
     {
-      code: 6023
-      name: 'onlyCreator'
-      msg: 'Only game creator can perform this action'
+      "code": 6029,
+      "name": "AllUsersMustSubmitBets",
+      "msg": "All users must submit bets before locking"
     },
     {
-      code: 6024
-      name: 'gameMustBeOpen'
-      msg: 'Game must be open to cancel'
+      "code": 6030,
+      "name": "InvalidEntryFee",
+      "msg": "Invalid entry fee"
     },
     {
-      code: 6025
-      name: 'cannotJoinOwnGame'
-      msg: 'Cannot join own game'
+      "code": 6031,
+      "name": "AccountNotWritable",
+      "msg": "Invalid account count for operation"
     },
     {
-      code: 6026
-      name: 'insufficientFunds'
-      msg: 'Insufficient funds'
+      "code": 6032,
+      "name": "AccountMismatch",
+      "msg": "Account mismatch"
     },
     {
-      code: 6027
-      name: 'gameAlreadyLocked'
-      msg: 'Game already locked'
+      "code": 6033,
+      "name": "UnauthorizedRefund",
+      "msg": "Unauthorized refund action"
     },
     {
-      code: 6028
-      name: 'invalidStatResult'
-      msg: 'Invalid stat result'
+      "code": 6034,
+      "name": "GameNotRefundable",
+      "msg": "Game is not refundable"
     },
     {
-      code: 6029
-      name: 'allUsersMustSubmitBets'
-      msg: 'All users must submit bets before locking'
+      "code": 6035,
+      "name": "GameAlreadyCancelled",
+      "msg": "Game already cancelled"
     },
     {
-      code: 6030
-      name: 'invalidEntryFee'
-      msg: 'Invalid entry fee'
+      "code": 6036,
+      "name": "GameIsFull",
+      "msg": "Game is full"
     },
     {
-      code: 6031
-      name: 'accountNotWritable'
-      msg: 'Invalid account count for operation'
+      "code": 6037,
+      "name": "GameCannotBeCancelled",
+      "msg": "Game cannot be cancelled"
     },
     {
-      code: 6032
-      name: 'accountMismatch'
-      msg: 'Account mismatch'
+      "code": 6038,
+      "name": "NoUsersToRefund",
+      "msg": "No users to refund"
     },
     {
-      code: 6033
-      name: 'unauthorizedRefund'
-      msg: 'Unauthorized refund action'
+      "code": 6039,
+      "name": "InvalidAccountCount",
+      "msg": "Invalid account count for operation"
     },
     {
-      code: 6034
-      name: 'gameNotRefundable'
-      msg: 'Game is not refundable'
+      "code": 6040,
+      "name": "InsufficientEscrowBalance",
+      "msg": "Insufficient balance in escrow to refund users"
     },
     {
-      code: 6035
-      name: 'gameAlreadyCancelled'
-      msg: 'Game already cancelled'
+      "code": 6041,
+      "name": "EscrowAmountMismatch",
+      "msg": "Escrow amount mismatch"
     },
     {
-      code: 6036
-      name: 'gameIsFull'
-      msg: 'Game is full'
+      "code": 6042,
+      "name": "InvalidAccountOwner",
+      "msg": "Invalid account owner"
     },
     {
-      code: 6037
-      name: 'gameCannotBeCancelled'
-      msg: 'Game cannot be cancelled'
+      "code": 6043,
+      "name": "EscrowGameMismatch",
+      "msg": "Escrow game mismatch"
     },
     {
-      code: 6038
-      name: 'noUsersToRefund'
-      msg: 'No users to refund'
+      "code": 6044,
+      "name": "RefundWindowExpired",
+      "msg": "Refund window has expired"
     },
     {
-      code: 6039
-      name: 'invalidAccountCount'
-      msg: 'Invalid account count for operation'
+      "code": 6045,
+      "name": "InvalidGameCreationTime",
+      "msg": "Invalid game creation time"
     },
     {
-      code: 6040
-      name: 'insufficientEscrowBalance'
-      msg: 'Insufficient balance in escrow to refund users'
+      "code": 6046,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow occurred"
     },
     {
-      code: 6041
-      name: 'escrowAmountMismatch'
-      msg: 'Escrow amount mismatch'
+      "code": 6047,
+      "name": "InvalidMaxUsers",
+      "msg": "Invalid max users"
     },
     {
-      code: 6042
-      name: 'invalidAccountOwner'
-      msg: 'Invalid account owner'
+      "code": 6048,
+      "name": "GameResultMismatch",
+      "msg": "Game result mismatch"
     },
     {
-      code: 6043
-      name: 'escrowGameMismatch'
-      msg: 'Escrow game mismatch'
+      "code": 6049,
+      "name": "DuplicateUserAccount",
+      "msg": "Duplicate user account"
     },
     {
-      code: 6044
-      name: 'refundWindowExpired'
-      msg: 'Refund window has expired'
+      "code": 6050,
+      "name": "UnauthorizedCancellation",
+      "msg": "Unauthorized cancellation"
     },
     {
-      code: 6045
-      name: 'invalidGameCreationTime'
-      msg: 'Invalid game creation time'
+      "code": 6051,
+      "name": "BetsAlreadyStarted",
+      "msg": "Bets have already started"
     },
     {
-      code: 6046
-      name: 'arithmeticOverflow'
-      msg: 'Arithmetic overflow occurred'
+      "code": 6052,
+      "name": "NoValidReasonToCancel",
+      "msg": "No valid reason to cancel the game"
     },
     {
-      code: 6047
-      name: 'invalidMaxUsers'
-      msg: 'Invalid max users'
+      "code": 6053,
+      "name": "TreasuryNotEmpty",
+      "msg": "Treasury is not empty"
     },
     {
-      code: 6048
-      name: 'gameResultMismatch'
-      msg: 'Game result mismatch'
+      "code": 6054,
+      "name": "EmptyPicks",
+      "msg": "Empty picks provided"
     },
     {
-      code: 6049
-      name: 'duplicateUserAccount'
-      msg: 'Duplicate user account'
+      "code": 6055,
+      "name": "PicksLinesMismatch",
+      "msg": "Picks do not match the expected line"
     },
     {
-      code: 6050
-      name: 'unauthorizedCancellation'
-      msg: 'Unauthorized cancellation'
+      "code": 6056,
+      "name": "InvalidLineAccount",
+      "msg": "Invalid line account provided"
     },
     {
-      code: 6051
-      name: 'betsAlreadyStarted'
-      msg: 'Bets have already started'
+      "code": 6057,
+      "name": "LineAlreadyStarted",
+      "msg": "Line already started"
     },
     {
-      code: 6052
-      name: 'noValidReasonToCancel'
-      msg: 'No valid reason to cancel the game'
+      "code": 6058,
+      "name": "InvalidRemainingAccountsCount",
+      "msg": "Invalid remaining accounts count"
     },
     {
-      code: 6053
-      name: 'treasuryNotEmpty'
-      msg: 'Treasury is not empty'
+      "code": 6059,
+      "name": "InvalidNumberOfLines",
+      "msg": "Invalid number of lines"
     },
     {
-      code: 6054
-      name: 'emptyPicks'
-      msg: 'Empty picks provided'
+      "code": 6060,
+      "name": "TooFewLines",
+      "msg": "Too few lines"
     },
     {
-      code: 6055
-      name: 'picksLinesMismatch'
-      msg: 'Picks do not match the expected line'
+      "code": 6061,
+      "name": "TooManyLines",
+      "msg": "Too many lines"
     },
     {
-      code: 6056
-      name: 'invalidLineAccount'
-      msg: 'Invalid line account provided'
+      "code": 6062,
+      "name": "LineMismatch",
+      "msg": "Line mismatch"
     },
     {
-      code: 6057
-      name: 'lineAlreadyStarted'
-      msg: 'Line already started'
+      "code": 6063,
+      "name": "UnauthorizedGameResolution",
+      "msg": "Only admin can resolve games"
     },
     {
-      code: 6058
-      name: 'invalidRemainingAccountsCount'
-      msg: 'Invalid remaining accounts count'
+      "code": 6064,
+      "name": "NoLinesInGame",
+      "msg": "Game does not have any lines"
     },
     {
-      code: 6059
-      name: 'invalidNumberOfLines'
-      msg: 'Invalid number of lines'
+      "code": 6065,
+      "name": "MissingLineAccounts",
+      "msg": "Line accounts are missing"
     },
     {
-      code: 6060
-      name: 'tooFewLines'
-      msg: 'Too few lines'
+      "code": 6066,
+      "name": "LineNotResolved",
+      "msg": "Line is yet to be resolved"
     },
     {
-      code: 6061
-      name: 'tooManyLines'
-      msg: 'Too many lines'
+      "code": 6067,
+      "name": "ExcessiveFee",
+      "msg": "Unrealistic fees"
     },
     {
-      code: 6062
-      name: 'lineMismatch'
-      msg: 'Line mismatch'
+      "code": 6068,
+      "name": "InvalidBetAccount",
+      "msg": "Bet account should be valid"
     },
     {
-      code: 6063
-      name: 'unauthorizedGameResolution'
-      msg: 'Only admin can resolve games'
+      "code": 6069,
+      "name": "BetNotInGame",
+      "msg": "This bet is not involved in thisgame"
     },
     {
-      code: 6064
-      name: 'noLinesInGame'
-      msg: 'Game does not have any lines'
+      "code": 6070,
+      "name": "InvalidBetPlayer",
+      "msg": "This bet does not belong to this user"
     },
     {
-      code: 6065
-      name: 'missingLineAccounts'
-      msg: 'Line accounts are missing'
+      "code": 6071,
+      "name": "NoPlayersInGame",
+      "msg": "No users in the game"
     },
     {
-      code: 6066
-      name: 'lineNotResolved'
-      msg: 'Line is yet to be resolved'
+      "code": 6072,
+      "name": "UserAccountNotFound",
+      "msg": "User account is not available"
     },
     {
-      code: 6067
-      name: 'excessiveFee'
-      msg: 'Unrealistic fees'
+      "code": 6073,
+      "name": "NumberOfWinnersMismatch",
+      "msg": "Number of winners does not match length of winners array"
     },
     {
-      code: 6068
-      name: 'invalidBetAccount'
-      msg: 'Bet account should be valid'
+      "code": 6074,
+      "name": "EscrowNotEmpty",
+      "msg": "Escrow not empty"
     },
     {
-      code: 6069
-      name: 'betNotInGame'
-      msg: 'This bet is not involved in thisgame'
+      "code": 6075,
+      "name": "NumberOfWinnersExpectedMismatch",
+      "msg": "Number of winners expected does not match number of winners"
     },
     {
-      code: 6070
-      name: 'invalidBetPlayer'
-      msg: 'This bet does not belong to this user'
+      "code": 6076,
+      "name": "UnauthorizedLineUpdate",
+      "msg": "Only admin can update the lines"
     },
     {
-      code: 6071
-      name: 'noPlayersInGame'
-      msg: 'No users in the game'
+      "code": 6077,
+      "name": "SamePredictedValue",
+      "msg": "Predicted value should be different for update"
     },
     {
-      code: 6072
-      name: 'userAccountNotFound'
-      msg: 'User account is not available'
+      "code": 6078,
+      "name": "UnauthorizedCalculation",
+      "msg": "Only admin can calculate correct bets"
     },
     {
-      code: 6073
-      name: 'numberOfWinnersMismatch'
-      msg: 'Number of winners does not match length of winners array'
+      "code": 6079,
+      "name": "UnauthorizedGameFinalization",
+      "msg": "Only admin can finalize the game stats"
     },
     {
-      code: 6074
-      name: 'escrowNotEmpty'
-      msg: 'Escrow not empty'
+      "code": 6080,
+      "name": "CalculationAlreadyComplete",
+      "msg": "Calcualtion is already done"
     },
     {
-      code: 6075
-      name: 'numberOfWinnersExpectedMismatch'
-      msg: 'Number of winners expected does not match number of winners'
+      "code": 6081,
+      "name": "NoBetsInGame",
+      "msg": "Must have atleast one bet"
     },
-  ]
-  types: [
+    {
+      "code": 6082,
+      "name": "CalculationNotComplete",
+      "msg": "Calculation must be completed"
+    },
+    {
+      "code": 6083,
+      "name": "IncorrectWinnerAccountCount",
+      "msg": "Ensure that we have the correct number of winner accounts"
+    }
+  ],
+  "types": [
     {
-      name: 'bet'
-      type: {
-        kind: 'struct'
-        fields: [
+      "name": "Bet",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
-            name: 'game'
-            type: 'pubkey'
+            "name": "game",
+            "type": "pubkey"
           },
           {
-            name: 'player'
-            type: 'pubkey'
+            "name": "player",
+            "type": "pubkey"
           },
           {
-            name: 'picks'
-            type: {
-              vec: {
-                defined: {
-                  name: 'pick'
+            "name": "picks",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Pick"
                 }
               }
             }
           },
           {
-            name: 'correctCount'
-            type: 'u8'
+            "name": "correct_count",
+            "type": "u8"
           },
           {
-            name: 'submittedAt'
-            type: 'i64'
+            "name": "num_correct",
+            "type": "u8"
           },
           {
-            name: 'bump'
-            type: 'u8'
+            "name": "submitted_at",
+            "type": "i64"
           },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
     {
-      name: 'direction'
-      type: {
-        kind: 'enum'
-        variants: [
+      "name": "Direction",
+      "type": {
+        "kind": "enum",
+        "variants": [
           {
-            name: 'over'
+            "name": "Over"
           },
           {
-            name: 'under'
-          },
+            "name": "Under"
+          }
         ]
       }
     },
     {
-      name: 'game'
-      type: {
-        kind: 'struct'
-        fields: [
+      "name": "Game",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
-            name: 'gameId'
-            type: 'u64'
+            "name": "game_id",
+            "type": "u64"
           },
           {
-            name: 'mint'
-            type: 'pubkey'
+            "name": "mint",
+            "type": "pubkey"
           },
           {
-            name: 'firstLineStartsAt'
-            type: 'i64'
+            "name": "first_line_starts_at",
+            "type": "i64"
           },
           {
-            name: 'creator'
-            type: 'pubkey'
+            "name": "creator",
+            "type": "pubkey"
           },
           {
-            name: 'admin'
-            type: 'pubkey'
-          },
-          {
-            name: 'users'
-            type: {
-              vec: 'pubkey'
+            "name": "users",
+            "type": {
+              "vec": "pubkey"
             }
           },
           {
-            name: 'maxUsers'
-            type: 'u8'
+            "name": "max_users",
+            "type": "u8"
           },
           {
-            name: 'entryFee'
-            type: 'u64'
+            "name": "entry_fee",
+            "type": "u64"
           },
           {
-            name: 'status'
-            type: {
-              defined: {
-                name: 'gameStatus'
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "GameStatus"
               }
             }
           },
           {
-            name: 'createdAt'
-            type: 'i64'
+            "name": "created_at",
+            "type": "i64"
           },
           {
-            name: 'lockedAt'
-            type: {
-              option: 'i64'
+            "name": "locked_at",
+            "type": {
+              "option": "i64"
             }
           },
           {
-            name: 'numberOfLines'
-            type: 'u8'
+            "name": "number_of_lines",
+            "type": "u8"
           },
           {
-            name: 'involvedLines'
-            type: {
-              vec: 'pubkey'
+            "name": "involved_lines",
+            "type": {
+              "vec": "pubkey"
             }
           },
           {
-            name: 'bump'
-            type: 'u8'
+            "name": "num_winners",
+            "type": "u32"
           },
+          {
+            "name": "correct_votes_to_be_winner",
+            "type": "u8"
+          },
+          {
+            "name": "calculation_complete",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
     {
-      name: 'gameEscrow'
-      type: {
-        kind: 'struct'
-        fields: [
+      "name": "GameEscrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
-            name: 'game'
-            type: 'pubkey'
+            "name": "game",
+            "type": "pubkey"
           },
           {
-            name: 'totalAmount'
-            type: 'u64'
+            "name": "total_amount",
+            "type": "u64"
           },
           {
-            name: 'bump'
-            type: 'u8'
-          },
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
     {
-      name: 'gameResult'
-      type: {
-        kind: 'struct'
-        fields: [
+      "name": "GameResult",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
-            name: 'game'
-            type: 'pubkey'
+            "name": "game",
+            "type": "pubkey"
           },
           {
-            name: 'resolved'
-            type: 'bool'
+            "name": "resolved",
+            "type": "bool"
           },
           {
-            name: 'winners'
-            type: {
-              vec: 'pubkey'
+            "name": "winners",
+            "type": {
+              "vec": "pubkey"
             }
           },
           {
-            name: 'highestCorrect'
-            type: 'u8'
+            "name": "highest_correct",
+            "type": "u8"
           },
           {
-            name: 'totalPool'
-            type: 'u64'
+            "name": "total_pool",
+            "type": "u64"
           },
           {
-            name: 'resolvedAt'
-            type: 'i64'
+            "name": "resolved_at",
+            "type": "i64"
           },
           {
-            name: 'bump'
-            type: 'u8'
-          },
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
     {
-      name: 'gameStatus'
-      type: {
-        kind: 'enum'
-        variants: [
+      "name": "GameStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
           {
-            name: 'open'
+            "name": "Open"
           },
           {
-            name: 'locked'
+            "name": "Locked"
           },
           {
-            name: 'resolved'
+            "name": "Resolved"
           },
           {
-            name: 'cancelled'
-          },
+            "name": "Cancelled"
+          }
         ]
       }
     },
     {
-      name: 'line'
-      type: {
-        kind: 'struct'
-        fields: [
+      "name": "Line",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
-            name: 'statId'
-            type: 'u16'
+            "name": "stat_id",
+            "type": "u16"
           },
           {
-            name: 'predictedValue'
-            type: 'f64'
+            "name": "predicted_value",
+            "type": "f64"
           },
           {
-            name: 'actualValue'
-            type: {
-              option: 'f64'
+            "name": "actual_value",
+            "type": {
+              "option": "f64"
             }
           },
           {
-            name: 'athleteId'
-            type: 'u64'
+            "name": "athlete_id",
+            "type": "u64"
           },
           {
-            name: 'startsAt'
-            type: 'i64'
+            "name": "starts_at",
+            "type": "i64"
           },
           {
-            name: 'seed'
-            type: 'u64'
+            "name": "seed",
+            "type": "u64"
           },
           {
-            name: 'result'
-            type: {
-              option: {
-                defined: {
-                  name: 'direction'
+            "name": "result",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "Direction"
                 }
               }
             }
           },
           {
-            name: 'shouldRefundBettors'
-            type: 'bool'
+            "name": "should_refund_bettors",
+            "type": "bool"
           },
           {
-            name: 'bump'
-            type: 'u8'
-          },
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
     {
-      name: 'pick'
-      type: {
-        kind: 'struct'
-        fields: [
+      "name": "Pick",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
-            name: 'lineId'
-            type: 'pubkey'
+            "name": "line_id",
+            "type": "pubkey"
           },
           {
-            name: 'direction'
-            type: {
-              defined: {
-                name: 'direction'
+            "name": "direction",
+            "type": {
+              "defined": {
+                "name": "Direction"
               }
             }
-          },
+          }
         ]
       }
-    },
+    }
   ]
 }
