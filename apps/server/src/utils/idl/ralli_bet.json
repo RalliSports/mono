@@ -1,5 +1,5 @@
 {
-  "address": "3P2wnyoxACHcnUg3sVfSQA1Fwz4ssGKcQ9b6XXZC2vcG",
+  "address": "CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN",
   "metadata": {
     "name": "ralli_bet",
     "version": "0.1.0",
@@ -7,6 +7,117 @@
     "description": "Created with Anchor"
   },
   "instructions": [
+    {
+      "name": "calculate_correct",
+      "discriminator": [
+        70,
+        99,
+        189,
+        145,
+        120,
+        54,
+        25,
+        190
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game"
+              },
+              {
+                "kind": "account",
+                "path": "bet.player",
+                "account": "Bet"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "calculate_winners",
+      "discriminator": [
+        140,
+        11,
+        52,
+        209,
+        154,
+        217,
+        87,
+        194
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
     {
       "name": "cancel_game",
       "discriminator": [
@@ -889,10 +1000,6 @@
         {
           "name": "fee_percentage",
           "type": "u16"
-        },
-        {
-          "name": "number_of_winners_expected",
-          "type": "u16"
         }
       ]
     },
@@ -1035,6 +1142,61 @@
               }
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "update_line",
+      "discriminator": [
+        232,
+        80,
+        58,
+        171,
+        8,
+        177,
+        146,
+        160
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "line",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "line_seed"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "line_seed",
+          "type": "u64"
+        },
+        {
+          "name": "new_predicted_value",
+          "type": "f64"
+        },
+        {
+          "name": "should_refund_bettors",
+          "type": "bool"
         }
       ]
     },
@@ -1570,6 +1732,46 @@
       "code": 6075,
       "name": "NumberOfWinnersExpectedMismatch",
       "msg": "Number of winners expected does not match number of winners"
+    },
+    {
+      "code": 6076,
+      "name": "UnauthorizedLineUpdate",
+      "msg": "Only admin can update the lines"
+    },
+    {
+      "code": 6077,
+      "name": "SamePredictedValue",
+      "msg": "Predicted value should be different for update"
+    },
+    {
+      "code": 6078,
+      "name": "UnauthorizedCalculation",
+      "msg": "Only admin can calculate correct bets"
+    },
+    {
+      "code": 6079,
+      "name": "UnauthorizedGameFinalization",
+      "msg": "Only admin can finalize the game stats"
+    },
+    {
+      "code": 6080,
+      "name": "CalculationAlreadyComplete",
+      "msg": "Calcualtion is already done"
+    },
+    {
+      "code": 6081,
+      "name": "NoBetsInGame",
+      "msg": "Must have atleast one bet"
+    },
+    {
+      "code": 6082,
+      "name": "CalculationNotComplete",
+      "msg": "Calculation must be completed"
+    },
+    {
+      "code": 6083,
+      "name": "IncorrectWinnerAccountCount",
+      "msg": "Ensure that we have the correct number of winner accounts"
     }
   ],
   "types": [
@@ -1598,6 +1800,10 @@
           },
           {
             "name": "correct_count",
+            "type": "u8"
+          },
+          {
+            "name": "num_correct",
             "type": "u8"
           },
           {
@@ -1647,10 +1853,6 @@
             "type": "pubkey"
           },
           {
-            "name": "admin",
-            "type": "pubkey"
-          },
-          {
             "name": "users",
             "type": {
               "vec": "pubkey"
@@ -1691,6 +1893,18 @@
             "type": {
               "vec": "pubkey"
             }
+          },
+          {
+            "name": "num_winners",
+            "type": "u32"
+          },
+          {
+            "name": "correct_votes_to_be_winner",
+            "type": "u8"
+          },
+          {
+            "name": "calculation_complete",
+            "type": "bool"
           },
           {
             "name": "bump",
