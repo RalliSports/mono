@@ -272,6 +272,7 @@ export class LinesService {
         matchupId: dto.matchupId?.toString(),
         predictedValue: dto.predictedValue?.toString(),
         status: dto.status,
+        currentValue: dto.currentValue?.toString(),
       })
       .where(eq(lines.id, id))
       .returning();

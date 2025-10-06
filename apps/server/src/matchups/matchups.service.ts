@@ -90,7 +90,6 @@ export class MatchupsService {
   }
 
   async getMatchupsWithOpenLines() {
-    console.log('Getting matchups with open lines');
     return this.db.query.matchups.findMany({
       with: {
         lines: {
@@ -182,6 +181,20 @@ export class MatchupsService {
             status: true,
           },
         },
+        homeTeam: {
+          columns: {
+            id: true,
+            name: true,
+            espnTeamId: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            id: true,
+            name: true,
+            espnTeamId: true,
+          },
+        },
       },
       where: and(
         eq(matchups.status, MatchupStatus.IN_PROGRESS),
@@ -193,6 +206,28 @@ export class MatchupsService {
   async getMatchupById(id: string) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, id),
+      with: {
+        lines: {
+          columns: {
+            id: true,
+            status: true,
+          },
+        },
+        homeTeam: {
+          columns: {
+            id: true,
+            espnTeamId: true,
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            id: true,
+            espnTeamId: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!matchup) throw new NotFoundException('Matchup not found');

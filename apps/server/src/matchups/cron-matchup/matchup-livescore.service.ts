@@ -32,11 +32,29 @@ export class MatchupLivescoreService {
   ) {}
 
   // 60 minutes interval
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCron() {
     this.logger.log('Running matchups livescore cron job...');
     const matchupsInProgress =
-      await this.matchupsService.getMatchupsInProgress();
+      // await this.matchupsService.getMatchupsInProgress();
+      await this.db.query.matchups.findMany({
+        where: eq(matchups.espnEventId, "401772939"),
+        with: {
+          homeTeam: {
+            columns: {
+              name: true,
+              espnTeamId: true,
+            },
+          },
+          awayTeam: {
+            columns: {
+              name: true,
+              espnTeamId: true,
+            },
+          },
+        },
+      });
+      this.logger.log(`Processing matchup: ${matchupsInProgress.length}`);
     for (const matchup of matchupsInProgress) {
       if (!matchup.espnEventId) {
         this.logger.warn(
@@ -67,16 +85,25 @@ export class MatchupLivescoreService {
   }
 
   //Live Score Update For In-Progress Matchups
-  startLiveScoreCronForMatchup(matchup: typeof matchups.$inferSelect) {
+  startLiveScoreCronForMatchup(matchup: (typeof matchups.$inferSelect & {
+  homeTeam: { name: string; espnTeamId: string | null } | null;
+  awayTeam: { name: string; espnTeamId: string | null } | null;
+  })) {
     const matchupId = matchup.id;
     const espnEventId = matchup.espnEventId;
     const homeTeamId = matchup.homeTeamId;
     const awayTeamId = matchup.awayTeamId;
+    const homeTeamESPNId = matchup?.homeTeam?.espnTeamId;
+    const awayTeamESPNId = matchup?.awayTeam?.espnTeamId;
+    const homeTeamName = matchup?.homeTeam?.name;
+    const awayTeamName = matchup?.awayTeam?.name;
     const liveScoreCronJob = `live-score-update-${matchupId}`;
     if (this.schedulerRegistry.doesExist('cron', liveScoreCronJob)) return; //avoiding double-registration
 
-    const CRON_INTERVAL = 2; // (N) minutes interval
+    const CRON_INTERVAL = 1; // (N) minutes interval
     const cronIntervalExpression = `*/${CRON_INTERVAL} * * * *`;
+    // // 10 sec interval
+    // const cronIntervalExpression = `*/10 * * * * *`;
     const liveScoreCronJobInstance = new CronJob(
       cronIntervalExpression,
       async () => {
@@ -105,6 +132,13 @@ export class MatchupLivescoreService {
             },
           },
         });
+        if (allLinesInThisMatchup.length === 0) {
+          this.logger.warn(
+            `No lines found for matchup ${matchupId}, stopping livescore cron...`,
+          );
+          this.schedulerRegistry.deleteCronJob(liveScoreCronJob);
+          return;
+        }
         const allAthletesInThisMatchupWithLines =
           await this.db.query.athletes.findMany({
             where: or(
@@ -144,11 +178,14 @@ export class MatchupLivescoreService {
             const currentLineValue =
               outcomePerAthlete.lines[stat.statOddsName!];
             try {
+              this.logger.log(
+                `Updated line ${lineData.id}-${stat.name}-${athlete.name} to ${currentLineValue}`,
+              );
               await this.linesService.updateLine(lineData.id, {
                 currentValue: Number(currentLineValue),
               });
             } catch (error) {
-              console.error(
+              this.logger.warn(
                 `Error processing line for ${matchupId} - ${athlete.name} - ${stat.name}-${currentLineValue}`,
                 error,
               );
@@ -159,11 +196,19 @@ export class MatchupLivescoreService {
 
         //Stopping Live Updates for Finalized Matchups
         if (currentEspnStatus.type.name === EspnStatusName.FINAL) {
+          const homeScore = matchupBoxScore.teams.find(
+            (team) => team.id === homeTeamESPNId,
+          )?.score;
+          const awayScore = matchupBoxScore.teams.find(
+            (team) => team.id === awayTeamESPNId,
+          )?.score;
           this.logger.log(
-            `Matchup ${matchupId} is finalized, stopping livescore cron...`,
+            `Matchup ${matchupId} is finalized - ${homeTeamName}:${homeScore} - ${awayTeamName}:${awayScore}, stopping livescore cron...`,
           );
-          this.matchupsService.updateMatchup(matchupId, {
+          await this.matchupsService.updateMatchup(matchupId, {
             status: MatchupStatus.FINISHED,
+            scoreHome: homeScore,
+            scoreAway: awayScore,
           });
           this.schedulerRegistry.deleteCronJob(liveScoreCronJob);
           return;
