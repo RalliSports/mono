@@ -27,8 +27,8 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { PredictionDirection } from 'src/games/enum/game';
-import { IDL } from '../idl';
-import { RalliBet } from '../idl/ralli_bet';
+import { IDL_New } from '../idl';
+import { RalliBet } from '../idl/ralli_bet_new';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 const ADMIN_KEYPAIR_JSON = process.env.ADMIN_KEYPAIR_JSON;
@@ -36,7 +36,7 @@ const ADMIN_KEYPAIR_JSON = process.env.ADMIN_KEYPAIR_JSON;
 const secretKey = Uint8Array.from(JSON.parse(ADMIN_KEYPAIR_JSON!));
 const adminKeypair = Keypair.fromSecretKey(secretKey);
 
-export class ParaAnchor {
+export class ParaAnchorNew {
   private solanaConnection: Connection;
   private paraServer: ParaServer;
   private admin: PublicKey;
@@ -110,7 +110,7 @@ export class ParaAnchor {
   async getProgram(useAdminSigner = false): Promise<Program<RalliBet>> {
     const provider = await this.getProvider(useAdminSigner);
 
-    return new Program<RalliBet>(IDL as Idl, provider);
+    return new Program<RalliBet>(IDL_New as Idl, provider);
   }
 
   //Returns the Solana Connection
@@ -480,7 +480,7 @@ export class ParaAnchor {
 
     try {
       const ix = await program.methods
-        .createGame(
+        .create_game(
           gameIdBuffer,
           maxParticipants,
           new BN(depositAmount * Math.pow(10, 6)),
@@ -720,7 +720,7 @@ export class ParaAnchor {
 
     try {
       const ix = await program.methods
-        .resolveGame(percentage, winners.length)
+        .resolveGame(percentage)
         .accountsStrict({
           admin: program.provider.wallet?.publicKey as PublicKey,
           game: gamePDA,

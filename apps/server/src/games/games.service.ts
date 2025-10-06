@@ -32,7 +32,6 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { User } from 'src/user/dto/user-response.dto';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
@@ -42,10 +41,11 @@ import { StreamChat } from 'stream-chat';
 import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
 import { sleep } from 'src/utils';
+import { ParaAnchorNew } from 'src/utils/services/paraAnchorNew';
 
 @Injectable()
 export class GamesService {
-  private anchor: ParaAnchor;
+  private anchor: ParaAnchorNew;
   private chatClient: StreamChat;
 
   constructor(
@@ -54,7 +54,7 @@ export class GamesService {
     private readonly notificationService: NotificationService,
     private readonly friendsService: FriendsService,
   ) {
-    this.anchor = new ParaAnchor(this.authService.getPara());
+    this.anchor = new ParaAnchorNew(this.authService.getPara());
     this.chatClient = chatClient;
   }
   async create(createGameDto: CreateGameDto, user: User) {
