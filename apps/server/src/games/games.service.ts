@@ -41,11 +41,11 @@ import { StreamChat } from 'stream-chat';
 import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
 import { sleep } from 'src/utils';
-import { ParaAnchorNew } from 'src/utils/services/paraAnchorNew';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class GamesService {
-  private anchor: ParaAnchorNew;
+  private anchor: ParaAnchor;
   private chatClient: StreamChat;
 
   constructor(
@@ -54,7 +54,7 @@ export class GamesService {
     private readonly notificationService: NotificationService,
     private readonly friendsService: FriendsService,
   ) {
-    this.anchor = new ParaAnchorNew(this.authService.getPara());
+    this.anchor = new ParaAnchor(this.authService.getPara());
     this.chatClient = chatClient;
   }
   async create(createGameDto: CreateGameDto, user: User) {
@@ -807,11 +807,11 @@ export class GamesService {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
         game.id,
-        game.gameCode as string
+        game.gameCode as string,
       );
 
       await this.notificationService.sendNotificationToUser(user.id, message);
-            return { success: true, message: 'Notification sent successfully' };
+      return { success: true, message: 'Notification sent successfully' };
     } catch (error) {
       console.error(error, 'unable to send invite');
     }

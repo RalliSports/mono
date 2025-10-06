@@ -14,10 +14,10 @@ import { CreateLineDto } from './dto/create-line.dto';
 import { ResolveLineDto } from './dto/resolve-line.dto';
 import { UpdateLineDto } from './dto/update-line.dto';
 import { PublicKey } from '@solana/web3.js';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
 import { line } from 'drizzle-orm/pg-core';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class LinesService {

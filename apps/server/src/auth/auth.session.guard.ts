@@ -22,7 +22,7 @@ export class SessionAuthGuard implements CanActivate {
     if (!sessionId || typeof sessionId !== 'string') {
       throw new UnauthorizedException('Session ID missing');
     }
-console.log(sessionId, "sesssion")
+
     try {
       const user = await this.authService.validateSession(
         sessionId,
