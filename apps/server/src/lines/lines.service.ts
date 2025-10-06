@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { athletes, lines, matchups, stats } from '@repo/db';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
@@ -263,6 +263,25 @@ export class LinesService {
     });
   }
 
+  async getLinesByMatchupId(matchupId: string) {
+    return await this.db.query.lines.findMany({
+      where: and(eq(lines.matchupId, matchupId)),
+      with: {
+        athlete: {
+          columns: {
+            name: true,
+          },
+        },
+        stat: {
+          columns: {
+            name: true,
+            statOddsName: true,
+          },
+        },
+      },
+    });
+  }
+
   async updateLine(id: string, dto: UpdateLineDto) {
     const res = await this.db
       .update(lines)
@@ -272,6 +291,7 @@ export class LinesService {
         matchupId: dto.matchupId?.toString(),
         predictedValue: dto.predictedValue?.toString(),
         status: dto.status,
+        currentValue: dto.currentValue?.toString(),
       })
       .where(eq(lines.id, id))
       .returning();
@@ -406,7 +426,7 @@ export class LinesService {
             isHigher:
               lineDataForResole.actualValue && lineData.predictedValue
                 ? lineDataForResole.actualValue >
-                  Number(lineData.predictedValue)
+                Number(lineData.predictedValue)
                 : null,
             status: LineStatus.RESOLVED,
           })

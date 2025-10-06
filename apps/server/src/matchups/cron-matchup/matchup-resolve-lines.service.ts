@@ -24,10 +24,10 @@ export class MatchupResolveLinesService {
     private readonly authService: AuthService,
     private readonly matchupsService: MatchupsService,
     private readonly linesService: LinesService,
-  ) {}
+  ) { }
 
-  // 60 minutes interval
-  @Cron(CronExpression.EVERY_HOUR)
+  // 30 minutes interval
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async handleCron() {
     this.logger.log('Running matchup resolve lines cron job...');
 
