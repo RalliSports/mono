@@ -29,32 +29,19 @@ export class MatchupLivescoreService {
     private readonly matchupsService: MatchupsService,
     private readonly linesService: LinesService,
     private readonly schedulerRegistry: SchedulerRegistry,
-  ) {}
+  ) { }
 
-  // 60 minutes interval
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  // 30 minutes interval
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async handleCron() {
     this.logger.log('Running matchups livescore cron job...');
     const matchupsInProgress =
-      // await this.matchupsService.getMatchupsInProgress();
-      await this.db.query.matchups.findMany({
-        where: eq(matchups.espnEventId, "401772939"),
-        with: {
-          homeTeam: {
-            columns: {
-              name: true,
-              espnTeamId: true,
-            },
-          },
-          awayTeam: {
-            columns: {
-              name: true,
-              espnTeamId: true,
-            },
-          },
-        },
-      });
-      this.logger.log(`Processing matchup: ${matchupsInProgress.length}`);
+      await this.matchupsService.getMatchupsInProgress();
+
+    if (matchupsInProgress.length === 0) {
+      this.logger.log('No matchups in progress, skipping...');
+      return;
+    }
     for (const matchup of matchupsInProgress) {
       if (!matchup.espnEventId) {
         this.logger.warn(
@@ -81,13 +68,13 @@ export class MatchupLivescoreService {
       }
       this.startLiveScoreCronForMatchup(matchup);
     }
-    this.logger.log('Matchups livescore update cron job completed.');
+    this.logger.log('Matchups livescore update cron job sceheduled.');
   }
 
   //Live Score Update For In-Progress Matchups
   startLiveScoreCronForMatchup(matchup: (typeof matchups.$inferSelect & {
-  homeTeam: { name: string; espnTeamId: string | null } | null;
-  awayTeam: { name: string; espnTeamId: string | null } | null;
+    homeTeam: { name: string; espnTeamId: string | null } | null;
+    awayTeam: { name: string; espnTeamId: string | null } | null;
   })) {
     const matchupId = matchup.id;
     const espnEventId = matchup.espnEventId;
@@ -98,12 +85,13 @@ export class MatchupLivescoreService {
     const homeTeamName = matchup?.homeTeam?.name;
     const awayTeamName = matchup?.awayTeam?.name;
     const liveScoreCronJob = `live-score-update-${matchupId}`;
-    if (this.schedulerRegistry.doesExist('cron', liveScoreCronJob)) return; //avoiding double-registration
+    if (this.schedulerRegistry.doesExist('cron', liveScoreCronJob)) {
+      this.logger.log(`Cron job already exists for ${matchupId}, skipping...`);
+      return;
+    }; //avoiding double-registration
 
     const CRON_INTERVAL = 1; // (N) minutes interval
     const cronIntervalExpression = `*/${CRON_INTERVAL} * * * *`;
-    // // 10 sec interval
-    // const cronIntervalExpression = `*/10 * * * * *`;
     const liveScoreCronJobInstance = new CronJob(
       cronIntervalExpression,
       async () => {
@@ -116,22 +104,12 @@ export class MatchupLivescoreService {
           this.schedulerRegistry.deleteCronJob(liveScoreCronJob);
           return;
         }
-        const allLinesInThisMatchup = await this.db.query.lines.findMany({
-          where: and(eq(lines.matchupId, matchupId)),
-          with: {
-            athlete: {
-              columns: {
-                name: true,
-              },
-            },
-            stat: {
-              columns: {
-                name: true,
-                statOddsName: true,
-              },
-            },
-          },
-        });
+        const allLinesInThisMatchup = await this.linesService.getLinesByMatchupId(
+          matchupId,
+        );
+        this.logger.log(
+          `Found ${allLinesInThisMatchup.length} lines for matchup ${matchupId}.`,
+        );
         if (allLinesInThisMatchup.length === 0) {
           this.logger.warn(
             `No lines found for matchup ${matchupId}, stopping livescore cron...`,
@@ -141,15 +119,18 @@ export class MatchupLivescoreService {
         }
         const allAthletesInThisMatchupWithLines =
           await this.db.query.athletes.findMany({
-            where: or(
-              eq(athletes.teamId, homeTeamId!),
-              eq(athletes.teamId, awayTeamId!),
+            where: and(
+              or(
+                eq(athletes.teamId, homeTeamId!),
+                eq(athletes.teamId, awayTeamId!),
+              ),
               inArray(
                 athletes.id,
                 allLinesInThisMatchup.map((line) => line.athleteId ?? ''),
               ),
             ),
           });
+
         if (allAthletesInThisMatchupWithLines.length === 0) {
           this.logger.warn(
             `No athletes found for matchup ${matchupId}, stopping livescore cron...`,
@@ -161,32 +142,33 @@ export class MatchupLivescoreService {
           espnEventId!,
         );
         for (const athlete of allAthletesInThisMatchupWithLines) {
-          const lines = allLinesInThisMatchup.filter(
+          const athleteName = athlete.name;
+          const linesForThisAthlete = allLinesInThisMatchup.filter(
             (line) => line.athleteId === athlete.id,
           );
           const outcomePerAthlete = matchupBoxScore.athletes.find(
-            (athlete) => athlete.name === athlete.name,
+            (athlete) => athlete.name === athleteName,
           );
           if (!outcomePerAthlete) {
             continue;
           }
-          for (const lineData of lines) {
+          for (const lineData of linesForThisAthlete) {
             const stat = lineData.stat;
             if (!stat) {
               continue;
             }
             const currentLineValue =
-              outcomePerAthlete.lines[stat.statOddsName!];
+              outcomePerAthlete.lines[stat.statOddsName!] || 0.0;
             try {
-              this.logger.log(
-                `Updated line ${lineData.id}-${stat.name}-${athlete.name} to ${currentLineValue}`,
-              );
               await this.linesService.updateLine(lineData.id, {
                 currentValue: Number(currentLineValue),
               });
+              this.logger.log(
+                `Updated line ${lineData.id}-${stat.statOddsName}-${athlete.name} to ${currentLineValue}`,
+              );
             } catch (error) {
               this.logger.warn(
-                `Error processing line for ${matchupId} - ${athlete.name} - ${stat.name}-${currentLineValue}`,
+                `Error processing line for ${matchupId} - ${athlete.name} - ${stat.statOddsName}-${currentLineValue}`,
                 error,
               );
               continue;

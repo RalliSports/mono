@@ -43,7 +43,7 @@ import {
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 import { sleep } from 'src/utils';
 import { LineStatus } from 'src/lines/enum/lines';
-import { PgColumn } from 'drizzle-orm/pg-core';
+import { line, PgColumn } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class MatchupsService {
@@ -52,7 +52,7 @@ export class MatchupsService {
     private readonly authService: AuthService,
     private readonly linesService: LinesService,
     private readonly statsService: StatsService,
-  ) {}
+  ) { }
 
   async getAllMatchups() {
     return this.db.query.matchups.findMany({
@@ -373,6 +373,7 @@ export class MatchupsService {
       statName: string;
     })[] = [];
     for (const matchup of matchupsToResolve) {
+      const { homeTeamId, awayTeamId } = matchup;
       if (!matchup.espnEventId) {
         console.warn(`Matchup ${matchup.id} missing ESPN event ID`);
         continue;
@@ -390,27 +391,16 @@ export class MatchupsService {
         continue;
       }
 
-      const allLinesInThisMatchup = await this.db.query.lines.findMany({
-        where: and(eq(lines.matchupId, matchup.id)),
-        with: {
-          athlete: {
-            columns: {
-              name: true,
-            },
-          },
-          stat: {
-            columns: {
-              name: true,
-              statOddsName: true,
-            },
-          },
-        },
-      });
+      const allLinesInThisMatchup = await this.linesService.getLinesByMatchupId(
+        matchup.id,
+      );
       const allAthletesInThisMatchupWithLines =
         await this.db.query.athletes.findMany({
-          where: or(
-            eq(athletes.teamId, matchup?.homeTeamId!),
-            eq(athletes.teamId, matchup?.awayTeamId!),
+          where: and(
+            or(
+              eq(athletes.teamId, homeTeamId!),
+              eq(athletes.teamId, awayTeamId!),
+            ),
             inArray(
               athletes.id,
               allLinesInThisMatchup.map((line) => line.athleteId ?? ''),
@@ -422,21 +412,19 @@ export class MatchupsService {
       );
 
       for (const athlete of allAthletesInThisMatchupWithLines) {
-        const lines = allLinesInThisMatchup.filter(
+        const athleteName = athlete.name;
+        const allLinesForThisAthlete = allLinesInThisMatchup.filter(
           (line) => line.athleteId === athlete.id,
         );
         const outcomePerAthlete = matchupBoxScore.athletes.find(
-          (athlete) => athlete.name === athlete.name,
+          (athlete) => athlete.name === athleteName,
         );
         if (!outcomePerAthlete) {
           continue;
         }
-        for (const lineData of lines) {
+        for (const lineData of allLinesForThisAthlete) {
           const stat = lineData.stat;
           if (!stat) {
-            // console.warn(
-            //   `Stat "${linesDataPerAthlete}" not found for ${matchup.espnEventId}`,
-            // );
             continue;
           }
           const actualValue = outcomePerAthlete.lines[stat.statOddsName!];
