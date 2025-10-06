@@ -720,7 +720,7 @@ export class ParaAnchor {
 
     try {
       const ix = await program.methods
-        .resolveGame(percentage, winners.length)
+        .resolveGame(percentage)
         .accountsStrict({
           admin: program.provider.wallet?.publicKey as PublicKey,
           game: gamePDA,
