@@ -160,12 +160,19 @@ export class MatchupLivescoreService {
             const currentLineValue =
               outcomePerAthlete.lines[stat.statOddsName!] || 0.0;
             try {
-              await this.linesService.updateLine(lineData.id, {
-                currentValue: Number(currentLineValue),
-              });
-              this.logger.log(
-                `Updated line ${lineData.id}-${stat.statOddsName}-${athlete.name} to ${currentLineValue}`,
-              );
+              if (!lineData.currentValue ||
+                Number(lineData.currentValue) !== Number(currentLineValue)) {
+                await this.linesService.updateLine(lineData.id, {
+                  currentValue: Number(currentLineValue),
+                });
+                this.logger.log(
+                  `Updated line: ${stat.statOddsName} - ${athlete.name} | ${lineData.currentValue} -> ${currentLineValue}`,
+                )
+              } else {
+                this.logger.log(
+                  `No update needed for line: ${stat.statOddsName} - ${athlete.name} | ${lineData.currentValue}`,
+                );
+              }
             } catch (error) {
               this.logger.warn(
                 `Error processing line for ${matchupId} - ${athlete.name} - ${stat.statOddsName}-${currentLineValue}`,

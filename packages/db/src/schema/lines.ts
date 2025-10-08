@@ -30,8 +30,8 @@ export const lines = pgTable("lines", {
   actualValue: decimal("actual_value"),
   currentValue: decimal("current_value"),
   isHigher: boolean("is_higher"),
-  createdAt: timestamp("created_at").defaultNow(),
-  startsAt: timestamp("starts_at"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  startsAt: timestamp("starts_at", { withTimezone: true }),
   createdTxnSignature: text("created_txn_signature"),
   resolvedTxnSignature: text("resolved_txn_signature"),
 });
