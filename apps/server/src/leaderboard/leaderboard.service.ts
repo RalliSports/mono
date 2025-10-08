@@ -132,15 +132,15 @@ export class LeaderboardService {
         COUNT(*) OVER() AS total_users,
         RANK() OVER (
           ORDER BY
-            ${this.sortExpr(sortBy)} DESC,
             m.games_played DESC,
-            m.user_id ASC
+            m.user_id ASC,
+            ${this.sortExpr(sortBy)} DESC
         ) AS rank
       FROM metrics m
       ORDER BY
-        ${this.sortExpr(sortBy)} DESC,
         m.games_played DESC,
-        m.user_id ASC
+        m.user_id ASC,
+        ${this.sortExpr(sortBy)} DESC
       LIMIT ${sql.param(limit)} OFFSET ${sql.param(offset)};
     `;
 
@@ -179,9 +179,9 @@ export class LeaderboardService {
           m.*,
           RANK() OVER (
             ORDER BY
-              ${this.sortExpr(sortBy)} DESC,
               m.games_played DESC,
-              m.user_id ASC
+              m.user_id ASC,
+              ${this.sortExpr(sortBy)} DESC
           ) AS rank
         FROM metrics m
       )

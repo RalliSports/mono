@@ -14,27 +14,36 @@ export class DatadogExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // LOG ERROR TO CONSOLE FIRST
-    console.error('=== BACKEND ERROR CAUGHT ===');
-    console.error(
-      'Error type:',
-      exception instanceof Error ? exception.constructor.name : 'Unknown',
-    );
-    console.error(
-      'Error message:',
-      exception instanceof Error ? exception.message : 'No message',
-    );
-    console.error(
-      'Error stack:',
-      exception instanceof Error ? exception.stack : 'No stack',
-    );
-    console.error('Request method:', request.method);
-    console.error('Request URL:', request.url);
-    console.error('Full error object:', JSON.stringify(exception, null, 2));
-    console.error('=== END ERROR LOG ===');
+    // Check if this is a transaction rollback error (should not log these)
+    const isRollbackError =
+      exception instanceof Error &&
+      (exception.message.includes('rollback') ||
+        exception.message.includes('ROLLBACK') ||
+        exception.constructor.name === 'TransactionRollbackError');
 
-    // Tag the current span with error information
-    if (process.env.NODE_ENV === 'production') {
+    // LOG ERROR TO CONSOLE FIRST (skip rollback errors)
+    if (!isRollbackError) {
+      console.error('=== BACKEND ERROR CAUGHT ===');
+      console.error(
+        'Error type:',
+        exception instanceof Error ? exception.constructor.name : 'Unknown',
+      );
+      console.error(
+        'Error message:',
+        exception instanceof Error ? exception.message : 'No message',
+      );
+      console.error(
+        'Error stack:',
+        exception instanceof Error ? exception.stack : 'No stack',
+      );
+      console.error('Request method:', request.method);
+      console.error('Request URL:', request.url);
+      console.error('Full error object:', JSON.stringify(exception, null, 2));
+      console.error('=== END ERROR LOG ===');
+    }
+
+    // Tag the current span with error information (skip rollback errors)
+    if (process.env.NODE_ENV === 'production' && !isRollbackError) {
       const span = tracer.scope().active();
       if (span) {
         span.setTag('error', true);

@@ -17,6 +17,11 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
       <div className="divide-y divide-slate-700/30">
         {participant.bets.map((pick) => {
           const valueToUse = pick.line?.status === 'resolved' ? pick.line?.actualValue : pick.line?.currentValue
+          console.log(valueToUse)
+          const predictedValue = pick.line?.predictedValue
+          const largerValue =
+            Number(predictedValue!) > Number(valueToUse!) ? Number(predictedValue!) : Number(valueToUse!)
+          console.log(largerValue)
           return (
             <div key={pick.id} className={`p-4 hover:bg-slate-700/20 transition-all duration-200 relative`}>
               <div className="flex items-center justify-between">
@@ -172,7 +177,7 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                             Math.max(
                               0,
                               valueToUse && pick.line?.predictedValue
-                                ? (Number(valueToUse) / (Number(pick.line.predictedValue) * 1.3)) * 100
+                                ? (Number(valueToUse) / (largerValue * 1.3)) * 100
                                 : 0,
                             ),
                           )}%`,
@@ -186,7 +191,7 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                         <div
                           className="absolute w-0.5 bg-white/80 shadow-lg"
                           style={{
-                            left: `${(Number(pick.line.predictedValue) / (Number(pick.line.predictedValue) * 1.3)) * 100}%`,
+                            left: `${(Number(pick.line.predictedValue) / (largerValue * 1.3)) * 100}%`,
                             top: '-1px',
                             height: '10px',
                           }}
@@ -196,7 +201,7 @@ export default function ParticipantPicks({ participant }: ParticipantPicksProps)
                         <div
                           className="absolute -top-6 text-xs text-slate-300 font-medium transform -translate-x-1/2 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-600/50"
                           style={{
-                            left: `${(Number(pick.line.predictedValue) / (Number(pick.line.predictedValue) * 1.3)) * 100}%`,
+                            left: `${(Number(pick.line.predictedValue) / (largerValue * 1.3)) * 100}%`,
                           }}
                         >
                           {pick.line.predictedValue}

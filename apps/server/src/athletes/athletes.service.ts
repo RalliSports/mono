@@ -5,6 +5,7 @@ import { Database } from 'src/database/database.provider';
 import { eq, isNull } from 'drizzle-orm';
 import { athletes } from '@repo/db';
 import { CreateAthleteDto } from './dto/create-athlete.dto';
+import { LineStatus } from 'src/lines/enum/lines';
 
 @Injectable()
 export class AthletesService {
@@ -66,7 +67,7 @@ export class AthletesService {
               },
             },
           },
-          where: (lines) => isNull(lines.actualValue),
+          where: (lines) => eq(lines.status, LineStatus.OPEN),
           columns: {
             id: true,
             predictedValue: true,

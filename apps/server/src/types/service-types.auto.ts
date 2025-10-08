@@ -55,6 +55,7 @@ export type LinesServiceBulkCreateLines = Awaited<ReturnType<InstanceType<typeof
 export type LinesServiceGetAllLines = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['getAllLines']>>;
 export type LinesServiceGetAllLinesInstance = LinesServiceGetAllLines[number];
 export type LinesServiceGetLineById = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['getLineById']>>;
+export type LinesServiceGetLinesByMatchupId = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['getLinesByMatchupId']>>;
 export type LinesServiceUpdateLine = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['updateLine']>>;
 export type LinesServiceDeleteLine = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['deleteLine']>>;
 export type LinesServiceResolveLine = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['resolveLine']>>;

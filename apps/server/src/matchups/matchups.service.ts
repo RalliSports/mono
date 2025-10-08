@@ -52,7 +52,7 @@ export class MatchupsService {
     private readonly authService: AuthService,
     private readonly linesService: LinesService,
     private readonly statsService: StatsService,
-  ) { }
+  ) {}
 
   async getAllMatchups() {
     return this.db.query.matchups.findMany({
@@ -115,7 +115,7 @@ export class MatchupsService {
           .from(lines)
           .where(
             and(
-              not(eq(lines.status, LineStatus.RESOLVED)),
+              eq(lines.status, LineStatus.OPEN),
               eq(lines.matchupId, matchups.id),
             ),
           ),
@@ -324,6 +324,7 @@ export class MatchupsService {
             eq(lines.athleteId, athleteId),
             eq(lines.statId, statId),
             eq(lines.matchupId, matchup?.id!),
+            eq(lines.status, LineStatus.OPEN),
           ),
         });
         if (possibleExistingLine) {
