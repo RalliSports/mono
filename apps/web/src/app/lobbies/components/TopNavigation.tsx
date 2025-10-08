@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRouter } from 'next/navigation'
 import { ParaButton } from '@/components/para-modal'
-import BalanceDisplay from './BalanceDisplay'
+import BalanceDisplay from '@/components/BalanceDisplay'
 import ProfileDropdown from './ProfileDropdown'
 
 interface TopNavigationProps {

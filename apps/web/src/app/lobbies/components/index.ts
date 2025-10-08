@@ -1,6 +1,5 @@
 // Export all components for easy importing
 export { default as TopNavigation } from './TopNavigation'
-export { default as BalanceDisplay } from './BalanceDisplay'
 export { default as ProfileDropdown } from './ProfileDropdown'
 export { default as FilterTabs } from './FilterTabs'
 export { default as SearchBar } from './SearchBar'
