@@ -5,6 +5,7 @@ import {
   pgTable,
   varchar,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { lines } from "./lines";
 import { matchup_performance } from "./matchup_performance";
@@ -29,7 +30,8 @@ export const matchups = pgTable("matchups", {
   scoreAway: integer("score_away"),
   homeTeamId: uuid("home_team_id").references(() => teams.id),
   awayTeamId: uuid("away_team_id").references(() => teams.id),
-  createdAt: timestamp("created_at").defaultNow(),
+  ifLinesCreated: boolean("if_lines_created").default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 export const matchupsRelations = relations(matchups, ({ many, one }) => ({
