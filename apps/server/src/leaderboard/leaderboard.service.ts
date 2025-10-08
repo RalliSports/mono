@@ -13,16 +13,24 @@ type SortKey = 'winRate' | 'totalWinnings' | 'netProfit' | 'bettingAccuracy';
 @Injectable()
 export class LeaderboardService {
   constructor(@Drizzle() private readonly db: Database) {}
-  
+
+  /** Normalize drizzle.execute() into an array of rows in all environments. */
+  private async execRows<T = any>(query: any): Promise<T[]> {
+    const result = (await this.db.execute(query)) as any;
+    // Drizzle sometimes returns an array, sometimes { rows: [...] } (pg QueryResult)
+    if (Array.isArray(result)) return result as T[];
+    if (result && Array.isArray(result.rows)) return result.rows as T[];
+    return [];
+  }
+
   /** Centralized sort expression using precomputed metric columns. */
-  private sortExpr(sortBy: SortKey) {
-    // Important: use already-computed columns in `metrics`
+  private sortExpr(sortBy: SortKey, alias: string = 'm') {
     return sql`
       CASE ${sql.param(sortBy)}
-        WHEN 'winRate' THEN metrics.win_percentage
-        WHEN 'totalWinnings' THEN metrics.total_amount_won
-        WHEN 'bettingAccuracy' THEN metrics.betting_accuracy
-        ELSE metrics.net_profit
+        WHEN 'winRate' THEN ${sql.raw(`${alias}.win_percentage`)}::numeric
+        WHEN 'totalWinnings' THEN ${sql.raw(`${alias}.total_amount_won`)}::numeric
+        WHEN 'bettingAccuracy' THEN ${sql.raw(`${alias}.betting_accuracy`)}::numeric
+        ELSE ${sql.raw(`${alias}.net_profit`)}::numeric
       END
     `;
   }
@@ -43,32 +51,30 @@ export class LeaderboardService {
       ),
       participant_stats AS (
         SELECT
-          p.${participants.userId} AS user_id,
-          COUNT(DISTINCT p.${participants.gameId}) AS games_played,
-          SUM(CASE WHEN p.${participants.isWinner} = true THEN 1 ELSE 0 END) AS games_won,
-          SUM(p.${participants.amountWon}) AS total_amount_won,
+          p.user_id AS user_id,
+          COUNT(DISTINCT p.game_id) AS games_played,
+          SUM(CASE WHEN p.is_winner = true THEN 1 ELSE 0 END) AS games_won,
+          SUM(p.amount_won) AS total_amount_won,
           -- Sum deposit per participant row to preserve prior semantics
-          SUM(g.${games.depositAmount}) AS total_amount_deposited
+          SUM(g.deposit_amount) AS total_amount_deposited
         FROM ${participants} p
-        JOIN ${games} g ON g.${games.id} = p.${participants.gameId}
-        GROUP BY p.${participants.userId}
+        JOIN ${games} g ON g.id = p.game_id
+        GROUP BY p.user_id
       ),
       per_user AS (
         SELECT
-          u.${users.id}       AS user_id,
-          u.${users.username} AS username,
-          u.${users.avatar}   AS avatar,
+          u.id       AS user_id,
+          u.username AS username,
+          u.avatar   AS avatar,
           COALESCE(ps.games_played, 0)          AS games_played,
           COALESCE(ps.games_won, 0)             AS games_won,
           COALESCE(ps.total_amount_won, 0)      AS total_amount_won,
           COALESCE(ps.total_amount_deposited,0) AS total_amount_deposited
         FROM ${users} u
-        LEFT JOIN participant_stats ps ON ps.user_id = u.${users.id}
-        WHERE u.${users.username} IS NOT NULL
-          AND u.${users.username} <> ''
-          AND EXISTS (
-            SELECT 1 FROM ${participants} p2 WHERE p2.${participants.userId} = u.${users.id}
-          )
+        LEFT JOIN participant_stats ps ON ps.user_id = u.id
+        WHERE u.username IS NOT NULL
+          AND u.username <> ''
+          AND EXISTS (SELECT 1 FROM ${participants} p2 WHERE p2.user_id = u.id)
       ),
       metrics AS (
         SELECT
@@ -82,20 +88,28 @@ export class LeaderboardService {
           COALESCE(bs.total_bets, 0)         AS total_bets,
           COALESCE(bs.total_correct_bets, 0) AS total_correct_bets,
 
-          -- Compute once, reuse
-          CASE
-            WHEN pu.games_played > 0
-            THEN ROUND(100.0 * pu.games_won::float / pu.games_played::float, 2)
-            ELSE 0
-          END AS win_percentage,
+          -- Force NUMERIC then ROUND(..., 2) to avoid 42883
+          COALESCE(
+            ROUND(
+              100::numeric
+              * pu.games_won::numeric
+              / NULLIF(pu.games_played, 0)::numeric,
+              2
+            ),
+            0
+          ) AS win_percentage,
 
-          CASE
-            WHEN COALESCE(bs.total_bets, 0) > 0
-            THEN ROUND(100.0 * COALESCE(bs.total_correct_bets, 0)::float / bs.total_bets::float, 2)
-            ELSE 0
-          END AS betting_accuracy,
+          COALESCE(
+            ROUND(
+              100::numeric
+              * COALESCE(bs.total_correct_bets, 0)::numeric
+              / NULLIF(bs.total_bets, 0)::numeric,
+              2
+            ),
+            0
+          ) AS betting_accuracy,
 
-          (pu.total_amount_won - pu.total_amount_deposited) AS net_profit
+          (pu.total_amount_won::numeric - pu.total_amount_deposited::numeric) AS net_profit
         FROM per_user pu
         LEFT JOIN betting_stats bs ON bs.user_id = pu.user_id
       )
@@ -111,13 +125,11 @@ export class LeaderboardService {
   ): Promise<LeaderboardResponseDto> {
     const offset = (page - 1) * limit;
 
-    const rows = (await this.db.execute(sql`
+    const query = sql`
       ${this.baseMetricsCte()}
       SELECT
         m.*,
         COUNT(*) OVER() AS total_users,
-
-        -- Global rank with deterministic tie-breaks
         RANK() OVER (
           ORDER BY
             ${this.sortExpr(sortBy)} DESC,
@@ -130,10 +142,12 @@ export class LeaderboardService {
         m.games_played DESC,
         m.user_id ASC
       LIMIT ${sql.param(limit)} OFFSET ${sql.param(offset)};
-    `)) as unknown as any[];
+    `;
+
+    const rows = await this.execRows<any>(query);
 
     const totalUsers = rows[0]?.total_users ? Number(rows[0].total_users) : 0;
-    const totalPages = Math.ceil(totalUsers / limit);
+    const totalPages = Math.ceil((totalUsers || 0) / limit) || 0;
 
     const usersOut: LeaderboardUserDto[] = rows.map((r: any) => ({
       id: r.user_id,
@@ -158,7 +172,7 @@ export class LeaderboardService {
     userId: string,
     sortBy: SortKey = 'netProfit',
   ): Promise<{ rank: number; user: LeaderboardUserDto } | null> {
-    const rows = (await this.db.execute(sql`
+    const query = sql`
       ${this.baseMetricsCte()}
       , ranked AS (
         SELECT
@@ -172,9 +186,10 @@ export class LeaderboardService {
         FROM metrics m
       )
       SELECT * FROM ranked WHERE user_id = ${sql.param(userId)} LIMIT 1;
-    `)) as unknown as any[];
+    `;
 
-    const r = rows[0] as any | undefined;
+    const rows = await this.execRows<any>(query);
+    const r = rows[0];
     if (!r) return null;
 
     const user: LeaderboardUserDto = {
@@ -218,7 +233,6 @@ export class LeaderboardService {
     usersWithWinnings: number;
     totalWinningsDistributed: number;
   }> {
-    // unchanged from your version
     const stats = await this.db
       .select({
         totalUsers: sql<number>`COUNT(DISTINCT ${users.id})`.as('total_users'),
@@ -241,7 +255,10 @@ export class LeaderboardService {
             THEN ${participants.userId}
           END)
         `.as('users_with_winnings'),
-        totalWinningsDistributed: sql<number>`COALESCE(SUM(${participants.amountWon}), 0)`.as('total_winnings_distributed'),
+        totalWinningsDistributed:
+          sql<number>`COALESCE(SUM(${participants.amountWon}), 0)`.as(
+            'total_winnings_distributed',
+          ),
       })
       .from(users)
       .leftJoin(participants, sql`${users.id} = ${participants.userId}`)

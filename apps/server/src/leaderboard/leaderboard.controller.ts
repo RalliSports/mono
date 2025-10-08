@@ -2,12 +2,8 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiOperation,
   ApiResponse,
-  ApiSecurity,
   ApiQuery,
 } from '@nestjs/swagger';
-import { SessionAuthGuard } from 'src/auth/auth.session.guard';
-import { UserPayload } from 'src/auth/auth.user.decorator';
-import { User } from 'src/user/dto/user-response.dto';
 import { LeaderboardResponseDto } from './dto/leaderboard-response.dto';
 import { LeaderboardService } from './leaderboard.service';
 
@@ -55,32 +51,6 @@ export class LeaderboardController {
     return this.leaderboardService.getLeaderboard(
       pageNum,
       limitNum,
-      sortCriteria,
-    );
-  }
-
-  @ApiSecurity('x-para-session')
-  @UseGuards(SessionAuthGuard)
-  @ApiOperation({ summary: 'Get current user position in leaderboard' })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    enum: ['winRate', 'totalWinnings', 'netProfit', 'bettingAccuracy'],
-    description: 'Sort criteria (default: netProfit)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User leaderboard position retrieved successfully',
-  })
-  @Get('my-position')
-  getUserLeaderboardPosition(
-    @UserPayload() user: User,
-    @Query('sortBy')
-    sortBy?: 'winRate' | 'totalWinnings' | 'netProfit' | 'bettingAccuracy',
-  ) {
-    const sortCriteria = sortBy || 'netProfit';
-    return this.leaderboardService.getUserLeaderboardPosition(
-      user.id,
       sortCriteria,
     );
   }

@@ -4,4 +4,4 @@ export { default as FilterOptions } from './FilterOptions'
 export { default as LeaderboardsList } from './LeaderboardsList'
 
 // Export types if needed
-export type { LeaderboardFilter, SportFilter } from '../page'
+export type { LeaderboardFilter } from '../page'
