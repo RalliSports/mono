@@ -32,7 +32,6 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { User } from 'src/user/dto/user-response.dto';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
@@ -42,6 +41,7 @@ import { StreamChat } from 'stream-chat';
 import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
 import { sleep } from 'src/utils';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class GamesService {
@@ -807,11 +807,11 @@ export class GamesService {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
         game.id,
-        game.gameCode as string
+        game.gameCode as string,
       );
 
       await this.notificationService.sendNotificationToUser(user.id, message);
-            return { success: true, message: 'Notification sent successfully' };
+      return { success: true, message: 'Notification sent successfully' };
     } catch (error) {
       console.error(error, 'unable to send invite');
     }
