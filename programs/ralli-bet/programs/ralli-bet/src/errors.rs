@@ -253,4 +253,10 @@ pub enum RalliError {
 
     #[msg("Ensure that we have the correct number of winner accounts")]
     IncorrectWinnerAccountCount,
+
+    #[msg("Too many accounts in this batch")]
+    TooManyAccountsInBatch,
+
+    #[msg("Too many winners in the batch")]
+    TooManyWinnersInBatch,
 }
