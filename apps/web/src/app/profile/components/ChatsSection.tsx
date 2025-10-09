@@ -8,10 +8,6 @@ import {
   ChannelPreviewUIComponentProps,
   Thread,
   useChannelStateContext,
-  ChannelHeaderProps,
-  useTranslationContext,
-  useChannelPreviewInfo, // List of user's channels/conversations
-  Avatar as DefaultAvatar,
 } from 'stream-chat-react'
 import { useProfile } from '../hooks/useProfile'
 import { useSessionToken } from '@/hooks/use-session'
@@ -19,9 +15,12 @@ import { useEffect, useState } from 'react'
 import { Channel, ChannelFilters } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
 import Image from 'next/image'
+import { useScreenSize } from '@/hooks/useScreenSize'
 
 import 'stream-chat-react/dist/css/v2/index.css'
-import { useScreenSize } from '@/hooks/useScreenSize'
+
+import { customChatStyles } from '@/styles/chat'
+
 export default function ChatsSection({
   activeChannel,
   setActiveChannel,
@@ -34,7 +33,7 @@ export default function ChatsSection({
   const { session } = useSessionToken()
   const { user } = useProfile(session || null)
   const [channels, setChannels] = useState<Channel[]>([])
-  const [hideChannelList, setHideChannelList] = useState(false)
+  const [hideChannelList, setHideChannelList] = useState(!isCurrentUser)
   const { client, getChannels, isConnectedToClient } = useChat()
   const isMobile = useScreenSize()
 
@@ -43,8 +42,24 @@ export default function ChatsSection({
       setChannels(channels ?? [])
     })
   }, [getChannels])
+
+  console.log('activeChannel', activeChannel)
+
   if (!user) {
-    return <div className="text-white">Loading...</div>
+    return (
+      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-lg flex items-center justify-center border border-[#00CED1]/30">
+            <span className="text-lg">💬</span>
+          </div>
+          <div>
+            <h3 className="text-white font-bold">Messages</h3>
+            <p className="text-slate-400 text-xs">Loading your profile...</p>
+          </div>
+        </div>
+        <div className="animate-pulse bg-slate-700/50 rounded-lg h-32"></div>
+      </div>
+    )
   }
 
   const filters = {
@@ -53,46 +68,45 @@ export default function ChatsSection({
   }
 
   if (channels.length === 0) {
-    return <div className="text-white">No channels found. Join a game to start chatting!</div>
+    return (
+      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-lg flex items-center justify-center border border-[#00CED1]/30">
+            <span className="text-lg">💬</span>
+          </div>
+          <div>
+            <h3 className="text-white font-bold">Messages</h3>
+            <p className="text-slate-400 text-xs">Your conversations will appear here</p>
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-xl p-6 border border-slate-700/30 text-center">
+          <div className="text-slate-400 mb-2">No conversations yet</div>
+          <div className="text-slate-500 text-sm">Join a game to start chatting with other players!</div>
+        </div>
+      </div>
+    )
   }
 
-  const CustomChannelHeader = (props: ChannelHeaderProps) => {
-    const { Avatar = DefaultAvatar, image: overrideImage, live, title: overrideTitle } = props
-
-    const { channel, watcher_count } = useChannelStateContext('ChannelHeader')
-    const { t } = useTranslationContext('ChannelHeader')
-    const { displayImage, displayTitle, groupChannelDisplayInfo } = useChannelPreviewInfo({
-      channel,
-      overrideImage,
-      overrideTitle,
-    })
-
-    const { member_count } = channel?.data || {}
+  const CustomChannelHeader = () => {
+    const { channel } = useChannelStateContext('ChannelHeader')
+    const channelName = channel?.data?.name || 'Direct Message'
 
     return (
-      <div className="str-chat__channel-header">
-        <button onClick={() => setHideChannelList(false)}>◀ Back</button>
-        <Avatar
-          className="str-chat__avatar--channel-header"
-          groupChannelDisplayInfo={groupChannelDisplayInfo}
-          image={displayImage}
-          name={displayTitle}
-        />
-        <div className="str-chat__channel-header-end">
-          <p className="str-chat__channel-header-title">
-            {displayTitle} {live && <span className="str-chat__header-livestream-livelabel">{t('live')}</span>}
-          </p>
-          <p className="str-chat__channel-header-info">
-            {!live && !!member_count && member_count > 0 && (
-              <>
-                {t('{{ memberCount }} members', {
-                  memberCount: member_count,
-                })}
-                ,{' '}
-              </>
-            )}
-            {t('{{ watcherCount }} online', { watcherCount: watcher_count })}
-          </p>
+      <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm border-b border-slate-700/50 p-4 flex items-center space-x-3">
+        {isMobile && (
+          <button
+            onClick={() => setHideChannelList(false)}
+            className="text-[#00CED1] hover:text-[#00CED1]/80 transition-colors duration-200 font-medium mr-2"
+          >
+            ← Back
+          </button>
+        )}
+        <div className="w-10 h-10 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-full flex items-center justify-center border border-[#00CED1]/30">
+          <span className="text-lg">💬</span>
+        </div>
+        <div className="flex-1">
+          <p className="text-white font-bold text-lg">{channelName}</p>
+          <p className="text-slate-400 text-sm">Active conversation</p>
         </div>
       </div>
     )
@@ -100,76 +114,130 @@ export default function ChatsSection({
 
   //   const sort = [{ last_message_at: -1 }]
   const CustomChannelPreview = (props: ChannelPreviewUIComponentProps) => {
-    const { channel, latestMessagePreview, unread, displayImage } = props
-    const channelName = channel.data?.name
+    const { channel, latestMessagePreview, displayImage } = props
+    // Explicitly don't use the unread prop to avoid any "0" rendering
+    const channelName = channel.data?.name || 'Direct Message'
     const handleChannelClick = () => {
       setHideChannelList(true)
       setActiveChannel(channel)
     }
 
+    const isActive = activeChannel?.id === channel.id
+
     return (
       <div
-        className={`channel-preview ${activeChannel?.id === channel.id ? 'active' : ''}`}
+        className={`
+          cursor-pointer transition-all duration-300 p-3 mx-2 my-1 rounded-lg
+          ${
+            isActive
+              ? 'bg-gradient-to-r from-[#00CED1]/20 to-blue-500/10 border border-[#00CED1]/30 shadow-lg'
+              : 'hover:bg-gradient-to-r hover:from-slate-800/40 hover:to-slate-700/40'
+          }
+        `}
         onClick={handleChannelClick}
-        style={{
-          padding: '12px',
-          borderBottom: '1px solid #eee',
-          cursor: 'pointer',
-          backgroundColor: activeChannel?.id === channel.id ? '#f0f0f0' : 'white',
-        }}
       >
-        <div className="channel-info">
-          <Image src={displayImage || '/images/pfp-1.svg'} alt={channelName || 'Channel'} width={32} height={32} />
-          <strong>{channelName || 'Direct Message'}</strong>
-          {unread && unread > 0 && <span className="unread-count">({unread})</span>}
-          <div style={{ fontSize: '12px', color: '#666' }}>{latestMessagePreview || 'No messages yet'}</div>
+        <div className="flex items-center space-x-3">
+          <div className="relative flex-shrink-0">
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-600/30 bg-slate-700">
+              <Image
+                src={displayImage || '/images/pfp-1.svg'}
+                alt={channelName}
+                width={48}
+                height={48}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className={`font-semibold text-sm truncate ${isActive ? 'text-[#00CED1]' : 'text-white'}`}>
+              {channelName}
+            </h4>
+            <div className="text-slate-400 text-xs truncate">{latestMessagePreview || 'No messages yet'}</div>
+          </div>
         </div>
       </div>
     )
   }
   return (
-    <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
-      <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-4 flex items-center justify-center">
-          <span className="text-lg">💬</span>
-        </span>
-        Chats
-      </h3>
-      <div className="space-y-4">
-        {isConnectedToClient && (
-          <div style={{ display: 'flex', height: '100vh' }}>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: customChatStyles }} />
+      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center space-x-3 p-6 border-b border-slate-700/50">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-lg flex items-center justify-center border border-[#00CED1]/30">
+            <span className="text-lg">💬</span>
+          </div>
+          <div>
+            <h3 className="text-white font-bold text-lg">Messages</h3>
+            <p className="text-slate-400 text-xs">Connect with other players</p>
+          </div>
+        </div>
+
+        {/* Chat Content */}
+        <div className="h-[600px] custom-chat-container">
+          {isConnectedToClient ? (
             <Chat client={client}>
-              {/* Left sidebar - Channel List */}
-              {isCurrentUser && (!isMobile || (isMobile && !hideChannelList)) && (
-                <div style={{ width: '300px', borderRight: '1px solid #ddd' }}>
-                  <div className="bg-white p-2 text-xl"> Select a conversation</div>
-                  <ChannelList
-                    filters={filters as ChannelFilters}
-                    // sort={sort}
-                    // onChannelSelect={setActiveChannel}
-                    Preview={(props) => <CustomChannelPreview {...props} />} // Optional custom preview
-                  />
-                </div>
-              )}
-
-              {/* Main chat area */}
-              <div style={{ flex: 1 }}>
-                {activeChannel && (!isMobile || (isMobile && hideChannelList)) && (
-                  <ChannelComponent channel={activeChannel}>
-                    <Window>
-                      <CustomChannelHeader />
-
-                      <MessageList />
-                      <MessageInput />
-                    </Window>
-                    <Thread />
-                  </ChannelComponent>
+              <div className="flex h-full">
+                {/* Channel List */}
+                {isCurrentUser && (!isMobile || (isMobile && !hideChannelList)) && (
+                  <div className="w-80 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm border-r border-slate-700/50">
+                    <div className="p-6 border-b border-slate-700/30">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-lg flex items-center justify-center border border-[#00CED1]/30">
+                          <span className="text-sm">💬</span>
+                        </div>
+                        <div>
+                          <h4 className="text-white font-semibold">Conversations</h4>
+                          <p className="text-slate-400 text-xs">Select a chat to continue</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="overflow-y-auto py-2">
+                      <ChannelList
+                        filters={filters as ChannelFilters}
+                        Preview={(props) => <CustomChannelPreview {...props} />}
+                      />
+                    </div>
+                  </div>
                 )}
+
+                {/* Main Chat */}
+                <div className="flex-1">
+                  {activeChannel && (!isMobile || (isMobile && hideChannelList)) ? (
+                    <ChannelComponent channel={activeChannel}>
+                      <Window>
+                        <CustomChannelHeader />
+                        <MessageList />
+                        <MessageInput />
+                      </Window>
+                      <Thread />
+                    </ChannelComponent>
+                  ) : (
+                    <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-700/40 to-slate-800/40">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-2xl flex items-center justify-center border border-[#00CED1]/30 mx-auto mb-4">
+                          <span className="text-2xl">💬</span>
+                        </div>
+                        <h4 className="text-white font-medium mb-2">No conversation selected</h4>
+                        <p className="text-slate-400 text-sm">
+                          Choose a conversation from the sidebar to start chatting
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </Chat>
-          </div>
-        )}
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin w-8 h-8 border-2 border-[#00CED1] border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-slate-400">Connecting to chat...</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

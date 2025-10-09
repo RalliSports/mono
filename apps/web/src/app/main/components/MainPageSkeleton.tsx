@@ -9,7 +9,7 @@ export default function MainPageSkeleton() {
       <TopNavigationSkeleton />
 
       {/* Filters and Search Skeleton */}
-      <FilterBarSkeleton />
+      {/* <FilterBarSkeleton /> */}
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts Skeleton */}

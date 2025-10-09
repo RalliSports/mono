@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { athletes, lines, matchups, stats } from '@repo/db';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
@@ -14,10 +14,10 @@ import { CreateLineDto } from './dto/create-line.dto';
 import { ResolveLineDto } from './dto/resolve-line.dto';
 import { UpdateLineDto } from './dto/update-line.dto';
 import { PublicKey } from '@solana/web3.js';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
 import { line } from 'drizzle-orm/pg-core';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class LinesService {
@@ -83,6 +83,12 @@ export class LinesService {
           adjustedTimestamp,
           new PublicKey(user.walletAddress),
         );
+        await this.db
+          .update(lines)
+          .set({
+            createdTxnSignature: txn,
+          })
+          .where(eq(lines.id, inserted.id));
 
         if (!txn || typeof txn !== 'string') {
           throw new Error(
@@ -263,6 +269,25 @@ export class LinesService {
     });
   }
 
+  async getLinesByMatchupId(matchupId: string) {
+    return await this.db.query.lines.findMany({
+      where: and(eq(lines.matchupId, matchupId)),
+      with: {
+        athlete: {
+          columns: {
+            name: true,
+          },
+        },
+        stat: {
+          columns: {
+            name: true,
+            statOddsName: true,
+          },
+        },
+      },
+    });
+  }
+
   async updateLine(id: string, dto: UpdateLineDto) {
     const res = await this.db
       .update(lines)
@@ -272,6 +297,7 @@ export class LinesService {
         matchupId: dto.matchupId?.toString(),
         predictedValue: dto.predictedValue?.toString(),
         status: dto.status,
+        currentValue: dto.currentValue?.toString(),
       })
       .where(eq(lines.id, id))
       .returning();
@@ -348,79 +374,79 @@ export class LinesService {
     dto: (ResolveLineDto & { athleteName: string; statName: string })[],
     user: User,
   ) {
-    return await this.db.transaction(async (tx) => {
-      let txn: string;
+    // First, try the bulk transaction approach
+    try {
+      return await this.db.transaction(async (tx) => {
+        const linesInformation: {
+          lineId: number;
+          predictedValue: number;
+          actualValue: number;
+          shouldRefundBettors: boolean;
+        }[] = [];
 
-      const linesInformation: {
-        lineId: number;
-        predictedValue: number;
-        actualValue: number;
-        shouldRefundBettors: boolean;
-      }[] = [];
-      for (const [index, lineDataForResole] of dto.entries()) {
-        const lineData = await tx.query.lines.findFirst({
-          where: eq(lines.id, lineDataForResole.lineId),
-        });
+        for (const lineDataForResole of dto) {
+          const lineData = await tx.query.lines.findFirst({
+            where: eq(lines.id, lineDataForResole.lineId),
+          });
 
-        // Check if line exists and is not resolved
-        if (!lineData) {
-          console.warn(
-            `Line not found for ${lineDataForResole.lineId}, athlete: ${lineDataForResole.athleteName}, stat: ${lineDataForResole.statName}`,
-          );
-          continue;
-        }
-        if (lineData.actualValue) {
-          console.warn(
-            `Line already resolved for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
-          );
-          continue;
-        }
-        if (!lineData.predictedValue) {
-          console.warn(
-            `Line not predicted for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
-          );
-          continue;
-        }
-        if (
-          lineDataForResole.actualValue === null ||
-          lineDataForResole.actualValue === undefined
-        ) {
-          console.warn(
-            `Actual value not provided for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
-          );
-          continue;
-        }
-        const lineCreatedAt = lineData.createdAt;
-        if (!lineCreatedAt) {
-          console.warn(
-            `Line not created for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
-          );
-          continue;
-        }
-        const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
-        // Update line to mark as resolved
-        const [inserted] = await tx
-          .update(lines)
-          .set({
-            actualValue: lineDataForResole.actualValue.toString(),
-            isHigher:
-              lineDataForResole.actualValue && lineData.predictedValue
-                ? lineDataForResole.actualValue >
-                  Number(lineData.predictedValue)
-                : null,
-            status: LineStatus.RESOLVED,
-          })
-          .where(eq(lines.id, lineDataForResole.lineId))
-          .returning();
-        linesInformation.push({
-          lineId: lineCreatedAtTimestamp,
-          predictedValue: Number(lineData.predictedValue),
-          actualValue: lineDataForResole.actualValue,
-          shouldRefundBettors: false,
-        });
-      }
+          // Check if line exists and is not resolved
+          if (!lineData) {
+            console.warn(
+              `Line not found for ${lineDataForResole.lineId}, athlete: ${lineDataForResole.athleteName}, stat: ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          if (lineData.actualValue) {
+            console.warn(
+              `Line already resolved for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          if (!lineData.predictedValue) {
+            console.warn(
+              `Line not predicted for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          if (
+            lineDataForResole.actualValue === null ||
+            lineDataForResole.actualValue === undefined
+          ) {
+            console.warn(
+              `Actual value not provided for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          const lineCreatedAt = lineData.createdAt;
+          if (!lineCreatedAt) {
+            console.warn(
+              `Line not created for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
+          // Update line to mark as resolved
+          await tx
+            .update(lines)
+            .set({
+              actualValue: lineDataForResole.actualValue.toString(),
+              isHigher:
+                lineDataForResole.actualValue && lineData.predictedValue
+                  ? lineDataForResole.actualValue >
+                    Number(lineData.predictedValue)
+                  : null,
+              status: LineStatus.RESOLVED,
+            })
+            .where(eq(lines.id, lineDataForResole.lineId));
 
-      try {
+          linesInformation.push({
+            lineId: lineCreatedAtTimestamp,
+            predictedValue: Number(lineData.predictedValue),
+            actualValue: lineDataForResole.actualValue,
+            shouldRefundBettors: false,
+          });
+        }
+
         const { success, txSig, error } =
           await this.anchor.bulkResolveLineInstruction(
             linesInformation,
@@ -429,7 +455,6 @@ export class LinesService {
 
         if (!success || typeof txSig !== 'string') {
           if (error?.includes('LineAlreadyResolved')) {
-            // Ix went through but backend timed out, just update BE and return
             console.warn('Line already resolved');
             return { success: true };
           }
@@ -437,19 +462,48 @@ export class LinesService {
             'Invalid transaction ID returned from bulkResolveLineInstruction',
           );
         }
-      } catch (error) {
-        console.error(
-          'Anchor instruction failed, rolling back transaction:',
-          error,
-        );
-        await tx.rollback();
-        // Throw to rollback DB transaction
-        throw new BadRequestException(
-          "'Anchor instruction failed, rolling back lines resolution",
-          error,
-        );
+
+        return { success: true };
+      });
+    } catch (bulkError) {
+      console.error(
+        'Bulk resolve failed, falling back to individual resolution:',
+        bulkError,
+      );
+
+      // Fallback: resolve each line individually
+      const results = {
+        successful: [] as string[],
+        failed: [] as string[],
+      };
+
+      for (const lineDataForResole of dto) {
+        try {
+          await this.resolveLine(
+            lineDataForResole.lineId,
+            lineDataForResole,
+            user,
+          );
+          results.successful.push(lineDataForResole.lineId);
+          console.log(`✓ Resolved line ${lineDataForResole.lineId}`);
+        } catch (error) {
+          results.failed.push(lineDataForResole.lineId);
+          console.error(
+            `✗ Failed to resolve line ${lineDataForResole.lineId}:`,
+            error.message,
+          );
+        }
       }
-      return { success: true };
-    });
+
+      console.log(
+        `Bulk resolve fallback complete: ${results.successful.length} succeeded, ${results.failed.length} failed`,
+      );
+
+      return {
+        success: results.successful.length > 0,
+        message: `Resolved ${results.successful.length}/${dto.length} lines individually`,
+        ...results,
+      };
+    }
   }
 }

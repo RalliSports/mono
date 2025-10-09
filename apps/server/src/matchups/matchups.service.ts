@@ -1,6 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { matchups, stats, athletes, lines, lineStatusEnum } from '@repo/db';
-import { and, eq, gt, lt, gte, lte, or, inArray, exists } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  gt,
+  lt,
+  gte,
+  lte,
+  or,
+  inArray,
+  exists,
+  isNull,
+  not,
+} from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -31,6 +43,7 @@ import {
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 import { sleep } from 'src/utils';
 import { LineStatus } from 'src/lines/enum/lines';
+import { line, PgColumn } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class MatchupsService {
@@ -96,19 +109,16 @@ export class MatchupsService {
           },
         },
       },
-      where: and(
-        eq(matchups.status, MatchupStatus.SCHEDULED),
-        exists(
-          this.db
-            .select()
-            .from(lines)
-            .where(
-              and(
-                eq(lines.matchupId, matchups.id),
-                eq(lines.status, LineStatus.OPEN),
-              ),
+      where: exists(
+        this.db
+          .select()
+          .from(lines)
+          .where(
+            and(
+              eq(lines.status, LineStatus.OPEN),
+              eq(lines.matchupId, matchups.id),
             ),
-        ),
+          ),
       ),
     });
   }
@@ -171,6 +181,20 @@ export class MatchupsService {
             status: true,
           },
         },
+        homeTeam: {
+          columns: {
+            id: true,
+            name: true,
+            espnTeamId: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            id: true,
+            name: true,
+            espnTeamId: true,
+          },
+        },
       },
       where: and(
         eq(matchups.status, MatchupStatus.IN_PROGRESS),
@@ -182,6 +206,28 @@ export class MatchupsService {
   async getMatchupById(id: string) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, id),
+      with: {
+        lines: {
+          columns: {
+            id: true,
+            status: true,
+          },
+        },
+        homeTeam: {
+          columns: {
+            id: true,
+            espnTeamId: true,
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            id: true,
+            espnTeamId: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!matchup) throw new NotFoundException('Matchup not found');
@@ -273,6 +319,21 @@ export class MatchupsService {
           continue;
         }
 
+        const possibleExistingLine = await this.db.query.lines.findFirst({
+          where: and(
+            eq(lines.athleteId, athleteId),
+            eq(lines.statId, statId),
+            eq(lines.matchupId, matchup?.id!),
+            eq(lines.status, LineStatus.OPEN),
+          ),
+        });
+        if (possibleExistingLine) {
+          console.warn(
+            `Line already exists for ${matchup?.espnEventId} ${athleteId} ${statId}`,
+          );
+          continue;
+        }
+
         formattedLines.push({
           statId: statId,
           athleteId: athleteId,
@@ -313,6 +374,7 @@ export class MatchupsService {
       statName: string;
     })[] = [];
     for (const matchup of matchupsToResolve) {
+      const { homeTeamId, awayTeamId } = matchup;
       if (!matchup.espnEventId) {
         console.warn(`Matchup ${matchup.id} missing ESPN event ID`);
         continue;
@@ -330,27 +392,16 @@ export class MatchupsService {
         continue;
       }
 
-      const allLinesInThisMatchup = await this.db.query.lines.findMany({
-        where: and(eq(lines.matchupId, matchup.id)),
-        with: {
-          athlete: {
-            columns: {
-              name: true,
-            },
-          },
-          stat: {
-            columns: {
-              name: true,
-              statOddsName: true,
-            },
-          },
-        },
-      });
+      const allLinesInThisMatchup = await this.linesService.getLinesByMatchupId(
+        matchup.id,
+      );
       const allAthletesInThisMatchupWithLines =
         await this.db.query.athletes.findMany({
-          where: or(
-            eq(athletes.teamId, matchup?.homeTeamId!),
-            eq(athletes.teamId, matchup?.awayTeamId!),
+          where: and(
+            or(
+              eq(athletes.teamId, homeTeamId!),
+              eq(athletes.teamId, awayTeamId!),
+            ),
             inArray(
               athletes.id,
               allLinesInThisMatchup.map((line) => line.athleteId ?? ''),
@@ -362,21 +413,19 @@ export class MatchupsService {
       );
 
       for (const athlete of allAthletesInThisMatchupWithLines) {
-        const lines = allLinesInThisMatchup.filter(
+        const athleteName = athlete.name;
+        const allLinesForThisAthlete = allLinesInThisMatchup.filter(
           (line) => line.athleteId === athlete.id,
         );
         const outcomePerAthlete = matchupBoxScore.athletes.find(
-          (athlete) => athlete.name === athlete.name,
+          (athlete) => athlete.name === athleteName,
         );
         if (!outcomePerAthlete) {
           continue;
         }
-        for (const lineData of lines) {
+        for (const lineData of allLinesForThisAthlete) {
           const stat = lineData.stat;
           if (!stat) {
-            // console.warn(
-            //   `Stat "${linesDataPerAthlete}" not found for ${matchup.espnEventId}`,
-            // );
             continue;
           }
           const actualValue = outcomePerAthlete.lines[stat.statOddsName!];

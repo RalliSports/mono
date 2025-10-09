@@ -1,6 +1,6 @@
 'use client'
 
-import { FriendsServiceGetFollowers, FriendsServiceGetFollowing, GamesServiceFindOne } from '@repo/server'
+import { FriendsServiceGetFollowers, FriendsServiceGetFollowing } from '@repo/server'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient, useApiWithAuth } from './base'
 
@@ -10,10 +10,10 @@ export function useFriends(session: string, userId: string) {
 
   const followerQuery = useQuery({
     queryKey: ['followers', userId],
-    queryFn: () =>
-      apiClient.get<FriendsServiceGetFollowers[]>(`/api/friends/followers?userId=${userId}`),
+    queryFn: () => apiClient.get<FriendsServiceGetFollowers[]>(`/api/friends/followers?userId=${userId}`),
     staleTime: 60 * 1000, // 1 minute
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
+    enabled: !!userId,
   })
 
   const followingQuery = useQuery({
@@ -25,6 +25,7 @@ export function useFriends(session: string, userId: string) {
         },
       }),
     staleTime: 30 * 1000, // 30 seconds
+    enabled: !!userId,
   })
 
   const isFollowingQuery = useQuery({
@@ -36,6 +37,7 @@ export function useFriends(session: string, userId: string) {
         },
       }),
     staleTime: 30 * 1000, // 30 seconds
+    enabled: !!userId,
   })
 
   const toggleMutation = useMutation({

@@ -9,7 +9,7 @@ pub mod state;
 use instructions::*;
 use state::*;
 
-declare_id!("GpTLdZGPWVx81HhpQ4fzLzKagE4ZQgeG56d9vf5QDLHG");
+declare_id!("CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN");
 
 #[program]
 pub mod ralli_bet {
@@ -92,10 +92,8 @@ pub mod ralli_bet {
         ctx: Context<'_, '_, 'info, 'info, ResolveGame<'info>>,
         fee_percentage: u16,
     ) -> Result<()> {
-        ctx.accounts.resolve_game(
-            fee_percentage,
-            ctx.remaining_accounts,
-        )
+        ctx.accounts
+            .resolve_game(fee_percentage, ctx.remaining_accounts)
     }
 
     pub fn resolve_game_batch<'info>(
@@ -113,13 +111,14 @@ pub mod ralli_bet {
         ctx: Context<UpdateLine>,
         line_seed: u64,
         new_predicted_value: f64,
-        should_refund_bettors: bool
+        should_refund_bettors: bool,
     ) -> Result<()> {
-        ctx.accounts.update_line(line_seed, new_predicted_value, should_refund_bettors)
+        ctx.accounts
+            .update_line(line_seed, new_predicted_value, should_refund_bettors)
     }
 
     pub fn calculate_correct<'info>(
-        ctx: Context<'_, '_, 'info, 'info, CalculateCorrect<'info>>
+        ctx: Context<'_, '_, 'info, 'info, CalculateCorrect<'info>>,
     ) -> Result<()> {
         ctx.accounts.calculate_correct(ctx.remaining_accounts)
     }
@@ -129,7 +128,7 @@ pub mod ralli_bet {
     ) -> Result<()> {
         ctx.accounts.calculate_winners(ctx.remaining_accounts)
     }
-    
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }

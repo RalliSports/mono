@@ -121,31 +121,30 @@ impl<'info> ResolveGame<'info> {
             return Ok(());
         }
 
-        // Handle edge case where no one wins (everyone loses)
+        // Handle edge case where no one wins (everyone loses/ties)
         if number_of_winners == 0 {
-            // All money goes to treasury as fees
-            let total_treasury_amount = game_escrow.total_amount;
-            
-            if total_treasury_amount > 0 {
-                let cpi_program = self.token_program.to_account_info();
-                let cpi_accounts = TransferChecked {
-                    from: self.game_vault.to_account_info(),
-                    to: self.treasury_vault.to_account_info(),
-                    authority: game_account_info.clone(),
-                    mint: self.mint.to_account_info(),
-                };
+        // Return everyone's money, no fees
+        // Note: remaining_accounts should contain all player token accounts in this case
+            for player_account in winner_accounts.iter() {
+            let cpi_program = self.token_program.to_account_info();
+            let cpi_accounts = TransferChecked {
+                from: self.game_vault.to_account_info(),
+                to: player_account.clone(),
+                authority: game_account_info.clone(),
+                mint: self.mint.to_account_info(),
+            };
 
-                let seeds = &["game".as_bytes(), &game_id.to_le_bytes(), &[game_bump]];
-                let signer_seeds = &[&seeds[..]];
-                let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-                
-                transfer_checked(cpi_ctx, total_treasury_amount, self.mint.decimals)?;
-            }
-
-            game_escrow.total_amount = 0;
-            game.status = GameStatus::Resolved;
-            return Ok(());
+            let seeds = &["game".as_bytes(), &game_id.to_le_bytes(), &[game_bump]];
+            let signer_seeds = &[&seeds[..]];
+            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        
+            transfer_checked(cpi_ctx, game.entry_fee, self.mint.decimals)?;
         }
+
+        game_escrow.total_amount = 0;
+        game.status = GameStatus::Resolved;
+        return Ok(());
+    }
 
         // Normal case: some winners, some losers
         // Use your fee formula:

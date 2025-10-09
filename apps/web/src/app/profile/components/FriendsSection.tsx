@@ -2,6 +2,7 @@ import { useFriends } from '@/hooks/api/use-friend'
 import { useState } from 'react'
 import FollowButton from './FollowButton'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Props {
   currentUserId: string
@@ -47,10 +48,12 @@ export default function FriendsSection({ currentUserId, session }: Props) {
             <Link href={`/profile?userId=${friend.followingId}`}>
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <img
+                  <Image
                     src={friend.following.avatar ?? ''}
                     alt={friend.following.firstName ?? ''}
                     className="w-8 h-8 rounded-full"
+                    width={32}
+                    height={32}
                   />
                 </div>
                 <div>
@@ -73,10 +76,12 @@ export default function FriendsSection({ currentUserId, session }: Props) {
             <Link href={`/profile?userId=${friend.followerId}`}>
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <img
+                  <Image
                     src={friend.follower.avatar ?? ''}
                     alt={friend.follower.firstName ?? ''}
                     className="w-8 h-8 rounded-full"
+                    width={32}
+                    height={32}
                   />
                 </div>
                 <div>

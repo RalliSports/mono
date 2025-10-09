@@ -16,7 +16,7 @@ export default function TabNavigation({ activeTab, setActiveTab, isUserInGame }:
   ]
 
   if (!isUserInGame) {
-    tabs.splice(1, 1)
+    tabs.splice(2, 1) // Remove chats tab when not in game
   }
 
   return (

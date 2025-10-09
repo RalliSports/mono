@@ -8,6 +8,7 @@ export default function ResolveLinesTab() {
   const linesQuery = useLines()
 
   const lines = (linesQuery.query.data || []) as LinesServiceGetAllLinesInstance[]
+  const filteredLines = lines.filter((line) => line.actualValue === null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSport, setSelectedSport] = useState('')
 
@@ -44,7 +45,7 @@ export default function ResolveLinesTab() {
 
       {/* Lines List */}
       <div className="space-y-4">
-        {lines.map((line) => (
+        {filteredLines.map((line) => (
           <LineCard line={line} key={line.id} />
         ))}
       </div>
