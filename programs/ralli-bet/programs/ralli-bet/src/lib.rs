@@ -98,6 +98,17 @@ pub mod ralli_bet {
         )
     }
 
+    pub fn resolve_game_batch<'info>(
+        ctx: Context<'_, '_, 'info, 'info, ResolveGameBatch<'info>>,
+        fee_percentage: u16,
+        batch_index: u32,
+    ) -> Result<()> {
+        ctx.accounts.resolve_game_batch(
+            fee_percentage,
+            batch_index,
+            ctx.remaining_accounts,
+        )
+    }
     pub fn update_line(
         ctx: Context<UpdateLine>,
         line_seed: u64,

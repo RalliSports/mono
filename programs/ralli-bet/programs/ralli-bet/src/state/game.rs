@@ -20,6 +20,7 @@ pub struct Game {
     pub num_winners: u32,
     pub correct_votes_to_be_winner: u8,
     pub calculation_complete: bool,
+    pub payout_progress: u32,
     pub bump: u8,
 }
 
@@ -33,6 +34,7 @@ pub struct GameLine {
 pub enum GameStatus {
     Open,
     Locked,
+    Resolving,
     Resolved,
     Cancelled,
 }
@@ -43,6 +45,7 @@ impl core::fmt::Display for GameStatus {
             GameStatus::Open => write!(f, "Open"),
             GameStatus::Cancelled => write!(f, "Cancelled"),
             GameStatus::Locked => write!(f, "Locked"),
+            GameStatus::Resolving => write!(f, "Resolving"),
             GameStatus::Resolved => write!(f, "Resolved"),
         }
     }
