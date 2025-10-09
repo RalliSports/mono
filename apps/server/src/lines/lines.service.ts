@@ -18,6 +18,7 @@ import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
 import { line } from 'drizzle-orm/pg-core';
+import { UserMockForAutoLinesDto } from 'src/user/dto/user-mock-for-auto-lines.dto';
 
 @Injectable()
 export class LinesService {
@@ -110,7 +111,7 @@ export class LinesService {
     });
   }
 
-  async bulkCreateLines(dto: CreateLineDto[], user: User) {
+  async bulkCreateLines(dto: CreateLineDto[], user: UserMockForAutoLinesDto) {
     return await this.db.transaction(async (tx) => {
       let txn: string;
 
@@ -176,7 +177,6 @@ export class LinesService {
         });
         insertedLines.push(inserted);
       }
-
       try {
         txn = await this.anchor.bulkCreateLineInstruction(
           linesInformation,
@@ -433,7 +433,7 @@ export class LinesService {
               isHigher:
                 lineDataForResole.actualValue && lineData.predictedValue
                   ? lineDataForResole.actualValue >
-                    Number(lineData.predictedValue)
+                  Number(lineData.predictedValue)
                   : null,
               status: LineStatus.RESOLVED,
             })

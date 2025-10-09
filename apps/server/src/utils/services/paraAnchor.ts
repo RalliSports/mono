@@ -32,9 +32,9 @@ import { RalliBet } from '../idl/ralli_bet';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 const ADMIN_KEYPAIR_JSON = process.env.ADMIN_KEYPAIR_JSON;
-
 const secretKey = Uint8Array.from(JSON.parse(ADMIN_KEYPAIR_JSON!));
 const adminKeypair = Keypair.fromSecretKey(secretKey);
+export const ADMIN_WALLET_PUBLIC_KEY: PublicKey = adminKeypair.publicKey;
 
 export class ParaAnchor {
   private solanaConnection: Connection;
@@ -94,21 +94,26 @@ export class ParaAnchor {
       },
     );
 
+    // returnig provider based on useAdminSigner flag
+    return this.paraProvider;
+  }
+
+  getServerAdminProvider(): AnchorProvider {
     // Initialize Admin signer provider
     this.adminProvider = new AnchorProvider(
       this.solanaConnection,
       new NodeWallet(adminKeypair),
       { commitment: 'confirmed' },
     );
-
-    // returnig provider based on useAdminSigner flag
-    return useAdminSigner ? this.adminProvider : this.paraProvider;
+    return this.adminProvider;
   }
 
   // Returns an Anchor Program instance
 
   async getProgram(useAdminSigner = false): Promise<Program<RalliBet>> {
-    const provider = await this.getProvider(useAdminSigner);
+    const provider = useAdminSigner
+      ? this.getServerAdminProvider()
+      : this.getProvider();
 
     return new Program<RalliBet>(IDL as Idl, provider);
   }
@@ -252,7 +257,7 @@ export class ParaAnchor {
     }[],
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(false); // useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
       const _lineId = new BN(line.timestamp);
@@ -309,7 +314,6 @@ export class ParaAnchor {
       );
 
       console.log(txSig, 'transaction signature');
-
       return txSig;
     } catch (error) {
       console.error('Transaction Error:', error);
@@ -833,7 +837,7 @@ export class ParaAnchor {
       console.log(txSig, 'transaction signature');
 
       return txSig;
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async getGamePDA(gameId: string, programId: PublicKey): Promise<PublicKey> {

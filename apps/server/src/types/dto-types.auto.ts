@@ -1,4 +1,5 @@
 // DTO Types - Auto-generated from DTO files
+export type UserMockForAutoLinesDtoType = InstanceType<typeof import('../user/dto/user-mock-for-auto-lines.dto.ts').UserMockForAutoLinesDto>;
 export type UpdateUserDtoType = InstanceType<typeof import('../user/dto/update-user.dto.ts').UpdateUserDto>;
 export type UpdateUserEmailDtoType = InstanceType<typeof import('../user/dto/update-user.dto.ts').UpdateUserEmailDto>;
 export type SendNotificationDtoType = InstanceType<typeof import('../user/dto/send-notification.dto.ts').SendNotificationDto>;
