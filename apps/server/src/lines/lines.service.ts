@@ -18,7 +18,7 @@ import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
 import { line } from 'drizzle-orm/pg-core';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
-import { UserMockForAutoLinesDto } from 'src/user/dto/user-mock-for-auto-lines.dto';
+import { UserAutoLinesDto } from 'src/user/dto/user-auto-lines.dto';
 
 @Injectable()
 export class LinesService {
@@ -111,7 +111,7 @@ export class LinesService {
     });
   }
 
-  async bulkCreateLines(dto: CreateLineDto[], user: UserMockForAutoLinesDto) {
+  async bulkCreateLines(dto: CreateLineDto[], user: UserAutoLinesDto) {
     return await this.db.transaction(async (tx) => {
       let txn: string;
 

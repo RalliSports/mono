@@ -19,7 +19,7 @@ import { MatchupStatus } from './enum/matchups';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { NFLBettingData } from './cron-matchup/types/oddsApiTypes';
 import { LinesService } from 'src/lines/lines.service';
-import { UserMockForAutoLinesDto } from 'src/user/dto/user-mock-for-auto-lines.dto';
+import { UserAutoLinesDto } from 'src/user/dto/user-auto-lines.dto';
 import { User } from 'src/user/dto/user-response.dto';
 import {
   AMERICAN_FOOTBALL_LABEL,
@@ -274,7 +274,7 @@ export class MatchupsService {
     return matchup;
   }
 
-  async createLinesForMatchup(dto: CreateLinesDto, user: UserMockForAutoLinesDto) {
+  async createLinesForMatchup(dto: CreateLinesDto, user: UserAutoLinesDto) {
     const matchupId = dto.matchupId;
     if (!matchupId) {
       console.warn('Matchup id is required');

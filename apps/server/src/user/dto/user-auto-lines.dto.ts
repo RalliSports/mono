@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, } from 'class-validator';
 
-export class UserMockForAutoLinesDto {
+export class UserAutoLinesDto {
     @ApiProperty()
     @IsString()
     walletAddress: string;

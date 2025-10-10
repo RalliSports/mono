@@ -23,7 +23,7 @@ export class MatchupCreateLinesService {
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async handleCron() {
         this.logger.log('Running matchup create lines cron job...');
-        const UPTO_DAYS = 15;//Upto (N) of days in future to create lines for
+        const UPTO_DAYS = 3;//Upto (N) of days in future to create lines for
         const NOW = new Date();
         const UPTO_DATE = new Date();
         UPTO_DATE.setDate(NOW.getDate() + UPTO_DAYS);
