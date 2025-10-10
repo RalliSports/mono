@@ -3,15 +3,12 @@ import { matchups, stats, athletes, lines, lineStatusEnum } from '@repo/db';
 import {
   and,
   eq,
-  gt,
   lt,
   gte,
   lte,
   or,
   inArray,
-  exists,
-  isNull,
-  not,
+  exists
 } from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
@@ -22,6 +19,7 @@ import { MatchupStatus } from './enum/matchups';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { NFLBettingData } from './cron-matchup/types/oddsApiTypes';
 import { LinesService } from 'src/lines/lines.service';
+import { UserAutoLinesDto } from 'src/user/dto/user-auto-lines.dto';
 import { User } from 'src/user/dto/user-response.dto';
 import {
   AMERICAN_FOOTBALL_LABEL,
@@ -44,6 +42,7 @@ import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 import { sleep } from 'src/utils';
 import { LineStatus } from 'src/lines/enum/lines';
 import { line, PgColumn } from 'drizzle-orm/pg-core';
+import { LinesCreationSuccessOutput } from './cron-matchup/types/lines-creation-success-outpot.type';
 
 @Injectable()
 export class MatchupsService {
@@ -52,7 +51,7 @@ export class MatchupsService {
     private readonly authService: AuthService,
     private readonly linesService: LinesService,
     private readonly statsService: StatsService,
-  ) {}
+  ) { }
 
   async getAllMatchups() {
     return this.db.query.matchups.findMany({
@@ -275,15 +274,36 @@ export class MatchupsService {
     return matchup;
   }
 
-  async createLinesForMatchup(dto: CreateLinesDto, user: User) {
+  async createLinesForMatchup(dto: CreateLinesDto, user: UserAutoLinesDto) {
+    const matchupId = dto.matchupId;
+    if (!matchupId) {
+      console.warn('Matchup id is required');
+      return [];
+    }
     const matchup = await this.db.query.matchups.findFirst({
-      where: eq(matchups.id, dto.matchupId),
+      where: eq(matchups.id, matchupId),
+      with: {
+        homeTeam: {
+          columns: {
+            abbreviation: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            abbreviation: true,
+          },
+        },
+      },
     });
     const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
 
     const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
       res.json(),
     );
+    if (!linesResponse) {
+      console.warn('No lines found for matchup: ', matchupId);
+      return [];
+    }
     const allAthletes = await this.db.query.athletes.findMany({
       where: or(
         eq(athletes.teamId, matchup?.homeTeamId!),
@@ -294,6 +314,11 @@ export class MatchupsService {
     const allStats = await this.statsService.getAllStats();
 
     const formattedLines: CreateLineDto[] = [];
+    const linesForCRONlogger: LinesCreationSuccessOutput[] = [];
+    if (!linesResponse?.bookmakers[0]?.markets) {
+      console.warn('No bookmakers found for matchup: ', matchupId);
+      return [];
+    }
 
     for (const market of linesResponse.bookmakers[0].markets) {
       const outcomes = market.outcomes;
@@ -340,6 +365,16 @@ export class MatchupsService {
           matchupId: matchup?.id!,
           predictedValue: outcome.point,
         });
+
+        //returning data for CRON logger
+        linesForCRONlogger.push({
+          statName: market.key,
+          athleteName: outcome.description,
+          predictedValue: outcome.point,
+          matchupId: matchup?.id!,
+          homeTeam: matchup?.homeTeam?.abbreviation!,
+          awayTeam: matchup?.awayTeam?.abbreviation!,
+        });
       }
     }
 
@@ -350,15 +385,25 @@ export class MatchupsService {
       chunks.push(formattedLines.slice(i, i + CHUNK_SIZE));
     }
 
-    // Process each chunk sequentially with 500ms delay between chunks
-    for (let i = 0; i < chunks.length; i++) {
-      if (i > 0) {
-        await sleep(500);
+    try {
+      // Process each chunk sequentially with 500ms delay between chunks
+      for (let i = 0; i < chunks.length; i++) {
+        if (i > 0) {
+          await sleep(500);
+        }
+        await this.linesService.bulkCreateLines(chunks[i], user);
+        await this.db
+          .update(matchups)
+          .set({ ifLinesCreated: true })
+          .where(eq(matchups.id, matchupId));
       }
-      await this.linesService.bulkCreateLines(chunks[i], user);
+      console.log('Lines created successfully');
+      return linesForCRONlogger;
+    } catch (error) {
+      console.error('Error creating lines:', error);
+      return [];
     }
 
-    return { message: 'Lines Created Successfully' };
   }
 
   async resolveLinesForMatchup(dto: ResolveLinesDto, user: User) {
