@@ -87,7 +87,7 @@ export class NotificationService {
 
   // 🎮 Game Resolved
   buildGameResolvedMessage(gameId: string, title: string): NotificationPayload {
-    return {
+    const payload = {
       title: 'Game Resolved 🎉',
       body: `Your recent game ${title} has been resolved. Check the results now!`,
       image: 'https://www.ralli.bet/images/game-resolved.png',
@@ -101,6 +101,11 @@ export class NotificationService {
       ],
       requireInteraction: true,
     };
+    console.log(
+      'Building game resolved notification with urlPath:',
+      payload.urlPath,
+    );
+    return payload;
   }
 
   // 🕹️ Game Invite
@@ -109,7 +114,7 @@ export class NotificationService {
     gameId: string,
     gameCode: string,
   ): NotificationPayload {
-    return {
+    const payload = {
       title: `You've Been Invited to join ${gameTitle}`,
       body: `
       You have been invited to join a new game,
@@ -127,6 +132,11 @@ export class NotificationService {
       ],
       requireInteraction: true,
     };
+    console.log(
+      'Building game invite notification with urlPath:',
+      payload.urlPath,
+    );
+    return payload;
   }
 
   // 💬 New Message

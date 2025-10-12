@@ -44,7 +44,12 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Default and 'open' -> open/focus the app at the target path
-  const target = new URL(event.notification.data?.urlPath || '/', self.registration.scope).href
+  const urlPath = event.notification.data?.urlPath || '/main'
+  const target = new URL(urlPath, self.registration.scope).href
+
+  // Debug: log the URL being navigated to
+  console.log('SW: Navigating to URL:', target)
+  console.log('SW: URL path from notification:', urlPath)
 
   event.waitUntil(
     (async () => {
@@ -52,11 +57,15 @@ self.addEventListener('notificationclick', (event) => {
 
       for (const c of list) {
         if (c.url.startsWith(self.registration.scope)) {
-          if ('navigate' in c && c.url !== target) await c.navigate(target)
+          if ('navigate' in c && c.url !== target) {
+            console.log('SW: Navigating existing client from', c.url, 'to', target)
+            await c.navigate(target)
+          }
           await c.focus()
           return
         }
       }
+      console.log('SW: Opening new window with URL:', target)
       if (clients.openWindow) await clients.openWindow(target)
     })(),
   )
