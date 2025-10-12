@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react'
 import { Channel } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
 import FriendsSection from './FriendsSection'
+import { useSearchParams } from 'next/navigation'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
@@ -29,6 +30,7 @@ export default function ProfileContent() {
   const { currentUser } = useUser()
   const { client, isConnectedToClient } = useChat()
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
+  const searchParams = useSearchParams()
 
   const {
     user,
@@ -65,6 +67,21 @@ export default function ProfileContent() {
       checkUserHasStreamChat()
     }
   }, [user, client, isConnectedToClient])
+
+  // Handle channel parameter from notification deep link
+  useEffect(() => {
+    const channelId = searchParams.get('channel')
+    if (channelId && isConnectedToClient && mounted) {
+      try {
+        // Try to get the channel and set it as active
+        const channel = client.channel('messaging', channelId)
+        setActiveChannel(channel)
+      } catch (error) {
+        console.error('Failed to set active channel from URL:', error)
+      }
+    }
+  }, [searchParams, isConnectedToClient, mounted, client])
+
   // Don't render until mounted to prevent hydration issues
   if (!mounted || userLoading || !user) {
     return null

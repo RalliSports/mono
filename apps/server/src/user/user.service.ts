@@ -159,32 +159,31 @@ export class UserService {
 
   async getAllSubscriptions() {
     const subscriptions = await this.db.query.pushSubscriptions.findMany();
-    return subscriptions;
 
     // Get user data for each subscription
-    // const subscriptionsWithUsers = await Promise.all(
-    //   subscriptions.map(async (sub) => {
-    //     const user = await this.db.query.users.findFirst({
-    //       where: eq(users.id, sub.userId),
-    //     });
+    const subscriptionsWithUsers = await Promise.all(
+      subscriptions.map(async (sub) => {
+        const user = await this.db.query.users.findFirst({
+          where: eq(users.id, sub.userId),
+        });
 
-    //     return {
-    //       id: sub.id,
-    //       userId: sub.userId,
-    //       subscription: sub.subscription,
-    //       isActive: sub.isActive,
-    //       createdAt: sub.createdAt,
-    //       user: user
-    //         ? {
-    //             username: user.username,
-    //             emailAddress: user.emailAddress,
-    //           }
-    //         : undefined,
-    //     };
-    //   }),
-    // );
+        return {
+          id: sub.id,
+          userId: sub.userId,
+          subscription: sub.subscription,
+          isActive: sub.isActive,
+          createdAt: sub.createdAt,
+          user: user
+            ? {
+                username: user.username,
+                emailAddress: user.emailAddress,
+              }
+            : undefined,
+        };
+      }),
+    );
 
-    // return subscriptionsWithUsers;
+    return subscriptionsWithUsers;
   }
 
   async sendNotificationToUser(dto: SendNotificationDto) {
