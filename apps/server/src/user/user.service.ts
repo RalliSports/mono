@@ -204,6 +204,9 @@ export class UserService {
       title: dto.title,
       body: dto.body,
       url: dto.url || 'https://www.ralli.bet',
+      urlPath: dto.url
+        ? new URL(dto.url).pathname + new URL(dto.url).search
+        : '/main',
     };
 
     try {
@@ -227,6 +230,9 @@ export class UserService {
       title: dto.title,
       body: dto.body,
       url: dto.url || 'https://www.ralli.bet',
+      urlPath: dto.url
+        ? new URL(dto.url).pathname + new URL(dto.url).search
+        : '/main',
     };
 
     const results: Array<{

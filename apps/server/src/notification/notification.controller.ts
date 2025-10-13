@@ -62,10 +62,18 @@ export class NotificationController {
     }
 
     // Create notification payload
+    // Determine if this is a game chat by checking channel_id pattern
+    const isGameChat = payload.channel_id.startsWith('game-');
+    const gameId = isGameChat
+      ? payload.channel_id.replace('game-', '')
+      : undefined;
+
     const notificationPayload = this.notificationService.buildNewChatMessage(
       sender.username || 'Someone',
       payload.channel_id,
       payload.message.text,
+      isGameChat,
+      gameId,
     );
 
     // Send notifications to all recipients

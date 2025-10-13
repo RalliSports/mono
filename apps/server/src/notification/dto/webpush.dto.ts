@@ -20,6 +20,14 @@ export class PushSubscriptionResponse {
   keys: PushSubscriptionKeys;
 }
 
+export class NotificationAction {
+  @ApiProperty()
+  action: string;
+
+  @ApiProperty()
+  title: string;
+}
+
 export class NotificationPayload {
   @ApiProperty()
   title: string;
@@ -34,10 +42,19 @@ export class NotificationPayload {
   url?: string;
 
   @ApiProperty()
+  urlPath?: string;
+
+  @ApiProperty()
   icon?: string;
 
   @ApiProperty()
   tag?: string;
+
+  @ApiProperty({ type: [NotificationAction] })
+  actions?: NotificationAction[];
+
+  @ApiProperty()
+  requireInteraction?: boolean;
 }
 
 export class UserPushSubscription {
