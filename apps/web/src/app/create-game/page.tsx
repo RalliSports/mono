@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSessionToken } from '@/hooks/use-session'
 import { toast, ToastContainer } from 'react-toastify'
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import LottieLoading from '@/components/ui/lottie-loading'
 import { CreateGameDtoType } from '@repo/server'
 
@@ -21,7 +21,6 @@ import {
   CreatingGameState,
   FormErrors,
   PrivateGameToggle,
-  InviteFriends,
 } from './components'
 
 // Types and Hooks
@@ -32,6 +31,7 @@ import GamePictureUpload from './components/GamePictureUpload'
 
 export default function CreateGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { validateForm } = useGameValidation()
 
   // Para wallet balance hook
@@ -40,6 +40,10 @@ export default function CreateGame() {
   const [mounted, setMounted] = useState(false)
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [creatingGameState, setCreatingGameState] = useState<CreatingGameState>('idle')
+
+  // Get pre-selected participants from URL
+  const preSelectedParticipants = searchParams.get('participants')?.split(',') || []
+  const fromGameId = searchParams.get('fromGame')
 
   // Fix hydration issues
   useEffect(() => {
@@ -86,6 +90,17 @@ export default function CreateGame() {
     numBets: 4, // Default Number of Bets
     imageUrl: '/images/pfp-2.svg',
   })
+
+  // Update game settings when pre-selected participants are detected
+  useEffect(() => {
+    if (preSelectedParticipants.length > 0) {
+      setGameSettings((prev) => ({
+        ...prev,
+        isPrivate: true,
+        title: fromGameId ? `New Game - Group ${fromGameId.slice(-4)}` : 'New Game with Same Group',
+      }))
+    }
+  }, [preSelectedParticipants.length, fromGameId])
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
@@ -135,6 +150,35 @@ export default function CreateGame() {
 
       if (response.ok) {
         setCreatingGameState('success')
+
+        // Send invitations to pre-selected participants
+        if (preSelectedParticipants.length > 0) {
+          try {
+            // Send invitations to each participant
+            const invitePromises = preSelectedParticipants.map(async (userId) => {
+              return fetch('/api/game-invite', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-para-session': session || '',
+                },
+                body: JSON.stringify({
+                  userId: userId.trim(),
+                  gameId: result.id,
+                }),
+              })
+            })
+
+            await Promise.all(invitePromises)
+            toast.success(
+              `Invitations sent to ${preSelectedParticipants.length} player${preSelectedParticipants.length !== 1 ? 's' : ''}!`,
+            )
+          } catch (inviteError) {
+            console.error('Error sending invitations:', inviteError)
+            toast.warning('Game created but some invitations failed to send')
+          }
+        }
+
         toast.success(
           <div>
             Contest created successfully! Transaction ID:
@@ -226,6 +270,26 @@ export default function CreateGame() {
             isPrivate={gameSettings.isPrivate}
           />
 
+          {/* Show who will be invited if coming from an existing game */}
+          {preSelectedParticipants.length > 0 && (
+            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-4 shadow-xl">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg flex items-center justify-center">
+                  <span className="text-lg">👥</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-sm">Same Group Game</h3>
+                  <p className="text-blue-400 text-xs">Previous players will be automatically invited</p>
+                </div>
+              </div>
+              <div className="text-blue-300 text-sm">
+                <span className="font-semibold">
+                  {preSelectedParticipants.length} player{preSelectedParticipants.length !== 1 ? 's' : ''}
+                </span>{' '}
+                from your previous game will receive an invitation when this game is created.
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <ToastContainer />

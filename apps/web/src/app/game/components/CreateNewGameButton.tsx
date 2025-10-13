@@ -12,11 +12,21 @@ export default function CreateNewGameButton({ lobby, size = 'large' }: CreateNew
   const isGameFull = lobby.participants.length >= (lobby.maxParticipants || 0)
   const isGameOngoing = lobby.participants.length > 0 && !isGameCompleted
 
+  // Get participant user IDs for pre-selection (excluding current user)
+  const participantIds = lobby.participants
+    .map((p) => p.user?.id)
+    .filter(Boolean)
+    .join(',')
+
+  const createGameUrl = participantIds
+    ? `/create-game?participants=${encodeURIComponent(participantIds)}&fromGame=${lobby.id}`
+    : '/create-game'
+
   // Show large button when game is completed or full
   if (size === 'large' && (isGameCompleted || isGameFull)) {
     return (
       <div className="mb-8">
-        <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-[#00CED1]/30 rounded-2xl p-6 shadow-2xl shadow-[#00CED1]/10">
+        <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl space-y-4">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-white font-bold text-xl">{isGameCompleted ? 'Game Completed!' : 'Game Full!'}</h3>
@@ -30,8 +40,9 @@ export default function CreateNewGameButton({ lobby, size = 'large' }: CreateNew
             </div>
           </div>
 
+          {/* Create New Game with Same Group - Primary Button */}
           <Link
-            href="/create-game"
+            href={createGameUrl}
             className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 group relative overflow-hidden"
           >
             {/* Shimmer effect */}
@@ -40,8 +51,19 @@ export default function CreateNewGameButton({ lobby, size = 'large' }: CreateNew
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11h-3v3c0 .55-.45 1-1 1s-1-.45-1-1v-3H8c-.55 0-1-.45-1-1s.45-1 1-1h3V8c0-.55.45-1 1-1s1 .45 1 1v3h3c.55 0 1 .45 1 1s-.45 1-1 1z" />
               </svg>
-              <span>Create New Game</span>
+              <span>Create New Game with Same Group</span>
             </span>
+          </Link>
+
+          {/* Create Regular New Game - Secondary Button */}
+          <Link
+            href="/create-game"
+            className="w-full bg-gradient-to-r from-slate-700/50 to-slate-600/50 border border-slate-600/50 text-slate-300 hover:text-white font-medium py-3 rounded-xl hover:bg-gradient-to-r hover:from-slate-600/50 hover:to-slate-500/50 hover:border-slate-500/50 transition-all duration-300 flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11h-3v3c0 .55-.45 1-1 1s-1-.45-1-1v-3H8c-.55 0-1-.45-1-1s.45-1 1-1h3V8c0-.55.45-1 1-1s1 .45 1 1v3h3c.55 0 1 .45 1 1s-.45 1-1 1z" />
+            </svg>
+            <span>Create New Game</span>
           </Link>
 
           {isGameCompleted && (
@@ -57,15 +79,26 @@ export default function CreateNewGameButton({ lobby, size = 'large' }: CreateNew
   // Show small button when game is ongoing
   if (size === 'small' && isGameOngoing && !isGameCompleted) {
     return (
-      <Link
-        href="/create-game"
-        className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#00CED1]/20 to-blue-500/20 border border-[#00CED1]/30 text-[#00CED1] hover:text-white hover:bg-gradient-to-r hover:from-[#00CED1]/30 hover:to-blue-500/30 px-4 py-2 rounded-xl transition-all duration-300 text-sm font-medium"
-      >
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11h-3v3c0 .55-.45 1-1 1s-1-.45-1-1v-3H8c-.55 0-1-.45-1-1s.45-1 1-1h3V8c0-.55.45-1 1-1s1 .45 1 1v3h3c.55 0 1 .45 1 1s-.45 1-1 1z" />
-        </svg>
-        <span>New Game</span>
-      </Link>
+      <div className="flex items-center space-x-2">
+        <Link
+          href={createGameUrl}
+          className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#00CED1]/20 to-blue-500/20 border border-[#00CED1]/30 text-[#00CED1] hover:text-white hover:bg-gradient-to-r hover:from-[#00CED1]/30 hover:to-blue-500/30 px-3 py-2 rounded-xl transition-all duration-300 text-sm font-medium"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11h-3v3c0 .55-.45 1-1 1s-1-.45-1-1v-3H8c-.55 0-1-.45-1-1s.45-1 1-1h3V8c0-.55.45-1 1-1s1 .45 1 1v3h3c.55 0 1 .45 1 1s-.45 1-1 1z" />
+          </svg>
+          <span>Same Group</span>
+        </Link>
+        <Link
+          href="/create-game"
+          className="inline-flex items-center space-x-2 bg-gradient-to-r from-slate-700/20 to-slate-600/20 border border-slate-600/30 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/30 hover:to-slate-500/30 px-3 py-2 rounded-xl transition-all duration-300 text-sm font-medium"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11h-3v3c0 .55-.45 1-1 1s-1-.45-1-1v-3H8c-.55 0-1-.45-1-1s.45-1 1-1h3V8c0-.55.45-1 1-1s1 .45 1 1v3h3c.55 0 1 .45 1 1s-.45 1-1 1z" />
+          </svg>
+          <span>New Game</span>
+        </Link>
+      </div>
     )
   }
 
