@@ -20,6 +20,7 @@ export default function Setup() {
   const [error, setError] = useState('')
   const userEditedRef = useRef(false)
   const hasNavigatedRef = useRef(false) // Track if we've already navigated
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   // Initialize local state from current user data once
   useEffect(() => {
@@ -34,8 +35,19 @@ export default function Setup() {
     }
   }, [currentUser.data])
 
-  // Show loading while account connection or user data is being fetched
-  if (currentUser.isLoading || account?.isConnected === undefined) {
+  // Track when initial loading is complete to prevent PWA flashing
+  useEffect(() => {
+    if (!currentUser.isLoading && account?.isConnected !== undefined) {
+      // Add a small delay to ensure state is stable, especially in PWA
+      const timer = setTimeout(() => {
+        setHasInitialized(true)
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [currentUser.isLoading, account?.isConnected])
+
+  // Show loading while account connection or user data is being fetched, or during PWA initialization
+  if (currentUser.isLoading || account?.isConnected === undefined || !hasInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-stone-100">
         <div className="text-center">
