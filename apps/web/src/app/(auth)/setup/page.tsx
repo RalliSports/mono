@@ -34,17 +34,8 @@ export default function Setup() {
     }
   }, [currentUser.data])
 
-  // Redirect if not connected
-  if (!account?.isConnected) {
-    if (!hasNavigatedRef.current) {
-      hasNavigatedRef.current = true
-      router.push('/signin')
-    }
-    return null
-  }
-
-  // Show loading while user data is being fetched
-  if (currentUser.isLoading) {
+  // Show loading while account connection or user data is being fetched
+  if (currentUser.isLoading || account?.isConnected === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-stone-100">
         <div className="text-center">
@@ -53,6 +44,15 @@ export default function Setup() {
         </div>
       </div>
     )
+  }
+
+  // Redirect if not connected (only after loading is complete)
+  if (!account?.isConnected) {
+    if (!hasNavigatedRef.current) {
+      hasNavigatedRef.current = true
+      router.push('/signin')
+    }
+    return null
   }
 
   // Skip setup if user has already completed first login setup
@@ -100,7 +100,7 @@ export default function Setup() {
           'x-para-session': session || '',
         },
         body: JSON.stringify({
-          username: username.trim(),
+          username: currentUsername.trim(),
           avatar: avatar,
           firstName: currentUser.data?.firstName || '',
           lastName: currentUser.data?.lastName || '',
