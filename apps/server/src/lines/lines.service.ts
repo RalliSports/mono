@@ -311,23 +311,20 @@ export class LinesService {
     return { success: true };
   }
 
-  async resolveLine(id: string, dto: ResolveLineDto, user: User) {
+  async resolveLine(id: string, dto: ResolveLineDto, user: UserAutoLinesDto) {
     return await this.db.transaction(async (tx) => {
       const line = await this.getLineById(id);
       if (!line) throw new NotFoundException(`Line ${id} not found`);
-      // if (line.actualValue)
-      //   throw new BadRequestException(`Line ${id} already resolved`);
       if (!line.predictedValue)
         throw new BadRequestException(`Line ${id} not predicted`);
       const predictedValue = Number(line.predictedValue);
-
       const res = await tx
         .update(lines)
         .set({
           actualValue: dto.actualValue?.toString(),
           isHigher:
-            dto.actualValue && line.predictedValue
-              ? dto.actualValue > Number(line.predictedValue)
+            (dto.actualValue || dto.actualValue === 0) && line.predictedValue
+              ? dto.actualValue > predictedValue
               : null,
           status: LineStatus.RESOLVED,
         })
@@ -372,7 +369,7 @@ export class LinesService {
 
   async bulkResolveLines(
     dto: (ResolveLineDto & { athleteName: string; statName: string })[],
-    user: User,
+    user: UserAutoLinesDto,
   ) {
     // First, try the bulk transaction approach
     try {
@@ -431,7 +428,7 @@ export class LinesService {
             .set({
               actualValue: lineDataForResole.actualValue.toString(),
               isHigher:
-                lineDataForResole.actualValue && lineData.predictedValue
+                (lineDataForResole.actualValue || lineDataForResole.actualValue === 0) && lineData.predictedValue
                   ? lineDataForResole.actualValue >
                   Number(lineData.predictedValue)
                   : null,

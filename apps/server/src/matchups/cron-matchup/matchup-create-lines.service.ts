@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { MatchupsService } from '../matchups.service';
@@ -16,14 +15,14 @@ export class MatchupCreateLinesService {
 
     constructor(
         @Drizzle() private readonly db: Database,
-        private readonly authService: AuthService,
         private readonly matchupsService: MatchupsService,
     ) { }
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async handleCron() {
         this.logger.log('Running matchup create lines cron job...');
-        const UPTO_DAYS = 3;//Upto (N) of days in future to create lines for
+        //line prediction for 72 hours + [1 day Tolerance]
+        const UPTO_DAYS = 4;//Upto (N) of days in future to create lines for
         const NOW = new Date();
         const UPTO_DATE = new Date();
         UPTO_DATE.setDate(NOW.getDate() + UPTO_DAYS);

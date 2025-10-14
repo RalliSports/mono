@@ -328,7 +328,7 @@ export class ParaAnchor {
     shouldRefundBettors: boolean,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(false); // useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
 
     const [lineAccount] = PublicKey.findProgramAddressSync(
@@ -397,7 +397,7 @@ export class ParaAnchor {
     }[],
     creator: PublicKey,
   ): Promise<{ success: boolean; txSig?: string; error?: string }> {
-    const program = await this.getProgram(false); // useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
       const _lineId = new BN(line.lineId);

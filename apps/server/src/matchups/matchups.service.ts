@@ -43,6 +43,7 @@ import { sleep } from 'src/utils';
 import { LineStatus } from 'src/lines/enum/lines';
 import { line, PgColumn } from 'drizzle-orm/pg-core';
 import { LinesCreationSuccessOutput } from './cron-matchup/types/lines-creation-success-outpot.type';
+import { LinesResolveSuccessOutput } from './cron-matchup/types/lines-resolve-success-outpot.type';
 
 @Injectable()
 export class MatchupsService {
@@ -406,22 +407,27 @@ export class MatchupsService {
 
   }
 
-  async resolveLinesForMatchup(dto: ResolveLinesDto, user: User) {
-    // const matchupsToResolve = await this.getMatchupsInProgress();
+  async resolveLinesForMatchup(dto: ResolveLinesDto, user: UserAutoLinesDto) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, dto.matchupId),
     });
-    if (!matchup) throw new NotFoundException('Matchup not found');
+    if (!matchup) {
+      console.warn('Matchup not found!');
+      return [];
+    }
     const matchupsToResolve = [matchup];
-    const allStats = await this.statsService.getAllStats();
     const allLinesToResolve: (ResolveLineDto & {
       athleteName: string;
       statName: string;
     })[] = [];
+
+    //returning data for ResolveCronLogger
+    const resolvedLinesData: LinesResolveSuccessOutput[] = [];
     for (const matchup of matchupsToResolve) {
+      const matchupId = matchup.id;
       const { homeTeamId, awayTeamId } = matchup;
       if (!matchup.espnEventId) {
-        console.warn(`Matchup ${matchup.id} missing ESPN event ID`);
+        console.warn(`Matchup ${matchupId} missing ESPN event ID`);
         continue;
       }
       const espnStatus: EspnMatchupStatusResponse =
@@ -433,12 +439,12 @@ export class MatchupsService {
         continue;
       }
       if (espnStatus.type.name !== EspnStatusName.FINAL) {
-        console.warn(`Matchup ${matchup.id} not final, skipping`);
+        console.warn(`Matchup ${matchupId} not final, skipping`);
         continue;
       }
 
       const allLinesInThisMatchup = await this.linesService.getLinesByMatchupId(
-        matchup.id,
+        matchupId,
       );
       const allAthletesInThisMatchupWithLines =
         await this.db.query.athletes.findMany({
@@ -481,6 +487,13 @@ export class MatchupsService {
               athleteName: athlete.name!,
               statName: stat.name!,
             });
+            resolvedLinesData.push({
+              statName: stat.name!,
+              athleteName: athlete.name!,
+              predictedValue: Number(lineData.predictedValue),
+              actualValue: Number(actualValue) || 0.0,
+              matchupId: matchup.id!,
+            });
           } catch (error) {
             console.error(
               `Error processing line for ${matchup.espnEventId} - ${athlete.name} - ${stat.name}-${actualValue}`,
@@ -502,14 +515,20 @@ export class MatchupsService {
       chunks.push(allLinesToResolve.slice(i, i + CHUNK_SIZE));
     }
 
-    // Process each chunk sequentially with 500ms delay between chunks
-    for (let i = 0; i < chunks.length; i++) {
-      if (i > 0) {
-        await sleep(500);
+    try {
+      // Process each chunk sequentially with 500ms delay between chunks
+      for (let i = 0; i < chunks.length; i++) {
+        if (i > 0) {
+          await sleep(500);
+        }
+        await this.linesService.bulkResolveLines(chunks[i], user);
       }
-      await this.linesService.bulkResolveLines(chunks[i], user);
+      console.log('Lines resolved successfully');
+      return resolvedLinesData;
     }
-
-    return { message: 'Lines Resolved Successfully.' };
+    catch (error) {
+      console.error('Error resolving lines:', error);
+      return [];
+    }
   }
 }
