@@ -1,4 +1,4 @@
-import { LeaderboardFilter } from '../page'
+import { LeaderboardFilter } from '../client'
 
 interface FilterOptionsProps {
   activeFilter: LeaderboardFilter

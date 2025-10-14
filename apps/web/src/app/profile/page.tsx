@@ -1,17 +1,8 @@
-'use client'
+import React from 'react'
+import ProfilePageNew from './client'
 
-import { Suspense } from 'react'
-import { ProfileContent, ProfileContentSkeleton } from './components'
-import { useWalletConnection } from '../main/hooks/useWalletConnection'
-
-export default function ProfilePageNew() {
-  const { mounted } = useWalletConnection()
-  if (!mounted) {
-    return null
-  }
+export default function page() {
   return (
-    <Suspense fallback={<ProfileContentSkeleton />}>
-      <ProfileContent />
-    </Suspense>
+    <ProfilePageNew />
   )
 }
