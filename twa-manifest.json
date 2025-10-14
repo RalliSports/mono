@@ -1,0 +1,54 @@
+{
+  "packageId": "bet.ralli.www.twa",
+  "host": "www.ralli.bet",
+  "name": "Ralli Sports",
+  "launcherName": "Ralli",
+  "display": "standalone",
+  "themeColor": "#111829",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#111829",
+  "enableNotifications": true,
+  "startUrl": "/main",
+  "iconUrl": "https://www.ralli.bet/images/RALLI.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/Users/jacksturtevant/work/ralli/twa/android.keystore",
+    "alias": "ralli-keystore"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://www.ralli.bet/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://www.ralli.bet/",
+  "minSdkVersion": 21,
+  "orientation": "portrait-primary",
+  "fingerprints": [
+    {
+      "value": "4C:AC:27:84:96:B1:93:5F:C0:13:37:16:ED:CF:58:8C:34:60:A6:EF:55:96:4C:B6:F7:44:E5:02:F4:D3:10:BB"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1"
+}
