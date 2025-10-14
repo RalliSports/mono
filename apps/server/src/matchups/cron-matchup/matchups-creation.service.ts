@@ -13,10 +13,10 @@ export class MatchupCreationService {
   constructor(
     private readonly matchupsService: MatchupsService,
     private readonly teamService: TeamService,
-  ) {}
+  ) { }
 
-  // Runs every day
-  @Cron(CronExpression.EVERY_WEEK)
+  // Runs every month
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
   async createAllMatchupsFromEspn() {
     const SEASON_TYPE_MAP = {
       PRESEASON: 1,

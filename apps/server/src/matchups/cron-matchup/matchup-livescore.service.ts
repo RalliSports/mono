@@ -110,9 +110,9 @@ export class MatchupLivescoreService {
         this.logger.log(
           `Found ${allLinesInThisMatchup.length} lines for matchup ${matchupId}.`,
         );
-        if (allLinesInThisMatchup.length === 0) {
+        if (allLinesInThisMatchup.length === 0 && currentEspnStatus.type.name !== EspnStatusName.FINAL) {
           this.logger.warn(
-            `No lines found for matchup ${matchupId}, stopping livescore cron...`,
+            `No lines found for matchup ${matchupId} and matchup is not finalized, stopping livescore cron...`,
           );
           this.schedulerRegistry.deleteCronJob(liveScoreCronJob);
           return;
@@ -131,7 +131,7 @@ export class MatchupLivescoreService {
             ),
           });
 
-        if (allAthletesInThisMatchupWithLines.length === 0) {
+        if (allAthletesInThisMatchupWithLines.length === 0 && currentEspnStatus.type.name !== EspnStatusName.FINAL) {
           this.logger.warn(
             `No athletes found for matchup ${matchupId}, stopping livescore cron...`,
           );
