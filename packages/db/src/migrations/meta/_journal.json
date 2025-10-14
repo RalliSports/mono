@@ -113,6 +113,20 @@
       "when": 1759960155285,
       "tag": "0016_daffy_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1760419237499,
+      "tag": "0017_hesitant_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1760419439888,
+      "tag": "0018_heavy_carmella_unuscione",
+      "breakpoints": true
     }
   ]
 }

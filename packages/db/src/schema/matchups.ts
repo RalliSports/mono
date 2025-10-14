@@ -31,6 +31,7 @@ export const matchups = pgTable("matchups", {
   homeTeamId: uuid("home_team_id").references(() => teams.id),
   awayTeamId: uuid("away_team_id").references(() => teams.id),
   ifLinesCreated: boolean("if_lines_created").default(false),
+  ifLinesResolved: boolean("if_lines_resolved").default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
