@@ -4,8 +4,8 @@ import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { MatchupsService } from '../matchups.service';
 import { ADMIN_WALLET_PUBLIC_KEY } from 'src/utils/services/paraAnchor';
-import { lines } from '@repo/db';
-import { and, eq, gte } from 'drizzle-orm';
+import { matchups } from '@repo/db';
+import { and, eq } from 'drizzle-orm';
 import { LinesResolveSuccessOutput } from './types/lines-resolve-success-outpot.type';
 
 @Injectable()
@@ -18,22 +18,24 @@ export class MatchupResolveLinesService {
   ) { }
 
   // 30 minutes interval
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async handleCron() {
     this.logger.log('Running matchup resolve lines cron job...');
-
-    const linesToResolve = await this.db.query.lines.findMany({
+    const matchupsToResolve = await this.db.query.matchups.findMany({
       where: and(
-        eq(lines.status, 'locked'),
-        gte(lines.createdAt, new Date(Date.now() - 5 * 86400 * 1000)),
-      )
-    });
-    const matchupsToResolve = new Set(
-      linesToResolve.map((line) => {
-        return line.matchupId!;
-      }),
+        eq(matchups.status, 'finished'),
+        eq(matchups.ifLinesResolved, false),
+      ),
+    })
+    if (matchupsToResolve.length === 0) {
+      this.logger.log('No matchups to resolve lines for, skipping...');
+      return;
+    }
+    this.logger.log(
+      `Found ${matchupsToResolve.length} matchups to resolve lines for`,
     );
-    for (const matchupId of matchupsToResolve) {
+    for (const matchup of matchupsToResolve) {
+      const matchupId = matchup.id;
       this.logger.log(`Resolving lines for matchup ${matchupId}`);
       const walletAddress = ADMIN_WALLET_PUBLIC_KEY.toString();
       try {
@@ -51,6 +53,7 @@ export class MatchupResolveLinesService {
           const result = actualValue > predictedValue ? 'OVER' : actualValue < predictedValue ? 'UNDER' : 'PUSH';
           this.logger.log(`Resolved Line: ${statName} - ${athleteName} | Predicted: ${predictedValue} | Actual: ${actualValue} | Result: ${result}`);
         }
+        await this.db.update(matchups).set({ ifLinesResolved: true }).where(eq(matchups.id, matchupId));
         if (resolvedLinesData.length === 0) {
           this.logger.log(`No lines found for matchup ${matchupId}`);
           continue;
