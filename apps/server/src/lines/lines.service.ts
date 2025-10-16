@@ -16,7 +16,6 @@ import { UpdateLineDto } from './dto/update-line.dto';
 import { PublicKey } from '@solana/web3.js';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
-import { line } from 'drizzle-orm/pg-core';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { UserAutoLinesDto } from 'src/user/dto/user-auto-lines.dto';
 
@@ -306,6 +305,8 @@ export class LinesService {
         predictedValue: dto.predictedValue?.toString(),
         status: dto.status,
         currentValue: dto.currentValue?.toString(),
+        lastUpdatedAt: dto.lastUpdatedAt,
+        isLatestOne: dto.isLatestOne,
       })
       .where(eq(lines.id, id))
       .returning();
@@ -335,6 +336,7 @@ export class LinesService {
               ? dto.actualValue > predictedValue
               : null,
           status: LineStatus.RESOLVED,
+          resolvedAt: new Date(),
         })
         .where(eq(lines.id, id))
         .returning();
@@ -441,6 +443,7 @@ export class LinesService {
                   Number(lineData.predictedValue)
                   : null,
               status: LineStatus.RESOLVED,
+              resolvedAt: new Date(),
             })
             .where(eq(lines.id, lineDataForResole.lineId));
 

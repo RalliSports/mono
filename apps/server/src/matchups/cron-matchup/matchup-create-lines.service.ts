@@ -29,7 +29,6 @@ export class MatchupCreateLinesService {
         const matchupsToCreateLinesFor =
             await this.db.query.matchups.findMany({
                 where: and(
-                    eq(matchups.ifLinesCreated, false),
                     eq(matchups.status, MatchupStatus.SCHEDULED),
                     isNotNull(matchups.oddsApiEventId),
                     gte(matchups.startsAt, NOW),

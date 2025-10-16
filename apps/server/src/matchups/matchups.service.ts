@@ -373,11 +373,18 @@ export class MatchupsService {
             eq(lines.status, LineStatus.OPEN),
           ),
         });
-        if (possibleExistingLine) {
+        if (possibleExistingLine && possibleExistingLine.predictedValue === thresholdValue.toString()) {
           console.warn(
-            `Line already exists for ${matchup?.espnEventId} ${athleteId} ${statId}`,
+            `Line already exists with same predicted value for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${thresholdValue}`,
           );
           continue;
+        } else if (possibleExistingLine) {
+          await this.linesService.updateLine(possibleExistingLine.id, {
+            isLatestOne: false,
+          });
+          console.log(
+            `Line with old predicted value found for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${possibleExistingLine.predictedValue}. Creting new line with Value: ${thresholdValue}`,
+          );
         }
 
         formattedLines.push({
