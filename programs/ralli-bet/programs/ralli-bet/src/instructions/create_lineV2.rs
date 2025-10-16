@@ -42,7 +42,7 @@ pub struct CreateLineV2<'info> {
 }
 
 impl<'info> CreateLineV2<'info> {
-    pub fn create_player_line(
+    pub fn create_lineV2(
         &mut self,
         player_id: String,
         matchup_id: u64,

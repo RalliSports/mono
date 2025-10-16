@@ -59,7 +59,7 @@ pub struct UpdateLineV2<'info> {
 }
 
 impl<'info> UpdateLineV2<'info> {
-    pub fn update_player_line(
+    pub fn update_lineV2(
         &mut self,
         player_id: String,
         matchup_id: u64,
@@ -76,38 +76,31 @@ impl<'info> UpdateLineV2<'info> {
         let new_line = &mut self.new_line;
         let line_pointer = &mut self.line_pointer;
 
-        // Only admin can update lines
         require!(
             is_admin(&admin.key()),
             RalliError::UnauthorizedLineUpdate
         );
 
-        // Ensure existing line hasn't been resolved yet
         require!(
             existing_line.result.is_none(),
             RalliError::LineAlreadyResolved
         );
 
-        // Ensure existing line hasn't started yet
         let current_time = Clock::get()?.unix_timestamp;
         require!(
             current_time < existing_line.starts_at,
             RalliError::LineAlreadyStarted
         );
 
-        // Validate new starts_at is in the future
         require!(
             new_starts_at > current_time,
             RalliError::InvalidLineStartTime
         );
 
-        // Validate new line value is reasonable (not zero)
         require!(new_line_value != 0, RalliError::InvalidLineValue);
 
-        // Validate new odds is reasonable (not zero)
         require!(new_odds != 0, RalliError::InvalidOdds);
 
-        // Check if line value is changing or just odds/starts_at
         if old_line_value != new_line_value {
             // CASE 1: Line value is changing - create new line, mark old as inactive
 
