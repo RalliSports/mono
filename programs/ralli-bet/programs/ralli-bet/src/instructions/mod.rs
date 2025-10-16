@@ -1,7 +1,9 @@
 pub mod create_game;
 pub mod create_line;
+pub mod create_lineV2;
 pub mod join_game;
 pub mod resolve_line;
+pub mod resolve_lineV2;
 pub mod submit_bet;
 pub mod resolve_game;
 pub mod calculate_correct;
@@ -13,8 +15,10 @@ pub mod resolve_game_batch;
 
 pub use create_game::*;
 pub use create_line::*;
+pub use create_lineV2::*;
 pub use join_game::*;
 pub use resolve_line::*;
+pub use resolve_lineV2::*;
 pub use submit_bet::*;
 pub use resolve_game::*;
 pub use calculate_correct::*;
