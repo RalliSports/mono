@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from 'react'
 import { Channel } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
+import { useSearchParams } from 'next/navigation'
 
 import 'stream-chat-react/dist/css/v2/index.css'
 import { useGameData } from '../hooks/useGameData'
@@ -17,6 +18,7 @@ import { customChatStyles } from '@/styles/chat'
 
 export default function ChatsSection() {
   const { lobby } = useGameData()
+  const searchParams = useSearchParams()
 
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
   const { client, getChannels, isConnectedToClient, getChannel } = useChat()
@@ -28,12 +30,37 @@ export default function ChatsSection() {
   useEffect(() => {
     if (lobby) {
       const fetchChannel = async () => {
-        const channel = await getChannel(`lobby-${lobby.id}`)
+        const channel = await getChannel(`lobby-${lobby.id}`, 'gaming')
         setActiveChannel(channel)
       }
       fetchChannel()
     }
   }, [lobby, getChannel])
+
+  // Handle notification deep linking for specific channels
+  useEffect(() => {
+    const channelId = searchParams.get('channel')
+    if (channelId && isConnectedToClient && lobby) {
+      try {
+        // If we have a specific channel ID from notification, use it
+        const fetchSpecificChannel = async () => {
+          // Game channels use 'gaming' type
+          const channel = await getChannel(channelId, 'gaming')
+          setActiveChannel(channel)
+          console.log('Set active gaming channel from notification:', channelId)
+        }
+        fetchSpecificChannel()
+      } catch (error) {
+        console.error('Failed to set specific channel from notification:', error)
+        // Fallback to lobby channel
+        const fetchChannel = async () => {
+          const channel = await getChannel(`lobby-${lobby.id}`, 'gaming')
+          setActiveChannel(channel)
+        }
+        fetchChannel()
+      }
+    }
+  }, [searchParams, isConnectedToClient, lobby, getChannel])
 
   return (
     <>
