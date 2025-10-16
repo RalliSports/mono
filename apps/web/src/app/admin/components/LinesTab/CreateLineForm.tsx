@@ -12,6 +12,8 @@ export default function CreateLineForm() {
     statId: '',
     matchupId: '',
     predictedValue: 0,
+    oddsOver: 0,
+    oddsUnder: 0,
   })
 
   const matchUpsQuery = useMatchups()
@@ -25,6 +27,8 @@ export default function CreateLineForm() {
         athleteId: newLine.athleteId,
         statId: newLine.statId,
         predictedValue: newLine.predictedValue,
+        oddsOver: newLine.oddsOver,
+        oddsUnder: newLine.oddsUnder,
       })
 
       addToast('Lines created successfully!', 'success')

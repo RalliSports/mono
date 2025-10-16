@@ -164,6 +164,7 @@ export class MatchupLivescoreService {
                 Number(lineData.currentValue) !== Number(currentLineValue)) {
                 await this.linesService.updateLine(lineData.id, {
                   currentValue: Number(currentLineValue),
+                  lastUpdatedAt: new Date(),
                 });
                 this.logger.log(
                   `Updated line: ${stat.statOddsName} - ${athlete.name} | ${lineData.currentValue} -> ${currentLineValue}`,

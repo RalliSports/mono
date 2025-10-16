@@ -127,6 +127,13 @@
       "when": 1760419439888,
       "tag": "0018_heavy_carmella_unuscione",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1760580937031,
+      "tag": "0019_short_dracula",
+      "breakpoints": true
     }
   ]
 }
