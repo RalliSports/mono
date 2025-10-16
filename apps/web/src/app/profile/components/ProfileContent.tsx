@@ -85,18 +85,9 @@ export default function ProfileContent() {
     }
   }, [searchParams, isConnectedToClient, mounted, client, setActiveTab])
 
-  // Show loading state instead of null to prevent screen disappearing
+  // Don't render until mounted to prevent hydration issues
   if (!mounted || userLoading || !user) {
-    return (
-      <div className="bg-gray-900 min-h-screen">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-[#00CED1] border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-slate-400">Loading profile...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return null
   }
 
   return (

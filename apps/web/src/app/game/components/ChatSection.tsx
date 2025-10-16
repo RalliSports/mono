@@ -21,18 +21,17 @@ export default function ChatsSection() {
   const searchParams = useSearchParams()
 
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
-  const { client, isConnectedToClient, getChannel } = useChat()
+  const { client, getChannels, isConnectedToClient, getChannel } = useChat()
+
+  useEffect(() => {
+    getChannels()
+  }, [getChannels])
 
   useEffect(() => {
     if (lobby) {
       const fetchChannel = async () => {
-        try {
-          const channel = await getChannel(`lobby-${lobby.id}`, 'gaming')
-          setActiveChannel(channel)
-          console.log('Set lobby channel for game:', lobby.id)
-        } catch (error) {
-          console.error('Failed to fetch lobby channel:', error)
-        }
+        const channel = await getChannel(`lobby-${lobby.id}`, 'gaming')
+        setActiveChannel(channel)
       }
       fetchChannel()
     }
@@ -42,25 +41,24 @@ export default function ChatsSection() {
   useEffect(() => {
     const channelId = searchParams.get('channel')
     if (channelId && isConnectedToClient && lobby) {
-      const fetchSpecificChannel = async () => {
-        try {
+      try {
+        // If we have a specific channel ID from notification, use it
+        const fetchSpecificChannel = async () => {
           // Game channels use 'gaming' type
           const channel = await getChannel(channelId, 'gaming')
           setActiveChannel(channel)
           console.log('Set active gaming channel from notification:', channelId)
-        } catch (error) {
-          console.error('Failed to set specific channel from notification:', error)
-          // Fallback to lobby channel
-          try {
-            const channel = await getChannel(`lobby-${lobby.id}`, 'gaming')
-            setActiveChannel(channel)
-            console.log('Fell back to lobby channel for game:', lobby.id)
-          } catch (fallbackError) {
-            console.error('Failed to fetch fallback lobby channel:', fallbackError)
-          }
         }
+        fetchSpecificChannel()
+      } catch (error) {
+        console.error('Failed to set specific channel from notification:', error)
+        // Fallback to lobby channel
+        const fetchChannel = async () => {
+          const channel = await getChannel(`lobby-${lobby.id}`, 'gaming')
+          setActiveChannel(channel)
+        }
+        fetchChannel()
       }
-      fetchSpecificChannel()
     }
   }, [searchParams, isConnectedToClient, lobby, getChannel])
 

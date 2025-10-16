@@ -34,25 +34,23 @@ export default function ChatsSection({
   const { user } = useProfile(session || null)
   const [channels, setChannels] = useState<Channel[]>([])
   const [hideChannelList, setHideChannelList] = useState(!isCurrentUser)
-  const [isLoadingChannels, setIsLoadingChannels] = useState(true)
   const { client, getChannels, isConnectedToClient } = useChat()
   const isMobile = useScreenSize()
 
-  // Load channels when component mounts or when chat connection is established
+  useEffect(() => {
+    getChannels().then((channels) => {
+      setChannels(channels ?? [])
+    })
+  }, [getChannels])
+
+  // Force refresh channels when chat section becomes active
   useEffect(() => {
     if (isConnectedToClient) {
-      console.log('Chat connection established, loading channels...')
-      setIsLoadingChannels(true)
-      getChannels()
-        .then((channels) => {
-          setChannels(channels ?? [])
-          setIsLoadingChannels(false)
-          console.log('Channels loaded:', channels?.length || 0)
-        })
-        .catch((error) => {
-          console.error('Failed to load channels:', error)
-          setIsLoadingChannels(false)
-        })
+      console.log('Chat section mounted, refreshing channels...')
+      getChannels().then((channels) => {
+        setChannels(channels ?? [])
+        console.log('Channels refreshed:', channels?.length || 0)
+      })
     }
   }, [isConnectedToClient, getChannels])
 
@@ -80,29 +78,7 @@ export default function ChatsSection({
     members: { $in: [user.id] },
   }
 
-  if (isLoadingChannels) {
-    return (
-      <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-lg flex items-center justify-center border border-[#00CED1]/30">
-            <span className="text-lg">💬</span>
-          </div>
-          <div>
-            <h3 className="text-white font-bold">Messages</h3>
-            <p className="text-slate-400 text-xs">Loading your conversations...</p>
-          </div>
-        </div>
-        <div className="h-[600px] flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-[#00CED1] border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-slate-400">Loading conversations...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (channels.length === 0 && !isLoadingChannels) {
+  if (channels.length === 0) {
     return (
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
         <div className="flex items-center space-x-3 mb-4">
