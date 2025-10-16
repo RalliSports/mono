@@ -46,6 +46,8 @@ export class LinesService {
           statId: dto.statId,
           matchupId: dto.matchupId,
           predictedValue: dto.predictedValue.toString(),
+          oddsOver: dto.oddsOver.toString(),
+          oddsUnder: dto.oddsUnder.toString(),
           actualValue: null,
           isHigher: null,
           startsAt: matchup.startsAt,
@@ -121,6 +123,8 @@ export class LinesService {
         athleteCustomId: number;
         adjustedTimestamp: number;
         predictedValue: number;
+        oddsOver: number;
+        oddsUnder: number;
       }[] = [];
       const insertedLines = [] as (typeof lines.$inferInsert)[];
       const initialTimestamp = new Date().getTime();
@@ -138,6 +142,8 @@ export class LinesService {
             statId: line.statId,
             matchupId: line.matchupId,
             predictedValue: line.predictedValue.toString(),
+            oddsOver: line.oddsOver.toString(),
+            oddsUnder: line.oddsUnder.toString(),
             actualValue: null,
             isHigher: null,
             startsAt: matchup.startsAt,
@@ -174,6 +180,8 @@ export class LinesService {
           athleteCustomId,
           adjustedTimestamp,
           predictedValue: line.predictedValue,
+          oddsOver: line.oddsOver,
+          oddsUnder: line.oddsUnder,
         });
         insertedLines.push(inserted);
       }

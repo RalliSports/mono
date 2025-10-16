@@ -41,9 +41,9 @@ import {
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 import { sleep } from 'src/utils';
 import { LineStatus } from 'src/lines/enum/lines';
-import { line, PgColumn } from 'drizzle-orm/pg-core';
 import { LinesCreationSuccessOutput } from './cron-matchup/types/lines-creation-success-outpot.type';
 import { LinesResolveSuccessOutput } from './cron-matchup/types/lines-resolve-success-outpot.type';
+import { calculateOddsFromPrice } from './cron-matchup/utils/odds-calculation-from-price';
 
 @Injectable()
 export class MatchupsService {
@@ -324,21 +324,36 @@ export class MatchupsService {
     for (const market of marketPredictions) {
       const predictionOutcomes = market.outcomes;
       const statName = market.key;
+      const statId = allStats.find(
+        (stat) => stat.oddsApiStatName === statName,
+      )?.id;
+      if (!statId) {
+        console.warn('Stat id not found for: ', statName);
+        continue;
+      }
+      const athletePredictionMap: Record<string, { thresholdValue: number; oddsOverValue: number; oddsUnderValue: number; }> = {};
       for (const outcome of predictionOutcomes) {
         const overOrUnder = outcome.name;
         const athleteName = outcome.description;
-        const thresholdValue = outcome.point;
-        const oddsValue = outcome.price;
+        const thresholdVal = outcome.point;
+        const oddsVal = outcome.price;
+        if (!athletePredictionMap[athleteName]) {
+          athletePredictionMap[athleteName] = {
+            thresholdValue: thresholdVal,
+            oddsOverValue: 0,
+            oddsUnderValue: 0,
+          };
+        }
         if (overOrUnder === 'Over') {
-          continue;
+          athletePredictionMap[athleteName].oddsOverValue = calculateOddsFromPrice(oddsVal);
+        } else if (overOrUnder === 'Under') {
+          athletePredictionMap[athleteName].oddsUnderValue = calculateOddsFromPrice(oddsVal);
         }
-        const statId = allStats.find(
-          (stat) => stat.oddsApiStatName === statName,
-        )?.id;
-        if (!statId) {
-          console.warn('Stat id not found for: ', statName);
-          continue;
-        }
+      }
+      for (const athleteName in athletePredictionMap) {
+        const { thresholdValue, oddsOverValue, oddsUnderValue } =
+          athletePredictionMap[athleteName];
+
         const athleteId = allAthletes.find(
           (athlete) => athlete.name === athleteName,
         )?.id;
@@ -370,6 +385,8 @@ export class MatchupsService {
           athleteId: athleteId,
           matchupId: matchup?.id!,
           predictedValue: thresholdValue,
+          oddsOver: oddsOverValue,
+          oddsUnder: oddsUnderValue,
         });
 
         //returning data for CRON logger
@@ -377,6 +394,8 @@ export class MatchupsService {
           statName: statName,
           athleteName: athleteName,
           predictedValue: thresholdValue,
+          oddsOver: oddsOverValue,
+          oddsUnder: oddsUnderValue,
           matchupId: matchup?.id!,
           homeTeam: matchup?.homeTeam?.abbreviation!,
           awayTeam: matchup?.awayTeam?.abbreviation!,

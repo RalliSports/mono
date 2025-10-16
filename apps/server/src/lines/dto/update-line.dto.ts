@@ -12,7 +12,6 @@ export class UpdateLineDto extends PartialType(CreateLineDto) {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  @Min(0)
   predictedValue?: number;
 
   @ApiProperty()
