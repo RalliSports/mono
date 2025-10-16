@@ -11,25 +11,21 @@ export function useProfileTabs() {
   const [editingUsername, setEditingUsername] = useState(false)
 
   // Function to update both state and URL
-  const setActiveTab = useCallback(
-    (tab: ProfileTabType) => {
-      console.log('Setting active tab to:', tab)
-      setActiveTabState(tab)
-
-      // Update URL with new tab parameter
-      const params = new URLSearchParams(searchParams.toString())
-      if (tab === 'parlays') {
-        // Remove tab param for default tab to keep URL clean
-        params.delete('tab')
-      } else {
-        params.set('tab', tab)
-      }
-
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname
-      router.replace(newUrl, { scroll: false })
-    },
-    [searchParams, router, pathname],
-  )
+  const setActiveTab = useCallback((tab: ProfileTabType) => {
+    setActiveTabState(tab)
+    
+    // Update URL with new tab parameter
+    const params = new URLSearchParams(searchParams.toString())
+    if (tab === 'parlays') {
+      // Remove tab param for default tab to keep URL clean
+      params.delete('tab')
+    } else {
+      params.set('tab', tab)
+    }
+    
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname
+    router.replace(newUrl, { scroll: false })
+  }, [searchParams, router, pathname])
 
   // Fix hydration issues and handle URL params
   useEffect(() => {

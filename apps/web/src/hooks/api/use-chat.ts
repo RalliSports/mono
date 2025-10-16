@@ -60,33 +60,16 @@ export function useChat() {
           members: [currentUser.data.id, userId],
         })
         channel.create()
-
-        // Enhanced notification handling for conversation tracking
         channel.on('notification.message_new', (event) => {
-          console.log('New message notification event:', event)
-          console.log('Message text:', event.message?.text)
-          console.log('Channel:', event.channel?.id)
-          console.log('Sender:', event.message?.user?.name)
-          console.log(`Total messages in channel: ${channel.state.messages.length}`)
-
-          // Track conversation activity for better notification handling
-          if (event.message && event.channel) {
-            console.log('Conversation updated - Channel ID:', event.channel.id)
-            console.log('Last activity timestamp:', new Date().toISOString())
-          }
+          console.log('event', event)
+          console.log('received a new message', event.message?.text)
+          console.log(`Now have ${channel.state.messages.length} stored in local state`)
         })
-
-        // Track when user reads messages
-        channel.on('message.read', (event) => {
-          console.log('Message read event:', event)
-          console.log('User read up to:', event.created_at)
-        })
-
         setCurrentChannel(channel)
-        console.log('Connected to direct message channel:', channel)
+        console.log('connected to channel', channel)
         return channel
       } else {
-        console.log('Could not connect to direct message - missing user data')
+        console.log('could not connect to direct message')
         throw new Error('could not connect to direct message')
       }
     },
@@ -131,15 +114,9 @@ export function useChat() {
     }
   }, [client])
 
-  const getChannel = useCallback(async (channelId: string, channelType: 'messaging' | 'gaming' = 'gaming') => {
-    try {
-      const channel = await client.getChannelById(channelType, channelId, {})
-      console.log(`Successfully fetched ${channelType} channel:`, channelId)
-      return channel
-    } catch (error) {
-      console.error(`Failed to fetch ${channelType} channel ${channelId}:`, error)
-      throw error
-    }
+  const getChannel = useCallback(async (channelId: string) => {
+    const channel = await client.getChannelById('gaming', channelId, {})
+    return channel
   }, [])
 
   return {

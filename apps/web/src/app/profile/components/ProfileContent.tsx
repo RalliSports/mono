@@ -73,17 +73,14 @@ export default function ProfileContent() {
     const channelId = searchParams.get('channel')
     if (channelId && isConnectedToClient && mounted) {
       try {
-        // For profile chats, these are direct messages using 'messaging' type
+        // Try to get the channel and set it as active
         const channel = client.channel('messaging', channelId)
         setActiveChannel(channel)
-        // Automatically switch to chat tab when opening from notification
-        setActiveTab('chats')
-        console.log('Set active messaging channel from notification:', channelId)
       } catch (error) {
         console.error('Failed to set active channel from URL:', error)
       }
     }
-  }, [searchParams, isConnectedToClient, mounted, client, setActiveTab])
+  }, [searchParams, isConnectedToClient, mounted, client])
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted || userLoading || !user) {

@@ -43,17 +43,6 @@ export default function ChatsSection({
     })
   }, [getChannels])
 
-  // Force refresh channels when chat section becomes active
-  useEffect(() => {
-    if (isConnectedToClient) {
-      console.log('Chat section mounted, refreshing channels...')
-      getChannels().then((channels) => {
-        setChannels(channels ?? [])
-        console.log('Channels refreshed:', channels?.length || 0)
-      })
-    }
-  }, [isConnectedToClient, getChannels])
-
   console.log('activeChannel', activeChannel)
 
   if (!user) {
