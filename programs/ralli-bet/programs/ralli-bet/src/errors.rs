@@ -259,4 +259,13 @@ pub enum RalliError {
 
     #[msg("Too many winners in the batch")]
     TooManyWinnersInBatch,
+
+    #[msg("Invalid player ID - cannot be empty")]
+    InvalidPlayerId,
+
+    #[msg("Invalid line value - cannot be zero")]
+    InvalidLineValue,
+
+    #[msg("Invalid odds - cannot be zero")]
+    InvalidOdds,
 }
