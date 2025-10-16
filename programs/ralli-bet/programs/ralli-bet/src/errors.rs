@@ -268,4 +268,7 @@ pub enum RalliError {
 
     #[msg("Invalid odds - cannot be zero")]
     InvalidOdds,
+
+    #[msg("New line value must be different from old line value")]
+    SameLineValue,
 }
