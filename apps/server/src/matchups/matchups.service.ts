@@ -320,27 +320,32 @@ export class MatchupsService {
       console.warn('No bookmakers found for matchup: ', matchupId);
       return [];
     }
-
-    for (const market of linesResponse.bookmakers[0].markets) {
-      const outcomes = market.outcomes;
-      for (const outcome of outcomes) {
-        if (outcome.name === 'Over') {
+    const marketPredictions = linesResponse.bookmakers[0].markets;
+    for (const market of marketPredictions) {
+      const predictionOutcomes = market.outcomes;
+      const statName = market.key;
+      for (const outcome of predictionOutcomes) {
+        const overOrUnder = outcome.name;
+        const athleteName = outcome.description;
+        const thresholdValue = outcome.point;
+        const oddsValue = outcome.price;
+        if (overOrUnder === 'Over') {
           continue;
         }
         const statId = allStats.find(
-          (stat) => stat.oddsApiStatName === market.key,
+          (stat) => stat.oddsApiStatName === statName,
         )?.id;
         if (!statId) {
-          console.warn('Stat id not found for: ', market.key);
+          console.warn('Stat id not found for: ', statName);
           continue;
         }
         const athleteId = allAthletes.find(
-          (athlete) => athlete.name === outcome.description,
+          (athlete) => athlete.name === athleteName,
         )?.id;
 
         if (!athleteId) {
           console.warn(
-            `Athlete "${outcome.description}" not found for ${matchup?.espnEventId}`,
+            `Athlete "${athleteName}" not found for ${matchup?.espnEventId}`,
           );
           continue;
         }
@@ -364,14 +369,14 @@ export class MatchupsService {
           statId: statId,
           athleteId: athleteId,
           matchupId: matchup?.id!,
-          predictedValue: outcome.point,
+          predictedValue: thresholdValue,
         });
 
         //returning data for CRON logger
         linesForCRONlogger.push({
-          statName: market.key,
-          athleteName: outcome.description,
-          predictedValue: outcome.point,
+          statName: statName,
+          athleteName: athleteName,
+          predictedValue: thresholdValue,
           matchupId: matchup?.id!,
           homeTeam: matchup?.homeTeam?.abbreviation!,
           awayTeam: matchup?.awayTeam?.abbreviation!,
