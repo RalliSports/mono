@@ -5,5 +5,5 @@ export function calculateOddsFromPrice(price: number) {
     } else {
         americanOdds = (price - 1) * 100;
     }
-    return americanOdds;
+    return Math.round(americanOdds);
 }

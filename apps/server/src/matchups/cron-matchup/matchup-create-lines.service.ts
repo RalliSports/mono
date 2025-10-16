@@ -21,8 +21,8 @@ export class MatchupCreateLinesService {
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async handleCron() {
         this.logger.log('Running matchup create lines cron job...');
-        //line prediction for 72 hours + [1 day Tolerance]
-        const UPTO_DAYS = 4;//Upto (N) of days in future to create lines for
+        //line prediction for 72 hours + [2 day Tolerance]
+        const UPTO_DAYS = 5;//Upto (N) of days in future to create lines for
         const NOW = new Date();
         const UPTO_DATE = new Date();
         UPTO_DATE.setDate(NOW.getDate() + UPTO_DAYS);
@@ -57,7 +57,7 @@ export class MatchupCreateLinesService {
                         },
                     );
                 for (const line of createdLines) {
-                    this.logger.log(`Created Line: ${line.homeTeam} - ${line.awayTeam} | ${line.statName} - ${line.athleteName} | ${line.predictedValue} Under: ${line.oddsUnder} | Over: ${line.oddsOver}`);
+                    this.logger.log(`Created Line: ${line.homeTeam} - ${line.awayTeam} | ${line.statName} - ${line.athleteName} | ${line.predictedValue} | Under: ${line.oddsUnder} | Over: ${line.oddsOver}`);
                 }
                 if (createdLines.length === 0) {
                     this.logger.log(`No lines found for matchup ${matchup.id}`);
