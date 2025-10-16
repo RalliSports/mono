@@ -129,7 +129,7 @@ export function useChat() {
       console.log('Channel count:', channels.length)
       return channels
     }
-  }, [client])
+  }, [client, currentUser.data])
 
   const getChannel = useCallback(async (channelId: string, channelType: 'messaging' | 'gaming' = 'gaming') => {
     try {
