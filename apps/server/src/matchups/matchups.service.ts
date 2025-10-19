@@ -41,9 +41,9 @@ import {
 import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
 import { sleep } from 'src/utils';
 import { LineStatus } from 'src/lines/enum/lines';
-import { line, PgColumn } from 'drizzle-orm/pg-core';
 import { LinesCreationSuccessOutput } from './cron-matchup/types/lines-creation-success-outpot.type';
 import { LinesResolveSuccessOutput } from './cron-matchup/types/lines-resolve-success-outpot.type';
+import { calculateOddsFromPrice } from './cron-matchup/utils/odds-calculation-from-price';
 
 @Injectable()
 export class MatchupsService {
@@ -320,27 +320,47 @@ export class MatchupsService {
       console.warn('No bookmakers found for matchup: ', matchupId);
       return [];
     }
+    const marketPredictions = linesResponse.bookmakers[0].markets;
+    for (const market of marketPredictions) {
+      const predictionOutcomes = market.outcomes;
+      const statName = market.key;
+      const statId = allStats.find(
+        (stat) => stat.oddsApiStatName === statName,
+      )?.id;
+      if (!statId) {
+        console.warn('Stat id not found for: ', statName);
+        continue;
+      }
+      const athletePredictionMap: Record<string, { thresholdValue: number; oddsOverValue: number; oddsUnderValue: number; }> = {};
+      for (const outcome of predictionOutcomes) {
+        const overOrUnder = outcome.name;
+        const athleteName = outcome.description;
+        const thresholdVal = outcome.point;
+        const oddsVal = outcome.price;
+        if (!athletePredictionMap[athleteName]) {
+          athletePredictionMap[athleteName] = {
+            thresholdValue: thresholdVal,
+            oddsOverValue: 0,
+            oddsUnderValue: 0,
+          };
+        }
+        if (overOrUnder === 'Over') {
+          athletePredictionMap[athleteName].oddsOverValue = calculateOddsFromPrice(oddsVal);
+        } else if (overOrUnder === 'Under') {
+          athletePredictionMap[athleteName].oddsUnderValue = calculateOddsFromPrice(oddsVal);
+        }
+      }
+      for (const athleteName in athletePredictionMap) {
+        const { thresholdValue, oddsOverValue, oddsUnderValue } =
+          athletePredictionMap[athleteName];
 
-    for (const market of linesResponse.bookmakers[0].markets) {
-      const outcomes = market.outcomes;
-      for (const outcome of outcomes) {
-        if (outcome.name === 'Over') {
-          continue;
-        }
-        const statId = allStats.find(
-          (stat) => stat.oddsApiStatName === market.key,
-        )?.id;
-        if (!statId) {
-          console.warn('Stat id not found for: ', market.key);
-          continue;
-        }
         const athleteId = allAthletes.find(
-          (athlete) => athlete.name === outcome.description,
+          (athlete) => athlete.name === athleteName,
         )?.id;
 
         if (!athleteId) {
           console.warn(
-            `Athlete "${outcome.description}" not found for ${matchup?.espnEventId}`,
+            `Athlete "${athleteName}" not found for ${matchup?.espnEventId}`,
           );
           continue;
         }
@@ -353,25 +373,36 @@ export class MatchupsService {
             eq(lines.status, LineStatus.OPEN),
           ),
         });
-        if (possibleExistingLine) {
+        if (possibleExistingLine && possibleExistingLine.predictedValue === thresholdValue.toString()) {
           console.warn(
-            `Line already exists for ${matchup?.espnEventId} ${athleteId} ${statId}`,
+            `Line already exists with same predicted value for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${thresholdValue}`,
           );
           continue;
+        } else if (possibleExistingLine) {
+          await this.linesService.updateLine(possibleExistingLine.id, {
+            isLatestOne: false,
+          });
+          console.log(
+            `Line with old predicted value found for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${possibleExistingLine.predictedValue}. Creting new line with Value: ${thresholdValue}`,
+          );
         }
 
         formattedLines.push({
           statId: statId,
           athleteId: athleteId,
           matchupId: matchup?.id!,
-          predictedValue: outcome.point,
+          predictedValue: thresholdValue,
+          oddsOver: oddsOverValue,
+          oddsUnder: oddsUnderValue,
         });
 
         //returning data for CRON logger
         linesForCRONlogger.push({
-          statName: market.key,
-          athleteName: outcome.description,
-          predictedValue: outcome.point,
+          statName: statName,
+          athleteName: athleteName,
+          predictedValue: thresholdValue,
+          oddsOver: oddsOverValue,
+          oddsUnder: oddsUnderValue,
           matchupId: matchup?.id!,
           homeTeam: matchup?.homeTeam?.abbreviation!,
           awayTeam: matchup?.awayTeam?.abbreviation!,
