@@ -37,9 +37,9 @@ export default function MainFeedPage() {
   } = useMainPage(session)
 
   // Don't render until mounted to prevent hydration issues
-  if (!mounted) {
-    return null
-  }
+  // if (!mounted) {
+  //   return null
+  // }
 
   // Show loading state while checking wallet connection
   if (shouldShowLoading) {
@@ -64,13 +64,11 @@ export default function MainFeedPage() {
         {/* Mobile and Desktop Layouts */}
         {lobbiesLoading ? (
           <>
-            <LobbiesSectionSkeleton isMobile={false} />
-            <LobbiesSectionSkeleton isMobile={true} />
+            <LobbiesSectionSkeleton />
           </>
         ) : (
           <>
-            <LobbiesSection lobbiesData={lobbiesData} isMobile={false} />
-            <LobbiesSection lobbiesData={lobbiesData} isMobile={true} />
+            <LobbiesSection lobbiesData={lobbiesData} />
           </>
         )}
       </div>

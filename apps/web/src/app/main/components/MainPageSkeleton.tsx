@@ -13,8 +13,7 @@ export default function MainPageSkeleton() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Mobile and Desktop Layouts Skeleton */}
-        <LobbiesSectionSkeleton isMobile={false} />
-        <LobbiesSectionSkeleton isMobile={true} />
+        <LobbiesSectionSkeleton />
       </div>
     </div>
   )
