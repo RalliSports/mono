@@ -1,3 +1,5 @@
+"use client"
+
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useSessionToken } from '@/hooks/use-session'
 import { formatBalance } from '@/lib/utils'
@@ -22,6 +24,7 @@ import { Channel } from 'stream-chat'
 import { useChat } from '@/hooks/api/use-chat'
 import FriendsSection from './FriendsSection'
 import { useSearchParams } from 'next/navigation'
+import { UserServiceFindOne } from '@repo/server'
 
 export default function ProfileContent() {
   const { session } = useSessionToken()
@@ -82,10 +85,6 @@ export default function ProfileContent() {
     }
   }, [searchParams, isConnectedToClient, mounted, client])
 
-  // Don't render until mounted to prevent hydration issues
-  if (!mounted || userLoading || !user) {
-    return null
-  }
 
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -104,13 +103,13 @@ export default function ProfileContent() {
         <>
           <ProfileHeader
             isCurrentUser={isCurrentUser}
-            userId={user.id}
+            userId={user?.id ?? ''}
             isConnected={isConnected}
             balances={balances}
             session={session ?? ''}
             formatBalance={formatBalance}
             onEditPictureClick={() => setIsUploadModalOpen(true)}
-            avatar={user.avatar || ''}
+            avatar={user?.avatar || ''}
             setActiveTab={setActiveTab}
             setActiveChannel={setActiveChannel}
             userHasStreamChat={userHasStreamChat}
@@ -120,7 +119,7 @@ export default function ProfileContent() {
             setActiveTab={setActiveTab}
             setActiveChannel={setActiveChannel}
             isCurrentUser={isCurrentUser}
-            userId={user.id}
+            userId={user?.id as string}
             userHasStreamChat={userHasStreamChat}
           />
         </>
@@ -137,8 +136,8 @@ export default function ProfileContent() {
               </>
             ) : (
               <>
-                <ActiveParlaysSection myOpenGames={myOpenGames} user={user} />
-                <PastParlaysSection myCompletedGames={myCompletedGames} user={user} />
+                <ActiveParlaysSection myOpenGames={myOpenGames} user={user as UserServiceFindOne } />
+                <PastParlaysSection myCompletedGames={myCompletedGames} user={user as UserServiceFindOne} />
               </>
             )}
           </div>
@@ -147,7 +146,7 @@ export default function ProfileContent() {
         {activeTab === 'history' && <HistorySection />}
 
         {activeTab === 'achievements' && <AchievementsSection />}
-        {activeTab === 'friends' && <FriendsSection currentUserId={user.id} session={session ?? ''} />}
+        {activeTab === 'friends' && <FriendsSection currentUserId={user?.id ?? ''} session={session ?? ''} />}
 
         {activeTab === 'chats' && (
           <ChatsSection
@@ -167,7 +166,7 @@ export default function ProfileContent() {
         onUploadComplete={() => {
           setTimeout(() => {}, 1000)
         }}
-        avatar={user.avatar || ''}
+        avatar={user?.avatar || ''}
         setAvatar={setAvatar}
       />
     </div>

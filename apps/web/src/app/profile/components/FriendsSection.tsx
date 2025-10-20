@@ -1,3 +1,5 @@
+"use client"
+
 import { useFriends } from '@/hooks/api/use-friend'
 import { useState } from 'react'
 import FollowButton from './FollowButton'

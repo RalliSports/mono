@@ -1,3 +1,6 @@
+"use client"
+
+
 import { useChat } from '@/hooks/api/use-chat'
 import { ProfileTabType } from '../hooks/useProfileTabs'
 import { Channel } from 'stream-chat'

@@ -13,6 +13,7 @@ export function useParaWalletBalance() {
   const para = useClient()
   const { connection } = useConnection()
 
+  // ✅ Only compute walletAddress when stable
   const walletAddress = useMemo(() => {
     if (!wallet || !para) return null
     try {
@@ -20,45 +21,38 @@ export function useParaWalletBalance() {
         truncate: false,
         addressType: wallet.type,
       })
+      if (!addressString) return null
       return new PublicKey(addressString)
     } catch (error) {
-      console.error('Error parsing wallet address:', error)
+      console.warn('Failed to parse wallet address:', error)
       return null
     }
-  }, [wallet, para])
+  }, [wallet?.id, wallet?.type, para])
 
+  // ✅ Stable query key and conditional fetching
   const ralliBalanceQuery = useQuery({
-    queryKey: ['para-ralli-balance', walletAddress?.toString()],
+    queryKey: ['para-ralli-balance', walletAddress?.toBase58() || 'no-wallet'],
     queryFn: async () => {
       if (!walletAddress) return 0
-      try {
-        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(walletAddress, {
-          mint: new PublicKey(RALLI_TOKEN),
-        })
-
-        if (tokenAccounts.value.length === 0) return 0
-
-        const balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount
-        return balance || 0
-      } catch (error) {
-        console.error('Error fetching RALLI balance:', error)
-        return 0
-      }
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(walletAddress, {
+        mint: new PublicKey(RALLI_TOKEN),
+      })
+      if (tokenAccounts.value.length === 0) return 0
+      return tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0
     },
     enabled: !!walletAddress && !!account?.isConnected,
     refetchInterval: 30000,
+    staleTime: 10000,
   })
 
   return {
     isConnected: !!account?.isConnected && !!walletAddress,
     walletAddress,
     balances: {
-      ralli: ralliBalanceQuery.data || 0,
+      ralli: ralliBalanceQuery.data ?? 0,
     },
-    isLoading: ralliBalanceQuery.isLoading,
+    isLoading: ralliBalanceQuery.isFetching,
     error: ralliBalanceQuery.error,
-    refetch: () => {
-      return ralliBalanceQuery.refetch()
-    },
+    refetch: ralliBalanceQuery.refetch,
   }
 }

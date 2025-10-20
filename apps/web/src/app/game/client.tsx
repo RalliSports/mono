@@ -1,0 +1,131 @@
+'use client'
+
+import { Suspense, useEffect, useState } from 'react'
+import {
+  TopNavigation,
+  GameHeader,
+  GameStats,
+  ParticipantsList,
+  LoadingSpinner,
+  WinnersDisplay,
+  CreateNewGameButton,
+} from './components'
+import { useGameData } from './hooks/useGameData'
+import JoinGameButton from './components/JoinGameButton'
+import { useUserData } from '@/providers/user-data-provider'
+import { useAccount } from '@getpara/react-sdk'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { useRouter } from 'next/navigation'
+import { useGameTabs } from './hooks/useGameTabs'
+import ChatSection from './components/ChatSection'
+import TabNavigation from './components/TabNavigation'
+import LottieLoading from '@/components/ui/lottie-loading'
+import InviteFriends from './components/InviteFriends'
+
+function ViewGameContent() {
+  const { lobby, isLoading, expandedParticipants, toggleParticipant } = useGameData()
+  const { activeTab, mounted, setActiveTab } = useGameTabs()
+  const { user } = useUserData()
+  const router = useRouter()
+  const isUserInGame = lobby?.participants.some((participant) => participant.user?.id === user?.id)
+
+  const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
+
+  // Use auth hooks
+  const account = useAccount()
+  const { isConnected, isLoading: balanceLoading } = useParaWalletBalance()
+
+  // Handle wallet connection with callback URL for join-game
+  useEffect(() => {
+    if (!mounted) return
+
+    // If we're connected, mark as checked
+    if (isConnected) {
+      setHasCheckedConnection(true)
+      return
+    }
+
+    // Don't check again if we've already performed a connection check
+    if (hasCheckedConnection) return
+
+    // Don't redirect if still loading
+    if (balanceLoading) return
+
+    // Wait for connection to establish, then redirect with callback URL if not connected
+    const timeoutId = setTimeout(() => {
+      setHasCheckedConnection(true)
+
+      if (!isConnected && !balanceLoading && lobby?.id) {
+        const callbackUrl = `/game?id=${lobby?.id}`
+        router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      }
+    }, 2000) // Same timeout as main page
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router, lobby])
+
+  // Secondary check for account connection
+  useEffect(() => {
+    if (!mounted) return
+
+    if (hasCheckedConnection && !account?.isConnected && lobby?.id) {
+      const callbackUrl = `/game?id=${lobby?.id}`
+      router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+    }
+  }, [mounted, hasCheckedConnection, account?.isConnected, router, lobby])
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center">
+        <LottieLoading size="lg" message="Loading game..." subMessage="Please wait while we prepare your game" />
+      </div>
+    )
+  }
+
+  if (!lobby) {
+    return (
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-white text-lg">Game not found</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+      <TopNavigation />
+
+      {/* Main Content */}
+      <div className="px-4 pb-20">
+        <GameHeader lobby={lobby} />
+        <GameStats lobby={lobby} />
+        <WinnersDisplay lobby={lobby} />
+        <CreateNewGameButton lobby={lobby} size="large" />
+        <JoinGameButton game={lobby} user={user ?? null} />
+        <InviteFriends game={lobby} />
+        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} isUserInGame={isUserInGame ?? false} />
+
+        {activeTab === 'parlays' && (
+          <ParticipantsList
+            lobby={lobby}
+            expandedParticipants={expandedParticipants}
+            toggleParticipant={toggleParticipant}
+          />
+        )}
+
+        {activeTab === 'chats' && <ChatSection />}
+      </div>
+    </div>
+  )
+}
+
+export default function JoinGamePage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <ViewGameContent />
+    </Suspense>
+  )
+}
