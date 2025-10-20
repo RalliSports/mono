@@ -681,15 +681,40 @@ export class GamesService {
     return false;
   }
 
-  async remove(id: string, user: User) {
-    await this.ensureUserOwnsGame(id, user.id);
-    const [deleted] = await this.db
-      .delete(games)
-      .where(eq(games.id, id))
-      .returning();
+  async removeCreatedGameWithNoParticipants(id: string, user: User) {
+    const selectedGame = await this.db.query.games.findFirst({
+      where: eq(games.id, id),
+      with: {
+        participants: true,
+      },
+    });
 
-    if (!deleted) throw new NotFoundException('Game not found');
-    return deleted;
+    // safety checks
+    if (!selectedGame) {
+      throw new NotFoundException(`Game with GameId ${id} not found`);
+    }
+    if (selectedGame.creatorId !== user.id) {
+      throw new ForbiddenException(
+        `You do not own this game with GameId ${id}`,
+      );
+    }
+    if (selectedGame.participants.length > 1) {
+      throw new BadRequestException(
+        `Game with GameId ${id} already has ${selectedGame.participants.length} participants`,
+      );
+    }
+
+    try {
+      const [deleted] = await this.db
+        .delete(games)
+        .where(and(eq(games.id, id), eq(games.creatorId, user.id)))
+        .returning();
+      return deleted;
+    } catch (error) {
+      throw new BadRequestException(
+        `Game with GameId ${id} not deleted: ${error}`,
+      );
+    }
   }
 
   async ensureUserOwnsGame(gameId: string, userId: string) {
