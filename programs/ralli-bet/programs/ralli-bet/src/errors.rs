@@ -271,4 +271,10 @@ pub enum RalliError {
 
     #[msg("New line value must be different from old line value")]
     SameLineValue,
+
+    #[msg("Line account mismatch")]
+    LineAccountMismatch,
+
+    #[msg("Line is not active")]
+    LineNotActive,
 }

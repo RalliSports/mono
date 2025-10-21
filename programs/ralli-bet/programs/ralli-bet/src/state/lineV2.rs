@@ -57,12 +57,13 @@ impl PlayerLine {
 #[derive(InitSpace)]
 pub struct LinePointer {
 
-    #[max_len(20)]
+    #[max_len(40)]
     pub player_id: String,
     pub matchup_id: u64,
     pub stat_id: u16,
     pub current_line_value: i32,
     pub current_odds: i32,
+    pub current_line_pubkey: Pubkey,
     pub last_updated: i64,
     pub bump: u8,
 }

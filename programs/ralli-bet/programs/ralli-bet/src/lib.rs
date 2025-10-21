@@ -170,6 +170,16 @@ pub mod ralli_bet {
         )
     }
 
+    pub fn update_line_pointer(
+        ctx: Context<UpdateLinePointer>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+    ) -> Result<()> {
+        ctx.accounts.update_line_pointer(player_id, matchup_id, stat_id, line_value)
+    }
+
 
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)

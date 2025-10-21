@@ -89,11 +89,9 @@ impl<'info> CreateLineV2<'info> {
         });
 
         // Update/initialize the LinePointer to point to this new line
-        line_pointer.player_id = player_id.clone();
-        line_pointer.matchup_id = matchup_id;
-        line_pointer.stat_id = stat_id;
         line_pointer.current_line_value = line_value;
         line_pointer.current_odds = odds;
+        line_pointer.current_line_pubkey = player_line.key();
         line_pointer.last_updated = current_time;
         line_pointer.bump = bumps.line_pointer;
 

@@ -11,6 +11,7 @@ pub mod calculate_winners;
 pub mod cancel_game;
 pub mod withdraw_submission;
 pub mod update_line;
+pub mod update_line_pointer;
 pub mod resolve_game_batch;
 
 pub use create_game::*;
@@ -26,4 +27,5 @@ pub use calculate_winners::*;
 pub use cancel_game::*;
 pub use withdraw_submission::*;
 pub use update_line::*;
+pub use update_line_pointer::*;
 pub use resolve_game_batch::*;
