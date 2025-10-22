@@ -2967,13 +2967,13 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Resolve Game Tests", () => {
+    ////NEW GAMES
     let newGame1PK: PublicKey;
     let newGame2PK: PublicKey;
     let newGame3PK: PublicKey;
     let newGame4PK: PublicKey;
     let newGame5PK: PublicKey;
     let newGame6PK: PublicKey;
-
     let newGame7PK: PublicKey;
     let newGame8PK: PublicKey;
     let newGame9PK: PublicKey;
@@ -2983,14 +2983,13 @@ describe("RalliBet Comprehensive Tests", () => {
     let newGame13PK: PublicKey;
     let newGame14PK: PublicKey;
 
+    ////NEW GAME ESCROWS
     let newGameEscrow1PK: PublicKey;
     let newGameEscrow2PK: PublicKey;
     let newGameEscrow3PK: PublicKey;
     let newGameEscrow4PK: PublicKey;
     let newGameEscrow5PK: PublicKey;
     let newGameEscrow6PK: PublicKey;
-
-    ////NEW LINES
 
     let newGameEscrow7PK: PublicKey;
     let newGameEscrow8PK: PublicKey;
@@ -3001,16 +3000,12 @@ describe("RalliBet Comprehensive Tests", () => {
     let newGameEscrow13PK: PublicKey;
     let newGameEscrow14PK: PublicKey;
 
-    ////LINE ENDS
-
     let newGameVault1PK: PublicKey;
     let newGameVault2PK: PublicKey;
     let newGameVault3PK: PublicKey;
     let newGameVault4PK: PublicKey;
     let newGameVault5PK: PublicKey;
     let newGameVault6PK: PublicKey;
-
-    ////NEW LINES
 
     let newGameVault7PK: PublicKey;
     let newGameVault8PK: PublicKey;
@@ -3021,7 +3016,7 @@ describe("RalliBet Comprehensive Tests", () => {
     let newGameVault13PK: PublicKey;
     let newGameVault14PK: PublicKey;
 
-    ////LINE ENDS
+    ////NEW LINES
 
     let newLine1PK: PublicKey;
     let newLine2PK: PublicKey;
@@ -3036,6 +3031,8 @@ describe("RalliBet Comprehensive Tests", () => {
     let newLineId4 = new BN(2003);
     let newLineId5 = new BN(2004);
     let newLineId6 = new BN(2005);
+
+    ////LINE ENDS
 
     let newBet1Game1: PublicKey;
     let newBet2Game1: PublicKey;
@@ -3052,8 +3049,6 @@ describe("RalliBet Comprehensive Tests", () => {
     let newBet2Game4: PublicKey;
     let newBet3Game4: PublicKey;
     let newBet4Game4: PublicKey;
-
-    ////NEW LINES
 
     let newBet1Game7: PublicKey;
     let newBet2Game7: PublicKey;
@@ -3097,8 +3092,6 @@ describe("RalliBet Comprehensive Tests", () => {
     let newBet4Game13: PublicKey;
 
     let newBet1Game14: PublicKey;
-
-    ////LINE ENDS
 
     before(async () => {
       let newStartsSoonRaw = Date.now() + 30000;
@@ -5769,6 +5762,7 @@ describe("RalliBet Comprehensive Tests", () => {
   });
 
   describe("Resolve Game Batch Tests", () => {
+    ////NEW GAMES
     let newGame1PK: PublicKey;
     let newGame2PK: PublicKey;
     let newGame3PK: PublicKey;
@@ -5785,14 +5779,13 @@ describe("RalliBet Comprehensive Tests", () => {
     let newGame13PK: PublicKey;
     let newGame14PK: PublicKey;
 
+    ////NEW GAME ESCROWS
     let newGameEscrow1PK: PublicKey;
     let newGameEscrow2PK: PublicKey;
     let newGameEscrow3PK: PublicKey;
     let newGameEscrow4PK: PublicKey;
     let newGameEscrow5PK: PublicKey;
     let newGameEscrow6PK: PublicKey;
-
-    ////NEW LINES
 
     let newGameEscrow7PK: PublicKey;
     let newGameEscrow8PK: PublicKey;
@@ -5803,16 +5796,12 @@ describe("RalliBet Comprehensive Tests", () => {
     let newGameEscrow13PK: PublicKey;
     let newGameEscrow14PK: PublicKey;
 
-    ////LINE ENDS
-
     let newGameVault1PK: PublicKey;
     let newGameVault2PK: PublicKey;
     let newGameVault3PK: PublicKey;
     let newGameVault4PK: PublicKey;
     let newGameVault5PK: PublicKey;
     let newGameVault6PK: PublicKey;
-
-    ////NEW LINES
 
     let newGameVault7PK: PublicKey;
     let newGameVault8PK: PublicKey;
@@ -5823,7 +5812,7 @@ describe("RalliBet Comprehensive Tests", () => {
     let newGameVault13PK: PublicKey;
     let newGameVault14PK: PublicKey;
 
-    ////LINE ENDS
+    ////NEW LINES
 
     let newLine1PK: PublicKey;
     let newLine2PK: PublicKey;
@@ -5838,6 +5827,8 @@ describe("RalliBet Comprehensive Tests", () => {
     let newLineId4 = new BN(12003);
     let newLineId5 = new BN(12004);
     let newLineId6 = new BN(12005);
+
+    ////LINE ENDS
 
     let newBet1Game1: PublicKey;
     let newBet2Game1: PublicKey;
@@ -5854,8 +5845,6 @@ describe("RalliBet Comprehensive Tests", () => {
     let newBet2Game4: PublicKey;
     let newBet3Game4: PublicKey;
     let newBet4Game4: PublicKey;
-
-    ////NEW LINES
 
     let newBet1Game7: PublicKey;
     let newBet2Game7: PublicKey;
@@ -5899,8 +5888,6 @@ describe("RalliBet Comprehensive Tests", () => {
     let newBet4Game13: PublicKey;
 
     let newBet1Game14: PublicKey;
-
-    ////LINE ENDS
 
     before(async () => {
       let newStartsSoonRaw = Date.now() + 30000;
