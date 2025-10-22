@@ -4,7 +4,6 @@ import {
   IsEmail,
   IsOptional,
   IsString,
-  IsUrl,
 } from 'class-validator';
 
 // Create the class that must exactly match the type
@@ -25,11 +24,11 @@ export class UpdateUserDto {
   username?: string;
 
   @ApiProperty({
-    description: 'User avatar URL',
-    example: 'https://example.com/avatar.png',
+    description: 'User avatar URL (absolute or relative)',
+    example: '/images/avatar.png',
   })
   @IsOptional()
-  @IsUrl({}, { message: 'Avatar must be a valid URL' })
+  @IsString({ message: 'Avatar must be a valid URL or relative path' })
   avatar?: string;
 
   @ApiProperty({
