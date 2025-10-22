@@ -15,20 +15,6 @@ import BN from "bn.js";
 import * as fs from "fs";
 import * as path from "path";
 
-/**
- * BATCH RESOLUTION TEST FILE
- *
- * This test demonstrates the resolve_game_batch instruction working with multiple batches.
- *
- * Key Features Tested:
- * 1. Resolving a game in 2 separate batches (batch_index 0 and 1)
- * 2. Verifying game status transitions: Open -> Resolving -> Resolved
- * 3. Tracking payout_progress as winners are paid in batches
- * 4. Ensuring treasury receives fees only after all winners are paid
- * 5. Verifying that batch_size can be flexible (1, 2, 3, etc.)
- */
-
-// Load admin keypair from Solana config
 const connection = new Connection("http://127.0.0.1:8899", "confirmed");
 const keypairPath = path.resolve(process.env.HOME!, ".config/solana/id.json");
 const secretKey = Uint8Array.from(
@@ -82,23 +68,21 @@ describe("RalliBet - Batch Resolution Tests", () => {
   let bet4PK: PublicKey;
   let bet5PK: PublicKey;
 
-  // Constants - Use unique IDs to avoid collisions
-  const entryFeeRaw = 1_000_000; // 1 USDC (assuming 6 decimals)
-  const statId1 = 5001; // u16 - use number
-  const statId2 = 5002; // u16 - use number
-  const statId3 = 5003; // u16 - use number
-  const predictedValue1 = 25.0; // f64 - use number (25.0 points)
-  const predictedValue2 = 12.0; // f64 - use number (12.0 rebounds)
-  const predictedValue3 = 8.0; // f64 - use number (8.0 assists)
-  const athleteId1 = new BN(5501); // u64 - use BN
-  const athleteId2 = new BN(5502); // u64 - use BN
-  const athleteId3 = new BN(5503); // u64 - use BN
+  const entryFeeRaw = 1_000_000;
+  const statId1 = 5001;
+  const statId2 = 5002;
+  const statId3 = 5003;
+  const predictedValue1 = 25.0;
+  const predictedValue2 = 12.0;
+  const predictedValue3 = 8.0;
+  const athleteId1 = new BN(5501);
+  const athleteId2 = new BN(5502);
+  const athleteId3 = new BN(5503);
 
   before(async () => {
     console.log("\n🚀 Setting up test environment...\n");
     console.log("✅ Using admin keypair:", adminKeypair.publicKey.toBase58());
 
-    // Generate keypairs for other users
     treasury = Keypair.generate();
     user1 = Keypair.generate();
     user2 = Keypair.generate();
@@ -106,7 +90,6 @@ describe("RalliBet - Batch Resolution Tests", () => {
     user4 = Keypair.generate();
     user5 = Keypair.generate();
 
-    // Airdrop SOL to user accounts (admin already has SOL from config)
     const accounts = [
       treasury.publicKey,
       user1.publicKey,
@@ -237,9 +220,6 @@ describe("RalliBet - Batch Resolution Tests", () => {
 
     console.log("✅ Token accounts created and funded");
 
-    // Create lines
-    // Start time must be in the future for creation
-    // Give enough time for users to join and place bets (10 seconds)
     const startTime = new BN(Math.floor(Date.now() / 1000) + 10); // Start in 10 seconds
 
     lineId1 = new BN(10001 + Date.now()); // Use timestamp to ensure uniqueness
@@ -309,19 +289,19 @@ describe("RalliBet - Batch Resolution Tests", () => {
 
     gameVaultPK = await getAssociatedTokenAddress(mint, gamePK, true);
 
-    const maxUsers = 10; // Maximum 10 users
-    const numberOfLines = 3; // We have 3 lines in this game
+    const maxUsers = 10;
+    const numberOfLines = 3;
 
     await program.methods
       .createGame(
-        gameId, // game_id: u64
-        maxUsers, // max_users: u8
-        entryFee, // entry_fee: u64
-        numberOfLines, // number_of_lines: u8
-        adminKeypair.publicKey // admin: Option<Pubkey>
+        gameId,
+        maxUsers,
+        entryFee,
+        numberOfLines,
+        adminKeypair.publicKey
       )
       .accountsPartial({
-        creator: adminKeypair.publicKey, // Note: it's "creator" not "admin"
+        creator: adminKeypair.publicKey,
         game: gamePK,
         gameEscrow: gameEscrowPK,
         mint: mint,
@@ -618,11 +598,10 @@ describe("RalliBet - Batch Resolution Tests", () => {
   it("Setup: Resolve lines - Calculate parlay winners", async () => {
     console.log("\n⚖️ Resolving lines...\n");
 
-    // Wait for lines to start (they were set to start in 10 seconds)
     console.log(
       "⏳ Waiting for lines to start (this takes about 10 seconds)..."
     );
-    await new Promise((resolve) => setTimeout(resolve, 11000)); // Wait 11 seconds to be safe
+    await new Promise((resolve) => setTimeout(resolve, 11000));
     console.log("✅ Lines have started\n");
 
     // Line Results:
@@ -676,9 +655,6 @@ describe("RalliBet - Batch Resolution Tests", () => {
 
   it("Setup: Calculate game winners", async () => {
     console.log("\n🧮 Calculating game winners...\n");
-
-    // STEP 1: calculateCorrect must be called ONCE PER BET
-    // Each call calculates the correct picks for one bet
 
     console.log("Step 1: Calculating correct picks for each bet...");
 
