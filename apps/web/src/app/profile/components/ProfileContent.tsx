@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useSessionToken } from '@/hooks/use-session'
@@ -31,7 +31,7 @@ export default function ProfileContent() {
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
   const [userHasStreamChat, setUserHasStreamChat] = useState(false)
   const { currentUser } = useUser()
-  const { client, isConnectedToClient } = useChat()
+  const { client, isConnectedToClient, ensureConnection } = useChat()
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
   const searchParams = useSearchParams()
 
@@ -71,20 +71,44 @@ export default function ProfileContent() {
     }
   }, [user, client, isConnectedToClient])
 
-  // Handle channel parameter from notification deep link
+  // Handle tab and channel parameters from notification deep link
   useEffect(() => {
+    const tab = searchParams.get('tab')
     const channelId = searchParams.get('channel')
-    if (channelId && isConnectedToClient && mounted) {
-      try {
-        // Try to get the channel and set it as active
-        const channel = client.channel('messaging', channelId)
-        setActiveChannel(channel)
-      } catch (error) {
-        console.error('Failed to set active channel from URL:', error)
-      }
-    }
-  }, [searchParams, isConnectedToClient, mounted, client])
 
+    if (tab && mounted) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setActiveTab(tab as any)
+    }
+
+    if (channelId && mounted) {
+      // Store the channel ID to load when Stream.io is ready
+      const loadChannelWhenReady = async () => {
+        try {
+          // Ensure Stream.io connection is ready
+          const connected = await ensureConnection()
+
+          if (connected) {
+            // Get the channel and watch it to load messages
+            const channel = client.channel('messaging', channelId)
+            await channel.watch()
+            setActiveChannel(channel)
+            // Ensure we're on the chats tab when opening a specific channel
+            if (!tab) {
+              setActiveTab('chats')
+            }
+            console.log('Successfully loaded channel from notification:', channelId)
+          } else {
+            console.warn('Failed to establish Stream.io connection for channel:', channelId)
+          }
+        } catch (error) {
+          console.error('Failed to watch channel from URL:', error)
+        }
+      }
+
+      loadChannelWhenReady()
+    }
+  }, [searchParams, isConnectedToClient, mounted, client, setActiveTab, ensureConnection])
 
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -136,7 +160,7 @@ export default function ProfileContent() {
               </>
             ) : (
               <>
-                <ActiveParlaysSection myOpenGames={myOpenGames} user={user as UserServiceFindOne } />
+                <ActiveParlaysSection myOpenGames={myOpenGames} user={user as UserServiceFindOne} />
                 <PastParlaysSection myCompletedGames={myCompletedGames} user={user as UserServiceFindOne} />
               </>
             )}

@@ -43,6 +43,22 @@ export default function ChatsSection({
     })
   }, [getChannels])
 
+  // Auto-select the active channel when it's provided (e.g., from notification deep link)
+  useEffect(() => {
+    if (activeChannel && channels.length > 0) {
+      // Ensure the channel list includes the active channel
+      const channelExists = channels.some((ch) => ch.id === activeChannel.id)
+      if (!channelExists) {
+        // Add the channel to the list if it's not already there
+        setChannels((prev) => [activeChannel, ...prev])
+      }
+      // Set mobile view to show the channel on small screens
+      if (isMobile) {
+        setHideChannelList(true)
+      }
+    }
+  }, [activeChannel, channels, isMobile])
+
   console.log('activeChannel', activeChannel)
 
   if (!user) {
