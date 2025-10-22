@@ -127,14 +127,22 @@ export function useChat() {
 
   const getChannels = useCallback(async () => {
     if (currentUser.data) {
-      const channels = await client.queryChannels({
-        members: { $in: [currentUser.data.id!] },
-      })
-      console.log('User channels:', channels)
-      console.log('Channel count:', channels.length)
-      return channels
+      try {
+        console.log('🔍 Querying channels for user:', currentUser.data.id)
+        const channels = await client.queryChannels({
+          members: { $in: [currentUser.data.id!] },
+        })
+        console.log('✅ User channels:', channels)
+        console.log('📊 Channel count:', channels.length)
+        return channels
+      } catch (error) {
+        console.error('❌ Failed to query channels:', error)
+        return []
+      }
     }
-  }, [client])
+    console.warn('⚠️ No current user data available for channel query')
+    return []
+  }, [client, currentUser.data])
 
   const getChannel = useCallback(async (channelId: string) => {
     const channel = await client.getChannelById('gaming', channelId, {})

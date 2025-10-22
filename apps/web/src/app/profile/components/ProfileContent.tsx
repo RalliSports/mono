@@ -31,7 +31,7 @@ export default function ProfileContent() {
   const { activeTab, setActiveTab, mounted } = useProfileTabs()
   const [userHasStreamChat, setUserHasStreamChat] = useState(false)
   const { currentUser } = useUser()
-  const { client, isConnectedToClient, ensureConnection } = useChat()
+  const { client, isConnectedToClient } = useChat()
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
   const searchParams = useSearchParams()
 
@@ -71,44 +71,72 @@ export default function ProfileContent() {
     }
   }, [user, client, isConnectedToClient])
 
-  // Handle tab and channel parameters from notification deep link
+  // Store channel ID from URL for later loading
+  const [pendingChannelId, setPendingChannelId] = useState<string | null>(null)
+
+  // Handle URL parameters immediately when mounted
   useEffect(() => {
-    const tab = searchParams.get('tab')
     const channelId = searchParams.get('channel')
+    const tab = searchParams.get('tab')
 
-    if (tab && mounted) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setActiveTab(tab as any)
+    console.log('🔄 URL params effect:', { channelId, tab, mounted, activeTab })
+
+    if (mounted) {
+      // Set pending channel if we have one
+      if (channelId) {
+        console.log('🔗 Setting pending channel from URL:', channelId)
+        setPendingChannelId(channelId)
+
+        // Ensure we're on the chats tab if no tab specified
+        if (!tab && activeTab !== 'chats') {
+          console.log('🎯 Setting tab to chats (no tab in URL)')
+          setActiveTab('chats')
+        }
+      }
     }
+  }, [searchParams, mounted, activeTab, setActiveTab])
 
-    if (channelId && mounted) {
-      // Store the channel ID to load when Stream.io is ready
-      const loadChannelWhenReady = async () => {
+  // Handle loading pending channel when Stream.io becomes ready
+  useEffect(() => {
+    console.log('🔄 Pending channel effect:', {
+      pendingChannelId,
+      isConnectedToClient,
+      hasActiveChannel: !!activeChannel,
+      user: user?.id,
+    })
+
+    if (pendingChannelId && isConnectedToClient && !activeChannel && user?.id) {
+      console.log('🔗 Loading pending channel:', pendingChannelId)
+
+      const loadChannel = async () => {
         try {
-          // Ensure Stream.io connection is ready
-          const connected = await ensureConnection()
+          console.log('✅ Stream.io connected, loading channel:', pendingChannelId)
+          // Get the channel and watch it to load messages
+          // Include current user as member to ensure access
+          const channel = client.channel('messaging', pendingChannelId, {
+            members: [user.id],
+          })
+          console.log('⏳ Watching channel...', channel)
 
-          if (connected) {
-            // Get the channel and watch it to load messages
-            const channel = client.channel('messaging', channelId)
-            await channel.watch()
-            setActiveChannel(channel)
-            // Ensure we're on the chats tab when opening a specific channel
-            if (!tab) {
-              setActiveTab('chats')
-            }
-            console.log('Successfully loaded channel from notification:', channelId)
-          } else {
-            console.warn('Failed to establish Stream.io connection for channel:', channelId)
-          }
+          // Try to watch the channel (this will create it if it doesn't exist)
+          const channelState = await channel.watch()
+          console.log('🎬 Channel watched successfully:', channelState)
+          console.log('📝 Channel state:', channel.state)
+          console.log('💬 Messages count:', channel.state.messages.length)
+
+          setActiveChannel(channel)
+          setPendingChannelId(null) // Clear pending
+          console.log('✅ Successfully loaded channel from notification:', pendingChannelId)
         } catch (error) {
-          console.error('Failed to watch channel from URL:', error)
+          console.error('💥 Failed to watch channel from URL:', error)
+          console.error('Error details:', error)
+          // Don't clear pending channel on error, might retry later
         }
       }
 
-      loadChannelWhenReady()
+      loadChannel()
     }
-  }, [searchParams, isConnectedToClient, mounted, client, setActiveTab, ensureConnection])
+  }, [pendingChannelId, isConnectedToClient, activeChannel, client, setActiveChannel, user?.id])
 
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -151,6 +179,10 @@ export default function ProfileContent() {
 
       {/* Tab Content */}
       <div className="px-4 pb-8">
+        {(() => {
+          console.log('🎨 Rendering tab content, activeTab:', activeTab)
+          return null
+        })()}
         {activeTab === 'parlays' && (
           <div className="space-y-6">
             {gamesLoading ? (
@@ -173,11 +205,17 @@ export default function ProfileContent() {
         {activeTab === 'friends' && <FriendsSection currentUserId={user?.id ?? ''} session={session ?? ''} />}
 
         {activeTab === 'chats' && (
-          <ChatsSection
-            activeChannel={activeChannel}
-            setActiveChannel={setActiveChannel}
-            isCurrentUser={isCurrentUser}
-          />
+          <>
+            {(() => {
+              console.log('🎯 Rendering ChatsSection with activeChannel:', activeChannel?.id)
+              return null
+            })()}
+            <ChatsSection
+              activeChannel={activeChannel}
+              setActiveChannel={setActiveChannel}
+              isCurrentUser={isCurrentUser}
+            />
+          </>
         )}
       </div>
 

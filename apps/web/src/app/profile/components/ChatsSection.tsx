@@ -34,14 +34,24 @@ export default function ChatsSection({
   const { user } = useProfile(session || null)
   const [channels, setChannels] = useState<Channel[]>([])
   const [hideChannelList, setHideChannelList] = useState(!isCurrentUser)
-  const { client, getChannels, isConnectedToClient } = useChat()
+  const { client, getChannels, isConnectedToClient, ensureConnection } = useChat()
   const isMobile = useScreenSize()
+  const [isInitializing, setIsInitializing] = useState(false)
 
   useEffect(() => {
-    getChannels().then((channels) => {
-      setChannels(channels ?? [])
-    })
-  }, [getChannels])
+    if (isConnectedToClient && user?.id) {
+      console.log('🔄 Fetching channels for user:', user.id)
+      getChannels()
+        .then((channels) => {
+          console.log('📥 Received channels:', channels?.length || 0)
+          setChannels(channels ?? [])
+        })
+        .catch((error) => {
+          console.error('❌ Error fetching channels:', error)
+          setChannels([])
+        })
+    }
+  }, [getChannels, isConnectedToClient, user?.id])
 
   // Auto-select the active channel when it's provided (e.g., from notification deep link)
   useEffect(() => {
@@ -68,13 +78,31 @@ export default function ChatsSection({
     }
   }, [activeChannel, isMobile, hideChannelList])
 
-  console.log('ChatsSection state:', {
+  // Proactively ensure Stream.io connection when we have an activeChannel but not connected
+  useEffect(() => {
+    if (activeChannel && !isConnectedToClient && user?.id && !isInitializing) {
+      console.log('📡 Proactively ensuring Stream.io connection for activeChannel:', activeChannel.id)
+      setIsInitializing(true)
+      ensureConnection()
+        .then((connected) => {
+          console.log('📡 Proactive connection result:', connected)
+          setIsInitializing(false)
+        })
+        .catch((error) => {
+          console.error('📡 Proactive connection failed:', error)
+          setIsInitializing(false)
+        })
+    }
+  }, [activeChannel, isConnectedToClient, user?.id, ensureConnection, isInitializing])
+
+  console.log('💬 ChatsSection render state:', {
     activeChannel: activeChannel?.id,
     channelsCount: channels.length,
     isConnectedToClient,
     userLoaded: !!user,
     isMobile,
     hideChannelList,
+    isCurrentUser,
   })
 
   if (!user) {
@@ -270,8 +298,12 @@ export default function ChatsSection({
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="animate-spin w-8 h-8 border-2 border-[#00CED1] border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-slate-400">Connecting to chat...</p>
-                {activeChannel && <p className="text-slate-500 text-xs mt-2">Loading channel: {activeChannel.id}</p>}
+                <p className="text-slate-400">{activeChannel ? 'Loading conversation...' : 'Connecting to chat...'}</p>
+                {activeChannel && (
+                  <p className="text-slate-500 text-xs mt-2">
+                    {isInitializing ? 'Initializing chat connection...' : `Loading channel: ${activeChannel.id}`}
+                  </p>
+                )}
               </div>
             </div>
           )}
