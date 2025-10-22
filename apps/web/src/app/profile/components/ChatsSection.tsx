@@ -155,7 +155,10 @@ export default function ChatsSection({
       <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm border-b border-slate-700/50 p-4 flex items-center space-x-3">
         {isMobile && (
           <button
-            onClick={() => setHideChannelList(false)}
+            onClick={() => {
+              setHideChannelList(false)
+              setActiveChannel(null)
+            }}
             className="text-[#00CED1] hover:text-[#00CED1]/80 transition-colors duration-200 font-medium mr-2"
           >
             ← Back
