@@ -45,21 +45,37 @@ export default function ChatsSection({
 
   // Auto-select the active channel when it's provided (e.g., from notification deep link)
   useEffect(() => {
-    if (activeChannel && channels.length > 0) {
-      // Ensure the channel list includes the active channel
-      const channelExists = channels.some((ch) => ch.id === activeChannel.id)
-      if (!channelExists) {
-        // Add the channel to the list if it's not already there
-        setChannels((prev) => [activeChannel, ...prev])
+    if (activeChannel) {
+      // Ensure the channel list includes the active channel if we have channels
+      if (channels.length > 0) {
+        const channelExists = channels.some((ch) => ch.id === activeChannel.id)
+        if (!channelExists) {
+          // Add the channel to the list if it's not already there
+          setChannels((prev) => [activeChannel, ...prev])
+        }
       }
-      // Set mobile view to show the channel on small screens
+      // Set mobile view to show the channel on small screens when activeChannel is set
       if (isMobile) {
         setHideChannelList(true)
       }
     }
   }, [activeChannel, channels, isMobile])
 
-  console.log('activeChannel', activeChannel)
+  // Force hide channel list on mobile when we have an active channel from deep link
+  useEffect(() => {
+    if (activeChannel && isMobile && !hideChannelList) {
+      setHideChannelList(true)
+    }
+  }, [activeChannel, isMobile, hideChannelList])
+
+  console.log('ChatsSection state:', {
+    activeChannel: activeChannel?.id,
+    channelsCount: channels.length,
+    isConnectedToClient,
+    userLoaded: !!user,
+    isMobile,
+    hideChannelList,
+  })
 
   if (!user) {
     return (
@@ -83,7 +99,7 @@ export default function ChatsSection({
     members: { $in: [user.id] },
   }
 
-  if (channels.length === 0) {
+  if (channels.length === 0 && !activeChannel) {
     return (
       <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
         <div className="flex items-center space-x-3 mb-4">
@@ -209,10 +225,14 @@ export default function ChatsSection({
                       </div>
                     </div>
                     <div className="overflow-y-auto py-2">
-                      <ChannelList
-                        filters={filters as ChannelFilters}
-                        Preview={(props) => <CustomChannelPreview {...props} />}
-                      />
+                      {channels.length > 0 ? (
+                        <ChannelList
+                          filters={filters as ChannelFilters}
+                          Preview={(props) => <CustomChannelPreview {...props} />}
+                        />
+                      ) : (
+                        <div className="p-4 text-center text-slate-400 text-sm">Loading conversations...</div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -220,7 +240,7 @@ export default function ChatsSection({
                 {/* Main Chat */}
                 <div className="flex-1">
                   {activeChannel && (!isMobile || (isMobile && hideChannelList)) ? (
-                    <ChannelComponent channel={activeChannel}>
+                    <ChannelComponent channel={activeChannel} key={activeChannel.id}>
                       <Window>
                         <CustomChannelHeader />
                         <MessageList />
@@ -236,7 +256,9 @@ export default function ChatsSection({
                         </div>
                         <h4 className="text-white font-medium mb-2">No conversation selected</h4>
                         <p className="text-slate-400 text-sm">
-                          Choose a conversation from the sidebar to start chatting
+                          {channels.length === 0
+                            ? 'Loading conversations...'
+                            : 'Choose a conversation from the sidebar to start chatting'}
                         </p>
                       </div>
                     </div>
@@ -249,6 +271,7 @@ export default function ChatsSection({
               <div className="text-center">
                 <div className="animate-spin w-8 h-8 border-2 border-[#00CED1] border-t-transparent rounded-full mx-auto mb-4"></div>
                 <p className="text-slate-400">Connecting to chat...</p>
+                {activeChannel && <p className="text-slate-500 text-xs mt-2">Loading channel: {activeChannel.id}</p>}
               </div>
             </div>
           )}
