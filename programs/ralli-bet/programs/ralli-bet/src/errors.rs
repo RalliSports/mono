@@ -271,4 +271,13 @@ pub enum RalliError {
 
     #[msg("Batch size does not match expected size")]
     BatchSizeMismatch,
+
+    #[msg("Invalid remaining accounts")]
+    InvalidRemainingAccounts,
+
+    #[msg("Bet account mismatch")]
+    BetAccountMismatch,
+
+    #[msg("Payout amount is zero")]
+    PayoutAmountZero,
 }
