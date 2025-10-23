@@ -870,6 +870,96 @@ describe("RalliBet - Batch Resolution Tests", () => {
     console.log("=".repeat(60) + "\n");
   });
 
+  it("🛡️ SECURITY TEST: Fails to re-run Batch 1 (batch_index=0) after it has already been processed", async () => {
+    console.log("\n" + "=".repeat(60));
+    console.log(
+      "🛡️ SECURITY TEST: Attempting to re-run Batch 1 (double-spend attack)..."
+    );
+    console.log("=".repeat(60));
+
+    const gameDataBefore = await program.account.game.fetch(gamePK);
+    const user1BalanceBefore = await connection.getTokenAccountBalance(
+      user1TokenAccount
+    );
+
+    console.log(`\n📊 Pre-Attack State:`);
+    console.log(
+      `   Payout Progress (Batches): ${gameDataBefore.payoutProgress}`
+    ); // Now tracks batches
+    console.log(`   User1 Balance: ${user1BalanceBefore.value.amount}`);
+    console.log(`   Game Status: ${JSON.stringify(gameDataBefore.status)}`);
+
+    expect(gameDataBefore.payoutProgress).to.equal(1);
+    expect(gameDataBefore.status).to.deep.equal({ resolving: {} });
+
+    const feePercentage = 500; // 5% fee
+    const accounts = {
+      admin: adminKeypair.publicKey,
+      game: gamePK,
+      gameEscrow: gameEscrowPK,
+      mint: mint,
+      gameVault: gameVaultPK,
+      treasury: treasury.publicKey,
+      treasuryVault: treasuryTokenAccount,
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    };
+
+    console.log("\n🔄 Executing Batch 1 (batch_index=0) AGAIN...");
+    console.log("   Paying: User1 (again)");
+    console.log("   Expected: This transaction MUST fail.");
+
+    let vulnerability_detected = false;
+    try {
+      await program.methods
+        .resolveGameBatch(feePercentage, 0)
+        .accounts(accounts)
+        .remainingAccounts([
+          { pubkey: user1TokenAccount, isWritable: true, isSigner: false },
+        ])
+        .signers([adminKeypair])
+        .rpc();
+
+      vulnerability_detected = true;
+    } catch (error) {
+      console.log("✅ PROTECTION VERIFIED: Transaction failed as expected!");
+      expect(error.toString()).to.include("InvalidBatchIndex");
+      console.log(`   Error: ${error.message}`);
+    }
+
+    const user1BalanceAfter = await connection.getTokenAccountBalance(
+      user1TokenAccount
+    );
+    const gameDataAfter = await program.account.game.fetch(gamePK);
+
+    console.log("\n📊 Post-Attack State (Verification):");
+    console.log(
+      `   User1 Balance: ${user1BalanceAfter.value.amount} (Unchanged)`
+    );
+    console.log(
+      `   Payout Progress: ${gameDataAfter.payoutProgress} (Unchanged)`
+    );
+
+    expect(user1BalanceAfter.value.amount).to.equal(
+      user1BalanceBefore.value.amount
+    );
+    expect(gameDataAfter.payoutProgress).to.equal(
+      gameDataBefore.payoutProgress
+    );
+
+    if (vulnerability_detected) {
+      console.error("\n" + "X".repeat(60));
+      console.error("❌ VULNERABILITY DETECTED: BATCH 1 WAS PROCESSED TWICE!");
+      console.error("X".repeat(60));
+      expect.fail("Vulnerability detected: Double-payment succeeded.");
+    }
+
+    console.log("\n" + "=".repeat(60));
+    console.log("🛡️ SECURITY TEST COMPLETE");
+    console.log("=".repeat(60) + "\n");
+  });
+
   it("🎯 BATCH 2: Resolve game - Pay second winner (User2) and finalize with batch_index=1", async () => {
     console.log("\n" + "=".repeat(60));
     console.log("🎯 BATCH RESOLUTION TEST - BATCH 2 of 2 (FINAL)");
@@ -889,13 +979,16 @@ describe("RalliBet - Batch Resolution Tests", () => {
 
     const gameBeforeBatch2 = await program.account.game.fetch(gamePK);
     console.log(
-      `   Current Payout Progress: ${gameBeforeBatch2.payoutProgress}/2`
+      `   Current Payout Progress (Batches): ${gameBeforeBatch2.payoutProgress}`
     );
     console.log(
       `   Current Status: ${JSON.stringify(gameBeforeBatch2.status)}`
     );
 
-    const feePercentage = 500; // 5% fee (same as Batch 1)
+    // We expect payoutProgress to be 1 (ready for batch 1)
+    expect(gameBeforeBatch2.payoutProgress).to.equal(1);
+
+    const feePercentage = 500; // 5% fee
     const accounts = {
       admin: adminKeypair.publicKey,
       game: gamePK,
@@ -915,7 +1008,6 @@ describe("RalliBet - Batch Resolution Tests", () => {
     console.log("   This batch will finalize the game!");
 
     // BATCH 2: Pay User2 (batch_index = 1)
-    // This should complete the resolution and pay treasury
     await program.methods
       .resolveGameBatch(feePercentage, 1) // batch_index = 1
       .accounts(accounts)
@@ -934,17 +1026,18 @@ describe("RalliBet - Batch Resolution Tests", () => {
     console.log("\n✅ Batch 2 Complete - GAME FULLY RESOLVED!");
     console.log("📊 Final Game State:");
     console.log(
-      `   Payout Progress: ${gameAfterBatch2.payoutProgress}/2 winners paid`
+      `   Payout Progress (Batches): ${gameAfterBatch2.payoutProgress}`
     );
     console.log(`   Game Status: ${JSON.stringify(gameAfterBatch2.status)}`);
     console.log(`   Escrow Balance: ${gameEscrowAfterBatch2.totalAmount}`);
 
     // Verify final state
-    expect(gameAfterBatch2.payoutProgress).to.equal(2); // All winners paid!
+    expect(gameAfterBatch2.payoutProgress).to.equal(2); // All batches done!
     expect(gameAfterBatch2.status).to.deep.equal({ resolved: {} }); // Fully resolved!
     expect(gameEscrowAfterBatch2.totalAmount.toNumber()).to.equal(0); // Escrow should be empty
 
-    // Calculate all expected amounts
+    // ... (rest of the assertions for payment amounts are the same)
+    // ...
     const numberOfLosers = new BN(3);
     const numberOfWinners = new BN(2);
     const entryFee = new BN(entryFeeRaw);
