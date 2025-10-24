@@ -20,20 +20,6 @@ pub struct PlayerLine {
 }
 
 impl PlayerLine {
-    pub const MAX_SIZE: usize = 8 + 
-        (4 + 20) + 
-        8 +        
-        2 +        
-        4 +      
-        4 +     
-        (1 + 4) +  
-        8 +       
-        8 +      
-        (1 + 1) + 
-        1 +      
-        1 +     
-        1;      
-
     pub fn to_decimal_odds(&self) -> f64 {
         if self.odds < 0 {
             (100.0 / self.odds.abs() as f64) + 1.0
@@ -66,17 +52,6 @@ pub struct LinePointer {
     pub current_line_pubkey: Pubkey,
     pub last_updated: i64,
     pub bump: u8,
-}
-
-impl LinePointer {
-    pub const MAX_SIZE: usize = 8 + 
-        (4 + 20) +
-        8 +      
-        2 +        
-        4 +   
-        4 +      
-        8 +
-        1;     
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Copy, Debug, InitSpace)]
