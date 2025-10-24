@@ -12,7 +12,7 @@ pub struct CreateLineV2<'info> {
     #[account(
         init,
         payer = admin,
-        space = 8 + PlayerLine::MAX_SIZE,
+        space = 8 + PlayerLine::INIT_SPACE,
         seeds = [
             b"player_line",
             player_id.as_bytes(),
@@ -27,7 +27,7 @@ pub struct CreateLineV2<'info> {
     #[account(
         init_if_needed,
         payer = admin,
-        space = 8 + LinePointer::MAX_SIZE,
+        space = 8 + LinePointer::INIT_SPACE,
         seeds = [
             b"line_pointer",
             player_id.as_bytes(),
