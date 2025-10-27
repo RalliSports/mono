@@ -47,7 +47,7 @@ impl<'info> CreateLineV2<'info> {
         player_id: String,
         matchup_id: u64,
         stat_id: u16,
-        line_value: i32,
+        line_value: i64,
         odds: i32,
         starts_at: i64,
         bumps: &CreateLineV2Bumps,

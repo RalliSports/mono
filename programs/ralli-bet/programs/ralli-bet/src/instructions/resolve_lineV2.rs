@@ -29,9 +29,9 @@ impl<'info> ResolveLineV2<'info> {
         player_id: String,
         matchup_id: u64,
         stat_id: u16,
-        line_value: i32,
+        line_value: i64,
         result: DirectionV2,
-        actual_value: i32,
+        actual_value: i64,
         should_refund_bettors: bool,
     ) -> Result<()> {
         let admin = &self.admin;
