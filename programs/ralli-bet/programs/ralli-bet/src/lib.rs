@@ -11,6 +11,7 @@ use state::*;
 
 declare_id!("CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN");
 
+
 #[program]
 pub mod ralli_bet {
     use crate::state::{Direction, Pick};

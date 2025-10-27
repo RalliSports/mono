@@ -97,6 +97,7 @@ impl<'info> SubmitBet<'info> {
             correct_count: 0, // Will be updated when lines are resolved
             num_correct: 0, // Will be updated as game proceeds
             submitted_at: clock.unix_timestamp,
+            paid: false,
             bump: bumps.bet,
         });
 

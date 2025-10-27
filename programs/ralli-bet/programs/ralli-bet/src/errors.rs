@@ -260,6 +260,26 @@ pub enum RalliError {
     #[msg("Too many winners in the batch")]
     TooManyWinnersInBatch,
 
+    #[msg("This bet has already been paid")]
+    BetAlreadyPaid,
+
+    #[msg("This bet is not a winner - cannot be paid")]
+    NotAWinner,
+
+    #[msg("Invalid batch index provided")]
+    InvalidBatchIndex,
+
+    #[msg("Batch size does not match expected size")]
+    BatchSizeMismatch,
+
+    #[msg("Invalid remaining accounts")]
+    InvalidRemainingAccounts,
+
+    #[msg("Bet account mismatch")]
+    BetAccountMismatch,
+
+    #[msg("Payout amount is zero")]
+    PayoutAmountZero,
     #[msg("Invalid player ID - cannot be empty")]
     InvalidPlayerId,
 
