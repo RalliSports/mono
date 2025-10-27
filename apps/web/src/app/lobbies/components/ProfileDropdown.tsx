@@ -1,9 +1,9 @@
-import { useRouter } from 'next/navigation'
-import type { ProfileDropdownProps } from './types'
-
-export default function ProfileDropdown({ isOpen, onClose, user, onNavigateToProfile }: ProfileDropdownProps) {
-  const router = useRouter()
-
+export interface ProfileDropdownProps {
+  isOpen: boolean
+  onClose: () => void
+  onNavigateToProfile: () => void
+}
+export default function ProfileDropdown({ isOpen, onClose, onNavigateToProfile }: ProfileDropdownProps) {
   if (!isOpen) return null
 
   return (

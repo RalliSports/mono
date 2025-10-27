@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import type { User } from '../components/types'
+import { UserServiceFindOne } from '@repo/server'
 
 export function useUserData(session: string | undefined) {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserServiceFindOne | null>(null)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -16,7 +16,7 @@ export function useUserData(session: string | undefined) {
             'x-para-session': session,
           },
         })
-        const data: User | null = await response.json()
+        const data: UserServiceFindOne | null = await response.json()
         if (data && !data.username) {
           router.push('/profile')
         }

@@ -1,4 +1,6 @@
-import type { PageHeaderProps } from './types'
+export interface PageHeaderProps {
+  onCreateGame: () => void
+}
 
 export default function PageHeader({ onCreateGame }: PageHeaderProps) {
   return (

@@ -41,6 +41,15 @@ export class NotificationService {
     return results;
   }
 
+  async sendChatNotificationToUser(
+    userId: string,
+    payload: NotificationPayload,
+  ) {
+    // Check if user has chat notifications enabled (you might want to add this to user preferences)
+    // For now, we'll send to all their subscriptions
+    return this.sendNotificationToUser(userId, payload);
+  }
+
   async broadcastMessageToAllUsers(payload: NotificationPayload) {
     // Fetch all active subscriptions
     const subscriptions = await this.db.query.pushSubscriptions.findMany({
@@ -78,43 +87,93 @@ export class NotificationService {
 
   // 🎮 Game Resolved
   buildGameResolvedMessage(gameId: string, title: string): NotificationPayload {
-    return {
+    const payload = {
       title: 'Game Resolved 🎉',
       body: `Your recent game ${title} has been resolved. Check the results now!`,
       image: 'https://www.ralli.bet/images/game-resolved.png',
-      url: `https://www.ralli.bet/games/${gameId}/results`, // dynamic link to specific game results
+      url: `https://www.ralli.bet/game?id=${gameId}`, // Links to game page where results are shown
+      urlPath: `/game?id=${gameId}`,
       icon: 'https://www.ralli.bet/icons/game.png',
       tag: `game-resolved-${gameId}`, // unique per game
+      actions: [
+        { action: 'open', title: 'View Results' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+      requireInteraction: true,
     };
+    console.log(
+      'Building game resolved notification with urlPath:',
+      payload.urlPath,
+    );
+    return payload;
   }
 
   // 🕹️ Game Invite
   buildGameInviteMessage(
     gameTitle: string,
     gameId: string,
+    gameCode: string,
   ): NotificationPayload {
-    return {
-      title: `You’ve Been Invited to join ${gameTitle}`,
-      body: `You have been invited to join a new game. Don’t keep them waiting!`,
+    const payload = {
+      title: `You've Been Invited to join ${gameTitle}`,
+      body: `
+      You have been invited to join a new game,
+      the game code is ${gameCode}
+      Don't keep them waiting!
+      `,
       // image: 'https://www.ralli.bet/images/game-invite.png',
       url: `https://www.ralli.bet/game?id=${gameId}`,
+      urlPath: `/game?id=${gameId}`,
       // icon: 'https://www.ralli.bet/icons/invite.png',
       tag: `game-invite-${gameId}`,
+      actions: [
+        { action: 'open', title: 'Join Game' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+      requireInteraction: true,
     };
+    console.log(
+      'Building game invite notification with urlPath:',
+      payload.urlPath,
+    );
+    return payload;
   }
 
   // 💬 New Message
   buildNewChatMessage(
     senderName: string,
     conversationId: string,
+    message: string,
+    isGroupChat: boolean = true,
+    gameId?: string,
   ): NotificationPayload {
+    // Determine the appropriate URL based on chat type
+    let url: string;
+    let urlPath: string;
+
+    if (isGroupChat && gameId) {
+      // Group message in a game - link to game page with chat tab active
+      url = `https://www.ralli.bet/game?id=${gameId}&tab=chats`;
+      urlPath = `/game?id=${gameId}&tab=chats`;
+    } else {
+      // Direct message - link to profile with chats tab active
+      url = `https://www.ralli.bet/profile?tab=chats&channel=${conversationId}`;
+      urlPath = `/profile?tab=chats&channel=${conversationId}`;
+    }
+
     return {
-      title: 'New Message 💌',
-      body: `You’ve got a new message from ${senderName}. Tap to read it now.`,
+      title: `New Message from ${senderName}`,
+      body: message,
       image: 'https://www.ralli.bet/images/new-message.png',
-      url: `https://www.ralli.bet/messages/${conversationId}`,
+      url,
+      urlPath,
       icon: 'https://www.ralli.bet/icons/message.png',
       tag: `new-message-${conversationId}`,
+      actions: [
+        { action: 'open', title: 'View Message' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+      requireInteraction: true,
     };
   }
 }

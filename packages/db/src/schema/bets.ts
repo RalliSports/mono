@@ -25,7 +25,7 @@ export const bets = pgTable("bets", {
   gameId: uuid("game_id").references(() => games.id),
   predictedDirection: predictedDirectionEnum("predicted_direction"),
   isCorrect: boolean("is_correct"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 export const betsRelations = relations(bets, ({ one }) => ({

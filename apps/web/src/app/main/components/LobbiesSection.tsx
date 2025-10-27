@@ -1,13 +1,11 @@
 import { useRouter } from 'next/navigation'
 import LobbyCard from '@/components/main-feed/lobby-card'
-import type { Lobby } from '@/hooks/get-games'
-
+import { GamesServiceFindAll, GamesServiceFindAllInstance } from '@repo/server'
 interface LobbiesSectionProps {
-  lobbiesData: Lobby[]
-  isMobile?: boolean
+  lobbiesData: GamesServiceFindAll
 }
 
-export default function LobbiesSection({ lobbiesData, isMobile = false }: LobbiesSectionProps) {
+export default function LobbiesSection({ lobbiesData, }: LobbiesSectionProps) {
   const router = useRouter()
   const totalActiveLobbies = lobbiesData.length
 
@@ -50,54 +48,9 @@ export default function LobbiesSection({ lobbiesData, isMobile = false }: Lobbie
     </button>
   )
 
-  if (isMobile) {
-    return (
-      <div className="lg:hidden space-y-8">
-        {/* Open Lobbies Section */}
-        <div className="relative">
-          {/* Section Header */}
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white flex items-center">Open Lobbies</h2>
-            <div className="flex items-center gap-3">
-              <CreateLobbyButton isMobile={true} />
-              <div className="text-right">
-                <div className="text-[#FFAB91] font-bold text-lg">{totalActiveLobbies}</div>
-                <div className="text-slate-400 text-xs">Active</div>
-              </div>
-            </div>
-          </div>
 
-          <div className="space-y-3">
-            {lobbiesData.slice(0, 10).map((lobby: Lobby) => (
-              <LobbyCard
-                key={lobby.id}
-                id={lobby.id}
-                title={lobby.title}
-                participants={lobby.participants}
-                maxParticipants={lobby.maxParticipants}
-                buyIn={lobby.buyIn}
-                prizePool={lobby.prizePool}
-                imageUrl={lobby.imageUrl}
-                legs={lobby.legs}
-                timeLeft={lobby.timeLeft}
-                host={lobby.host}
-                isUrgent={lobby.isUrgent}
-              />
-            ))}
-          </div>
-
-          {/* View More Button */}
-          <div className="mt-4">
-            <ViewAllButton />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Desktop Layout
   return (
-    <div className="hidden lg:grid lg:grid-cols-3 lg:gap-8">
+    <div className="lg:grid lg:grid-cols-3 lg:gap-8">
       {/* Open Lobbies Sidebar (1/3 width) */}
       <div className="lg:col-span-3">
         {/* Section Header */}
@@ -110,22 +63,9 @@ export default function LobbiesSection({ lobbiesData, isMobile = false }: Lobbie
           <div className="text-[#FFAB91] font-bold text-xl">{totalActiveLobbies} Active</div>
         </div>
 
-        <div className="space-y-3 mb-6">
-          {lobbiesData.slice(0, 10).map((lobby) => (
-            <LobbyCard
-              key={lobby.id}
-              id={lobby.id}
-              title={lobby.title}
-              imageUrl={lobby.imageUrl}
-              participants={lobby.participants}
-              maxParticipants={lobby.maxParticipants}
-              buyIn={lobby.buyIn}
-              prizePool={lobby.prizePool}
-              legs={lobby.legs}
-              timeLeft={lobby.timeLeft}
-              host={lobby.host}
-              isUrgent={lobby.isUrgent}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {lobbiesData.slice(0, 12).map((lobby) => (
+            <LobbyCard key={lobby.id} lobby={lobby} />
           ))}
         </div>
 

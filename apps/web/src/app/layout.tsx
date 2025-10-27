@@ -3,6 +3,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import { AppProviders } from '@/components/app-providers'
 
+import DatadogInit from '@/components/DatadogInit'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning={true}
       >
         <AppProviders>
+          <DatadogInit />
           <div className="flex min-h-screen flex-col overflow-hidden supports-[overflow:clip]:overflow-clip">
             {children}
           </div>

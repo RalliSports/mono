@@ -92,7 +92,7 @@ export function ParaButton() {
       {/* Tooltip */}
       <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
         <div className="bg-slate-800/90 text-stone-100 text-[10px] px-2 py-1 rounded-md whitespace-nowrap">
-          {isConnected ? 'Click to manage wallet' : 'Connect to start betting'}
+          {isConnected ? 'Click to manage account' : 'Connect to start betting'}
         </div>
       </div>
     </div>

@@ -1,0 +1,1 @@
+ALTER TABLE "matchups" ADD COLUMN "is_resolved" boolean DEFAULT false;

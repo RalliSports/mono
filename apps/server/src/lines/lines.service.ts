@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { athletes, lines, matchups, stats } from '@repo/db';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
@@ -14,9 +14,10 @@ import { CreateLineDto } from './dto/create-line.dto';
 import { ResolveLineDto } from './dto/resolve-line.dto';
 import { UpdateLineDto } from './dto/update-line.dto';
 import { PublicKey } from '@solana/web3.js';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { User } from 'src/user/dto/user-response.dto';
 import { LineStatus } from './enum/lines';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { UserAutoLinesDto } from 'src/user/dto/user-auto-lines.dto';
 
 @Injectable()
 export class LinesService {
@@ -44,13 +45,15 @@ export class LinesService {
           statId: dto.statId,
           matchupId: dto.matchupId,
           predictedValue: dto.predictedValue.toString(),
+          oddsOver: dto.oddsOver.toString(),
+          oddsUnder: dto.oddsUnder.toString(),
           actualValue: null,
           isHigher: null,
           startsAt: matchup.startsAt,
         })
         .returning();
 
-      // Ensure createGameInstruction throws if it fails
+      // Ensure createLineInstruction throws if it fails
       let txn: string;
       const createdAt = inserted.createdAt;
       if (!createdAt) throw new BadRequestException('Line not created');
@@ -82,10 +85,16 @@ export class LinesService {
           adjustedTimestamp,
           new PublicKey(user.walletAddress),
         );
+        await this.db
+          .update(lines)
+          .set({
+            createdTxnSignature: txn,
+          })
+          .where(eq(lines.id, inserted.id));
 
         if (!txn || typeof txn !== 'string') {
           throw new Error(
-            'Invalid transaction ID returned from createGameInstruction',
+            'Invalid transaction ID returned from createLineInstruction',
           );
         }
       } catch (error) {
@@ -95,7 +104,7 @@ export class LinesService {
         );
         // Throw to rollback DB transaction
         throw new BadRequestException(
-          "'Anchor instruction failed, rolling back game creation",
+          "'Anchor instruction failed, rolling back line creation",
           error,
         );
       }
@@ -103,7 +112,7 @@ export class LinesService {
     });
   }
 
-  async bulkCreateLines(dto: CreateLineDto[], user: User) {
+  async bulkCreateLines(dto: CreateLineDto[], user: UserAutoLinesDto) {
     return await this.db.transaction(async (tx) => {
       let txn: string;
 
@@ -113,6 +122,8 @@ export class LinesService {
         athleteCustomId: number;
         adjustedTimestamp: number;
         predictedValue: number;
+        oddsOver: number;
+        oddsUnder: number;
       }[] = [];
       const insertedLines = [] as (typeof lines.$inferInsert)[];
       const initialTimestamp = new Date().getTime();
@@ -130,6 +141,8 @@ export class LinesService {
             statId: line.statId,
             matchupId: line.matchupId,
             predictedValue: line.predictedValue.toString(),
+            oddsOver: line.oddsOver.toString(),
+            oddsUnder: line.oddsUnder.toString(),
             actualValue: null,
             isHigher: null,
             startsAt: matchup.startsAt,
@@ -166,10 +179,11 @@ export class LinesService {
           athleteCustomId,
           adjustedTimestamp,
           predictedValue: line.predictedValue,
+          oddsOver: line.oddsOver,
+          oddsUnder: line.oddsUnder,
         });
         insertedLines.push(inserted);
       }
-
       try {
         txn = await this.anchor.bulkCreateLineInstruction(
           linesInformation,
@@ -221,9 +235,62 @@ export class LinesService {
     return this.db.query.lines.findFirst({
       where: eq(lines.id, id),
       with: {
-        stat: true,
-        matchup: true,
-        athlete: true,
+        stat: {
+          columns: {
+            id: true,
+            customId: true,
+            name: true,
+            statOddsName: true,
+          },
+        },
+        matchup: {
+          columns: {
+            id: true,
+            espnEventId: true,
+          },
+          with: {
+            homeTeam: {
+              columns: {
+                id: true,
+                name: true,
+                espnTeamId: true,
+              },
+            },
+            awayTeam: {
+              columns: {
+                id: true,
+                name: true,
+                espnTeamId: true,
+              },
+            },
+          },
+        },
+        athlete: {
+          columns: {
+            id: true,
+            name: true,
+            espnAthleteId: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getLinesByMatchupId(matchupId: string) {
+    return await this.db.query.lines.findMany({
+      where: and(eq(lines.matchupId, matchupId)),
+      with: {
+        athlete: {
+          columns: {
+            name: true,
+          },
+        },
+        stat: {
+          columns: {
+            name: true,
+            statOddsName: true,
+          },
+        },
       },
     });
   }
@@ -237,6 +304,9 @@ export class LinesService {
         matchupId: dto.matchupId?.toString(),
         predictedValue: dto.predictedValue?.toString(),
         status: dto.status,
+        currentValue: dto.currentValue?.toString(),
+        lastUpdatedAt: dto.lastUpdatedAt,
+        isLatestOne: dto.isLatestOne,
       })
       .where(eq(lines.id, id))
       .returning();
@@ -250,25 +320,23 @@ export class LinesService {
     return { success: true };
   }
 
-  async resolveLine(id: string, dto: ResolveLineDto, user: User) {
+  async resolveLine(id: string, dto: ResolveLineDto, user: UserAutoLinesDto) {
     return await this.db.transaction(async (tx) => {
       const line = await this.getLineById(id);
       if (!line) throw new NotFoundException(`Line ${id} not found`);
-      // if (line.actualValue)
-      //   throw new BadRequestException(`Line ${id} already resolved`);
       if (!line.predictedValue)
         throw new BadRequestException(`Line ${id} not predicted`);
       const predictedValue = Number(line.predictedValue);
-
       const res = await tx
         .update(lines)
         .set({
           actualValue: dto.actualValue?.toString(),
           isHigher:
-            dto.actualValue && line.predictedValue
-              ? dto.actualValue > Number(line.predictedValue)
+            (dto.actualValue || dto.actualValue === 0) && line.predictedValue
+              ? dto.actualValue > predictedValue
               : null,
           status: LineStatus.RESOLVED,
+          resolvedAt: new Date(),
         })
         .where(eq(lines.id, id))
         .returning();
@@ -307,5 +375,143 @@ export class LinesService {
       }
       return res[0];
     });
+  }
+
+  async bulkResolveLines(
+    dto: (ResolveLineDto & { athleteName: string; statName: string })[],
+    user: UserAutoLinesDto,
+  ) {
+    // First, try the bulk transaction approach
+    try {
+      return await this.db.transaction(async (tx) => {
+        const linesInformation: {
+          lineId: number;
+          predictedValue: number;
+          actualValue: number;
+          shouldRefundBettors: boolean;
+        }[] = [];
+
+        for (const lineDataForResole of dto) {
+          const lineData = await tx.query.lines.findFirst({
+            where: eq(lines.id, lineDataForResole.lineId),
+          });
+
+          // Check if line exists and is not resolved
+          if (!lineData) {
+            console.warn(
+              `Line not found for ${lineDataForResole.lineId}, athlete: ${lineDataForResole.athleteName}, stat: ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          if (lineData.actualValue) {
+            console.warn(
+              `Line already resolved for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          if (!lineData.predictedValue) {
+            console.warn(
+              `Line not predicted for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          if (
+            lineDataForResole.actualValue === null ||
+            lineDataForResole.actualValue === undefined
+          ) {
+            console.warn(
+              `Actual value not provided for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          const lineCreatedAt = lineData.createdAt;
+          if (!lineCreatedAt) {
+            console.warn(
+              `Line not created for ${lineDataForResole.lineId} ${lineDataForResole.athleteName} ${lineDataForResole.statName}`,
+            );
+            continue;
+          }
+          const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
+          // Update line to mark as resolved
+          await tx
+            .update(lines)
+            .set({
+              actualValue: lineDataForResole.actualValue.toString(),
+              isHigher:
+                (lineDataForResole.actualValue || lineDataForResole.actualValue === 0) && lineData.predictedValue
+                  ? lineDataForResole.actualValue >
+                  Number(lineData.predictedValue)
+                  : null,
+              status: LineStatus.RESOLVED,
+              resolvedAt: new Date(),
+            })
+            .where(eq(lines.id, lineDataForResole.lineId));
+
+          linesInformation.push({
+            lineId: lineCreatedAtTimestamp,
+            predictedValue: Number(lineData.predictedValue),
+            actualValue: lineDataForResole.actualValue,
+            shouldRefundBettors: false,
+          });
+        }
+
+        const { success, txSig, error } =
+          await this.anchor.bulkResolveLineInstruction(
+            linesInformation,
+            new PublicKey(user.walletAddress),
+          );
+
+        if (!success || typeof txSig !== 'string') {
+          if (error?.includes('LineAlreadyResolved')) {
+            console.warn('Line already resolved');
+            return { success: true };
+          }
+          throw new Error(
+            'Invalid transaction ID returned from bulkResolveLineInstruction',
+          );
+        }
+
+        return { success: true };
+      });
+    } catch (bulkError) {
+      console.error(
+        'Bulk resolve failed, falling back to individual resolution:',
+        bulkError,
+      );
+
+      // Fallback: resolve each line individually
+      const results = {
+        successful: [] as string[],
+        failed: [] as string[],
+      };
+
+      for (const lineDataForResole of dto) {
+        try {
+          await this.resolveLine(
+            lineDataForResole.lineId,
+            lineDataForResole,
+            user,
+          );
+          results.successful.push(lineDataForResole.lineId);
+          console.log(`✓ Resolved line ${lineDataForResole.lineId}`);
+        } catch (error) {
+          results.failed.push(lineDataForResole.lineId);
+          console.error(
+            `✗ Failed to resolve line ${lineDataForResole.lineId}:`,
+            error.message,
+          );
+        }
+      }
+
+      console.log(
+        `Bulk resolve fallback complete: ${results.successful.length} succeeded, ${results.failed.length} failed`,
+      );
+
+      return {
+        success: results.successful.length > 0,
+        message: `Resolved ${results.successful.length}/${dto.length} lines individually`,
+        ...results,
+      };
+    }
   }
 }

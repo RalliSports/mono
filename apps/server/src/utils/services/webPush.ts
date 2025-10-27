@@ -1,13 +1,21 @@
 import { PushSubscriptionResponse } from 'src/notification/dto/webpush.dto';
 import * as webpush from 'web-push';
 
+type NotificationAction = {
+  action: string;
+  title: string;
+};
+
 type Payload = {
   title: string;
   body: string;
   image?: string;
   url?: string;
+  urlPath?: string;
   icon?: string;
   tag?: string;
+  actions?: NotificationAction[];
+  requireInteraction?: boolean;
 };
 
 export class WebPushService {

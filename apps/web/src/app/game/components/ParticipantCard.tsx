@@ -1,10 +1,11 @@
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import ParticipantPicks from './ParticipantPicks'
 import Image from 'next/image'
 import { useState } from 'react'
+import Link from 'next/link'
 interface ParticipantCardProps {
-  participant: GamesFindOne['participants'][number]
-  lobby: GamesFindOne
+  participant: GamesServiceFindOne['participants'][number]
+  lobby: GamesServiceFindOne
   isExpanded: boolean
   onToggle: () => void
 }
@@ -33,23 +34,25 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-xl overflow-hidden">
-                  {participant.user?.username ? (
-                    <Image
-                      src={imageSrc || '/images/pfp-1.svg'}
-                      alt={participant.user?.username || 'Anonymous User'}
-                      className="w-14 h-14 object-cover rounded-xl"
-                      width={56}
-                      height={56}
-                      onError={(e) => {
-                        e.currentTarget.onerror = handleError
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
-                      }}
-                    />
-                  ) : (
-                    <span className="text-white font-bold text-2xl">
-                      {participant.user?.username || 'Anonymous User'}
-                    </span>
-                  )}
+                  <Link href={`/profile?userId=${participant.userId}`}>
+                    {participant.user?.username ? (
+                      <Image
+                        src={imageSrc || '/images/pfp-1.svg'}
+                        alt={participant.user?.username || 'Anonymous User'}
+                        className="w-14 h-14 object-cover rounded-xl"
+                        width={56}
+                        height={56}
+                        onError={(e) => {
+                          e.currentTarget.onerror = handleError
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.user?.username || 'Anonymous User')}&background=0D8ABC&color=fff&size=128`
+                        }}
+                      />
+                    ) : (
+                      <span className="text-white font-bold text-2xl">
+                        {participant.user?.username || 'Anonymous User'}
+                      </span>
+                    )}
+                  </Link>
                 </div>
                 {participant.user?.username === lobby.creator?.username && (
                   <div className="absolute -top-1 -left-1 text-sm">👑</div>
@@ -88,9 +91,9 @@ export default function ParticipantCard({ participant, lobby, isExpanded, onTogg
                   <div key={pick.id} className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full bg-gradient-to-r ${
-                        new Date(pick.line?.matchup?.startsAt || '') > new Date()
+                        pick.line?.status === 'open'
                           ? 'bg-slate-600'
-                          : pick.line?.status !== 'resolved'
+                          : pick.line?.status === 'locked'
                             ? 'bg-blue-500'
                             : pick.isCorrect
                               ? 'bg-emerald-500'

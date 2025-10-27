@@ -32,9 +32,9 @@ import { RalliBet } from '../idl/ralli_bet';
 
 const CLUSTER = (process.env.SOLANA_CLUSTER as Cluster) || 'devnet';
 const ADMIN_KEYPAIR_JSON = process.env.ADMIN_KEYPAIR_JSON;
-
 const secretKey = Uint8Array.from(JSON.parse(ADMIN_KEYPAIR_JSON!));
 const adminKeypair = Keypair.fromSecretKey(secretKey);
+export const ADMIN_WALLET_PUBLIC_KEY: PublicKey = adminKeypair.publicKey;
 
 export class ParaAnchor {
   private solanaConnection: Connection;
@@ -94,21 +94,26 @@ export class ParaAnchor {
       },
     );
 
+    // returnig provider based on useAdminSigner flag
+    return this.paraProvider;
+  }
+
+  getServerAdminProvider(): AnchorProvider {
     // Initialize Admin signer provider
     this.adminProvider = new AnchorProvider(
       this.solanaConnection,
       new NodeWallet(adminKeypair),
       { commitment: 'confirmed' },
     );
-
-    // returnig provider based on useAdminSigner flag
-    return useAdminSigner ? this.adminProvider : this.paraProvider;
+    return this.adminProvider;
   }
 
   // Returns an Anchor Program instance
 
   async getProgram(useAdminSigner = false): Promise<Program<RalliBet>> {
-    const provider = await this.getProvider(useAdminSigner);
+    const provider = useAdminSigner
+      ? this.getServerAdminProvider()
+      : this.getProvider();
 
     return new Program<RalliBet>(IDL as Idl, provider);
   }
@@ -187,7 +192,7 @@ export class ParaAnchor {
       [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
       program.programId,
     );
-
+    // console.log(program.provider.wallet?.publicKey, 'program provider wallet');
     try {
       const ix = await program.methods
         .createLine(_lineId, statId, predictedValue, _athleteId, _startsAt)
@@ -201,6 +206,7 @@ export class ParaAnchor {
       // Get latest blockhash
       const { blockhash, lastValidBlockHeight } =
         await program.provider.connection.getLatestBlockhash('finalized');
+      // console.log(blockhash, 'blockhash');
 
       // Build TransactionMessage for VersionedTransaction
       const messageV0 = new TransactionMessage({
@@ -208,9 +214,11 @@ export class ParaAnchor {
         recentBlockhash: blockhash,
         instructions: [ix],
       }).compileToV0Message();
+      // console.log(messageV0, 'messageV0');
 
       // Create VersionedTransaction
       const transaction = new VersionedTransaction(messageV0);
+      // console.log(transaction, 'transaction');
 
       // Sign transaction
       await program.provider.wallet?.signTransaction(transaction);
@@ -218,6 +226,7 @@ export class ParaAnchor {
       // Send transaction
       const txSig =
         await program.provider.connection.sendTransaction(transaction);
+      // console.log(txSig, 'txSig');
 
       // Confirm transaction
       await program.provider.connection.confirmTransaction(
@@ -248,7 +257,7 @@ export class ParaAnchor {
     }[],
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(false); // useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
       const _lineId = new BN(line.timestamp);
@@ -305,7 +314,6 @@ export class ParaAnchor {
       );
 
       console.log(txSig, 'transaction signature');
-
       return txSig;
     } catch (error) {
       console.error('Transaction Error:', error);
@@ -320,7 +328,7 @@ export class ParaAnchor {
     shouldRefundBettors: boolean,
     creator: PublicKey,
   ): Promise<string> {
-    const program = await this.getProgram(false); // useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const _lineId = new BN(lineId);
 
     const [lineAccount] = PublicKey.findProgramAddressSync(
@@ -377,6 +385,80 @@ export class ParaAnchor {
     } catch (error) {
       console.error('Transaction Error:', error);
       return '';
+    }
+  }
+
+  async bulkResolveLineInstruction(
+    linesInformation: {
+      lineId: number;
+      predictedValue: number;
+      actualValue: number;
+      shouldRefundBettors: boolean;
+    }[],
+    creator: PublicKey,
+  ): Promise<{ success: boolean; txSig?: string; error?: string }> {
+    const program = await this.getProgram(true); // useAdminSigner
+    const linesIxs = [] as TransactionInstruction[];
+    for (const line of linesInformation) {
+      const _lineId = new BN(line.lineId);
+      const _predictedValue = line.predictedValue;
+      const _actualValue = line.actualValue;
+      const _shouldRefundBettors = line.shouldRefundBettors;
+
+      const [lineAccount] = PublicKey.findProgramAddressSync(
+        [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+        program.programId,
+      );
+      const direction =
+        _actualValue > _predictedValue ? { over: {} } : { under: {} };
+      const ix = await program.methods
+        .resolveLine(direction, _actualValue, _shouldRefundBettors)
+        .accountsPartial({
+          admin: creator,
+          line: lineAccount,
+        })
+        .instruction();
+      linesIxs.push(ix);
+    }
+
+    try {
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: linesIxs,
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return { success: true, txSig };
+    } catch (error) {
+      console.error('Transaction Error:', error);
+      return { success: false, error: error.toString() };
     }
   }
 
@@ -642,7 +724,7 @@ export class ParaAnchor {
 
     try {
       const ix = await program.methods
-        .resolveGame(percentage, winners.length)
+        .resolveGame(percentage)
         .accountsStrict({
           admin: program.provider.wallet?.publicKey as PublicKey,
           game: gamePDA,
@@ -755,7 +837,7 @@ export class ParaAnchor {
       console.log(txSig, 'transaction signature');
 
       return txSig;
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async getGamePDA(gameId: string, programId: PublicKey): Promise<PublicKey> {

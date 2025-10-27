@@ -85,6 +85,55 @@
       "when": 1757635165118,
       "tag": "0012_chubby_madripoor",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1758317027908,
+      "tag": "0013_flaky_chronomancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1758641053099,
+      "tag": "0014_outgoing_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1759959987717,
+      "tag": "0015_old_molten_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1759960155285,
+      "tag": "0016_daffy_spectrum",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1760419237499,
+      "tag": "0017_hesitant_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1760419439888,
+      "tag": "0018_heavy_carmella_unuscione",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1760580937031,
+      "tag": "0019_short_dracula",
+      "breakpoints": true
     }
   ]
 }

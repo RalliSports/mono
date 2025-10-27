@@ -1,14 +1,16 @@
+'use client'
+
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Game, User } from './types'
+import { GamesServiceGetMyCompletedGames } from '@repo/server'
+import { UserServiceFindOne } from '@repo/server'
 
 interface PastParlaysSectionProps {
-  myCompletedGames: Game[]
-  user: User
-  setActiveTab: (tab: string) => void
+  myCompletedGames: GamesServiceGetMyCompletedGames
+  user: UserServiceFindOne
 }
 
-export default function PastParlaysSection({ myCompletedGames, user, setActiveTab }: PastParlaysSectionProps) {
+export default function PastParlaysSection({ myCompletedGames, user }: PastParlaysSectionProps) {
   const router = useRouter()
 
   return (
@@ -21,7 +23,7 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
           Past Parlays
         </h3>
         <button
-          onClick={() => setActiveTab('parlays')}
+          onClick={() => router.push('/lobbies')}
           className="text-[#00CED1] hover:text-[#FFAB91] transition-colors text-sm font-medium"
         >
           View All
@@ -51,14 +53,14 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
                             : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                       }`}
                     >
-                      {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
+                      {game.status && game.status.charAt(0).toUpperCase() + game.status.slice(1)}
                     </span>
                     <span className="text-slate-400 text-sm">{game.participants.length} players</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-[#00CED1] font-bold text-lg">
-                    ${game.depositAmount * game.participants.length}
+                    ${(game.depositAmount || 0) * (game.participants.length || 0)}
                   </div>
                   <div className="text-slate-400 text-xs">Potential</div>
                 </div>
@@ -68,18 +70,18 @@ export default function PastParlaysSection({ myCompletedGames, user, setActiveTa
               <div className="flex justify-between items-center">
                 <div className="flex -space-x-2">
                   {game.participants
-                    .find((participant) => participant.user.id === user.id)
+                    .find((participant) => participant.user?.id === user?.id)
                     ?.bets.map((bet, index) => (
                       <Image
                         key={bet.id}
-                        src={bet.line.athlete.picture || '/images/pfp-2.svg'}
-                        alt={bet.line.athlete.name || ''}
+                        src={bet.line?.athlete?.picture || '/images/pfp-2.svg'}
+                        alt={bet.line?.athlete?.name || ''}
                         width={32}
                         height={32}
                         className={`rounded-full border-2 object-cover bg-slate-800 ${
-                          new Date(bet.line.matchup.startsAt) > new Date()
+                          bet.line?.status === 'open'
                             ? 'border-slate-600'
-                            : !!bet.line.actualValue
+                            : bet.line?.status === 'locked'
                               ? 'border-blue-500'
                               : bet.isCorrect
                                 ? 'border-emerald-500'

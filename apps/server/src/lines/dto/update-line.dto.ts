@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateLineDto } from './create-line.dto';
-import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 import { LineStatus } from '../enum/lines';
 
 export class UpdateLineDto extends PartialType(CreateLineDto) {
@@ -12,6 +12,20 @@ export class UpdateLineDto extends PartialType(CreateLineDto) {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  @Min(0)
   predictedValue?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  currentValue?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  lastUpdatedAt?: Date;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  isLatestOne?: boolean;
 }

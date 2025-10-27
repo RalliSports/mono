@@ -15,23 +15,38 @@ import {
   users,
 } from '@repo/db';
 import { PublicKey } from '@solana/web3.js';
-import { and, count, eq, inArray, ne, or, exists, desc } from 'drizzle-orm';
+import {
+  and,
+  count,
+  eq,
+  inArray,
+  ne,
+  or,
+  exists,
+  desc,
+  not,
+  isNull,
+} from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
 import { User } from 'src/user/dto/user-response.dto';
 import { generateRandonCode } from 'src/utils/generateRandonCode';
-import { ParaAnchor } from 'src/utils/services/paraAnchor';
 import { CreateGameDto } from './dto/create-game.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GameStatus, PredictionDirection } from './enum/game';
 import { NotificationService } from 'src/notification/notification.service';
+import { StreamChat } from 'stream-chat';
+import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
+import { sleep } from 'src/utils';
+import { ParaAnchor } from 'src/utils/services/paraAnchor';
 
 @Injectable()
 export class GamesService {
   private anchor: ParaAnchor;
+  private chatClient: StreamChat;
 
   constructor(
     @Drizzle() private readonly db: Database,
@@ -40,6 +55,7 @@ export class GamesService {
     private readonly friendsService: FriendsService,
   ) {
     this.anchor = new ParaAnchor(this.authService.getPara());
+    this.chatClient = chatClient;
   }
   async create(createGameDto: CreateGameDto, user: User) {
     const gameCode = await this.generateUniqueGameCode();
@@ -87,6 +103,17 @@ export class GamesService {
           error,
         );
       }
+      const memberIds = [user.id];
+      // await connectToChat(user.id);
+      const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+        name: game.title ?? `Lobby ${game.id}`,
+        // Custom fields for lobby management
+        lobby_id: game.id,
+        members: memberIds,
+        created_by_id: user.id,
+      });
+
+      await channel.create();
 
       const [updatedGame] = await tx
         .update(games)
@@ -110,6 +137,7 @@ export class GamesService {
         token: true,
         participants: { with: { user: true, bets: true } },
       },
+       orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
   async findAllOpen() {
@@ -121,6 +149,7 @@ export class GamesService {
         participants: { with: { user: true, bets: true } },
         creator: true,
       },
+       orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -134,11 +163,11 @@ export class GamesService {
     });
   }
 
-  async getMyOpenGames(user: User) {
+  async getMyOpenGames(userId: string) {
     return this.db.query.games.findMany({
       where: and(
         or(
-          eq(games.creatorId, user.id),
+          eq(games.creatorId, userId),
           exists(
             this.db
               .select()
@@ -146,12 +175,15 @@ export class GamesService {
               .where(
                 and(
                   eq(participants.gameId, games.id),
-                  eq(participants.userId, user.id),
+                  eq(participants.userId, userId),
                 ),
               ),
           ),
         ),
-        ne(games.status, GameStatus.COMPLETED),
+        or(
+          eq(games.status, GameStatus.WAITING),
+          eq(games.status, GameStatus.IN_PROGRESS),
+        ),
       ),
       with: {
         token: true,
@@ -171,14 +203,15 @@ export class GamesService {
           },
         },
       },
+       orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
-  async getMyCompletedGames(user: User) {
+  async getMyCompletedGames(userId: string) {
     return this.db.query.games.findMany({
       where: and(
         or(
-          eq(games.creatorId, user.id),
+          eq(games.creatorId, userId),
           exists(
             this.db
               .select()
@@ -186,7 +219,7 @@ export class GamesService {
               .where(
                 and(
                   eq(participants.gameId, games.id),
-                  eq(participants.userId, user.id),
+                  eq(participants.userId, userId),
                 ),
               ),
           ),
@@ -211,6 +244,7 @@ export class GamesService {
           },
         },
       },
+       orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -332,6 +366,17 @@ export class GamesService {
         await Promise.all(picks),
       );
 
+      if (user.id !== game.creatorId) {
+        // await connectToChat(user.id);
+        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+          name: `Lobby ${game.id}`,
+          // Custom fields for lobby management
+          lobby_id: game.id,
+        });
+
+        await channel.addMembers([user.id]);
+      }
+
       if (!submitTxnSig) {
         throw new BadRequestException(
           'Failed to execute submit bets instruction on-chain',
@@ -373,6 +418,7 @@ export class GamesService {
   async findGamesCreatedByUser(user: User) {
     const result = await this.db.query.games.findMany({
       where: eq(games.creatorId, user.id),
+       orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
 
     if (!result.length) throw new NotFoundException('Games not found');
@@ -787,17 +833,17 @@ export class GamesService {
       throw new NotFoundException('game not found');
     }
 
-    console.log(game, user, 'invite');
-
     try {
       const message = this.notificationService.buildGameInviteMessage(
         game?.title as string,
         game.id,
+        game.gameCode as string,
       );
 
       await this.notificationService.sendNotificationToUser(user.id, message);
+      return { success: true, message: 'Notification sent successfully' };
     } catch (error) {
-      console.log(error, 'unable to send invite');
+      console.error(error, 'unable to send invite');
     }
   }
 
@@ -821,5 +867,50 @@ export class GamesService {
       ),
       orderBy: [desc(games.createdAt)],
     });
+  }
+
+  async resolveAllPossibleGames() {
+    const gamesToResolve = await this.db.query.games.findMany({
+      where: and(
+        or(
+          eq(games.status, GameStatus.WAITING),
+          eq(games.status, GameStatus.IN_PROGRESS),
+        ),
+        isNull(games.resolvedTxnSignature),
+        // Only include games where all lines are resolved
+        not(
+          exists(
+            this.db
+              .select()
+              .from(bets)
+              .innerJoin(lines, eq(bets.lineId, lines.id))
+              .where(
+                and(eq(bets.gameId, games.id), ne(lines.status, 'resolved')),
+              ),
+          ),
+        ),
+      ),
+      with: {
+        participants: {
+          with: {
+            bets: {
+              with: {
+                line: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const game of gamesToResolve) {
+      try {
+        await sleep(500);
+        await this.resolveGame(game.id);
+      } catch (error) {
+        console.error('error resolving game', game.title, error);
+      }
+    }
+    return { message: 'All possible games resolved successfully' };
   }
 }

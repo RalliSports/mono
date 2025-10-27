@@ -3,41 +3,18 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
+import { GamesServiceFindAllInstance } from '@repo/server'
 
 interface LobbyCardProps {
-  id: string
-  title: string
-  participants: { id: string; userId: string; user: { username: string; avatar: string; id: string } }[]
-  maxParticipants: number
-  buyIn: number
-  prizePool: number
-  imageUrl: string
-  legs: number
-  timeLeft: string
-  host: {
-    username: string
-    avatar: string
-  }
-  isUrgent?: boolean
+  lobby: GamesServiceFindAllInstance
 }
 
-export default function LobbyCard({
-  id,
-  title,
-  participants,
-  maxParticipants,
-  buyIn,
-  prizePool,
-  imageUrl,
-  legs,
-  timeLeft,
-  host,
-  isUrgent = false,
-}: LobbyCardProps) {
-  const progressPercentage = (participants.length / maxParticipants) * 100
+export default function LobbyCard({ lobby }: LobbyCardProps) {
+  const progressPercentage = (lobby.participants.length / (lobby.maxParticipants || 1)) * 100
   const nextPageOnClick = 'game'
+  const prizePool = (lobby.maxParticipants || 1) * (lobby.depositAmount || 0)
 
-  const [imageSrc, setImageSrc] = useState(imageUrl || '/images/pfp-2.svg')
+  const [imageSrc, setImageSrc] = useState(lobby.imageUrl || '/images/pfp-2.svg')
   const [hasErrored, setHasErrored] = useState(false)
 
   const handleError = () => {
@@ -55,27 +32,30 @@ export default function LobbyCard({
         {/* Host Info Header */}
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-            {imageSrc ? (
-              <Image
-                src={imageSrc || '/images/pfp-1.svg'}
-                alt={host.username}
-                // className="w-12 h-12 object-cover rounded-full"
-                width={48}
-                height={48}
-                onError={(e) => {
-                  e.currentTarget.onerror = handleError
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(host.username)}&background=0D8ABC&color=fff&size=128`
-                }}
-              />
-            ) : (
-              <span className="text-white font-bold text-sm">{host.avatar}</span>
-            )}
+            <Link href={`/profile?userId=${lobby.creatorId}`}>
+              {imageSrc ? (
+                <Image
+                  src={imageSrc || '/images/pfp-1.svg'}
+                  alt={lobby.creator?.username || ''}
+                  // className="w-12 h-12 object-cover rounded-full"
+                  width={48}
+                  height={48}
+                  onError={(e) => {
+                    e.currentTarget.onerror = handleError
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lobby.creator?.username || '')}&background=0D8ABC&color=fff&size=128`
+                  }}
+                />
+              ) : (
+                <span className="text-white font-bold text-sm">{lobby.creator?.avatar}</span>
+              )}
+            </Link>
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1 text-white">
-              {host.username}
+              <Link href={`/profile?userId=${lobby.creatorId}`}>{lobby.creator?.username}</Link>
               <span className="text-slate-400 text-sm ml-1">created a lobby</span>
             </div>
+              <p className="text-slate-400 text-sm">{new Date(lobby.createdAt || '').toLocaleDateString()}</p>
             <p className="text-slate-300 text-xs ">{/* <span className="text-[#00CED1]">{timeLeft} left</span> */}</p>
           </div>
         </div>
@@ -83,33 +63,26 @@ export default function LobbyCard({
         {/* Lobby Content */}
         <div className="flex-1 flex flex-col">
           <div className="mb-6">
-            <h3 className="text-white font-bold text-xl mb-4 flex items-center">
-              {title}
-              {isUrgent && (
-                <span className="ml-3 px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-bold animate-pulse">
-                  FILLING FAST
-                </span>
-              )}
-            </h3>
+            <h3 className="text-white font-bold text-xl mb-4 flex items-center">{lobby.title}</h3>
 
             {/* Key Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-gradient-to-br from-slate-700/80 to-slate-800/60 rounded-xl p-4 border border-slate-600/30">
                 <div className="text-center">
-                  <div className="text-2xl font-black text-[#00CED1] mb-1">{legs}</div>
+                  <div className="text-2xl font-black text-[#00CED1] mb-1">{lobby.numBets}</div>
                   <div className="text-slate-400 text-xs font-medium uppercase tracking-wide">Legs</div>
                 </div>
               </div>
               <div className="bg-gradient-to-br from-slate-700/80 to-slate-800/60 rounded-xl p-4 border border-slate-600/30">
                 <div className="text-center">
-                  <div className="text-2xl font-black text-[#FFAB91] mb-1">${buyIn}</div>
+                  <div className="text-2xl font-black text-[#FFAB91] mb-1">${lobby.depositAmount}</div>
                   <div className="text-slate-400 text-xs font-medium uppercase tracking-wide">Buy-in</div>
                 </div>
               </div>
               <div className="bg-gradient-to-br from-slate-700/80 to-slate-800/60 rounded-xl p-4 border border-slate-600/30">
                 <div className="text-center">
                   <div className="text-2xl font-black text-emerald-400 mb-1">
-                    {participants.length}/{maxParticipants}
+                    {lobby.participants.length}/{lobby.maxParticipants}
                   </div>
                   <div className="text-slate-400 text-xs font-medium uppercase tracking-wide">Slots</div>
                 </div>
@@ -138,7 +111,7 @@ export default function LobbyCard({
 
           {/* View Button - pushed to bottom */}
           <Link
-            href={`/${nextPageOnClick}?id=${id}`}
+            href={`/${nextPageOnClick}?id=${lobby.id}`}
             className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-slate-900 font-bold py-4 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/30 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2 mt-auto"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

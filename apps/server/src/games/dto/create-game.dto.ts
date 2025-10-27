@@ -38,11 +38,6 @@ export class CreateGameDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  tokenId: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
   @IsBoolean()
   isPrivate: boolean;
 
@@ -53,11 +48,6 @@ export class CreateGameDto {
   @ApiProperty()
   @IsEnum(['whitelist', 'blacklist', 'none'])
   userControlType: 'whitelist' | 'blacklist' | 'none';
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsUUID()
-  gameModeId?: string;
 
   @ApiProperty({
     description: 'User avatar URL',

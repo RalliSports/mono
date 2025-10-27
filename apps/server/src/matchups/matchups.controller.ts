@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { MatchupsService } from './matchups.service';
 import { ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/auth.session.guard';
@@ -9,10 +17,31 @@ import { User } from 'src/user/dto/user-response.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { CreateLinesDto } from './dto/create-lines.dto';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
+import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
+import { tracer } from 'dd-trace';
 
 @Controller('matchups')
 export class MatchupsController {
   constructor(private readonly matchupsService: MatchupsService) {}
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get matchups with open lines' })
+  @ApiResponse({
+    status: 200,
+    description: 'Matchups with open lines fetched successfully',
+    type: [MatchupResponseDto],
+  })
+  @Get('/read-matchups-with-open-lines')
+  async getMatchupsWithOpenLines() {
+    try {
+      const result = await this.matchupsService.getMatchupsWithOpenLines();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
@@ -37,7 +66,13 @@ export class MatchupsController {
   })
   @Get('/open')
   async getAllOpenMatchups() {
-    return this.matchupsService.getAllOpenMatchups();
+    try {
+      return await this.matchupsService.getAllOpenMatchups();
+    } catch (error) {
+      console.error('Controller: getAllOpenMatchups error:', error);
+      console.error('Controller: Error details:', error.message);
+      throw error;
+    }
   }
 
   @ApiSecurity('x-para-session')
@@ -93,5 +128,47 @@ export class MatchupsController {
     @UserPayload() user: User,
   ) {
     return this.matchupsService.createLinesForMatchup(dto, user);
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary: 'Resolve lines for matchups with ESPN final score data',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lines resolved successfully',
+    type: MatchupResponseDto,
+  })
+  @Post('/resolve-lines')
+  async resolveMatchupLines(
+    @Body() dto: ResolveLinesDto,
+    @UserPayload() user: User,
+  ) {
+    return this.matchupsService.resolveLinesForMatchup(dto, user);
+  }
+
+  @Get('test/sync-error')
+  testSyncError() {
+    throw new Error('Test synchronous backend error');
+  }
+
+  @Get('test/async-error')
+  async testAsyncError() {
+    throw new Error('Test asynchronous backend error');
+  }
+
+  @Get('test/http-error')
+  testHttpError() {
+    throw new BadRequestException('Test HTTP exception error');
+  }
+
+  @Get('test/custom-error')
+  async testCustomError() {
+    const span = tracer.scope().active();
+    if (span) {
+      span.setTag('custom.test', 'error_testing');
+    }
+    throw new Error('Test error with custom span tags');
   }
 }

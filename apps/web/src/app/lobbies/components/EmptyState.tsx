@@ -1,4 +1,9 @@
-import type { EmptyStateProps } from './types'
+export interface EmptyStateProps {
+  searchQuery: string
+  selectedFilter: string
+  onClearSearch: () => void
+  onCreateGame: () => void
+}
 
 export default function EmptyState({ searchQuery, selectedFilter, onClearSearch, onCreateGame }: EmptyStateProps) {
   return (

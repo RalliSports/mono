@@ -56,14 +56,14 @@ export class FriendsService {
   async getFollowers(userId: string) {
     return this.db.query.friends.findMany({
       where: eq(friends.followingId, userId),
-      with: { follower: true },
+      with: { follower: true, following: true },
     });
   }
 
   async getFollowing(userId: string) {
     return this.db.query.friends.findMany({
       where: eq(friends.followerId, userId),
-      with: { following: true },
+      with: { following: true, follower: true },
     });
   }
 
@@ -86,4 +86,22 @@ export class FriendsService {
       return !!follow;
     }
   
+    async isFollowing(
+    currentUserId: string,
+    userId: string,
+  ): Promise<boolean> {
+    if (currentUserId === userId) {
+      // You always "follow" yourself
+      return true;
+    }
+
+    const follow = await this.db.query.friends.findFirst({
+      where: and(
+        eq(friends.followerId, currentUserId),
+        eq(friends.followingId, userId),
+      ),
+    });
+    
+    return !!follow;
+  }
 }

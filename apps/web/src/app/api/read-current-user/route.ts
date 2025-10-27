@@ -14,9 +14,6 @@ export async function GET(request: NextRequest) {
     const referralCode = request.headers.get('x-referral-code')
     const email = request.headers.get('x-email')
 
-    console.log('API Route - Session:', tokenString?.substring(0, 10) + '...')
-    console.log('API Route - Referral Code:', referralCode)
-
     // Check if the JWT token is missing
     if (!tokenString) {
       return NextResponse.json(
@@ -44,7 +41,7 @@ export async function GET(request: NextRequest) {
       const errorData = await response.text()
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: errorData,
           status: response.status,
         },
@@ -57,7 +54,7 @@ export async function GET(request: NextRequest) {
     if (data.error) {
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: data.error,
           status: response.status,
         },

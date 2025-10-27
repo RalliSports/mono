@@ -26,6 +26,7 @@ import { GameResponseDto } from './dto/game-response.dto';
 import { BulkCreateBetsDto } from './dto/bet.dto';
 import { UserPayload } from 'src/auth/auth.user.decorator';
 import { User } from 'src/user/dto/user-response.dto';
+import { isUUID } from 'class-validator';
 
 @Controller('')
 export class GamesController {
@@ -56,27 +57,49 @@ export class GamesController {
   }
 
   @ApiOperation({ summary: 'Get all games' })
-  @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all games',
     type: [GameResponseDto],
   })
   @Get('/games/my-open-games')
-  findMyOpenGames(@UserPayload() user: User) {
-    return this.gamesService.getMyOpenGames(user);
+  findMyOpenGames(
+    @Query('userId') userId: string | undefined,
+    @UserPayload() user: User,
+  ) {
+    const userIdToUse = userId || user.id;
+    if (userIdToUse && isUUID(userIdToUse)) {
+      return this.gamesService.getMyOpenGames(userIdToUse);
+    }
+    return [];
   }
 
   @ApiOperation({ summary: 'Get all games' })
-  @UseGuards(SessionAuthGuard)
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all games',
     type: [GameResponseDto],
   })
   @Get('/games/my-completed-games')
-  findMyCompletedGames(@UserPayload() user: User) {
-    return this.gamesService.getMyCompletedGames(user);
+  findMyCompletedGames(
+    @Query('userId') userId: string,
+    @UserPayload() user: User,
+  ) {
+    const userIdToUse = userId || user.id;
+    if (userIdToUse && isUUID(userIdToUse)) {
+      return this.gamesService.getMyCompletedGames(userIdToUse);
+    }
+    return [];
   }
 
   @ApiOperation({ summary: 'Get all games' })
@@ -214,6 +237,19 @@ export class GamesController {
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Resolves all possible games' })
+  @ApiResponse({
+    status: 200,
+    description: 'All possible games resolved successfully',
+    type: GameResponseDto,
+  })
+  @Patch('/game/resolve-all-possible-games')
+  resolveAllPossibleGames() {
+    return this.gamesService.resolveAllPossibleGames();
+  }
+
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete a game created by the user if none has joined',
@@ -225,13 +261,15 @@ export class GamesController {
     return this.gamesService.removeCreatedGameWithNoParticipants(id, user);
   }
 
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get a game using its unique code' })
   @ApiResponse({
     status: 200,
   })
   @ApiParam({ name: 'gameId', type: String })
   @ApiParam({ name: 'userId', type: String })
-  @Get('/game/invite/:gameId/:userId')
+  @Post('/game/invite/:gameId/:userId')
   inviteUser(@Param('gameId') gameId: string, @Param('userId') userId: string) {
     return this.gamesService.inviteUserToPlay(userId, gameId);
   }

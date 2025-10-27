@@ -1,7 +1,7 @@
-import type { Game } from './types'
+import { GamesServiceFindAll } from '@repo/server'
 
 interface GameInfoHeaderProps {
-  game: Game
+  game: GamesServiceFindAll[number]
   legsRequired: number
   buyIn: number
 }
@@ -26,7 +26,9 @@ export default function GameInfoHeader({ game, legsRequired, buyIn }: GameInfoHe
           </div>
           <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 text-center">
             <div className="text-slate-400 text-xs">Potential</div>
-            <div className="text-emerald-400 font-bold text-lg">~${Math.round(buyIn * game.maxParticipants)}</div>
+            <div className="text-emerald-400 font-bold text-lg">
+              ~${Math.round(buyIn * (game.maxParticipants || 0))}
+            </div>
           </div>
         </div>
       </div>

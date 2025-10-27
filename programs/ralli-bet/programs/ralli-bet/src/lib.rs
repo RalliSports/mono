@@ -9,7 +9,7 @@ pub mod state;
 use instructions::*;
 use state::*;
 
-declare_id!("GpTLdZGPWVx81HhpQ4fzLzKagE4ZQgeG56d9vf5QDLHG");
+declare_id!("CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN");
 
 #[program]
 pub mod ralli_bet {
@@ -92,23 +92,33 @@ pub mod ralli_bet {
         ctx: Context<'_, '_, 'info, 'info, ResolveGame<'info>>,
         fee_percentage: u16,
     ) -> Result<()> {
-        ctx.accounts.resolve_game(
+        ctx.accounts
+            .resolve_game(fee_percentage, ctx.remaining_accounts)
+    }
+
+    pub fn resolve_game_batch<'info>(
+        ctx: Context<'_, '_, 'info, 'info, ResolveGameBatch<'info>>,
+        fee_percentage: u16,
+        batch_index: u32,
+    ) -> Result<()> {
+        ctx.accounts.resolve_game_batch(
             fee_percentage,
+            batch_index,
             ctx.remaining_accounts,
         )
     }
-
     pub fn update_line(
         ctx: Context<UpdateLine>,
         line_seed: u64,
         new_predicted_value: f64,
-        should_refund_bettors: bool
+        should_refund_bettors: bool,
     ) -> Result<()> {
-        ctx.accounts.update_line(line_seed, new_predicted_value, should_refund_bettors)
+        ctx.accounts
+            .update_line(line_seed, new_predicted_value, should_refund_bettors)
     }
 
     pub fn calculate_correct<'info>(
-        ctx: Context<'_, '_, 'info, 'info, CalculateCorrect<'info>>
+        ctx: Context<'_, '_, 'info, 'info, CalculateCorrect<'info>>,
     ) -> Result<()> {
         ctx.accounts.calculate_correct(ctx.remaining_accounts)
     }
@@ -118,7 +128,59 @@ pub mod ralli_bet {
     ) -> Result<()> {
         ctx.accounts.calculate_winners(ctx.remaining_accounts)
     }
-    
+
+    pub fn create_lineV2(
+        ctx: Context<CreateLineV2>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+        odds: i32,
+        starts_at: i64,
+    ) -> Result<()> {
+        ctx.accounts.create_lineV2(
+            player_id,
+            matchup_id,
+            stat_id,
+            line_value,
+            odds,
+            starts_at,
+            &ctx.bumps,
+        )
+    }
+
+    pub fn resolve_lineV2(
+        ctx: Context<ResolveLineV2>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+        result: DirectionV2,
+        actual_value: i32,
+        should_refund_bettors: bool,
+    ) -> Result<()> {
+        ctx.accounts.resolve_lineV2(
+            player_id,
+            matchup_id,
+            stat_id,
+            line_value,
+            result,
+            actual_value,
+            should_refund_bettors,
+        )
+    }
+
+    pub fn update_line_pointer(
+        ctx: Context<UpdateLinePointer>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+    ) -> Result<()> {
+        ctx.accounts.update_line_pointer(player_id, matchup_id, stat_id, line_value)
+    }
+
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }

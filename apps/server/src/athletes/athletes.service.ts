@@ -2,16 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
-import { eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { athletes } from '@repo/db';
 import { CreateAthleteDto } from './dto/create-athlete.dto';
+import { LineStatus } from 'src/lines/enum/lines';
 
 @Injectable()
 export class AthletesService {
   constructor(
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   async getAllAthletes() {
     return this.db.query.athletes.findMany({
@@ -66,10 +67,15 @@ export class AthletesService {
               },
             },
           },
-          where: (lines) => isNull(lines.actualValue),
+          where: (lines) => and(
+            eq(lines.status, LineStatus.OPEN),
+            eq(lines.isLatestOne, true),
+          ),
           columns: {
             id: true,
             predictedValue: true,
+            oddsOver: true,
+            oddsUnder: true,
           },
         },
       },

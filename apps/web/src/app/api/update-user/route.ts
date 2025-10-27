@@ -13,6 +13,8 @@ function validateUpdateUserRequest(data: unknown): { isValid: boolean; errors?: 
   if (typeof obj.avatar !== 'string') errors.push('avatar must be a string')
   if (typeof obj.firstName !== 'string') errors.push('firstName must be a string')
   if (typeof obj.lastName !== 'string') errors.push('lastName must be a string')
+  if (obj.isFirstLogin !== undefined && typeof obj.isFirstLogin !== 'boolean')
+    errors.push('isFirstLogin must be a boolean')
 
   return { isValid: errors.length === 0, errors: errors.length > 0 ? errors : undefined }
 }
@@ -69,7 +71,7 @@ export async function PATCH(request: NextRequest) {
       const errorData = await response.text()
       return NextResponse.json(
         {
-          error: 'Backend request failed',
+          error: 'errorData',
           details: errorData,
           status: response.status,
         },

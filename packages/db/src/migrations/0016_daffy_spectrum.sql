@@ -1,0 +1,1 @@
+ALTER TABLE "matchups" ADD COLUMN "if_lines_created" boolean DEFAULT false;

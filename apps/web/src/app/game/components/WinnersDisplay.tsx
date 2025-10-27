@@ -1,9 +1,9 @@
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import Image from 'next/image'
 import { useState } from 'react'
 
 interface WinnersDisplayProps {
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
 }
 
 export default function WinnersDisplay({ lobby }: WinnersDisplayProps) {
@@ -37,9 +37,9 @@ function WinnerCard({
   winner,
   position,
 }: {
-  winner: GamesFindOne['participants'][0]
+  winner: GamesServiceFindOne['participants'][0]
   position: number
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
 }) {
   const [imageSrc, setImageSrc] = useState(winner.user?.avatar)
 

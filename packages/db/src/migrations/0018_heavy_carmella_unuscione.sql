@@ -1,0 +1,1 @@
+ALTER TABLE "matchups" RENAME COLUMN "is_resolved" TO "if_lines_resolved";

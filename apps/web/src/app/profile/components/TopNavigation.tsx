@@ -1,5 +1,8 @@
+"use client"
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import LottieLoading from '@/components/ui/lottie-loading'
 
 interface TopNavigationProps {
   isConnected: boolean
@@ -7,6 +10,7 @@ interface TopNavigationProps {
   balanceLoading: boolean
   balanceError?: string
   formatBalance: (amount: number) => string
+  isCurrentUser: boolean
 }
 
 export default function TopNavigation({
@@ -15,6 +19,7 @@ export default function TopNavigation({
   balanceLoading,
   balanceError,
   formatBalance,
+  isCurrentUser,
 }: TopNavigationProps) {
   const router = useRouter()
 
@@ -33,7 +38,7 @@ export default function TopNavigation({
           </Link>
           <h1 className="text-xl font-bold text-white">
             <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
-              My Profile
+              {isCurrentUser ? 'My Profile' : 'Profile'}
             </span>
           </h1>
         </div>
@@ -48,13 +53,13 @@ export default function TopNavigation({
             title={
               isConnected
                 ? `Click to refresh balance\nRALLI: $${formatBalance(balances.ralli)}`
-                : 'Connect wallet to view balance'
+                : 'Connect account to view balance'
             }
           >
             <div className="flex items-center space-x-2">
               <div className="w-5 h-5 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-lg flex items-center justify-center">
                 {balanceLoading ? (
-                  <div className="w-3 h-3 border-[1.5px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                  <LottieLoading size="sm" className="w-8 h-8" />
                 ) : (
                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path

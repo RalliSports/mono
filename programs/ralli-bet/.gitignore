@@ -5,3 +5,5 @@ target
 node_modules
 test-ledger
 .yarn
+ralli_bet-keypair.json
+admin-keypair-new.json

@@ -1,9 +1,10 @@
 import { useReferral } from '@/hooks/useReferral'
-import { GamesFindOne } from '@repo/server'
+import { GamesServiceFindOne } from '@repo/server'
 import Image from 'next/image'
 import { useState } from 'react'
+import CreateNewGameButton from './CreateNewGameButton'
 interface GameHeaderProps {
-  lobby: GamesFindOne
+  lobby: GamesServiceFindOne
 }
 
 export default function GameHeader({ lobby }: GameHeaderProps) {
@@ -21,7 +22,7 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
 
   const handleShare = async () => {
     setIsSharing(true)
-    const shareUrl = `${window.location.origin}/game?id=${lobby.id}&ref=${userReferralCode}`
+    const shareUrl = `${window.location.origin}/game?id=${lobby.id}&ref=${userReferralCode}&code=${lobby.gameCode}`
     const shareData = {
       title: lobby.title || 'Ralli Game',
       text: `Check out this game on Ralli: ${lobby.title}`,
@@ -36,14 +37,12 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
         // Desktop: copy to clipboard
         await navigator.clipboard.writeText(shareUrl)
         // You could add a toast notification here
-        console.log('Link copied to clipboard!')
       }
     } catch (error) {
       console.error('Error sharing:', error)
       // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(shareUrl)
-        console.log('Link copied to clipboard!')
       } catch (clipboardError) {
         console.error('Failed to copy to clipboard:', clipboardError)
       }
@@ -73,29 +72,62 @@ export default function GameHeader({ lobby }: GameHeaderProps) {
             </div>
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-3">
+            {/* Desktop Layout */}
+            <div className="hidden sm:flex items-center justify-between">
               <h3 className="text-white font-bold text-xl truncate">{lobby.title}</h3>
-              <button
-                onClick={handleShare}
-                disabled={isSharing}
-                className="flex-shrink-0 p-2 hover:bg-slate-700/50 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Share game"
-              >
-                <svg
-                  className="w-5 h-5 text-slate-400 hover:text-white transition-colors"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+              <div className="flex items-center gap-2">
+                <CreateNewGameButton lobby={lobby} size="small" />
+                <button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className="flex-shrink-0 p-2 hover:bg-slate-700/50 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Share game"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5 text-slate-400 hover:text-white transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Layout */}
+            <div className="sm:hidden">
+              <h3 className="text-white font-bold text-xl truncate mb-2">{lobby.title}</h3>
+              <div className="flex items-center gap-2">
+                <CreateNewGameButton lobby={lobby} size="small" />
+                <button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className="flex-shrink-0 p-2 hover:bg-slate-700/50 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Share game"
+                >
+                  <svg
+                    className="w-4 h-4 text-slate-400 hover:text-white transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
             <p className="text-slate-400 text-sm">
               Host • Created {new Date(lobby.createdAt || '').toLocaleDateString()}

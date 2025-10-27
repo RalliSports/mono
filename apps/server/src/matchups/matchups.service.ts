@@ -1,6 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { matchups, stats, athletes, lines } from '@repo/db';
-import { and, eq, gt, lt, gte, lte, or } from 'drizzle-orm';
+import { matchups, stats, athletes, lines, lineStatusEnum } from '@repo/db';
+import {
+  and,
+  eq,
+  lt,
+  gte,
+  lte,
+  or,
+  inArray,
+  exists
+} from 'drizzle-orm';
 import { AuthService } from 'src/auth/auth.service';
 import { Drizzle } from 'src/database/database.decorator';
 import { Database } from 'src/database/database.provider';
@@ -10,6 +19,7 @@ import { MatchupStatus } from './enum/matchups';
 import { CreateLineDto } from 'src/lines/dto/create-line.dto';
 import { NFLBettingData } from './cron-matchup/types/oddsApiTypes';
 import { LinesService } from 'src/lines/lines.service';
+import { UserAutoLinesDto } from 'src/user/dto/user-auto-lines.dto';
 import { User } from 'src/user/dto/user-response.dto';
 import {
   AMERICAN_FOOTBALL_LABEL,
@@ -17,6 +27,23 @@ import {
   AMERICAN_FOOTBALL_MARKETS,
 } from './cron-matchup/types/constants';
 import { CreateLinesDto } from './dto/create-lines.dto';
+import { StatsService } from 'src/stats/stats.service';
+import {
+  EspnMatchupStatusResponse,
+  EspnStatusName,
+} from './cron-matchup/types/matchup-status-espn-response.types';
+import { fetchEspnMatchupStatus } from './cron-matchup/utils/espn-event-status-fetcher';
+import { ResolveLineDto } from 'src/lines/dto/resolve-line.dto';
+import {
+  fetchESPNBoxscoreData,
+  ProcessedData,
+} from './cron-matchup/utils/espnEvent-finalScore-dataProcess';
+import { ResolveLinesDto } from 'src/lines/dto/resolve-lines.dto';
+import { sleep } from 'src/utils';
+import { LineStatus } from 'src/lines/enum/lines';
+import { LinesCreationSuccessOutput } from './cron-matchup/types/lines-creation-success-outpot.type';
+import { LinesResolveSuccessOutput } from './cron-matchup/types/lines-resolve-success-outpot.type';
+import { calculateOddsFromPrice } from './cron-matchup/utils/odds-calculation-from-price';
 
 @Injectable()
 export class MatchupsService {
@@ -24,7 +51,8 @@ export class MatchupsService {
     @Drizzle() private readonly db: Database,
     private readonly authService: AuthService,
     private readonly linesService: LinesService,
-  ) {}
+    private readonly statsService: StatsService,
+  ) { }
 
   async getAllMatchups() {
     return this.db.query.matchups.findMany({
@@ -58,6 +86,40 @@ export class MatchupsService {
         },
       },
       where: and(eq(matchups.status, MatchupStatus.SCHEDULED)),
+    });
+  }
+
+  async getMatchupsWithOpenLines() {
+    return this.db.query.matchups.findMany({
+      with: {
+        lines: {
+          columns: {
+            id: true,
+            status: true,
+          },
+        },
+        homeTeam: {
+          columns: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+      where: exists(
+        this.db
+          .select()
+          .from(lines)
+          .where(
+            and(
+              eq(lines.status, LineStatus.OPEN),
+              eq(lines.matchupId, matchups.id),
+            ),
+          ),
+      ),
     });
   }
 
@@ -117,8 +179,20 @@ export class MatchupsService {
           columns: {
             id: true,
             status: true,
-            statId: true,
-            athleteId: true,
+          },
+        },
+        homeTeam: {
+          columns: {
+            id: true,
+            name: true,
+            espnTeamId: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            id: true,
+            name: true,
+            espnTeamId: true,
           },
         },
       },
@@ -132,6 +206,28 @@ export class MatchupsService {
   async getMatchupById(id: string) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, id),
+      with: {
+        lines: {
+          columns: {
+            id: true,
+            status: true,
+          },
+        },
+        homeTeam: {
+          columns: {
+            id: true,
+            espnTeamId: true,
+            name: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            id: true,
+            espnTeamId: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!matchup) throw new NotFoundException('Matchup not found');
@@ -179,17 +275,36 @@ export class MatchupsService {
     return matchup;
   }
 
-  async createLinesForMatchup(dto: CreateLinesDto, user: User) {
+  async createLinesForMatchup(dto: CreateLinesDto, user: UserAutoLinesDto) {
+    const matchupId = dto.matchupId;
+    if (!matchupId) {
+      console.warn('Matchup id is required');
+      return [];
+    }
     const matchup = await this.db.query.matchups.findFirst({
-      where: eq(matchups.id, dto.matchupId),
+      where: eq(matchups.id, matchupId),
+      with: {
+        homeTeam: {
+          columns: {
+            abbreviation: true,
+          },
+        },
+        awayTeam: {
+          columns: {
+            abbreviation: true,
+          },
+        },
+      },
     });
-    console.log('key', process.env.ODDS_API_KEY);
     const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
 
     const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
       res.json(),
     );
-    console.log('linesResponse', linesResponse);
+    if (!linesResponse) {
+      console.warn('No lines found for matchup: ', matchupId);
+      return [];
+    }
     const allAthletes = await this.db.query.athletes.findMany({
       where: or(
         eq(athletes.teamId, matchup?.homeTeamId!),
@@ -197,131 +312,254 @@ export class MatchupsService {
       ),
     });
 
-    const allStats = await this.db.query.stats.findMany();
+    const allStats = await this.statsService.getAllStats();
 
     const formattedLines: CreateLineDto[] = [];
+    const linesForCRONlogger: LinesCreationSuccessOutput[] = [];
+    if (!linesResponse?.bookmakers[0]?.markets) {
+      console.warn('No bookmakers found for matchup: ', matchupId);
+      return [];
+    }
+    const marketPredictions = linesResponse.bookmakers[0].markets;
+    for (const market of marketPredictions) {
+      const predictionOutcomes = market.outcomes;
+      const statName = market.key;
+      const statId = allStats.find(
+        (stat) => stat.oddsApiStatName === statName,
+      )?.id;
+      if (!statId) {
+        console.warn('Stat id not found for: ', statName);
+        continue;
+      }
+      const athletePredictionMap: Record<string, { thresholdValue: number; oddsOverValue: number; oddsUnderValue: number; }> = {};
+      for (const outcome of predictionOutcomes) {
+        const overOrUnder = outcome.name;
+        const athleteName = outcome.description;
+        const thresholdVal = outcome.point;
+        const oddsVal = outcome.price;
+        if (!athletePredictionMap[athleteName]) {
+          athletePredictionMap[athleteName] = {
+            thresholdValue: thresholdVal,
+            oddsOverValue: 0,
+            oddsUnderValue: 0,
+          };
+        }
+        if (overOrUnder === 'Over') {
+          athletePredictionMap[athleteName].oddsOverValue = calculateOddsFromPrice(oddsVal);
+        } else if (overOrUnder === 'Under') {
+          athletePredictionMap[athleteName].oddsUnderValue = calculateOddsFromPrice(oddsVal);
+        }
+      }
+      for (const athleteName in athletePredictionMap) {
+        const { thresholdValue, oddsOverValue, oddsUnderValue } =
+          athletePredictionMap[athleteName];
 
-    for (const market of linesResponse.bookmakers[0].markets) {
-      const outcomes = market.outcomes;
-      for (const outcome of outcomes) {
-        if (outcome.name === 'Over') {
-          continue;
-        }
-        const statId = allStats.find(
-          (stat) => stat.oddsApiStatName === market.key,
-        )?.id;
-        if (!statId) {
-          console.warn('Stat id not found for: ', market.key);
-          continue;
-        }
         const athleteId = allAthletes.find(
-          (athlete) => athlete.name === outcome.description,
+          (athlete) => athlete.name === athleteName,
         )?.id;
 
         if (!athleteId) {
           console.warn(
-            `Athlete "${outcome.description}" not found for ${matchup?.espnEventId}`,
+            `Athlete "${athleteName}" not found for ${matchup?.espnEventId}`,
           );
           continue;
+        }
+
+        const possibleExistingLine = await this.db.query.lines.findFirst({
+          where: and(
+            eq(lines.athleteId, athleteId),
+            eq(lines.statId, statId),
+            eq(lines.matchupId, matchup?.id!),
+            eq(lines.status, LineStatus.OPEN),
+          ),
+        });
+        if (possibleExistingLine && possibleExistingLine.predictedValue === thresholdValue.toString()) {
+          console.warn(
+            `Line already exists with same predicted value for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${thresholdValue}`,
+          );
+          continue;
+        } else if (possibleExistingLine) {
+          await this.linesService.updateLine(possibleExistingLine.id, {
+            isLatestOne: false,
+          });
+          console.log(
+            `Line with old predicted value found for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${possibleExistingLine.predictedValue}. Creting new line with Value: ${thresholdValue}`,
+          );
         }
 
         formattedLines.push({
           statId: statId,
           athleteId: athleteId,
           matchupId: matchup?.id!,
-          predictedValue: outcome.point,
+          predictedValue: thresholdValue,
+          oddsOver: oddsOverValue,
+          oddsUnder: oddsUnderValue,
+        });
+
+        //returning data for CRON logger
+        linesForCRONlogger.push({
+          statName: statName,
+          athleteName: athleteName,
+          predictedValue: thresholdValue,
+          oddsOver: oddsOverValue,
+          oddsUnder: oddsUnderValue,
+          matchupId: matchup?.id!,
+          homeTeam: matchup?.homeTeam?.abbreviation!,
+          awayTeam: matchup?.awayTeam?.abbreviation!,
         });
       }
     }
 
     // Chunk lines into groups of 5
-    const chunkSize = 5;
+    const CHUNK_SIZE = 5;
     const chunks: CreateLineDto[][] = [];
-    for (let i = 0; i < formattedLines.length; i += chunkSize) {
-      chunks.push(formattedLines.slice(i, i + chunkSize));
+    for (let i = 0; i < formattedLines.length; i += CHUNK_SIZE) {
+      chunks.push(formattedLines.slice(i, i + CHUNK_SIZE));
     }
 
-    // Process each chunk sequentially with 500ms delay between chunks
-    for (let i = 0; i < chunks.length; i++) {
-      if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      // Process each chunk sequentially with 500ms delay between chunks
+      for (let i = 0; i < chunks.length; i++) {
+        if (i > 0) {
+          await sleep(500);
+        }
+        await this.linesService.bulkCreateLines(chunks[i], user);
+        await this.db
+          .update(matchups)
+          .set({ ifLinesCreated: true })
+          .where(eq(matchups.id, matchupId));
       }
-      await this.linesService.bulkCreateLines(chunks[i], user);
+      console.log('Lines created successfully');
+      return linesForCRONlogger;
+    } catch (error) {
+      console.error('Error creating lines:', error);
+      return [];
     }
 
-    return { message: 'Lines Created Successfully' };
   }
 
-  async resolveLinesForMatchup(dto: CreateLinesDto, user: User) {
+  async resolveLinesForMatchup(dto: ResolveLinesDto, user: UserAutoLinesDto) {
     const matchup = await this.db.query.matchups.findFirst({
       where: eq(matchups.id, dto.matchupId),
     });
-    console.log('key', process.env.ODDS_API_KEY);
-    const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
+    if (!matchup) {
+      console.warn('Matchup not found!');
+      return [];
+    }
+    const matchupsToResolve = [matchup];
+    const allLinesToResolve: (ResolveLineDto & {
+      athleteName: string;
+      statName: string;
+    })[] = [];
 
-    const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
-      res.json(),
-    );
-    console.log('linesResponse', linesResponse);
-    const allAthletes = await this.db.query.athletes.findMany({
-      where: or(
-        eq(athletes.teamId, matchup?.homeTeamId!),
-        eq(athletes.teamId, matchup?.awayTeamId!),
-      ),
-    });
+    //returning data for ResolveCronLogger
+    const resolvedLinesData: LinesResolveSuccessOutput[] = [];
+    for (const matchup of matchupsToResolve) {
+      const matchupId = matchup.id;
+      const { homeTeamId, awayTeamId } = matchup;
+      if (!matchup.espnEventId) {
+        console.warn(`Matchup ${matchupId} missing ESPN event ID`);
+        continue;
+      }
+      const espnStatus: EspnMatchupStatusResponse =
+        await fetchEspnMatchupStatus(matchup.espnEventId);
 
-    const allStats = await this.db.query.stats.findMany();
+      //Check if matchup is final
+      if (!espnStatus || !espnStatus.type) {
+        console.warn(`Invalid ESPN status data for ${matchup.espnEventId}`);
+        continue;
+      }
+      if (espnStatus.type.name !== EspnStatusName.FINAL) {
+        console.warn(`Matchup ${matchupId} not final, skipping`);
+        continue;
+      }
 
-    const formattedLines: CreateLineDto[] = [];
-
-    for (const market of linesResponse.bookmakers[0].markets) {
-      const outcomes = market.outcomes;
-      for (const outcome of outcomes) {
-        if (outcome.name === 'Over') {
-          continue;
-        }
-        const statId = allStats.find(
-          (stat) => stat.oddsApiStatName === market.key,
-        )?.id;
-        if (!statId) {
-          console.warn('Stat id not found for: ', market.key);
-          continue;
-        }
-        const athleteId = allAthletes.find(
-          (athlete) => athlete.name === outcome.description,
-        )?.id;
-
-        if (!athleteId) {
-          console.warn(
-            `Athlete "${outcome.description}" not found for ${matchup?.espnEventId}`,
-          );
-          continue;
-        }
-
-        formattedLines.push({
-          statId: statId,
-          athleteId: athleteId,
-          matchupId: matchup?.id!,
-          predictedValue: outcome.point,
+      const allLinesInThisMatchup = await this.linesService.getLinesByMatchupId(
+        matchupId,
+      );
+      const allAthletesInThisMatchupWithLines =
+        await this.db.query.athletes.findMany({
+          where: and(
+            or(
+              eq(athletes.teamId, homeTeamId!),
+              eq(athletes.teamId, awayTeamId!),
+            ),
+            inArray(
+              athletes.id,
+              allLinesInThisMatchup.map((line) => line.athleteId ?? ''),
+            ),
+          ),
         });
+      const matchupBoxScore: ProcessedData = await fetchESPNBoxscoreData(
+        matchup.espnEventId,
+      );
+
+      for (const athlete of allAthletesInThisMatchupWithLines) {
+        const athleteName = athlete.name;
+        const allLinesForThisAthlete = allLinesInThisMatchup.filter(
+          (line) => line.athleteId === athlete.id,
+        );
+        const outcomePerAthlete = matchupBoxScore.athletes.find(
+          (athlete) => athlete.name === athleteName,
+        );
+        if (!outcomePerAthlete) {
+          continue;
+        }
+        for (const lineData of allLinesForThisAthlete) {
+          const stat = lineData.stat;
+          if (!stat) {
+            continue;
+          }
+          const actualValue = outcomePerAthlete.lines[stat.statOddsName!];
+          try {
+            allLinesToResolve.push({
+              lineId: lineData.id,
+              actualValue: Number(actualValue) || 0.0,
+              athleteName: athlete.name!,
+              statName: stat.name!,
+            });
+            resolvedLinesData.push({
+              statName: stat.name!,
+              athleteName: athlete.name!,
+              predictedValue: Number(lineData.predictedValue),
+              actualValue: Number(actualValue) || 0.0,
+              matchupId: matchup.id!,
+            });
+          } catch (error) {
+            console.error(
+              `Error processing line for ${matchup.espnEventId} - ${athlete.name} - ${stat.name}-${actualValue}`,
+              error,
+            );
+            continue;
+          }
+        }
       }
     }
 
     // Chunk lines into groups of 5
-    const chunkSize = 5;
-    const chunks: CreateLineDto[][] = [];
-    for (let i = 0; i < formattedLines.length; i += chunkSize) {
-      chunks.push(formattedLines.slice(i, i + chunkSize));
+    const CHUNK_SIZE = 5;
+    const chunks: (ResolveLineDto & {
+      athleteName: string;
+      statName: string;
+    })[][] = [];
+    for (let i = 0; i < allLinesToResolve.length; i += CHUNK_SIZE) {
+      chunks.push(allLinesToResolve.slice(i, i + CHUNK_SIZE));
     }
 
-    // Process each chunk sequentially with 500ms delay between chunks
-    for (let i = 0; i < chunks.length; i++) {
-      if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      // Process each chunk sequentially with 500ms delay between chunks
+      for (let i = 0; i < chunks.length; i++) {
+        if (i > 0) {
+          await sleep(500);
+        }
+        await this.linesService.bulkResolveLines(chunks[i], user);
       }
-      await this.linesService.bulkCreateLines(chunks[i], user);
+      console.log('Lines resolved successfully');
+      return resolvedLinesData;
     }
-
-    return { message: 'Lines Created Successfully' };
+    catch (error) {
+      console.error('Error resolving lines:', error);
+      return [];
+    }
   }
 }

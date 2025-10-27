@@ -1,7 +1,7 @@
-import { GamesFindAllInstance } from '@repo/server'
+import { GamesServiceFindAllInstance } from '@repo/server'
 
 interface GameCardProps {
-  game: GamesFindAllInstance
+  game: GamesServiceFindAllInstance
   handleResolveGame: (gameId: string) => void
 }
 

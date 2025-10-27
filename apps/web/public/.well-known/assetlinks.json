@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "bet.ralli.www.twa",
+        "sha256_cert_fingerprints": ["4C:AC:27:84:96:B1:93:5F:C0:13:37:16:ED:CF:58:8C:34:60:A6:EF:55:96:4C:B6:F7:44:E5:02:F4:D3:10:BB"]
+      }
+    }]

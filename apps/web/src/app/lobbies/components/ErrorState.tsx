@@ -1,5 +1,7 @@
-import type { ErrorStateProps } from './types'
-
+export interface ErrorStateProps {
+  error: string
+  onRetry: () => void
+}
 export default function ErrorState({ error, onRetry }: ErrorStateProps) {
   return (
     <div className="bg-gray-900 min-h-screen flex items-center justify-center">

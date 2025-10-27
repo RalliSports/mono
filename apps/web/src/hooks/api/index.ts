@@ -25,6 +25,9 @@ export * from './use-stats'
 // Token hooks
 export * from './use-tokens'
 
+// Leaderboard hooks
+export * from './use-leaderboard'
+
 // Types and utilities
 export * from './types'
 export { apiClient, ApiClient, useApiWithAuth } from './base'

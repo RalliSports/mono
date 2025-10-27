@@ -88,6 +88,7 @@ impl<'info> CreateGame<'info> {
             num_winners: 0,
             correct_votes_to_be_winner: 0,
             calculation_complete: false,
+            payout_progress: 0,
             bump: bumps.game,
         });
 

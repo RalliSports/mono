@@ -1,6 +1,5 @@
 // Export all components for easy importing
 export { default as TopNavigation } from './TopNavigation'
-export { default as BalanceDisplay } from './BalanceDisplay'
 export { default as ProfileDropdown } from './ProfileDropdown'
 export { default as FilterTabs } from './FilterTabs'
 export { default as SearchBar } from './SearchBar'
@@ -11,5 +10,9 @@ export { default as EmptyState } from './EmptyState'
 export { default as LoadingState } from './LoadingState'
 export { default as ErrorState } from './ErrorState'
 
-// Export types
-export * from './types'
+// Export skeleton components
+export { default as LobbiesPageSkeleton } from './LobbiesPageSkeleton'
+export { default as LobbiesGridSkeleton } from './LobbiesGridSkeleton'
+export { default as FilterTabsSkeleton } from './FilterTabsSkeleton'
+export { default as SearchBarSkeleton } from './SearchBarSkeleton'
+export { default as PageHeaderSkeleton } from './PageHeaderSkeleton'
