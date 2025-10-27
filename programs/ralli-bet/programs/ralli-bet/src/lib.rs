@@ -130,6 +130,58 @@ pub mod ralli_bet {
         ctx.accounts.calculate_winners(ctx.remaining_accounts)
     }
 
+    pub fn create_lineV2(
+        ctx: Context<CreateLineV2>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+        odds: i32,
+        starts_at: i64,
+    ) -> Result<()> {
+        ctx.accounts.create_lineV2(
+            player_id,
+            matchup_id,
+            stat_id,
+            line_value,
+            odds,
+            starts_at,
+            &ctx.bumps,
+        )
+    }
+
+    pub fn resolve_lineV2(
+        ctx: Context<ResolveLineV2>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+        result: DirectionV2,
+        actual_value: i32,
+        should_refund_bettors: bool,
+    ) -> Result<()> {
+        ctx.accounts.resolve_lineV2(
+            player_id,
+            matchup_id,
+            stat_id,
+            line_value,
+            result,
+            actual_value,
+            should_refund_bettors,
+        )
+    }
+
+    pub fn update_line_pointer(
+        ctx: Context<UpdateLinePointer>,
+        player_id: String,
+        matchup_id: u64,
+        stat_id: u16,
+        line_value: i32,
+    ) -> Result<()> {
+        ctx.accounts.update_line_pointer(player_id, matchup_id, stat_id, line_value)
+    }
+
+
     // pub fn submit_bet(ctx: Context<SubmitBet>, picks: Vec<state::Pick>) -> Result<()> {
     //     instructions::submit_bet::handler(ctx, picks)
     // }

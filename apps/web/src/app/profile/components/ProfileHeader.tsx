@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useFriends } from '@/hooks/api/use-friend'
 import { UserMinusIcon, UserRoundPlus, MessageCircle } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
 import NotificationsButton from './NotificationsButton'
 import ProfilePicture from './ProfilePicture'
 import ReferFriendsSection from './ReferFriendsSection'

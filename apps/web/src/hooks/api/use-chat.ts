@@ -30,23 +30,45 @@ export function useChat() {
       currentUser.data?.username &&
       currentUser.data?.avatar
     ) {
-      client.connectUser(
-        { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
-        currentUserChatToken.data.token,
-      )
-      console.log('connected to client', client)
-      setIsConnectedToClient(true)
+      const connectUser = async () => {
+        try {
+          await client.connectUser(
+            {
+              id: currentUser.data!.id,
+              name: currentUser.data!.username!,
+              image: currentUser.data!.avatar!,
+            },
+            currentUserChatToken.data!.token,
+          )
+          console.log('Successfully connected to Stream.io client', client)
+          setIsConnectedToClient(true)
+        } catch (error) {
+          console.error('Failed to connect to Stream.io client:', error)
+          setIsConnectedToClient(false)
+        }
+      }
+
+      connectUser()
     }
   }, [currentUserChatToken.data, currentUser.data])
 
-  const connectToClient = useCallback(() => {
+  const connectToClient = useCallback(async () => {
     if (currentUserChatToken.data && currentUser.data) {
-      client.connectUser(
-        { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
-        currentUserChatToken.data.token,
-      )
-      console.log('connected to client', client)
+      try {
+        await client.connectUser(
+          { id: currentUser.data.id, name: currentUser.data.username!, image: currentUser.data.avatar! },
+          currentUserChatToken.data.token,
+        )
+        console.log('connected to client', client)
+        setIsConnectedToClient(true)
+        return true
+      } catch (error) {
+        console.error('Failed to connect to client:', error)
+        setIsConnectedToClient(false)
+        return false
+      }
     }
+    return false
   }, [currentUserChatToken.data, currentUser.data])
 
   const disconnectFromClient = useCallback(() => {
@@ -105,19 +127,53 @@ export function useChat() {
 
   const getChannels = useCallback(async () => {
     if (currentUser.data) {
-      const channels = await client.queryChannels({
-        members: { $in: [currentUser.data.id!] },
-      })
-      console.log('User channels:', channels)
-      console.log('Channel count:', channels.length)
-      return channels
+      try {
+        console.log('🔍 Querying channels for user:', currentUser.data.id)
+        const channels = await client.queryChannels({
+          members: { $in: [currentUser.data.id!] },
+        })
+        console.log('✅ User channels:', channels)
+        console.log('📊 Channel count:', channels.length)
+        return channels
+      } catch (error) {
+        console.error('❌ Failed to query channels:', error)
+        return []
+      }
     }
-  }, [client])
+    console.warn('⚠️ No current user data available for channel query')
+    return []
+  }, [client, currentUser.data])
 
   const getChannel = useCallback(async (channelId: string) => {
     const channel = await client.getChannelById('gaming', channelId, {})
     return channel
   }, [])
+
+  const ensureConnection = useCallback(async (): Promise<boolean> => {
+    if (isConnectedToClient) {
+      return true
+    }
+
+    if (currentUserChatToken.data && currentUser.data?.id && currentUser.data?.username && currentUser.data?.avatar) {
+      try {
+        await client.connectUser(
+          {
+            id: currentUser.data.id,
+            name: currentUser.data.username,
+            image: currentUser.data.avatar,
+          },
+          currentUserChatToken.data.token,
+        )
+        setIsConnectedToClient(true)
+        return true
+      } catch (error) {
+        console.error('Failed to ensure Stream.io connection:', error)
+        return false
+      }
+    }
+
+    return false
+  }, [isConnectedToClient, currentUserChatToken.data, currentUser.data, client])
 
   return {
     currentUserChatToken,
@@ -130,5 +186,6 @@ export function useChat() {
     isConnectedToClient,
     getChannel,
     connectToDirectMessage,
+    ensureConnection,
   }
 }

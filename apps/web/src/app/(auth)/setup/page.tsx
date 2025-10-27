@@ -105,6 +105,11 @@ export default function Setup() {
     setError('')
 
     try {
+      // Ensure avatar is an absolute URL
+      const formattedAvatar = avatar.startsWith('/')
+        ? `https://ralli.bet${avatar}`
+        : avatar;
+
       const response = await fetch('/api/update-user', {
         method: 'PATCH',
         headers: {
@@ -113,7 +118,7 @@ export default function Setup() {
         },
         body: JSON.stringify({
           username: currentUsername.trim(),
-          avatar: avatar,
+          avatar: formattedAvatar,
           firstName: currentUser.data?.firstName || '',
           lastName: currentUser.data?.lastName || '',
           isFirstLogin: false,

@@ -55,6 +55,7 @@ export default function LobbyCard({ lobby }: LobbyCardProps) {
               <Link href={`/profile?userId=${lobby.creatorId}`}>{lobby.creator?.username}</Link>
               <span className="text-slate-400 text-sm ml-1">created a lobby</span>
             </div>
+              <p className="text-slate-400 text-sm">{new Date(lobby.createdAt || '').toLocaleDateString()}</p>
             <p className="text-slate-300 text-xs ">{/* <span className="text-[#00CED1]">{timeLeft} left</span> */}</p>
           </div>
         </div>

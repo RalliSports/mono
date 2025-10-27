@@ -1,3 +1,5 @@
+"use client"
+
 import { ACHIEVEMENTS } from '../constants/achievements'
 
 export default function AchievementsSection() {

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { LeaderboardFilter } from '../page'
+import { LeaderboardFilter } from '../client'
 import { useLeaderboard, LeaderboardSortBy } from '@/hooks/api/use-leaderboard'
 import LottieLoading from '@/components/ui/lottie-loading'
 

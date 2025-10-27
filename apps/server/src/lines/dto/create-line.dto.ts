@@ -1,4 +1,4 @@
-import { IsUUID, IsNumber, IsDefined, Min } from 'class-validator';
+import { IsUUID, IsNumber, IsDefined } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLineDto {
@@ -17,6 +17,15 @@ export class CreateLineDto {
   @ApiProperty()
   @IsDefined()
   @IsNumber()
-  @Min(0)
   predictedValue: number;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNumber()
+  oddsOver: number;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNumber()
+  oddsUnder: number;
 }

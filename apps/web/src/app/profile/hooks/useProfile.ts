@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'
 import { useAccount } from '@getpara/react-sdk'
@@ -72,6 +74,7 @@ export function useProfile(session: string | null) {
               }),
             })
           }
+          setUserLoading(false)
         } else {
           const errorData = await response?.json()
           addToast(errorData.error || 'Failed to fetch user', 'error')
@@ -96,6 +99,7 @@ export function useProfile(session: string | null) {
         if (response.ok) {
           const data = await response.json()
           setMyOpenGames(data)
+          setGamesLoading(false)
         } else {
           const errorData = await response.json()
           console.error(errorData)
