@@ -667,7 +667,7 @@ export class ParaAnchor {
     userWallets: string[],
     winningLines: number[],
   ) {
-    const program = await this.getProgram();
+    const program = await this.getProgram(true);// useAdminSigner
     const percentage = 100;
 
     const gamePDA = await this.getGamePDA(gameId, program.programId);
@@ -716,13 +716,35 @@ export class ParaAnchor {
       }),
     );
 
-    const remainingAccounts = [
-      ...betAccounts,
-      ...tokenAccounts,
-      ...lineAccounts,
-    ];
+    // const remainingAccounts = [
+    //   ...betAccounts,
+    //   ...tokenAccounts,
+    //   ...lineAccounts,
+    // ];
 
     try {
+      const instructions: TransactionInstruction[] = [];
+      for (const betAccount of betAccounts) {
+        const ix_calculate_correct = await program.methods
+          .calculateCorrect()
+          .accountsStrict({
+            admin: program.provider.wallet?.publicKey as PublicKey,
+            game: gamePDA,
+            bet: betAccount.pubkey,
+          })
+          .remainingAccounts(lineAccounts)
+          .instruction();
+        instructions.push(ix_calculate_correct);
+      }
+      const ix_calculate_winners = await program.methods
+        .calculateWinners()
+        .accountsStrict({
+          admin: program.provider.wallet?.publicKey as PublicKey,
+          game: gamePDA,
+        })
+        .remainingAccounts(betAccounts)
+        .instruction();
+      instructions.push(ix_calculate_winners);
       const ix = await program.methods
         .resolveGame(percentage)
         .accountsStrict({
@@ -737,9 +759,9 @@ export class ParaAnchor {
           treasury: this.treasury,
           treasuryVault: this.treasuryTokenAccount,
         })
-        .remainingAccounts(remainingAccounts)
+        .remainingAccounts(tokenAccounts)
         .instruction();
-
+      instructions.push(ix);
       // Get latest blockhash
       const { blockhash, lastValidBlockHeight } =
         await program.provider.connection.getLatestBlockhash('finalized');
@@ -748,7 +770,7 @@ export class ParaAnchor {
       const messageV0 = new TransactionMessage({
         payerKey: program.provider.publicKey as PublicKey,
         recentBlockhash: blockhash,
-        instructions: [ix],
+        instructions: [...instructions],
       }).compileToV0Message();
 
       // Create VersionedTransaction
