@@ -9,7 +9,7 @@ import { ODDS_API_BASE_URL, AMERICAN_FOOTBALL_LABEL } from './types/constants';
 export class SyncMatchupsWithOddsEventIdService {
   private readonly logger = new Logger(SyncMatchupsWithOddsEventIdService.name);
 
-  constructor(private readonly matchupsService: MatchupsService) {}
+  constructor(private readonly matchupsService: MatchupsService) { }
 
   async fetchOddsApiEvents() {
     const url = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events?apiKey=${process.env.ODDS_API_KEY}`;
@@ -22,8 +22,8 @@ export class SyncMatchupsWithOddsEventIdService {
     }
   }
 
-  //as odds gets the weekly data
-  @Cron(CronExpression.EVERY_WEEK)
+  //as odds gets the weekly data, !!!(everyday at noon - TEMPORARY - as OddsAPi misses some events, needed more frequent checks)
+  @Cron(CronExpression.EVERY_DAY_AT_NOON)
   async syncMatchupsWithOddsEventId() {
     this.logger.log('Running matchup odds API event ID sync job...');
     const oddsApiEvents: OddsEventsResponse = await this.fetchOddsApiEvents();
@@ -48,13 +48,14 @@ export class SyncMatchupsWithOddsEventIdService {
         startDateRange,
         endDateRange,
       );
-
     for (const oddsApiEvent of oddsApiEvents) {
-      this.logger.log(`Processing Odds API event: ${oddsApiEvent.id}`);
+      this.logger.log(`Processing Odds API event: ${oddsApiEvent.id} - ${oddsApiEvent.home_team} vs ${oddsApiEvent.away_team} - ${oddsApiEvent.commence_time}`);
       const matchupPicked = matchupsInRange.find(
         (matchup) =>
           matchup.homeTeam?.name === oddsApiEvent.home_team &&
-          matchup.awayTeam?.name === oddsApiEvent.away_team,
+          matchup.awayTeam?.name === oddsApiEvent.away_team &&
+          matchup.startsAt?.toLocaleDateString() ===
+          new Date(oddsApiEvent.commence_time).toLocaleDateString(),
       );
       if (matchupPicked) {
         await this.matchupsService.updateMatchup(matchupPicked.id, {

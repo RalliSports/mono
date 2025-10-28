@@ -321,7 +321,7 @@ export class MatchupsService {
 
     const formattedLines: CreateLineDto[] = [];
     const linesForCRONlogger: LinesCreationSuccessOutput[] = [];
-    if (!linesResponse?.bookmakers[0]?.markets) {
+    if (!linesResponse?.bookmakers?.[0]?.markets) {
       console.warn('No bookmakers found for matchup: ', matchupId);
       return [];
     }
