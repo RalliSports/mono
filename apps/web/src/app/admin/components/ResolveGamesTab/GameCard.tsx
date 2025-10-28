@@ -14,13 +14,12 @@ export default function GameCard({ game, handleResolveGame }: GameCardProps) {
             {/* <span className="text-lg">{sports.find((s) => s.name === game.sport)?.icon}</span> */}
             <h4 className="text-white font-semibold">{game.title}</h4>
             <span
-              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                game.status === 'active'
-                  ? 'bg-[#00CED1]/20 text-[#00CED1]'
-                  : game.status === 'waiting'
-                    ? 'bg-yellow-500/20 text-[#FFAB91]'
-                    : 'bg-[#FFAB91]/20 text-[#FFAB91]'
-              }`}
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${game.status === 'in_progress'
+                ? 'bg-[#00CED1]/20 text-[#00CED1]'
+                : game.status === 'waiting'
+                  ? 'bg-yellow-500/20 text-[#FFAB91]'
+                  : 'bg-[#FFAB91]/20 text-[#FFAB91]'
+                }`}
             >
               {game.status}
             </span>

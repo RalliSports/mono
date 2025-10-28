@@ -137,7 +137,7 @@ export class GamesService {
         token: true,
         participants: { with: { user: true, bets: true } },
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
   async findAllOpen() {
@@ -149,7 +149,7 @@ export class GamesService {
         participants: { with: { user: true, bets: true } },
         creator: true,
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -203,7 +203,7 @@ export class GamesService {
           },
         },
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -244,7 +244,7 @@ export class GamesService {
           },
         },
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -418,7 +418,7 @@ export class GamesService {
   async findGamesCreatedByUser(user: User) {
     const result = await this.db.query.games.findMany({
       where: eq(games.creatorId, user.id),
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
 
     if (!result.length) throw new NotFoundException('Games not found');

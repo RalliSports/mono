@@ -15,12 +15,20 @@ import { users } from "./users";
 import { uuid } from "drizzle-orm/pg-core";
 import { text } from "drizzle-orm/pg-core";
 import { tokens } from "./tokens";
+import { game_access } from "./game_access";
 
-export const gameTypeEnum = pgEnum("type", ["1v1", "limited", "unlimited"]);
+export const gameTypeEnum = pgEnum("game_type", ["1v1", "limited", "unlimited"]);
 export const userControlTypeEnum = pgEnum("user_control_type", [
   "whitelist",
   "blacklist",
   "none",
+]);
+export const gameStatusEnum = pgEnum("game_status", [
+  "waiting",
+  "in_progress",
+  "completed",
+  "cancelled",
+  "expired",
 ]);
 
 export const games = pgTable("games", {
@@ -28,14 +36,16 @@ export const games = pgTable("games", {
   title: varchar("title"),
   creatorId: uuid("creator_id"),
   depositAmount: numeric("deposit_amount", { mode: "number" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  status: varchar("status"),
+  status: gameStatusEnum("status"),
   maxParticipants: integer("max_participants"),
+  currentParticipants: integer("current_participants"),
   numBets: integer("num_bets"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  lockedAt: timestamp("locked_at", { withTimezone: true }),
   gameCode: varchar("game_code"),
   matchupGroup: varchar("matchup_group"),
   tokenId: uuid("token_id"),
-  isPrivate: boolean("isPrivate"),
+  isPrivate: boolean("is_private"),
   type: gameTypeEnum("type"),
   userControlType: userControlTypeEnum("user_control_type"),
   gameModeId: uuid("game_mode_id"),
@@ -54,7 +64,7 @@ export const gamesRelations = relations(games, ({ many, one }) => ({
     fields: [games.tokenId],
     references: [tokens.id],
   }),
-  gameAccess: one(game_mode),
+  gameAccess: many(game_access),
   creator: one(users, {
     fields: [games.creatorId],
     references: [users.id],
