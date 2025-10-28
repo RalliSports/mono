@@ -296,6 +296,11 @@ export class MatchupsService {
         },
       },
     });
+
+    if (!matchup) {
+      console.warn('Matchup not found: ', matchupId);
+      return [];
+    }
     const linesURL = `${ODDS_API_BASE_URL}/${AMERICAN_FOOTBALL_LABEL}/events/${matchup?.oddsApiEventId}/odds?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=${AMERICAN_FOOTBALL_MARKETS.join(',').replace('[', '').replace(']', '')}&bookmakers=draftkings`;
 
     const linesResponse: NFLBettingData = await fetch(linesURL).then((res) =>
@@ -365,28 +370,34 @@ export class MatchupsService {
           continue;
         }
 
-        const possibleExistingLine = await this.db.query.lines.findFirst({
+        const possibleExistingLines = await this.db.query.lines.findMany({
           where: and(
             eq(lines.athleteId, athleteId),
             eq(lines.statId, statId),
-            eq(lines.matchupId, matchup?.id!),
-            eq(lines.status, LineStatus.OPEN),
+            eq(lines.matchupId, matchupId),
+            eq(lines.isLatestOne, true)
           ),
         });
-        if (possibleExistingLine && possibleExistingLine.predictedValue === thresholdValue.toString()) {
-          console.warn(
-            `Line already exists with same predicted value for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${thresholdValue}`,
-          );
-          continue;
-        } else if (possibleExistingLine) {
-          await this.linesService.updateLine(possibleExistingLine.id, {
-            isLatestOne: false,
-          });
-          console.log(
-            `Line with old predicted value found for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${possibleExistingLine.predictedValue}. Creting new line with Value: ${thresholdValue}`,
-          );
+        let existingLineWithSamePredictedValue = false;
+        for (const possibleExistingLine of possibleExistingLines) {
+          if (possibleExistingLine && possibleExistingLine.predictedValue === thresholdValue.toString()) {
+            console.log(
+              `Line already exists with same predicted value for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${thresholdValue}`,
+            );
+            existingLineWithSamePredictedValue = true;
+            continue;
+          } else if (possibleExistingLine) {
+            await this.linesService.updateLine(possibleExistingLine.id, {
+              isLatestOne: false,
+            });
+            console.log(
+              `Line with old predicted value found for ${matchup?.espnEventId} - ${athleteName} - ${statName} - ${possibleExistingLine.predictedValue}.`,
+            );
+          }
         }
-
+        if (existingLineWithSamePredictedValue) {
+          continue;
+        }
         formattedLines.push({
           statId: statId,
           athleteId: athleteId,
