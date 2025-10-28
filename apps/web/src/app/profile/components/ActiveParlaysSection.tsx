@@ -45,9 +45,9 @@ export default function ActiveParlaysSection({ myOpenGames, user }: ActiveParley
                   <div className="flex items-center space-x-2 mt-1">
                     <span
                       className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        game.status === 'live'
+                        game.status === 'in_progress'
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : game.status === 'pending'
+                          : game.status === 'waiting'
                             ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                             : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                       }`}

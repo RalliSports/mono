@@ -45,13 +45,12 @@ export default function PastParlaysSection({ myCompletedGames, user }: PastParla
                   <h4 className="text-white font-semibold text-lg">{game.title}</h4>
                   <div className="flex items-center space-x-2 mt-1">
                     <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        game.status === 'live'
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : game.status === 'pending'
-                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                            : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                      }`}
+                      className={`px-2 py-1 rounded-md text-xs font-medium ${game.status === 'completed'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : game.status === 'cancelled'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                        }`}
                     >
                       {game.status && game.status.charAt(0).toUpperCase() + game.status.slice(1)}
                     </span>
@@ -78,15 +77,14 @@ export default function PastParlaysSection({ myCompletedGames, user }: PastParla
                         alt={bet.line?.athlete?.name || ''}
                         width={32}
                         height={32}
-                        className={`rounded-full border-2 object-cover bg-slate-800 ${
-                          bet.line?.status === 'open'
-                            ? 'border-slate-600'
-                            : bet.line?.status === 'locked'
-                              ? 'border-blue-500'
-                              : bet.isCorrect
-                                ? 'border-emerald-500'
-                                : 'border-red-500'
-                        }`}
+                        className={`rounded-full border-2 object-cover bg-slate-800 ${bet.line?.status === 'open'
+                          ? 'border-slate-600'
+                          : bet.line?.status === 'locked'
+                            ? 'border-blue-500'
+                            : bet.isCorrect
+                              ? 'border-emerald-500'
+                              : 'border-red-500'
+                          }`}
                         style={{
                           aspectRatio: '1/1',
                           zIndex: index + 1,

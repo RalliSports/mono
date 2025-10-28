@@ -25,9 +25,10 @@ export const userControlTypeEnum = pgEnum("user_control_type", [
 ]);
 export const gameStatusEnum = pgEnum("game_status", [
   "waiting",
-  "locked",
+  "in_progress",
   "completed",
   "cancelled",
+  "expired",
 ]);
 
 export const games = pgTable("games", {
