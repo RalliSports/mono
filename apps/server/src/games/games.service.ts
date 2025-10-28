@@ -860,7 +860,7 @@ export class GamesService {
   }
 
   async resolveAllPossibleGames() {
-    let resolvedGamesForLooger: string[] = [];
+    let resolvedGamesForLogger: string[] = [];
     const gamesToResolve = await this.db.query.games.findMany({
       where: and(
         or(
@@ -897,11 +897,11 @@ export class GamesService {
       try {
         await sleep(500);
         await this.resolveGame(game.id);
-        resolvedGamesForLooger.push(game.id);
+        resolvedGamesForLogger.push(game.title!);
       } catch (error) {
         console.error('error resolving game: ', game.title, error);
       }
     }
-    return resolvedGamesForLooger;
+    return resolvedGamesForLogger;
   }
 }
