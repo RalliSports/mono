@@ -135,7 +135,7 @@ export class ParaAnchor {
   }
 
   async faucetSol(user: PublicKey) {
-    const provider = this.getProvider(true); // Use admin signer
+    const provider = this.getServerAdminProvider(); // Use admin signer
 
     // Create transfer instruction
     const transferInstruction = SystemProgram.transfer({
@@ -667,7 +667,7 @@ export class ParaAnchor {
     userWallets: string[],
     winningLines: number[],
   ) {
-    const program = await this.getProgram(true);// useAdminSigner
+    const program = await this.getProgram(true); // useAdminSigner
     const percentage = 100;
 
     const gamePDA = await this.getGamePDA(gameId, program.programId);
@@ -859,7 +859,7 @@ export class ParaAnchor {
       console.log(txSig, 'transaction signature');
 
       return txSig;
-    } catch (error) { }
+    } catch (error) {}
   }
 
   async getGamePDA(gameId: string, programId: PublicKey): Promise<PublicKey> {

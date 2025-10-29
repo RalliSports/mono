@@ -369,17 +369,6 @@ export class GamesService {
         await Promise.all(picks),
       );
 
-      if (user.id !== game.creatorId) {
-        // await connectToChat(user.id);
-        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
-          name: `Lobby ${game.id}`,
-          // Custom fields for lobby management
-          lobby_id: game.id,
-        });
-
-        await channel.addMembers([user.id]);
-      }
-
       if (!submitTxnSig) {
         throw new BadRequestException(
           'Failed to execute submit bets instruction on-chain',
@@ -395,9 +384,10 @@ export class GamesService {
         .returning();
 
       const updatedParticipants = currentCount + 1;
-      const updatedStatus = updatedParticipants >= (game.maxParticipants as number)
-        ? GameStatus.IN_PROGRESS
-        : GameStatus.WAITING;
+      const updatedStatus =
+        updatedParticipants >= (game.maxParticipants as number)
+          ? GameStatus.IN_PROGRESS
+          : GameStatus.WAITING;
       const [updatedGame] = await tx
         .update(games)
         .set({
@@ -406,6 +396,17 @@ export class GamesService {
         })
         .where(eq(games.id, game.id))
         .returning();
+
+      if (user.id !== game.creatorId) {
+        // await connectToChat(user.id);
+        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+          name: `Lobby ${game.id}`,
+          // Custom fields for lobby management
+          lobby_id: game.id,
+        });
+
+        await channel.addMembers([user.id]);
+      }
       // Transaction will auto-commit if no error is thrown
       return {
         success: true,
