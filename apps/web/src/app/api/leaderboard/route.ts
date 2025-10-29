@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const page = searchParams.get('page') || '1'
     const limit = searchParams.get('limit') || '50'
-    const sortBy = searchParams.get('sortBy') || 'netProfit'
+    const sortBy = searchParams.get('sortBy') || 'bettingAccuracy'
 
     const response = await fetch(`${backendUrl}/api/v1/leaderboard?page=${page}&limit=${limit}&sortBy=${sortBy}`, {
       method: 'GET',

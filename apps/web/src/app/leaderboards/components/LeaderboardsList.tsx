@@ -11,11 +11,11 @@ export default function LeaderboardsList({ filter }: LeaderboardsListProps) {
   const getSortBy = (): LeaderboardSortBy => {
     switch (filter) {
       case 'wins':
-        return 'winRate'
+        return 'totalWins'
       case 'earnings':
-        return 'totalWinnings'
+        return 'topEarners'
       default:
-        return 'netProfit'
+        return 'winRate'
     }
   }
 

@@ -9,9 +9,9 @@ import {
   LeaderboardServiceGetTopPerformers,
 } from '@repo/server'
 
-export type LeaderboardSortBy = 'winRate' | 'totalWinnings' | 'netProfit' | 'bettingAccuracy'
+export type LeaderboardSortBy = 'winRate' | 'totalWins' | 'topEarners'
 
-export function useLeaderboard(page = 1, limit = 50, sortBy: LeaderboardSortBy = 'netProfit') {
+export function useLeaderboard(page = 1, limit = 50, sortBy: LeaderboardSortBy = 'winRate') {
   return useQuery({
     queryKey: ['leaderboard', page, limit, sortBy],
     queryFn: () =>
@@ -20,7 +20,7 @@ export function useLeaderboard(page = 1, limit = 50, sortBy: LeaderboardSortBy =
   })
 }
 
-export function useMyLeaderboardPosition(sortBy: LeaderboardSortBy = 'netProfit', enabled = true) {
+export function useMyLeaderboardPosition(sortBy: LeaderboardSortBy = 'winRate', enabled = true) {
   const api = useApiWithAuth()
 
   return useQuery({
