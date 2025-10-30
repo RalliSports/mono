@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRouter } from 'next/navigation'
-import { ParaButton } from '@/components/para-modal'
+
 import BalanceDisplay from '@/components/BalanceDisplay'
 import ProfileDropdown from './ProfileDropdown'
 
@@ -67,7 +67,6 @@ export default function TopNavigation({
 
           {/* Profile Dropdown */}
           <div className="relative profile-dropdown">
-            <ParaButton />
             <ProfileDropdown
               isOpen={isProfileDropdownOpen}
               onClose={() => setIsProfileDropdownOpen(false)}
