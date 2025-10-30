@@ -151,8 +151,7 @@ export class LeaderboardService {
       gamesPlayed: Number(r.games_played) || 0,
       gamesWon: Number(r.games_won) || 0,
       winPercentage: Number(r.win_percentage) || 0,
-      totalAmountWon:
-        Number(r.total_amount_won) || Number((Math.random() * 100).toFixed(2)),
+      totalAmountWon: Number(r.total_amount_won) || 0,
       totalAmountDeposited: Number(r.total_amount_deposited) || 0,
       netProfit: Number(r.net_profit) || 0,
       totalCorrectBets: Number(r.total_correct_bets) || 0,
