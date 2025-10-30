@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 
 import BalanceDisplay from '@/components/BalanceDisplay'
 import ProfileDropdown from './ProfileDropdown'
+import ProfileButton from '@/app/main/components/ProfileButton'
 
 interface TopNavigationProps {
   isSidebarOpen: boolean
@@ -72,6 +73,7 @@ export default function TopNavigation({
               onClose={() => setIsProfileDropdownOpen(false)}
               onNavigateToProfile={() => router.push('/profile')}
             />
+            <ProfileButton />
           </div>
         </div>
       </div>
