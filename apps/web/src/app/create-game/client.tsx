@@ -252,9 +252,9 @@ export default function CreateGame() {
             />
 
             <BetsSelector numBets={gameSettings.numBets} onChange={(bets) => handleInputChange('numBets', bets)} />
-
+            {/*
             <TokenSelector selectedToken={selectedToken} onChange={handleTokenChange} />
-
+            */}
             <PrivateGameToggle
               isPrivate={gameSettings.isPrivate}
               onChange={(isPrivate) => handleInputChange('isPrivate', isPrivate)}
