@@ -115,8 +115,8 @@ export class GamesService {
 
       await channel.create();
 
-      //lock game after 48 hours
-      const LOCK_AFTER_HOURS = 48;
+      //lock game after 72 hours
+      const LOCK_AFTER_HOURS = 72;
       const [updatedGame] = await tx
         .update(games)
         .set({
