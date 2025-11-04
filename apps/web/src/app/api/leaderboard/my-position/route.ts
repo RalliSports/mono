@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const sortBy = searchParams.get('sortBy') || 'netProfit'
+    const sortBy = searchParams.get('sortBy') || 'bettingAccuracy'
 
     const response = await fetch(`${backendUrl}/api/v1/leaderboard/my-position?sortBy=${sortBy}`, {
       method: 'GET',

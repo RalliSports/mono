@@ -13,10 +13,11 @@ import { NotificationModule } from 'src/notification/notification.module';
 import { TokenService } from './token.service';
 import { TokenController } from './token.controller';
 import { FriendsModule } from 'src/friends/friends.module';
+import { GameResolveService } from './cron-game/game-resolve.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule, UserModule, NotificationModule, FriendsModule],
   controllers: [GamesController, GameAccessController, GameModeController, TokenController],
-  providers: [GamesService, GameAccessService, GameModeService, ParaAnchor, TokenService],
+  providers: [GamesService, GameAccessService, GameModeService, ParaAnchor, TokenService, GameResolveService],
 })
-export class GamesModule {}
+export class GamesModule { }

@@ -51,7 +51,7 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
         { name: 'Create Game', icon: '🎯', href: '/create-game' },
         // { name: "My Games", icon: "🎮", href: "/my-games" },
         { name: 'Add Funds', icon: '💳', href: '/add-funds' },
-        // { name: "Leaderboard", icon: "🏆", href: "/leaderboard" },
+        { name: 'Leaderboard', icon: '🏆', href: '/leaderboards' },
         // { name: "Transaction History", icon: "💰", href: "/transactions" },
       ],
     },
@@ -61,6 +61,7 @@ export default function SidebarNav({ isOpen, onClose }: SidebarNavProps) {
         { name: 'Sign In', icon: '🔑', href: '/signin' },
         // { name: "Sign Up", icon: "✨", href: "/signup" },
         { name: 'Profile', icon: '👤', href: '/profile' },
+        { name: 'Onboarding', icon: '🚀', href: '/onboarding' },
       ],
     },
     {

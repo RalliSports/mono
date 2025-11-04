@@ -96,6 +96,9 @@ export default function OnboardingWelcome({ onExperiencedPlayer, onNewPlayer }: 
                   if (key && key.startsWith('onboardingLobbyPopupSeen_')) {
                     keysToRemove.push(key)
                   }
+                  if (key && key.startsWith('onboardingPicksPopupSeen_')) {
+                    keysToRemove.push(key)
+                  }
                 }
                 keysToRemove.forEach((key) => localStorage.removeItem(key))
 

@@ -29,16 +29,17 @@ export function Providers({
           oAuthMethods: ['GOOGLE'],
           authLayout: ['AUTH:FULL', 'EXTERNAL:CONDENSED'],
         }}
-         externalWalletConfig={{
-           appUrl: 'https://ralli.bet/', // Ensure this matches your app's real URL
-           solanaConnector: {
-             config: {
-               endpoint: 'https://api.devnet.solana.com', // Ensure this matches your desired cluster
-               chain: WalletAdapterNetwork.Devnet, // Devnet | Mainnet | Testnet
-             },
-           },
-           wallets: ['BACKPACK', 'PHANTOM', 'GLOW', 'SOLFLARE', 'METAMASK']
-         }}
+        externalWalletConfig={{
+          appUrl: 'https://ralli.bet/', // Ensure this matches your app's real URL
+          wallets: ['METAMASK', 'PHANTOM', 'SOLFLARE', 'BACKPACK'],
+          includeWalletVerification: true,
+          solanaConnector: {
+            config: {
+              endpoint: 'https://api.devnet.solana.com', // Ensure this matches your desired cluster
+              chain: WalletAdapterNetwork.Devnet, // Devnet | Mainnet | Testnet
+            },
+          },
+        }}
       >
         {children}
       </ParaProvider>

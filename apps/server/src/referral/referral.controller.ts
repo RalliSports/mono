@@ -11,6 +11,9 @@ export class ReferralController {
 
   @Get('code')
   async getReferralCode(@UserPayload() user: UserType) {
+    if (!user) {
+      return { code: null, error: 'User not found' };
+    }
     const code = await this.referralService.getReferralCode(user.id);
     if (!code) {
       // Generate a new code if user doesn't have one

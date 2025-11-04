@@ -7,9 +7,15 @@ import {
   LeaderboardResponseDto,
   LeaderboardUserDto,
 } from './dto/leaderboard-response.dto';
+import { Sql } from 'postgres';
 
-type SortKey = 'winRate' | 'totalWinnings' | 'netProfit' | 'bettingAccuracy';
+type SortKey = 'winRate' | 'totalWins' | 'topEarners';
 
+const sortKeyToRawExpression: Record<SortKey, string> = {
+  winRate: 'm.win_percentage',
+  totalWins: 'm.games_won',
+  topEarners: 'm.total_amount_won',
+};
 @Injectable()
 export class LeaderboardService {
   constructor(@Drizzle() private readonly db: Database) {}
@@ -24,16 +30,6 @@ export class LeaderboardService {
   }
 
   /** Centralized sort expression using precomputed metric columns. */
-  private sortExpr(sortBy: SortKey, alias: string = 'm') {
-    return sql`
-      CASE ${sql.param(sortBy)}
-        WHEN 'winRate' THEN ${sql.raw(`${alias}.win_percentage`)}::numeric
-        WHEN 'totalWinnings' THEN ${sql.raw(`${alias}.total_amount_won`)}::numeric
-        WHEN 'bettingAccuracy' THEN ${sql.raw(`${alias}.betting_accuracy`)}::numeric
-        ELSE ${sql.raw(`${alias}.net_profit`)}::numeric
-      END
-    `;
-  }
 
   /**
    * Base CTEs + metrics. Reuse this in both list + single user queries.
@@ -121,9 +117,12 @@ export class LeaderboardService {
   async getLeaderboard(
     page: number = 1,
     limit: number = 50,
-    sortBy: SortKey = 'netProfit',
+    sortBy: SortKey = 'topEarners',
   ): Promise<LeaderboardResponseDto> {
     const offset = (page - 1) * limit;
+
+    const rawExpression = sortKeyToRawExpression[sortBy];
+    console.log(rawExpression);
 
     const query = sql`
       ${this.baseMetricsCte()}
@@ -132,15 +131,11 @@ export class LeaderboardService {
         COUNT(*) OVER() AS total_users,
         RANK() OVER (
           ORDER BY
-            m.games_played DESC,
-            m.user_id ASC,
-            ${this.sortExpr(sortBy)} DESC
+            ${sql.raw(rawExpression)} DESC
         ) AS rank
       FROM metrics m
       ORDER BY
-        m.games_played DESC,
-        m.user_id ASC,
-        ${this.sortExpr(sortBy)} DESC
+        ${sql.raw(rawExpression)} DESC
       LIMIT ${sql.param(limit)} OFFSET ${sql.param(offset)};
     `;
 
@@ -170,8 +165,9 @@ export class LeaderboardService {
 
   async getUserLeaderboardPosition(
     userId: string,
-    sortBy: SortKey = 'netProfit',
+    sortBy: SortKey = 'topEarners',
   ): Promise<{ rank: number; user: LeaderboardUserDto } | null> {
+    const rawExpression = sortKeyToRawExpression[sortBy];
     const query = sql`
       ${this.baseMetricsCte()}
       , ranked AS (
@@ -179,9 +175,7 @@ export class LeaderboardService {
           m.*,
           RANK() OVER (
             ORDER BY
-              m.games_played DESC,
-              m.user_id ASC,
-              ${this.sortExpr(sortBy)} DESC
+              ${sql.raw(rawExpression)} DESC
           ) AS rank
         FROM metrics m
       )
@@ -214,9 +208,9 @@ export class LeaderboardService {
   async getTopPerformers(limit: number = 10) {
     const [netProfitLeaders, winRateLeaders, bettingAccuracyLeaders] =
       await Promise.all([
-        this.getLeaderboard(1, limit, 'netProfit'),
+        this.getLeaderboard(1, limit, 'topEarners'),
         this.getLeaderboard(1, limit, 'winRate'),
-        this.getLeaderboard(1, limit, 'bettingAccuracy'),
+        this.getLeaderboard(1, limit, 'topEarners'),
       ]);
     return {
       topByNetProfit: netProfitLeaders.users,

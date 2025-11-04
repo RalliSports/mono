@@ -1,13 +1,14 @@
 use crate::constants::*;
 use crate::errors::RalliError;
 use crate::state::*;
+use crate::state::Bet; // Import the Bet struct
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
     token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
-const MAX_WINNERS_PER_TX: usize = 30;
+const MAX_WINNERS_PER_TX: usize = 15; // Now 15 pairs (30 accounts)
 
 #[derive(Accounts)]
 pub struct ResolveGameBatch<'info> {
@@ -56,7 +57,7 @@ impl<'info> ResolveGameBatch<'info> {
     pub fn resolve_game_batch(
         &mut self,
         fee_percentage: u16,
-        batch_index: u32,
+        batch_index: u32, // Represents the number of winners *already paid*
         remaining_accounts: &'info [AccountInfo<'info>],
     ) -> Result<()> {
         let game_id = self.game.game_id;
@@ -64,112 +65,112 @@ impl<'info> ResolveGameBatch<'info> {
         let entry_fee = self.game.entry_fee;
         let total_players = self.game.users.len();
         let number_of_winners = self.game.num_winners as usize;
-        let num_winners = self.game.num_winners;
+        let number_of_losers = total_players - number_of_winners; 
+        let num_winners_u32 = self.game.num_winners; 
         let payout_progress = self.game.payout_progress;
         let calculation_complete = self.game.calculation_complete;
         let game_status = self.game.status.clone();
+        let program_id = self.game.to_account_info().owner; 
 
         require!(
             is_admin(&self.admin.key()),
             RalliError::UnauthorizedGameResolution
         );
-
         require!(
             game_status == GameStatus::Open || game_status == GameStatus::Resolving,
             RalliError::GameAlreadyResolved
         );
-
         require!(calculation_complete, RalliError::CalculationNotComplete);
-
         require!(fee_percentage <= 1000, RalliError::ExcessiveFee);
+        require!(total_players > 0, RalliError::NoPlayersInGame);
 
         require!(
-            remaining_accounts.len() <= MAX_WINNERS_PER_TX,
+            remaining_accounts.len() > 0 && remaining_accounts.len() % 2 == 0,
+            RalliError::InvalidRemainingAccounts // Add to errors.rs
+        );
+
+        let winners_in_this_batch = remaining_accounts.len() / 2;
+        require!(
+            winners_in_this_batch <= MAX_WINNERS_PER_TX,
             RalliError::TooManyAccountsInBatch
         );
 
-        let number_of_losers = total_players - number_of_winners;
-
-        require!(total_players > 0, RalliError::NoPlayersInGame);
-
-        if batch_index == 0 {
-            self.game.status = GameStatus::Resolving;
-
-            if number_of_winners == total_players {
-                for winner_account in remaining_accounts.iter() {
-                    self.transfer_to_winner(
-                        winner_account,
-                        entry_fee,
-                        game_id,
-                        game_bump,
-                    )?;
-                }
-                
-                self.game.payout_progress += remaining_accounts.len() as u32;
-                
-                if self.game.payout_progress >= num_winners {
-                    self.game_escrow.total_amount = 0;
-                    self.game.status = GameStatus::Resolved;
-                    msg!(
-                        "Game {} fully resolved - All {} players won (returned entry fees)",
-                        game_id,
-                        total_players
-                    );
-                }
-                return Ok(());
-            }
-
-            if number_of_winners == 0 {
-                for player_account in remaining_accounts.iter() {
-                    self.transfer_to_winner(
-                        player_account,
-                        entry_fee,
-                        game_id,
-                        game_bump,
-                    )?;
-                }
-                
-                self.game.payout_progress += remaining_accounts.len() as u32;
-                
-                if self.game.payout_progress >= total_players as u32 {
-                    self.game_escrow.total_amount = 0;
-                    self.game.status = GameStatus::Resolved;
-                    msg!(
-                        "Game {} fully resolved - No winners, all {} players refunded",
-                        game_id,
-                        total_players
-                    );
-                }
-                return Ok(());
-            }
-        }
-
-        let losers_pool = entry_fee * number_of_losers as u64;
-        let fee_from_losers = (losers_pool as u128 * fee_percentage as u128) / 10000u128;
-        let fee_from_losers = fee_from_losers as u64;
-        let net_losers_pool = losers_pool - fee_from_losers;
-        let winnings_per_winner = net_losers_pool / number_of_winners as u64;
-        let total_per_winner = entry_fee + winnings_per_winner;
-
-        let winners_remaining = num_winners - payout_progress;
         require!(
-            remaining_accounts.len() <= winners_remaining as usize,
+            batch_index == payout_progress,
+            RalliError::InvalidBatchIndex
+        );
+
+        if payout_progress == 0 {
+            self.game.status = GameStatus::Resolving;
+            msg!("Game {} is now Resolving.", game_id);
+        }
+        
+        let winners_remaining = num_winners_u32 - payout_progress;
+        require!(
+            (winners_in_this_batch as u32) <= winners_remaining,
             RalliError::TooManyWinnersInBatch
         );
 
-        for winner_account in remaining_accounts.iter() {
+        // Calculate payouts
+        let (total_per_winner, fee_from_losers, net_losers_pool) = 
+            if number_of_winners == 0 {
+                (0, 0, 0) // Should be unreachable
+            } else if number_of_winners == total_players {
+                // All win, refund entry fee
+                (entry_fee, 0, 0)
+            } else {
+                // Normal case: some winners, some losers
+                let losers_pool = entry_fee * number_of_losers as u64;
+                let fee = (losers_pool as u128 * fee_percentage as u128) / 10000u128;
+                let fee = fee as u64;
+                let net_pool = losers_pool - fee;
+                let winnings = net_pool / number_of_winners as u64;
+                (entry_fee + winnings, fee, net_pool)
+            };
+
+        require!(total_per_winner > 0, RalliError::PayoutAmountZero);
+
+        // --- Process this batch's winners ---
+        for account_chunk in remaining_accounts.chunks_exact(2) {
+            let bet_account_info = &account_chunk[0];
+            let token_account_info = &account_chunk[1];
+
+            let mut bet = Account::<Bet>::try_from(bet_account_info)?;
+
+            let token_account = InterfaceAccount::<TokenAccount>::try_from(token_account_info)?;
+
+            require!(!bet.paid, RalliError::BetAlreadyPaid); 
+
+            require!(bet.game == self.game.key(), RalliError::BetAccountMismatch);
+
+            require!(bet.player == token_account.owner, RalliError::BetAccountMismatch);
+
+            require!(
+                (bet.num_correct as u32) == (self.game.correct_votes_to_be_winner as u32),
+                RalliError::NotAWinner
+            );
+            
             self.transfer_to_winner(
-                winner_account,
+                token_account_info,
                 total_per_winner,
                 game_id,
                 game_bump,
             )?;
+
+            bet.paid = true;
+
+            bet.exit(program_id)?;
         }
 
-        self.game.payout_progress += remaining_accounts.len() as u32;
+        self.game.payout_progress += winners_in_this_batch as u32;
 
-        if self.game.payout_progress >= num_winners {
-            let remainder_to_treasury = net_losers_pool % number_of_winners as u64;
+        // Finalize if all winners are now paid
+        if self.game.payout_progress >= num_winners_u32 {
+            let remainder_to_treasury = if number_of_winners > 0 && number_of_winners < total_players {
+                net_losers_pool % number_of_winners as u64
+            } else {
+                0
+            };
             let total_treasury_amount = fee_from_losers + remainder_to_treasury;
 
             if total_treasury_amount > 0 {
@@ -192,20 +193,18 @@ impl<'info> ResolveGameBatch<'info> {
             self.game.status = GameStatus::Resolved;
 
             msg!(
-                "Game {} fully resolved - Winners: {}, Losers: {}, Fees: {}, Total batches: {}",
+                "Game {} fully resolved - Winners: {}, Losers: {}, Fees: {}",
                 game_id,
                 number_of_winners,
                 number_of_losers,
-                fee_from_losers,
-                batch_index + 1
+                fee_from_losers
             );
         } else {
             msg!(
-                "Game {} batch {} complete - Progress: {}/{}",
+                "Game {} batch complete - Progress: {}/{}",
                 game_id,
-                batch_index,
                 self.game.payout_progress,
-                num_winners
+                num_winners_u32
             );
         }
 
@@ -214,7 +213,7 @@ impl<'info> ResolveGameBatch<'info> {
 
     fn transfer_to_winner(
         &self,
-        winner_account: &AccountInfo<'info>,
+        winner_account_info: &AccountInfo<'info>, // Renamed for clarity
         amount: u64,
         game_id: u64,
         game_bump: u8,
@@ -222,7 +221,7 @@ impl<'info> ResolveGameBatch<'info> {
         let cpi_program = self.token_program.to_account_info();
         let cpi_accounts = TransferChecked {
             from: self.game_vault.to_account_info(),
-            to: winner_account.clone(),
+            to: winner_account_info.clone(),
             authority: self.game.to_account_info(),
             mint: self.mint.to_account_info(),
         };
@@ -235,3 +234,4 @@ impl<'info> ResolveGameBatch<'info> {
         Ok(())
     }
 }
+

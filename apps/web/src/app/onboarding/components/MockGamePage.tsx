@@ -29,11 +29,14 @@ export default function MockGamePage({ lobby, onBack }: MockGamePageProps) {
 
   // Show final popup after 3 seconds (only once per lobby)
   useEffect(() => {
+    console.log('lobby.id', lobby.id)
     const popupSeenKey = `onboardingLobbyPopupSeen_${lobby.id}`
-    const hasSeenPopup = localStorage.getItem(popupSeenKey)
+    // const hasSeenPopup = localStorage.getItem(popupSeenKey)
+    const hasSeenPopup = false
 
     if (!hasSeenPopup) {
       const timer = setTimeout(() => {
+        console.log('showing final popup')
         setShowFinalPopup(true)
         localStorage.setItem(popupSeenKey, 'true')
       }, 500)

@@ -12,7 +12,7 @@ interface JoinGameButtonProps {
 export default function JoinGameButton({ game, user }: JoinGameButtonProps) {
   const searchParams = useSearchParams()
   const [hasValidAccess, setHasValidAccess] = useState(true)
-  const spotsLeft = game.maxParticipants || 0 - game.participants.length
+  const spotsLeft = (game.maxParticipants || 0) - game.participants.length
   const isUserInGame = game.participants.some((participant) => participant.user?.id === user?.id)
   const isGameFull = game.participants.length >= (game.maxParticipants || 0)
 

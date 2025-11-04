@@ -115,10 +115,13 @@ export class GamesService {
 
       await channel.create();
 
+      //lock game after 72 hours
+      const LOCK_AFTER_HOURS = 72;
       const [updatedGame] = await tx
         .update(games)
         .set({
           createdTxnSignature: txn,
+          lockedAt: new Date(Date.now() + 1000 * 60 * 60 * LOCK_AFTER_HOURS),
         })
         .where(eq(games.id, game.id))
         .returning();
@@ -137,7 +140,7 @@ export class GamesService {
         token: true,
         participants: { with: { user: true, bets: true } },
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
   async findAllOpen() {
@@ -149,7 +152,7 @@ export class GamesService {
         participants: { with: { user: true, bets: true } },
         creator: true,
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -203,7 +206,7 @@ export class GamesService {
           },
         },
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -244,7 +247,7 @@ export class GamesService {
           },
         },
       },
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
   }
 
@@ -366,17 +369,6 @@ export class GamesService {
         await Promise.all(picks),
       );
 
-      if (user.id !== game.creatorId) {
-        // await connectToChat(user.id);
-        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
-          name: `Lobby ${game.id}`,
-          // Custom fields for lobby management
-          lobby_id: game.id,
-        });
-
-        await channel.addMembers([user.id]);
-      }
-
       if (!submitTxnSig) {
         throw new BadRequestException(
           'Failed to execute submit bets instruction on-chain',
@@ -391,6 +383,30 @@ export class GamesService {
         .where(eq(participants.id, insertedParticipant.id ?? ''))
         .returning();
 
+      const updatedParticipants = currentCount + 1;
+      const updatedStatus =
+        updatedParticipants >= (game.maxParticipants as number)
+          ? GameStatus.IN_PROGRESS
+          : GameStatus.WAITING;
+      const [updatedGame] = await tx
+        .update(games)
+        .set({
+          currentParticipants: updatedParticipants,
+          status: updatedStatus,
+        })
+        .where(eq(games.id, game.id))
+        .returning();
+
+      if (user.id !== game.creatorId) {
+        // await connectToChat(user.id);
+        const channel = this.chatClient.channel('gaming', `lobby-${game.id}`, {
+          name: `Lobby ${game.id}`,
+          // Custom fields for lobby management
+          lobby_id: game.id,
+        });
+
+        await channel.addMembers([user.id]);
+      }
       // Transaction will auto-commit if no error is thrown
       return {
         success: true,
@@ -418,7 +434,7 @@ export class GamesService {
   async findGamesCreatedByUser(user: User) {
     const result = await this.db.query.games.findMany({
       where: eq(games.creatorId, user.id),
-       orderBy: (games, { desc }) => [desc(games.createdAt)],
+      orderBy: (games, { desc }) => [desc(games.createdAt)],
     });
 
     if (!result.length) throw new NotFoundException('Games not found');
@@ -845,6 +861,7 @@ export class GamesService {
   }
 
   async resolveAllPossibleGames() {
+    let resolvedGamesForLogger: string[] = [];
     const gamesToResolve = await this.db.query.games.findMany({
       where: and(
         or(
@@ -877,15 +894,15 @@ export class GamesService {
         },
       },
     });
-
     for (const game of gamesToResolve) {
       try {
         await sleep(500);
         await this.resolveGame(game.id);
+        resolvedGamesForLogger.push(game.title!);
       } catch (error) {
-        console.error('error resolving game', game.title, error);
+        console.error('error resolving game: ', game.title, error);
       }
     }
-    return { message: 'All possible games resolved successfully' };
+    return resolvedGamesForLogger;
   }
 }

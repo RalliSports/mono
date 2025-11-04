@@ -1,9 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { LeaderboardResponseDto } from './dto/leaderboard-response.dto';
 import { LeaderboardService } from './leaderboard.service';
 
@@ -28,7 +24,7 @@ export class LeaderboardController {
     name: 'sortBy',
     required: false,
     enum: ['winRate', 'totalWinnings', 'netProfit', 'bettingAccuracy'],
-    description: 'Sort criteria (default: netProfit)',
+    description: 'Sort criteria (default: bettingAccuracy)',
   })
   @ApiResponse({
     status: 200,
@@ -40,13 +36,13 @@ export class LeaderboardController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('sortBy')
-    sortBy?: 'winRate' | 'totalWinnings' | 'netProfit' | 'bettingAccuracy',
+    sortBy?: 'winRate' | 'totalWins' | 'topEarners',
   ) {
     const pageNum = page ? Math.max(1, parseInt(page, 10)) : 1;
     const limitNum = limit
       ? Math.min(100, Math.max(1, parseInt(limit, 10)))
       : 50;
-    const sortCriteria = sortBy || 'netProfit';
+    const sortCriteria = sortBy || 'topEarners';
 
     return this.leaderboardService.getLeaderboard(
       pageNum,
