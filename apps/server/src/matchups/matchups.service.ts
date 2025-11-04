@@ -513,15 +513,15 @@ export class MatchupsService {
         const outcomePerAthlete = matchupBoxScore.athletes.find(
           (athlete) => athlete.name === athleteName,
         );
-        if (!outcomePerAthlete) {
-          continue;
-        }
+        // if (!outcomePerAthlete) { 
+        //   continue;
+        // }
         for (const lineData of allLinesForThisAthlete) {
           const stat = lineData.stat;
           if (!stat) {
             continue;
           }
-          const actualValue = outcomePerAthlete.lines[stat.statOddsName!];
+          const actualValue = outcomePerAthlete?.lines[stat.statOddsName!];
           try {
             allLinesToResolve.push({
               lineId: lineData.id,
