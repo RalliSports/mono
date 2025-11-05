@@ -135,7 +135,7 @@ pub mod ralli_bet {
         player_id: String,
         matchup_id: u64,
         stat_id: u16,
-        line_value: i32,
+        line_value: i64,
         odds: i32,
         starts_at: i64,
     ) -> Result<()> {
@@ -155,9 +155,9 @@ pub mod ralli_bet {
         player_id: String,
         matchup_id: u64,
         stat_id: u16,
-        line_value: i32,
+        line_value: i64,
         result: DirectionV2,
-        actual_value: i32,
+        actual_value: i64,
         should_refund_bettors: bool,
     ) -> Result<()> {
         ctx.accounts.resolve_lineV2(
@@ -176,7 +176,7 @@ pub mod ralli_bet {
         player_id: String,
         matchup_id: u64,
         stat_id: u16,
-        line_value: i32,
+        line_value: i64,
     ) -> Result<()> {
         ctx.accounts.update_line_pointer(player_id, matchup_id, stat_id, line_value)
     }

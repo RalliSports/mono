@@ -8,9 +8,9 @@ pub struct PlayerLine {
     pub player_id: String,
     pub matchup_id: u64,
     pub stat_id: u16,
-    pub line_value: i32,
+    pub line_value: i64,
     pub odds: i32,
-    pub actual_value: Option<i32>,
+    pub actual_value: Option<i64>,
     pub starts_at: i64,
     pub created_at: i64,
     pub result: Option<DirectionV2>,
@@ -20,20 +20,6 @@ pub struct PlayerLine {
 }
 
 impl PlayerLine {
-    pub const MAX_SIZE: usize = 8 + 
-        (4 + 20) + 
-        8 +        
-        2 +        
-        4 +      
-        4 +     
-        (1 + 4) +  
-        8 +       
-        8 +      
-        (1 + 1) + 
-        1 +      
-        1 +     
-        1;      
-
     pub fn to_decimal_odds(&self) -> f64 {
         if self.odds < 0 {
             (100.0 / self.odds.abs() as f64) + 1.0
@@ -61,22 +47,11 @@ pub struct LinePointer {
     pub player_id: String,
     pub matchup_id: u64,
     pub stat_id: u16,
-    pub current_line_value: i32,
+    pub current_line_value: i64,
     pub current_odds: i32,
     pub current_line_pubkey: Pubkey,
     pub last_updated: i64,
     pub bump: u8,
-}
-
-impl LinePointer {
-    pub const MAX_SIZE: usize = 8 + 
-        (4 + 20) +
-        8 +      
-        2 +        
-        4 +   
-        4 +      
-        8 +
-        1;     
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Copy, Debug, InitSpace)]

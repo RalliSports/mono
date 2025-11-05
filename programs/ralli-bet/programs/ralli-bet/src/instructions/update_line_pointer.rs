@@ -44,7 +44,7 @@ impl<'info> UpdateLinePointer<'info> {
         player_id: String,
         matchup_id: u64,
         stat_id: u16,
-        line_value: i32,
+        line_value: i64,
     ) -> Result<()> {
         let admin = &self.admin;
         let player_line = &self.player_line;
