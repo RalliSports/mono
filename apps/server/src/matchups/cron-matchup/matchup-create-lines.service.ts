@@ -18,7 +18,7 @@ export class MatchupCreateLinesService {
         private readonly matchupsService: MatchupsService,
     ) { }
 
-    @Cron(CronExpression.EVERY_8_HOURS) //8 hours interval - more frequent to avoid "0 lines to bet on" situations
+    @Cron(CronExpression.EVERY_6_HOURS) //6 hours interval - more frequent to avoid "0 lines to bet on" situations
     async handleCron() {
         this.logger.log('Running matchup create lines cron job...');
         //line prediction for 72 hours + [2 day Tolerance]
