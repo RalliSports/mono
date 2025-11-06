@@ -27,7 +27,7 @@ import { User } from 'src/user/dto/user-response.dto';
 
 @Controller('')
 export class LinesController {
-  constructor(private readonly linesService: LinesService) {}
+  constructor(private readonly linesService: LinesService) { }
 
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
@@ -111,5 +111,17 @@ export class LinesController {
     @UserPayload() user: User,
   ) {
     return this.linesService.resolveLine(id, dto, user);
+  }
+
+  @ApiOperation({ summary: 'Deactivate duplicate active lines' })
+  @ApiResponse({
+    status: 200,
+    description: 'Duplicate active lines deactivated successfully',
+  })
+  @ApiSecurity('x-para-session')
+  @UseGuards(SessionAuthGuard)
+  @Patch('/lines/deactivate-duplicate-active-lines')
+  async deactivateDuplicateActiveLines() {
+    return this.linesService.deactivateDuplicateActiveLines();
   }
 }

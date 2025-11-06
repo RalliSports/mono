@@ -8,6 +8,7 @@ import { and, eq, gte, isNotNull, lte } from 'drizzle-orm';
 import { MatchupStatus } from '../enum/matchups';
 import { ADMIN_WALLET_PUBLIC_KEY } from 'src/utils/services/paraAnchor';
 import { LinesCreationSuccessOutput } from './types/lines-creation-success-outpot.type';
+import { LinesService } from 'src/lines/lines.service';
 
 @Injectable()
 export class MatchupCreateLinesService {
@@ -16,6 +17,7 @@ export class MatchupCreateLinesService {
     constructor(
         @Drizzle() private readonly db: Database,
         private readonly matchupsService: MatchupsService,
+        private readonly linesService: LinesService,
     ) { }
 
     @Cron(CronExpression.EVERY_6_HOURS) //6 hours interval - more frequent to avoid "0 lines to bet on" situations
@@ -70,5 +72,7 @@ export class MatchupCreateLinesService {
                 );
             }
         }
+        this.logger.log('Matchup create lines cron job completed.');
+        await this.linesService.deactivateDuplicateActiveLines();//Safeguard: avoiding duplicate-active lines -> marking as 'not latest one'
     }
 }

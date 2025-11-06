@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { athletes, lines, matchups, stats } from '@repo/db';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
@@ -513,5 +513,48 @@ export class LinesService {
         ...results,
       };
     }
+  }
+
+  async deactivateDuplicateActiveLines() {
+    const allActiveLines = await this.db.query.lines.findMany({
+      where: and(
+        eq(lines.status, LineStatus.OPEN),
+        eq(lines.isLatestOne, true),
+      ),
+      columns: {
+        id: true,
+        athleteId: true,
+        statId: true,
+        matchupId: true,
+        predictedValue: true,
+        createdAt: true,
+      },
+      orderBy(fields, operators) {
+        return [operators.desc(fields.createdAt)];
+      },
+    });
+    let uniqueActiveLinesRecord: Record<string, string> = {};
+    let toBeDeactivatedLines: string[] = [];
+    for (const line of allActiveLines) {
+      const lineKey = `${line.athleteId}-${line.statId}-${line.matchupId}-${line.predictedValue}`;
+      if (uniqueActiveLinesRecord[lineKey]) {
+        toBeDeactivatedLines.push(line.id);
+      } else {
+        uniqueActiveLinesRecord[lineKey] = line.id;
+      }
+    }
+    if (toBeDeactivatedLines.length > 0) {
+      try {
+        await this.db
+          .update(lines)
+          .set({ isLatestOne: false })
+          .where(inArray(lines.id, toBeDeactivatedLines));
+        console.log(`Deactivated ${toBeDeactivatedLines.length} duplicate lines`);
+      } catch (error) {
+        console.error('Error deactivating duplicate lines:', error);
+        return { deactivatedCount: 0, message: 'Error deactivating duplicate lines', success: false };
+      }
+    };
+    return { deactivatedCount: toBeDeactivatedLines.length, message: 'Duplicate lines deactivated', success: true };
   }
 }
