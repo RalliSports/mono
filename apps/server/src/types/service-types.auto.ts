@@ -60,6 +60,7 @@ export type LinesServiceUpdateLine = Awaited<ReturnType<InstanceType<typeof impo
 export type LinesServiceDeleteLine = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['deleteLine']>>;
 export type LinesServiceResolveLine = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['resolveLine']>>;
 export type LinesServiceBulkResolveLines = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['bulkResolveLines']>>;
+export type LinesServiceDeactivateDuplicateActiveLines = Awaited<ReturnType<InstanceType<typeof import('../lines/lines.service.ts').LinesService>['deactivateDuplicateActiveLines']>>;
 export type LeaderboardServiceGetLeaderboard = Awaited<ReturnType<InstanceType<typeof import('../leaderboard/leaderboard.service.ts').LeaderboardService>['getLeaderboard']>>;
 export type LeaderboardServiceGetUserLeaderboardPosition = Awaited<ReturnType<InstanceType<typeof import('../leaderboard/leaderboard.service.ts').LeaderboardService>['getUserLeaderboardPosition']>>;
 export type LeaderboardServiceGetTopPerformers = Awaited<ReturnType<InstanceType<typeof import('../leaderboard/leaderboard.service.ts').LeaderboardService>['getTopPerformers']>>;

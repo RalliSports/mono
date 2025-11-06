@@ -515,7 +515,7 @@ export class LinesService {
     }
   }
 
-  async cancelDuplicateActiveLines() {
+  async deactivateDuplicateActiveLines() {
     const allActiveLines = await this.db.query.lines.findMany({
       where: and(
         eq(lines.status, LineStatus.OPEN),
@@ -534,27 +534,27 @@ export class LinesService {
       },
     });
     let uniqueActiveLinesRecord: Record<string, string> = {};
-    let toBeCancelledLines: string[] = [];
+    let toBeDeactivatedLines: string[] = [];
     for (const line of allActiveLines) {
       const lineKey = `${line.athleteId}-${line.statId}-${line.matchupId}-${line.predictedValue}`;
       if (uniqueActiveLinesRecord[lineKey]) {
-        toBeCancelledLines.push(line.id);
+        toBeDeactivatedLines.push(line.id);
       } else {
         uniqueActiveLinesRecord[lineKey] = line.id;
       }
     }
-    if (toBeCancelledLines.length > 0) {
+    if (toBeDeactivatedLines.length > 0) {
       try {
         await this.db
           .update(lines)
           .set({ isLatestOne: false })
-          .where(inArray(lines.id, toBeCancelledLines));
-        console.log(`Cancelled ${toBeCancelledLines.length} duplicate lines`);
+          .where(inArray(lines.id, toBeDeactivatedLines));
+        console.log(`Deactivated ${toBeDeactivatedLines.length} duplicate lines`);
       } catch (error) {
-        console.error('Error cancelling duplicate lines:', error);
-        return { cancelledCount: 0, message: 'Error cancelling duplicate lines', success: false };
+        console.error('Error deactivating duplicate lines:', error);
+        return { deactivatedCount: 0, message: 'Error deactivating duplicate lines', success: false };
       }
     };
-    return { cancelledCount: toBeCancelledLines.length, message: 'Duplicate lines cancelled', success: true };
+    return { deactivatedCount: toBeDeactivatedLines.length, message: 'Duplicate lines deactivated', success: true };
   }
 }

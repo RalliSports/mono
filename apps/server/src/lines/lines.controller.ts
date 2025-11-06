@@ -113,15 +113,15 @@ export class LinesController {
     return this.linesService.resolveLine(id, dto, user);
   }
 
-  @ApiOperation({ summary: 'Cancel duplicate active lines' })
+  @ApiOperation({ summary: 'Deactivate duplicate active lines' })
   @ApiResponse({
     status: 200,
-    description: 'Duplicate active lines cancelled successfully',
+    description: 'Duplicate active lines deactivated successfully',
   })
   @ApiSecurity('x-para-session')
   @UseGuards(SessionAuthGuard)
-  @Patch('/lines/cancel-duplicate-active-lines')
-  async cancelDuplicateActiveLines() {
-    return this.linesService.cancelDuplicateActiveLines();
+  @Patch('/lines/deactivate-duplicate-active-lines')
+  async deactivateDuplicateActiveLines() {
+    return this.linesService.deactivateDuplicateActiveLines();
   }
 }
