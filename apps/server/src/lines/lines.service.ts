@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { athletes, lines, matchups, stats } from '@repo/db';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { Drizzle } from 'src/database/database.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { Database } from 'src/database/database.provider';
@@ -521,24 +521,40 @@ export class LinesService {
         eq(lines.status, LineStatus.OPEN),
         eq(lines.isLatestOne, true),
       ),
+      columns: {
+        id: true,
+        athleteId: true,
+        statId: true,
+        matchupId: true,
+        predictedValue: true,
+        createdAt: true,
+      },
+      orderBy(fields, operators) {
+        return [operators.desc(fields.createdAt)];
+      },
     });
-    let activeLinesRecord = {} as Record<string, (typeof allActiveLines)[0]>;
-    let duplicateCount = 0;
+    let uniqueActiveLinesRecord: Record<string, string> = {};
+    let toBeCancelledLines: string[] = [];
     for (const line of allActiveLines) {
       const lineKey = `${line.athleteId}-${line.statId}-${line.matchupId}-${line.predictedValue}`;
-      if (activeLinesRecord[lineKey]) {
-        await this.updateLine(activeLinesRecord[lineKey].id, {
-          isLatestOne: false,
-        });
-        console.log(
-          `Cancelled duplicate line ${line.id}`,
-        );
-        duplicateCount++;
+      if (uniqueActiveLinesRecord[lineKey]) {
+        toBeCancelledLines.push(line.id);
       } else {
-        activeLinesRecord[lineKey] = line;
+        uniqueActiveLinesRecord[lineKey] = line.id;
       }
     }
-    console.log(`Cancelled ${duplicateCount} duplicate lines`);
-    return { cancelledCount: duplicateCount, message: 'Duplicate lines cancelled', success: true };
+    if (toBeCancelledLines.length > 0) {
+      try {
+        await this.db
+          .update(lines)
+          .set({ isLatestOne: false })
+          .where(inArray(lines.id, toBeCancelledLines));
+        console.log(`Cancelled ${toBeCancelledLines.length} duplicate lines`);
+      } catch (error) {
+        console.error('Error cancelling duplicate lines:', error);
+        return { cancelledCount: 0, message: 'Error cancelling duplicate lines', success: false };
+      }
+    };
+    return { cancelledCount: toBeCancelledLines.length, message: 'Duplicate lines cancelled', success: true };
   }
 }
