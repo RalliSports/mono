@@ -514,4 +514,31 @@ export class LinesService {
       };
     }
   }
+
+  async cancelDuplicateActiveLines() {
+    const allActiveLines = await this.db.query.lines.findMany({
+      where: and(
+        eq(lines.status, LineStatus.OPEN),
+        eq(lines.isLatestOne, true),
+      ),
+    });
+    let activeLinesRecord = {} as Record<string, (typeof allActiveLines)[0]>;
+    let duplicateCount = 0;
+    for (const line of allActiveLines) {
+      const lineKey = `${line.athleteId}-${line.statId}-${line.matchupId}-${line.predictedValue}`;
+      if (activeLinesRecord[lineKey]) {
+        await this.updateLine(activeLinesRecord[lineKey].id, {
+          isLatestOne: false,
+        });
+        console.log(
+          `Cancelled duplicate line ${line.id}`,
+        );
+        duplicateCount++;
+      } else {
+        activeLinesRecord[lineKey] = line;
+      }
+    }
+    console.log(`Cancelled ${duplicateCount} duplicate lines`);
+    return { cancelledCount: duplicateCount, message: 'Duplicate lines cancelled', success: true };
+  }
 }
