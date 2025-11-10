@@ -869,6 +869,10 @@ export class GamesService {
           eq(games.status, GameStatus.IN_PROGRESS),
         ),
         isNull(games.resolvedTxnSignature),
+        // Only include games with bets
+        exists(
+          this.db.select().from(bets).where(eq(bets.gameId, games.id))
+        ),
         // Only include games where all lines are resolved
         not(
           exists(

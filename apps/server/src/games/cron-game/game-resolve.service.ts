@@ -38,6 +38,18 @@ export class GameResolveService {
         for (const game of resolvedGames) {
             this.logger.log(`Resolved game: ${game}`);
         }
+
+        //Check for games with no participants and expire them
+        const gamesToBeExpired = await this.db
+            .update(games)
+            .set({ status: GameStatus.EXPIRED })
+            .where(and(
+                eq(games.status, GameStatus.IN_PROGRESS),
+                eq(games.currentParticipants, 0),
+            )).returning({ id: games.id, title: games.title });
+        for (const game of gamesToBeExpired) {
+            this.logger.log(`Expired game due to no participants : ${game.title} - ${game.id}`);
+        }
         this.logger.log('Game resolve cron job completed.');
     }
 }
