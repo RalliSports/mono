@@ -1,4 +1,4 @@
-import { fetchAthletes } from "./athletes-fetcher";
+import { fetchAthletes } from "./nfl/nfl-athletes-fetcher";
 
 async function main() {
   try {

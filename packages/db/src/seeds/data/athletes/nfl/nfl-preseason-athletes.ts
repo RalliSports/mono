@@ -1,4 +1,4 @@
-export const preSeasonAthletes = [
+export const nflPreSeasonAthletes = [
   {
     name: "Isaiah Adams",
     team: "Arizona Cardinals",

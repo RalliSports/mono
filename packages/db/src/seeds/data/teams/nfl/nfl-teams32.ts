@@ -1,6 +1,6 @@
 import { teams } from "@repo/db";
 
-export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
+export const nflTeams32: (typeof teams.$inferInsert)[] = [
   {
     id: "550e8400-e29b-41d4-b132-446655440014",
     espnTeamId: "22",
@@ -11,6 +11,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Jonathan Gannon",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png",
     abbreviation: "ARI",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440015",
@@ -22,6 +24,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Raheem Morris",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/atl.png",
     abbreviation: "ATL",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440002",
@@ -33,6 +37,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "John Harbaugh",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png",
     abbreviation: "BAL",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440003",
@@ -44,6 +50,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Sean McDermott",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/buf.png",
     abbreviation: "BUF",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440016",
@@ -55,6 +63,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Dave Canales",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png",
     abbreviation: "CAR",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440017",
@@ -66,6 +76,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Ben Johnson",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png",
     abbreviation: "CHI",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440018",
@@ -77,6 +89,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Zac Taylor",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/cin.png",
     abbreviation: "CIN",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440019",
@@ -88,6 +102,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Kevin Stefanski",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/cle.png",
     abbreviation: "CLE",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440020",
@@ -99,6 +115,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Brian Schottenheimer",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png",
     abbreviation: "DAL",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440021",
@@ -110,6 +128,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Sean Payton",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png",
     abbreviation: "DEN",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440022",
@@ -121,6 +141,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Dan Campbell",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png",
     abbreviation: "DET",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440010",
@@ -132,6 +154,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Matt LaFleur",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png",
     abbreviation: "GB",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440023",
@@ -143,6 +167,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "DeMeco Ryans",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png",
     abbreviation: "HOU",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440013",
@@ -154,6 +180,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Shane Steichen",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png",
     abbreviation: "IND",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440024",
@@ -165,6 +193,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Liam Coen",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/jax.png",
     abbreviation: "JAX",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440001",
@@ -176,6 +206,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Andy Reid",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png",
     abbreviation: "KC",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440011",
@@ -187,6 +219,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Josh McDaniels",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png",
     abbreviation: "LV",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440012",
@@ -198,6 +232,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Brandon Staley",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/lac.png",
     abbreviation: "LAC",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440008",
@@ -209,6 +245,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Sean McVay",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png",
     abbreviation: "LAR",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440004",
@@ -220,6 +258,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Mike McDaniel",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/mia.png",
     abbreviation: "MIA",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440025",
@@ -231,6 +271,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Kevin O'Connell",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/min.png",
     abbreviation: "MIN",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440005",
@@ -242,6 +284,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Mike Vrabel",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png",
     abbreviation: "NE",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440026",
@@ -253,6 +297,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Kellen Moore",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/no.png",
     abbreviation: "NO",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440027",
@@ -264,6 +310,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Brian Daboll",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png",
     abbreviation: "NYG",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440006",
@@ -275,6 +323,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Aaron Glenn",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyj.png",
     abbreviation: "NYJ",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440028",
@@ -286,6 +336,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Nick Sirianni",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/phi.png",
     abbreviation: "PHI",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440029",
@@ -297,6 +349,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Mike Tomlin",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/pit.png",
     abbreviation: "PIT",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440007",
@@ -308,6 +362,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Kyle Shanahan",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png",
     abbreviation: "SF",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440009",
@@ -319,6 +375,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Pete Carroll",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png",
     abbreviation: "SEA",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440030",
@@ -330,6 +388,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Todd Bowles",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/tb.png",
     abbreviation: "TB",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440031",
@@ -341,6 +401,8 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Brian Callahan",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/ten.png",
     abbreviation: "TEN",
+    sportType: "football",
+    leagueType: "NFL",
   },
   {
     id: "550e8400-e29b-41d4-b132-446655440032",
@@ -352,5 +414,7 @@ export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
     coachName: "Dan Quinn",
     avatar: "https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png",
     abbreviation: "WSH",
+    sportType: "football",
+    leagueType: "NFL",
   },
 ];

@@ -1,7 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { athletes } from "@repo/db";
 import * as schema from "@repo/db";
-import { preSeasonAthletes } from "./data/athletes/preseason-athletes";
+import { nflPreSeasonAthletes } from "./data/athletes/nfl/nfl-preseason-athletes";
 import { teamsData } from "./teams.seed";
 
 // export const athletesData: (typeof athletes.$inferInsert)[] = preSeasonAthletes;
@@ -12,7 +12,7 @@ export const seedAthletes = async (db: NodePgDatabase<typeof schema>) => {
     return `550e8400-2940-4aa4-b132-44665544${paddedIndex}`;
   };
   const athletesWithTeamIds: (typeof athletes.$inferInsert)[] =
-    preSeasonAthletes.map((athlete, index) => {
+    nflPreSeasonAthletes.map((athlete, index) => {
       const team = teamsData.find(
         (team) => team.espnTeamId === athlete.espnTeamId //to get the teamID matching the ESPN reference
       );
