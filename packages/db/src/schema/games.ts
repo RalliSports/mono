@@ -16,6 +16,7 @@ import { uuid } from "drizzle-orm/pg-core";
 import { text } from "drizzle-orm/pg-core";
 import { tokens } from "./tokens";
 import { game_access } from "./game_access";
+import { bets } from "./bets";
 
 export const gameTypeEnum = pgEnum("game_type", ["1v1", "limited", "unlimited"]);
 export const userControlTypeEnum = pgEnum("user_control_type", [
@@ -56,6 +57,7 @@ export const games = pgTable("games", {
 
 export const gamesRelations = relations(games, ({ many, one }) => ({
   participants: many(participants),
+  bets: many(bets),
   gameMode: one(game_mode, {
     fields: [games.gameModeId],
     references: [game_mode.id],
