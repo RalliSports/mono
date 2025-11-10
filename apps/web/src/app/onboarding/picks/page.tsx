@@ -44,6 +44,8 @@ type AthleteType = {
   createdAt: Date | null
   lines: any[]
   team: any | null
+  sportType: "football" | "basketball" | "baseball" | null;
+  leagueType: "NFL" | "NBA" | "MLB" | null;
 }
 
 const mockGame = {
@@ -119,7 +121,8 @@ const mockAthletes: AthleteType[] = [
       abbreviation: 'LAL',
       logo: '/images/teams/lal.png',
     },
-    // odds removed
+    sportType: null,
+    leagueType: null
   },
   {
     id: 'athlete-2',
@@ -167,7 +170,8 @@ const mockAthletes: AthleteType[] = [
       abbreviation: 'GSW',
       logo: '/images/teams/gsw.png',
     },
-    // odds removed
+    sportType: null,
+    leagueType: null
   },
   {
     id: 'athlete-3',
@@ -215,7 +219,8 @@ const mockAthletes: AthleteType[] = [
       abbreviation: 'MIL',
       logo: '/images/teams/mil.png',
     },
-    // odds removed
+    sportType: null,
+    leagueType: null
   },
 ]
 

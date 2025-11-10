@@ -7,6 +7,7 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { lines } from "./lines";
+import { sportTypeEnum, leagueTypeEnum } from "./common_enums";
 
 export const stats = pgTable("stats", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -18,6 +19,8 @@ export const stats = pgTable("stats", {
   statOddsName: varchar("stat_odds_name"),
   oddsApiStatName: varchar("odds_api_stat_name"),
   description: varchar("description"),
+  sportType: sportTypeEnum("sport_type"),
+  leagueType: leagueTypeEnum("league_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

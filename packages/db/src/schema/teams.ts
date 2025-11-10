@@ -8,6 +8,7 @@ import {
 import { athletes } from "./athletes";
 import { relations } from "drizzle-orm";
 import { matchups } from "./matchups";
+import { sportTypeEnum, leagueTypeEnum } from "./common_enums";
 
 // Teams Table
 export const teams = pgTable("teams", {
@@ -19,8 +20,10 @@ export const teams = pgTable("teams", {
   foundedYear: integer("founded_year"),
   coachName: varchar("coach_name", { length: 100 }),
   avatar: varchar("avatar"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
   abbreviation: varchar("abbreviation", { length: 3 }),
+  sportType: sportTypeEnum("sport_type"),
+  leagueType: leagueTypeEnum("league_type"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Relations
