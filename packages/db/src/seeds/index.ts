@@ -27,16 +27,16 @@ async function seed(db: NodePgDatabase<typeof schema>) {
   console.log("🌱 Starting database seeding...");
   try {
     // await seedRoles(db);
-    await seedUsers(db);
-    await seedGameModes(db);
-    await seedTeams(db);
-    await seedAthletes(db);
-    await seedStats(db);
-    await seedMatchups(db);
-    await seedGames(db);
-    await seedParticipants(db);
-    await seedLines(db);
-    await seedBets(db);
+    // await seedUsers(db);
+    // await seedGameModes(db);
+    // await seedTeams(db);
+    // await seedAthletes(db);
+    // await seedStats(db);
+    // await seedMatchups(db);
+    // await seedGames(db);
+    // await seedParticipants(db);
+    // await seedLines(db);
+    // await seedBets(db);
     console.log("🎉 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Seeding data failed:", error);

@@ -19,9 +19,9 @@ const db = drizzle(pool, { schema });
 async function seed(db: NodePgDatabase<typeof schema>) {
   console.log("🌱 Starting database seeding < teams | athletes >...");
   try {
-    await seedTeams(db);
-    await seedAthletes(db);
-    await seedStats(db);
+    // await seedTeams(db);
+    // await seedAthletes(db);
+    // await seedStats(db);
     console.log("🎉 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Seeding data failed:", error);

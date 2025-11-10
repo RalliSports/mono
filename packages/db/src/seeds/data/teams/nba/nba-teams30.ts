@@ -11,6 +11,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Quin Snyder",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/atl.png",
         abbreviation: "ATL",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a002",
@@ -22,6 +24,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Joe Mazzulla",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/bos.png",
         abbreviation: "BOS",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a017",
@@ -33,6 +37,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Jordi Fernández",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/bkn.png",
         abbreviation: "BKN",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a030",
@@ -44,6 +50,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Charles Lee",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/cha.png",
         abbreviation: "CHA",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a004",
@@ -55,6 +63,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Billy Donovan",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/chi.png",
         abbreviation: "CHI",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a005",
@@ -66,6 +76,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Kenny Atkinson",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/cle.png",
         abbreviation: "CLE",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a006",
@@ -77,6 +89,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Jason Kidd",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/dal.png",
         abbreviation: "DAL",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a007",
@@ -88,6 +102,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Michael Malone",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/den.png",
         abbreviation: "DEN",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a008",
@@ -99,6 +115,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "J. B. Bickerstaff",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/det.png",
         abbreviation: "DET",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a009",
@@ -110,6 +128,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Steve Kerr",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/gs.png",
         abbreviation: "GS",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a010",
@@ -121,6 +141,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Ime Udoka",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/hou.png",
         abbreviation: "HOU",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a011",
@@ -132,6 +154,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Rick Carlisle",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/ind.png",
         abbreviation: "IND",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a012",
@@ -143,6 +167,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Tyronn Lue",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/lac.png",
         abbreviation: "LAC",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a013",
@@ -154,6 +180,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "J. J. Redick",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/lal.png",
         abbreviation: "LAL",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a029",
@@ -165,6 +193,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Taylor Jenkins",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/mem.png",
         abbreviation: "MEM",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a014",
@@ -176,6 +206,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Erik Spoelstra",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/mia.png",
         abbreviation: "MIA",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a015",
@@ -187,6 +219,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Doc Rivers",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/mil.png",
         abbreviation: "MIL",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a016",
@@ -198,6 +232,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Chris Finch",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/min.png",
         abbreviation: "MIN",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a003",
@@ -209,6 +245,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "James Borrego",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/no.png",
         abbreviation: "NO",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a018",
@@ -220,6 +258,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Shane Battier",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/ny.png",
         abbreviation: "NY",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a025",
@@ -231,6 +271,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Mark Daigneault",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/okc.png",
         abbreviation: "OKC",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a019",
@@ -242,6 +284,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Jamahl Mosley",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/orl.png",
         abbreviation: "ORL",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a020",
@@ -253,6 +297,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Nick Nurse",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/phi.png",
         abbreviation: "PHI",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a021",
@@ -264,6 +310,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Jordan Ott",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/phx.png",
         abbreviation: "PHX",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a022",
@@ -275,6 +323,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Chauncey Billups",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/por.png",
         abbreviation: "POR",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a023",
@@ -286,6 +336,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Mike Brown",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/sac.png",
         abbreviation: "SAC",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a024",
@@ -297,6 +349,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Gregg Popovich",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/sa.png",
         abbreviation: "SA",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a028",
@@ -308,6 +362,8 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Darko Rajaković",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/tor.png",
         abbreviation: "TOR",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a026",
@@ -318,7 +374,9 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         foundedYear: 1974,
         coachName: "Will Hardy",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/utah.png",
-        abbreviation: "UTAH",
+        abbreviation: "UTA",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
     {
         id: "750e8400-e29b-41d4-b132-44665544a027",
@@ -330,5 +388,7 @@ export const nbaTeams30: (typeof teams.$inferInsert)[] = [
         coachName: "Brian Keefe",
         avatar: "https://a.espncdn.com/i/teamlogos/nba/500-dark/wsh.png",
         abbreviation: "WSH",
+        sportType: "basketball",
+        leagueType: "NBA",
     },
 ];
