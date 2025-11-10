@@ -11,6 +11,7 @@ import { lines } from "./lines";
 import { matchup_performance } from "./matchup_performance";
 import { relations } from "drizzle-orm";
 import { teams } from "./teams";
+import { sportTypeEnum, leagueTypeEnum } from "./common_enums";
 
 export const matchupStatusEnum = pgEnum("matchup_status", [
   "scheduled",
@@ -32,6 +33,8 @@ export const matchups = pgTable("matchups", {
   awayTeamId: uuid("away_team_id").references(() => teams.id),
   ifLinesCreated: boolean("if_lines_created").default(false),
   ifLinesResolved: boolean("if_lines_resolved").default(false),
+  sportType: sportTypeEnum("sport_type"),
+  leagueType: leagueTypeEnum("league_type"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

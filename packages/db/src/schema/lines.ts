@@ -12,6 +12,8 @@ import { athletes } from "./athletes";
 import { bets } from "./bets";
 import { matchups } from "./matchups";
 import { stats } from "./stats";
+import { sportTypeEnum, leagueTypeEnum } from "./common_enums";
+
 
 export const lineStatusEnum = pgEnum("line_status", [
   "open", // Open for bets, not started
@@ -34,6 +36,8 @@ export const lines = pgTable("lines", {
   isHigher: boolean("is_higher"),
   isLatestOne: boolean("is_latest_one").default(true),
   startsAt: timestamp("starts_at", { withTimezone: true }),
+  sportType: sportTypeEnum("sport_type"),
+  leagueType: leagueTypeEnum("league_type"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   lastUpdatedAt: timestamp("last_updated_at", { withTimezone: true }).defaultNow(),
   resolvedAt: timestamp("resolved_at", { withTimezone: true }),

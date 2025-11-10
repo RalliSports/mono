@@ -10,6 +10,8 @@ import { lines } from "./lines";
 import { matchup_performance } from "./matchup_performance";
 import { uuid } from "drizzle-orm/pg-core";
 import { teams } from "./teams";
+import { sportTypeEnum, leagueTypeEnum } from "./common_enums";
+
 
 export const athletes = pgTable("athletes", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -21,6 +23,8 @@ export const athletes = pgTable("athletes", {
   age: integer("age"),
   picture: varchar("picture"),
   teamId: uuid("team_id").references(() => teams.id),
+  sportType: sportTypeEnum("sport_type"),
+  leagueType: leagueTypeEnum("league_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
