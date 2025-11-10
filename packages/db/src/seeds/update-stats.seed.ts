@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { stats } from "@repo/db";
 import * as schema from "@repo/db";
-import { statsData } from "./data/stats/stats-data";
+import { statsData } from "./data/stats/nfl/stats-data";
 import { eq } from "drizzle-orm";
 
 config();

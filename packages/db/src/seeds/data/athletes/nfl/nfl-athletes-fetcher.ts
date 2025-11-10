@@ -145,12 +145,12 @@ export const fetchAthletes = async () => {
   }
 
   // Write the athletes to a file
-  const filePath = path.join(__dirname, "preseason-athletes.ts");
+  const filePath = path.join(__dirname, "nfl-athletes-latest.ts");
 
   // Construct TypeScript file content as a string
   const tsContent = `import { athletes } from "@repo/db";
 
-export const preSeasonAthletes = ${JSON.stringify(allAthletes, null, 2)};
+export const nflAthletes = ${JSON.stringify(allAthletes, null, 2)};
 `;
 
   // Write the file

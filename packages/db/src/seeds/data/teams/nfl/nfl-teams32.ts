@@ -1,6 +1,6 @@
 import { teams } from "@repo/db";
 
-export const preSeasonTeams32: (typeof teams.$inferInsert)[] = [
+export const nflTeams32: (typeof teams.$inferInsert)[] = [
   {
     id: "550e8400-e29b-41d4-b132-446655440014",
     espnTeamId: "22",
