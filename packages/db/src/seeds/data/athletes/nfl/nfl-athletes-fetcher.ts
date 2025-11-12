@@ -41,6 +41,9 @@ export const BASE_URL =
   "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl";
 export const LANG = "en";
 export const REGION = "us";
+export const YEAR = "2026";
+export const SPORT_TYPE = "football";
+export const LEAGUE_TYPE = "NFL";
 
 export interface SeederAthlete {
   name: string;
@@ -51,6 +54,8 @@ export interface SeederAthlete {
   jerseyNumber: number;
   age: number | null;
   picture: string;
+  sportType: string;
+  leagueType: string;
 }
 
 export async function fetchJSON(url: string) {
@@ -103,6 +108,8 @@ export async function fetchAthleteDetails(
     age,
     picture,
     espnAthleteId: data.id,
+    sportType: SPORT_TYPE,
+    leagueType: LEAGUE_TYPE,
   };
 }
 
@@ -111,19 +118,19 @@ export const fetchAthletes = async () => {
 
   for (const teamId of TEAMS) {
     let pageIndex = 1;
-    let pageCount = 1;
+    let pageCount = 1; // initial placeholder val, will get updated with actual page count in the loop
 
-    const teamRefUrl = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/teams/${teamId}`;
+    const teamRefUrl = `${BASE_URL}/teams/${teamId}`;
     const teamName = teamRefUrl
       ? await fetchTeamName(teamRefUrl)
       : "Unknown Team";
 
     while (pageIndex <= pageCount) {
-      const url = `${BASE_URL}/seasons/2025/teams/${teamId}/athletes?lang=${LANG}&region=${REGION}&page=${pageIndex}`;
+      const url = `${BASE_URL}/seasons/${YEAR}/teams/${teamId}/athletes?lang=${LANG}&region=${REGION}&page=${pageIndex}`;
       console.log(`Fetching team ${teamId} athletes page ${pageIndex}`);
 
       const data = await fetchJSON(url);
-      pageCount = data.pageCount;
+      pageCount = data.pageCount; // Updated the page count with the actual value from the API response
 
       for (const item of data.items) {
         const athleteRef = Array.isArray(item["$ref"])
@@ -148,8 +155,7 @@ export const fetchAthletes = async () => {
   const filePath = path.join(__dirname, "nfl-athletes-latest.ts");
 
   // Construct TypeScript file content as a string
-  const tsContent = `import { athletes } from "@repo/db";
-
+  const tsContent = `
 export const nflAthletes = ${JSON.stringify(allAthletes, null, 2)};
 `;
 
