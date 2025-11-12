@@ -1,4 +1,3 @@
-
 export const nbaAthletes = [
   {
     "name": "Nickeil Alexander-Walker",
@@ -6336,4 +6335,4 @@ export const nbaAthletes = [
     "sportType": "basketball",
     "leagueType": "NBA"
   }
-];
+] as const;
