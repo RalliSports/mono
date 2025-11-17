@@ -5,17 +5,17 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-ralli_bet = "CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN"
+ralli_bet = "Dwh1o43c4zeHc9LboGb8HnwqQbu9ERoCzZ9jtG6zmTmt"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
-test-lineV2 = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/lineV2-tests.ts"
 test-batch = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/batch_resolution_tests.ts"
+test-lineV2 = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/lineV2-tests.ts"
 test-main = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/ralli-bet.ts"

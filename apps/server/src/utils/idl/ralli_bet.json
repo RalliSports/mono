@@ -1,5 +1,5 @@
 {
-  "address": "CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN",
+  "address": "Dwh1o43c4zeHc9LboGb8HnwqQbu9ERoCzZ9jtG6zmTmt",
   "metadata": {
     "name": "ralli_bet",
     "version": "0.1.0",
@@ -467,6 +467,133 @@
         {
           "name": "athlete_id",
           "type": "u64"
+        },
+        {
+          "name": "starts_at",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "create_lineV2",
+      "discriminator": [
+        182,
+        250,
+        140,
+        25,
+        164,
+        224,
+        210,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "player_line",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "player_id"
+              },
+              {
+                "kind": "arg",
+                "path": "matchup_id"
+              },
+              {
+                "kind": "arg",
+                "path": "stat_id"
+              },
+              {
+                "kind": "arg",
+                "path": "line_value"
+              }
+            ]
+          }
+        },
+        {
+          "name": "line_pointer",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  110,
+                  101,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "player_id"
+              },
+              {
+                "kind": "arg",
+                "path": "matchup_id"
+              },
+              {
+                "kind": "arg",
+                "path": "stat_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "player_id",
+          "type": "string"
+        },
+        {
+          "name": "matchup_id",
+          "type": "u64"
+        },
+        {
+          "name": "stat_id",
+          "type": "u16"
+        },
+        {
+          "name": "line_value",
+          "type": "i64"
+        },
+        {
+          "name": "odds",
+          "type": "i32"
         },
         {
           "name": "starts_at",
@@ -1004,6 +1131,275 @@
       ]
     },
     {
+      "name": "resolve_game_batch",
+      "discriminator": [
+        234,
+        56,
+        0,
+        147,
+        165,
+        185,
+        57,
+        108
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "game_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "game"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true
+        },
+        {
+          "name": "treasury_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "fee_percentage",
+          "type": "u16"
+        },
+        {
+          "name": "batch_index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
       "name": "resolve_line",
       "discriminator": [
         249,
@@ -1056,6 +1452,100 @@
         {
           "name": "actual_value",
           "type": "f64"
+        },
+        {
+          "name": "should_refund_bettors",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "resolve_lineV2",
+      "discriminator": [
+        76,
+        164,
+        224,
+        137,
+        217,
+        227,
+        221,
+        252
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "player_line",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "player_id"
+              },
+              {
+                "kind": "arg",
+                "path": "matchup_id"
+              },
+              {
+                "kind": "arg",
+                "path": "stat_id"
+              },
+              {
+                "kind": "arg",
+                "path": "line_value"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "player_id",
+          "type": "string"
+        },
+        {
+          "name": "matchup_id",
+          "type": "u64"
+        },
+        {
+          "name": "stat_id",
+          "type": "u16"
+        },
+        {
+          "name": "line_value",
+          "type": "i64"
+        },
+        {
+          "name": "result",
+          "type": {
+            "defined": {
+              "name": "DirectionV2"
+            }
+          }
+        },
+        {
+          "name": "actual_value",
+          "type": "i64"
         },
         {
           "name": "should_refund_bettors",
@@ -1197,6 +1687,130 @@
         {
           "name": "should_refund_bettors",
           "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "update_line_pointer",
+      "discriminator": [
+        240,
+        54,
+        132,
+        181,
+        84,
+        220,
+        127,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "player_line",
+          "docs": [
+            "The existing PlayerLine account we're pointing to"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "player_id"
+              },
+              {
+                "kind": "arg",
+                "path": "matchup_id"
+              },
+              {
+                "kind": "arg",
+                "path": "stat_id"
+              },
+              {
+                "kind": "arg",
+                "path": "line_value"
+              }
+            ]
+          }
+        },
+        {
+          "name": "line_pointer",
+          "docs": [
+            "The LinePointer we're updating"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  110,
+                  101,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "player_id"
+              },
+              {
+                "kind": "arg",
+                "path": "matchup_id"
+              },
+              {
+                "kind": "arg",
+                "path": "stat_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "player_id",
+          "type": "string"
+        },
+        {
+          "name": "matchup_id",
+          "type": "u64"
+        },
+        {
+          "name": "stat_id",
+          "type": "u16"
+        },
+        {
+          "name": "line_value",
+          "type": "i64"
         }
       ]
     },
@@ -1349,6 +1963,32 @@
         13,
         80,
         187
+      ]
+    },
+    {
+      "name": "LinePointer",
+      "discriminator": [
+        76,
+        197,
+        68,
+        30,
+        64,
+        224,
+        45,
+        223
+      ]
+    },
+    {
+      "name": "PlayerLine",
+      "discriminator": [
+        40,
+        200,
+        175,
+        199,
+        248,
+        81,
+        247,
+        66
       ]
     }
   ],
@@ -1772,6 +2412,81 @@
       "code": 6083,
       "name": "IncorrectWinnerAccountCount",
       "msg": "Ensure that we have the correct number of winner accounts"
+    },
+    {
+      "code": 6084,
+      "name": "TooManyAccountsInBatch",
+      "msg": "Too many accounts in this batch"
+    },
+    {
+      "code": 6085,
+      "name": "TooManyWinnersInBatch",
+      "msg": "Too many winners in the batch"
+    },
+    {
+      "code": 6086,
+      "name": "BetAlreadyPaid",
+      "msg": "This bet has already been paid"
+    },
+    {
+      "code": 6087,
+      "name": "NotAWinner",
+      "msg": "This bet is not a winner - cannot be paid"
+    },
+    {
+      "code": 6088,
+      "name": "InvalidBatchIndex",
+      "msg": "Invalid batch index provided"
+    },
+    {
+      "code": 6089,
+      "name": "BatchSizeMismatch",
+      "msg": "Batch size does not match expected size"
+    },
+    {
+      "code": 6090,
+      "name": "InvalidRemainingAccounts",
+      "msg": "Invalid remaining accounts"
+    },
+    {
+      "code": 6091,
+      "name": "BetAccountMismatch",
+      "msg": "Bet account mismatch"
+    },
+    {
+      "code": 6092,
+      "name": "PayoutAmountZero",
+      "msg": "Payout amount is zero"
+    },
+    {
+      "code": 6093,
+      "name": "InvalidPlayerId",
+      "msg": "Invalid player ID - cannot be empty"
+    },
+    {
+      "code": 6094,
+      "name": "InvalidLineValue",
+      "msg": "Invalid line value - cannot be zero"
+    },
+    {
+      "code": 6095,
+      "name": "InvalidOdds",
+      "msg": "Invalid odds - cannot be zero"
+    },
+    {
+      "code": 6096,
+      "name": "SameLineValue",
+      "msg": "New line value must be different from old line value"
+    },
+    {
+      "code": 6097,
+      "name": "LineAccountMismatch",
+      "msg": "Line account mismatch"
+    },
+    {
+      "code": 6098,
+      "name": "LineNotActive",
+      "msg": "Line is not active"
     }
   ],
   "types": [
@@ -1811,6 +2526,10 @@
             "type": "i64"
           },
           {
+            "name": "paid",
+            "type": "bool"
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -1819,6 +2538,20 @@
     },
     {
       "name": "Direction",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Over"
+          },
+          {
+            "name": "Under"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DirectionV2",
       "type": {
         "kind": "enum",
         "variants": [
@@ -1907,6 +2640,10 @@
             "type": "bool"
           },
           {
+            "name": "payout_progress",
+            "type": "u32"
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -1983,6 +2720,9 @@
             "name": "Locked"
           },
           {
+            "name": "Resolving"
+          },
+          {
             "name": "Resolved"
           },
           {
@@ -2044,6 +2784,46 @@
       }
     },
     {
+      "name": "LinePointer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string"
+          },
+          {
+            "name": "matchup_id",
+            "type": "u64"
+          },
+          {
+            "name": "stat_id",
+            "type": "u16"
+          },
+          {
+            "name": "current_line_value",
+            "type": "i64"
+          },
+          {
+            "name": "current_odds",
+            "type": "i32"
+          },
+          {
+            "name": "current_line_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "last_updated",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "Pick",
       "type": {
         "kind": "struct",
@@ -2059,6 +2839,70 @@
                 "name": "Direction"
               }
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlayerLine",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string"
+          },
+          {
+            "name": "matchup_id",
+            "type": "u64"
+          },
+          {
+            "name": "stat_id",
+            "type": "u16"
+          },
+          {
+            "name": "line_value",
+            "type": "i64"
+          },
+          {
+            "name": "odds",
+            "type": "i32"
+          },
+          {
+            "name": "actual_value",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "starts_at",
+            "type": "i64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "result",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "DirectionV2"
+                }
+              }
+            }
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "should_refund_bettors",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
