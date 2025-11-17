@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ralli_bet.json`.
  */
 export type RalliBet = {
-  address: 'CtQi2SG7Mc8zapDRvWA5zoQoAWSwKRvqJsLCmCpiRPgN';
+  address: 'Dwh1o43c4zeHc9LboGb8HnwqQbu9ERoCzZ9jtG6zmTmt';
   metadata: {
     name: 'ralliBet';
     version: '0.1.0';
@@ -373,6 +373,112 @@ export type RalliBet = {
         {
           name: 'athleteId';
           type: 'u64';
+        },
+        {
+          name: 'startsAt';
+          type: 'i64';
+        },
+      ];
+    },
+    {
+      name: 'createLineV2';
+      discriminator: [182, 250, 140, 25, 164, 224, 210, 84];
+      accounts: [
+        {
+          name: 'admin';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'playerLine';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 108, 97, 121, 101, 114, 95, 108, 105, 110, 101];
+              },
+              {
+                kind: 'arg';
+                path: 'playerId';
+              },
+              {
+                kind: 'arg';
+                path: 'matchupId';
+              },
+              {
+                kind: 'arg';
+                path: 'statId';
+              },
+              {
+                kind: 'arg';
+                path: 'lineValue';
+              },
+            ];
+          };
+        },
+        {
+          name: 'linePointer';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  108,
+                  105,
+                  110,
+                  101,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114,
+                ];
+              },
+              {
+                kind: 'arg';
+                path: 'playerId';
+              },
+              {
+                kind: 'arg';
+                path: 'matchupId';
+              },
+              {
+                kind: 'arg';
+                path: 'statId';
+              },
+            ];
+          };
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+      ];
+      args: [
+        {
+          name: 'playerId';
+          type: 'string';
+        },
+        {
+          name: 'matchupId';
+          type: 'u64';
+        },
+        {
+          name: 'statId';
+          type: 'u16';
+        },
+        {
+          name: 'lineValue';
+          type: 'i64';
+        },
+        {
+          name: 'odds';
+          type: 'i32';
         },
         {
           name: 'startsAt';
@@ -868,6 +974,254 @@ export type RalliBet = {
       ];
     },
     {
+      name: 'resolveGameBatch';
+      discriminator: [234, 56, 0, 147, 165, 185, 57, 108];
+      accounts: [
+        {
+          name: 'admin';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'game';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 97, 109, 101];
+              },
+              {
+                kind: 'account';
+                path: 'game.game_id';
+                account: 'game';
+              },
+            ];
+          };
+        },
+        {
+          name: 'gameEscrow';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [101, 115, 99, 114, 111, 119];
+              },
+              {
+                kind: 'account';
+                path: 'game';
+              },
+            ];
+          };
+        },
+        {
+          name: 'mint';
+        },
+        {
+          name: 'gameVault';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'game';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'treasury';
+          writable: true;
+        },
+        {
+          name: 'treasuryVault';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'treasury';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'tokenProgram';
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        },
+      ];
+      args: [
+        {
+          name: 'feePercentage';
+          type: 'u16';
+        },
+        {
+          name: 'batchIndex';
+          type: 'u32';
+        },
+      ];
+    },
+    {
       name: 'resolveLine';
       discriminator: [249, 172, 97, 191, 184, 158, 240, 145];
       accounts: [
@@ -906,6 +1260,79 @@ export type RalliBet = {
         {
           name: 'actualValue';
           type: 'f64';
+        },
+        {
+          name: 'shouldRefundBettors';
+          type: 'bool';
+        },
+      ];
+    },
+    {
+      name: 'resolveLineV2';
+      discriminator: [76, 164, 224, 137, 217, 227, 221, 252];
+      accounts: [
+        {
+          name: 'admin';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'playerLine';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 108, 97, 121, 101, 114, 95, 108, 105, 110, 101];
+              },
+              {
+                kind: 'arg';
+                path: 'playerId';
+              },
+              {
+                kind: 'arg';
+                path: 'matchupId';
+              },
+              {
+                kind: 'arg';
+                path: 'statId';
+              },
+              {
+                kind: 'arg';
+                path: 'lineValue';
+              },
+            ];
+          };
+        },
+      ];
+      args: [
+        {
+          name: 'playerId';
+          type: 'string';
+        },
+        {
+          name: 'matchupId';
+          type: 'u64';
+        },
+        {
+          name: 'statId';
+          type: 'u16';
+        },
+        {
+          name: 'lineValue';
+          type: 'i64';
+        },
+        {
+          name: 'result';
+          type: {
+            defined: {
+              name: 'directionV2';
+            };
+          };
+        },
+        {
+          name: 'actualValue';
+          type: 'i64';
         },
         {
           name: 'shouldRefundBettors';
@@ -1019,6 +1446,105 @@ export type RalliBet = {
       ];
     },
     {
+      name: 'updateLinePointer';
+      discriminator: [240, 54, 132, 181, 84, 220, 127, 109];
+      accounts: [
+        {
+          name: 'admin';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'playerLine';
+          docs: ["The existing PlayerLine account we're pointing to"];
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 108, 97, 121, 101, 114, 95, 108, 105, 110, 101];
+              },
+              {
+                kind: 'arg';
+                path: 'playerId';
+              },
+              {
+                kind: 'arg';
+                path: 'matchupId';
+              },
+              {
+                kind: 'arg';
+                path: 'statId';
+              },
+              {
+                kind: 'arg';
+                path: 'lineValue';
+              },
+            ];
+          };
+        },
+        {
+          name: 'linePointer';
+          docs: ["The LinePointer we're updating"];
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  108,
+                  105,
+                  110,
+                  101,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114,
+                ];
+              },
+              {
+                kind: 'arg';
+                path: 'playerId';
+              },
+              {
+                kind: 'arg';
+                path: 'matchupId';
+              },
+              {
+                kind: 'arg';
+                path: 'statId';
+              },
+            ];
+          };
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+      ];
+      args: [
+        {
+          name: 'playerId';
+          type: 'string';
+        },
+        {
+          name: 'matchupId';
+          type: 'u64';
+        },
+        {
+          name: 'statId';
+          type: 'u16';
+        },
+        {
+          name: 'lineValue';
+          type: 'i64';
+        },
+      ];
+    },
+    {
       name: 'withdrawSubmission';
       discriminator: [242, 62, 195, 3, 192, 241, 52, 174];
       accounts: [
@@ -1102,6 +1628,14 @@ export type RalliBet = {
     {
       name: 'line';
       discriminator: [15, 73, 125, 153, 180, 13, 80, 187];
+    },
+    {
+      name: 'linePointer';
+      discriminator: [76, 197, 68, 30, 64, 224, 45, 223];
+    },
+    {
+      name: 'playerLine';
+      discriminator: [40, 200, 175, 199, 248, 81, 247, 66];
     },
   ];
   errors: [
@@ -1525,6 +2059,81 @@ export type RalliBet = {
       name: 'incorrectWinnerAccountCount';
       msg: 'Ensure that we have the correct number of winner accounts';
     },
+    {
+      code: 6084;
+      name: 'tooManyAccountsInBatch';
+      msg: 'Too many accounts in this batch';
+    },
+    {
+      code: 6085;
+      name: 'tooManyWinnersInBatch';
+      msg: 'Too many winners in the batch';
+    },
+    {
+      code: 6086;
+      name: 'betAlreadyPaid';
+      msg: 'This bet has already been paid';
+    },
+    {
+      code: 6087;
+      name: 'notAWinner';
+      msg: 'This bet is not a winner - cannot be paid';
+    },
+    {
+      code: 6088;
+      name: 'invalidBatchIndex';
+      msg: 'Invalid batch index provided';
+    },
+    {
+      code: 6089;
+      name: 'batchSizeMismatch';
+      msg: 'Batch size does not match expected size';
+    },
+    {
+      code: 6090;
+      name: 'invalidRemainingAccounts';
+      msg: 'Invalid remaining accounts';
+    },
+    {
+      code: 6091;
+      name: 'betAccountMismatch';
+      msg: 'Bet account mismatch';
+    },
+    {
+      code: 6092;
+      name: 'payoutAmountZero';
+      msg: 'Payout amount is zero';
+    },
+    {
+      code: 6093;
+      name: 'invalidPlayerId';
+      msg: 'Invalid player ID - cannot be empty';
+    },
+    {
+      code: 6094;
+      name: 'invalidLineValue';
+      msg: 'Invalid line value - cannot be zero';
+    },
+    {
+      code: 6095;
+      name: 'invalidOdds';
+      msg: 'Invalid odds - cannot be zero';
+    },
+    {
+      code: 6096;
+      name: 'sameLineValue';
+      msg: 'New line value must be different from old line value';
+    },
+    {
+      code: 6097;
+      name: 'lineAccountMismatch';
+      msg: 'Line account mismatch';
+    },
+    {
+      code: 6098;
+      name: 'lineNotActive';
+      msg: 'Line is not active';
+    },
   ];
   types: [
     {
@@ -1563,6 +2172,10 @@ export type RalliBet = {
             type: 'i64';
           },
           {
+            name: 'paid';
+            type: 'bool';
+          },
+          {
             name: 'bump';
             type: 'u8';
           },
@@ -1571,6 +2184,20 @@ export type RalliBet = {
     },
     {
       name: 'direction';
+      type: {
+        kind: 'enum';
+        variants: [
+          {
+            name: 'over';
+          },
+          {
+            name: 'under';
+          },
+        ];
+      };
+    },
+    {
+      name: 'directionV2';
       type: {
         kind: 'enum';
         variants: [
@@ -1659,6 +2286,10 @@ export type RalliBet = {
             type: 'bool';
           },
           {
+            name: 'payoutProgress';
+            type: 'u32';
+          },
+          {
             name: 'bump';
             type: 'u8';
           },
@@ -1735,6 +2366,9 @@ export type RalliBet = {
             name: 'locked';
           },
           {
+            name: 'resolving';
+          },
+          {
             name: 'resolved';
           },
           {
@@ -1796,6 +2430,46 @@ export type RalliBet = {
       };
     },
     {
+      name: 'linePointer';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'playerId';
+            type: 'string';
+          },
+          {
+            name: 'matchupId';
+            type: 'u64';
+          },
+          {
+            name: 'statId';
+            type: 'u16';
+          },
+          {
+            name: 'currentLineValue';
+            type: 'i64';
+          },
+          {
+            name: 'currentOdds';
+            type: 'i32';
+          },
+          {
+            name: 'currentLinePubkey';
+            type: 'pubkey';
+          },
+          {
+            name: 'lastUpdated';
+            type: 'i64';
+          },
+          {
+            name: 'bump';
+            type: 'u8';
+          },
+        ];
+      };
+    },
+    {
       name: 'pick';
       type: {
         kind: 'struct';
@@ -1811,6 +2485,70 @@ export type RalliBet = {
                 name: 'direction';
               };
             };
+          },
+        ];
+      };
+    },
+    {
+      name: 'playerLine';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'playerId';
+            type: 'string';
+          },
+          {
+            name: 'matchupId';
+            type: 'u64';
+          },
+          {
+            name: 'statId';
+            type: 'u16';
+          },
+          {
+            name: 'lineValue';
+            type: 'i64';
+          },
+          {
+            name: 'odds';
+            type: 'i32';
+          },
+          {
+            name: 'actualValue';
+            type: {
+              option: 'i64';
+            };
+          },
+          {
+            name: 'startsAt';
+            type: 'i64';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'result';
+            type: {
+              option: {
+                defined: {
+                  name: 'directionV2';
+                };
+              };
+            };
+          },
+          {
+            name: 'isActive';
+            type: 'bool';
+          },
+          {
+            name: 'shouldRefundBettors';
+            type: 'bool';
+          },
+          {
+            name: 'bump';
+            type: 'u8';
           },
         ];
       };
