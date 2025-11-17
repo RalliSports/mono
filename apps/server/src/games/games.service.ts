@@ -122,6 +122,7 @@ export class GamesService {
         .set({
           createdTxnSignature: txn,
           lockedAt: new Date(Date.now() + 1000 * 60 * 60 * LOCK_AFTER_HOURS),
+          currentParticipants: 0,
         })
         .where(eq(games.id, game.id))
         .returning();
