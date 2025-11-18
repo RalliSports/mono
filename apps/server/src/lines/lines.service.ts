@@ -58,8 +58,6 @@ export class LinesService {
       const createdAt = inserted.createdAt;
       if (!createdAt) throw new BadRequestException('Line not created');
 
-      const timestamp = new Date(createdAt).getTime();
-
       const statCustomId = await tx.query.stats
         .findFirst({
           where: eq(stats.id, dto.statId),
@@ -91,7 +89,7 @@ export class LinesService {
           Number(matchupCustomId),
           Number(inserted.isHigher ? inserted.oddsOver : inserted.oddsUnder),
           dto.predictedValue,
-          dto.athleteId,
+          String(athleteCustomId),
           adjustedTimestamp,
           new PublicKey(user.walletAddress),
         );
@@ -165,6 +163,12 @@ export class LinesService {
 
         const timestamp = new Date(createdAt).getTime();
 
+        const athleteCustomId = await tx.query.athletes
+          .findFirst({
+            where: eq(athletes.id, line.athleteId),
+          })
+          .then((athlete) => athlete?.customId);
+
         const statCustomId = await tx.query.stats
           .findFirst({
             where: eq(stats.id, line.statId),
@@ -184,7 +188,7 @@ export class LinesService {
 
         linesInformation.push({
           statCustomId,
-          athleteId: line.athleteId,
+          athleteId: String(athleteCustomId),
           adjustedTimestamp,
           predictedValue: line.predictedValue,
           odds: Number(
@@ -338,9 +342,15 @@ export class LinesService {
         })
         .then((matchup) => matchup?.espnEventId);
 
+      const athleteCustomId = await tx.query.athletes
+        .findFirst({
+          where: eq(athletes.id, updatedLine.athleteId ?? ''),
+        })
+        .then((athlete) => athlete?.customId);
+
       try {
         txn = await this.anchor.updateLinePointer(
-          String(updatedLine.athleteId),
+          String(athleteCustomId),
           Number(matchupCustomId),
           Number(statCustomId),
           Number(updatedLine.predictedValue),
@@ -398,6 +408,12 @@ export class LinesService {
       if (!lineCreatedAt) throw new BadRequestException('Line not created');
       const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
 
+      const athleteCustomId = await tx.query.athletes
+        .findFirst({
+          where: eq(athletes.id, line.athleteId ?? ''),
+        })
+        .then((athlete) => athlete?.customId);
+
       const statCustomId = await tx.query.stats
         .findFirst({
           where: eq(stats.id, line.statId ?? ''),
@@ -415,7 +431,7 @@ export class LinesService {
 
       try {
         txn = await this.anchor.resolveLineInstruction(
-          String(line.athleteId),
+          String(athleteCustomId),
           predictedValue,
           Number(statCustomId),
           Number(matchupCustomId),
@@ -493,7 +509,7 @@ export class LinesService {
             );
             continue;
           }
-          
+
           const lineCreatedAt = lineData.createdAt;
           if (!lineCreatedAt) {
             console.warn(
@@ -532,11 +548,17 @@ export class LinesService {
             })
             .then((matchup) => matchup?.espnEventId);
 
+          const athleteCustomId = await tx.query.athletes
+            .findFirst({
+              where: eq(athletes.id, lineData.athleteId ?? ''),
+            })
+            .then((athlete) => athlete?.customId);
+
           linesInformation.push({
             predictedValue: Number(lineData.predictedValue),
             actualValue: lineDataForResole.actualValue,
             shouldRefundBettors: false,
-            athleteId: String(lineData.athleteId),
+            athleteId: String(athleteCustomId),
             matchupId: Number(matchupCustomId),
             statCustomId: Number(statCustomId),
           });

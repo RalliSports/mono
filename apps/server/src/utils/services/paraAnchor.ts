@@ -185,7 +185,6 @@ export class ParaAnchor {
     creator: PublicKey,
   ): Promise<string> {
     const program = await this.getProgram(false); // useAdminSigner
-    const _athleteId = new BN(athleteId);
     const _matchupId = new BN(matchupId);
     const _statId = new BN(statId);
     const _lineValue = new BN(predictedValue);
@@ -194,10 +193,10 @@ export class ParaAnchor {
     const [playerLinePDa] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('player_line'),
-        _athleteId.toArrayLike(Buffer, 'le', 8),
+        Buffer.from(athleteId),
         _matchupId.toArrayLike(Buffer, 'le', 8),
-        _statId.toArrayLike(Buffer, 'le', 8),
-        _lineValue.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 2),
+        _lineValue.toArrayLike(Buffer, 'le', 4),
       ],
       program.programId,
     );
@@ -205,9 +204,9 @@ export class ParaAnchor {
     const [linePointerPDA] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('line_pointer'),
-        _athleteId.toArrayLike(Buffer, 'le', 8),
+        Buffer.from(athleteId),
         _matchupId.toArrayLike(Buffer, 'le', 8),
-        _statId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 2),
       ],
       program.programId,
     );
@@ -288,7 +287,6 @@ export class ParaAnchor {
     const program = await this.getProgram(true); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
-      const _athleteId = new BN(line.athleteId);
       const _matchupId = new BN(line.matchupId);
       const _startsAt = new BN(line.adjustedTimestamp);
       const _statId = new BN(line.statCustomId);
@@ -297,7 +295,7 @@ export class ParaAnchor {
       const [playerLinePDa] = PublicKey.findProgramAddressSync(
         [
           Buffer.from('player_line'),
-          _athleteId.toArrayLike(Buffer, 'le', 8),
+          Buffer.from(line.athleteId),
           _matchupId.toArrayLike(Buffer, 'le', 8),
           _statId.toArrayLike(Buffer, 'le', 8),
           _predictedValue.toArrayLike(Buffer, 'le', 8),
@@ -308,7 +306,7 @@ export class ParaAnchor {
       const [linePointerPDA] = PublicKey.findProgramAddressSync(
         [
           Buffer.from('line_pointer'),
-          _athleteId.toArrayLike(Buffer, 'le', 8),
+          Buffer.from(line.athleteId),
           _matchupId.toArrayLike(Buffer, 'le', 8),
           _statId.toArrayLike(Buffer, 'le', 8),
         ],
@@ -393,7 +391,7 @@ export class ParaAnchor {
     const [playerLinePDa] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('player_line'),
-        _athleteId.toArrayLike(Buffer, 'le', 8),
+        Buffer.from(athleteId),
         _matchupId.toArrayLike(Buffer, 'le', 8),
         _statId.toArrayLike(Buffer, 'le', 8),
         _predictedValue.toArrayLike(Buffer, 'le', 8),
@@ -471,15 +469,14 @@ export class ParaAnchor {
     const _matchupId = new BN(matchupId);
     const _lineValue = new BN(line_value);
     const _statId = new BN(statId);
-    const _playerId = new BN(playerId);
 
     const [playerLinePDa] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('player_line'),
-        _playerId.toArrayLike(Buffer, 'le', 8),
+        Buffer.from(playerId),
         _matchupId.toArrayLike(Buffer, 'le', 8),
-        _statId.toArrayLike(Buffer, 'le', 8),
-        _lineValue.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 2),
+        _lineValue.toArrayLike(Buffer, 'le', 4),
       ],
       program.programId,
     );
@@ -487,9 +484,9 @@ export class ParaAnchor {
     const [linePointerPDA] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('line_pointer'),
-        _playerId.toArrayLike(Buffer, 'le', 8),
+        Buffer.from(playerId),
         _matchupId.toArrayLike(Buffer, 'le', 8),
-        _statId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 2),
       ],
       program.programId,
     );
@@ -560,14 +557,13 @@ export class ParaAnchor {
     for (const line of linesInformation) {
       const _predictedValue = new BN(line.predictedValue);
       const _actualValue = new BN(line.actualValue);
-      const _athleteId = new BN(line.athleteId);
       const _matchupId = new BN(line.matchupId);
       const _statId = new BN(line.statCustomId);
 
       const [playerLinePDa] = PublicKey.findProgramAddressSync(
         [
           Buffer.from('player_line'),
-          _athleteId.toArrayLike(Buffer, 'le', 8),
+          Buffer.from(line.athleteId),
           _matchupId.toArrayLike(Buffer, 'le', 8),
           _statId.toArrayLike(Buffer, 'le', 8),
           _predictedValue.toArrayLike(Buffer, 'le', 8),
