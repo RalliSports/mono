@@ -57,7 +57,7 @@ export class LinesService {
       let txn: string;
       const createdAt = inserted.createdAt;
       if (!createdAt) throw new BadRequestException('Line not created');
-      const timestamp = new Date(createdAt).getTime();
+
       const statCustomId = await tx.query.stats
         .findFirst({
           where: eq(stats.id, dto.statId),
@@ -70,18 +70,26 @@ export class LinesService {
         })
         .then((athlete) => athlete?.customId);
 
+      const matchupCustomId = await tx.query.matchups
+        .findFirst({
+          where: eq(matchups.id, dto.matchupId),
+        })
+        .then((athlete) => athlete?.espnEventId);
+
       if (!statCustomId) throw new BadRequestException('Stat not found');
       if (!athleteCustomId) throw new BadRequestException('Athlete not found');
+      if (!matchupCustomId) throw new BadRequestException('Matchup not found');
 
       const adjustedTimestamp =
         new Date(matchup.startsAt ?? '').getTime() / 1000;
 
       try {
         txn = await this.anchor.createLineInstruction(
-          timestamp,
           statCustomId,
+          Number(matchupCustomId),
+          Number(inserted.isHigher ? inserted.oddsOver : inserted.oddsUnder),
           dto.predictedValue,
-          athleteCustomId,
+          String(athleteCustomId),
           adjustedTimestamp,
           new PublicKey(user.walletAddress),
         );
@@ -117,13 +125,12 @@ export class LinesService {
       let txn: string;
 
       const linesInformation: {
-        timestamp: number;
         statCustomId: number;
-        athleteCustomId: number;
+        athleteId: string;
+        matchupId: number;
+        odds: number;
         adjustedTimestamp: number;
         predictedValue: number;
-        oddsOver: number;
-        oddsUnder: number;
       }[] = [];
       const insertedLines = [] as (typeof lines.$inferInsert)[];
       const initialTimestamp = new Date().getTime();
@@ -153,12 +160,8 @@ export class LinesService {
         // Ensure createGameInstruction throws if it fails
         const createdAt = inserted.createdAt;
         if (!createdAt) throw new BadRequestException('Line not created');
+
         const timestamp = new Date(createdAt).getTime();
-        const statCustomId = await tx.query.stats
-          .findFirst({
-            where: eq(stats.id, line.statId),
-          })
-          .then((stat) => stat?.customId);
 
         const athleteCustomId = await tx.query.athletes
           .findFirst({
@@ -166,21 +169,34 @@ export class LinesService {
           })
           .then((athlete) => athlete?.customId);
 
+        const statCustomId = await tx.query.stats
+          .findFirst({
+            where: eq(stats.id, line.statId),
+          })
+          .then((stat) => stat?.customId);
+
+        const matchupCustomId = await tx.query.matchups
+          .findFirst({
+            where: eq(matchups.id, line.matchupId),
+          })
+          .then((athlete) => athlete?.espnEventId);
+
         if (!statCustomId) throw new BadRequestException('Stat not found');
-        if (!athleteCustomId)
-          throw new BadRequestException('Athlete not found');
 
         const adjustedTimestamp =
           new Date(matchup.startsAt ?? '').getTime() / 1000;
 
         linesInformation.push({
-          timestamp,
           statCustomId,
-          athleteCustomId,
+          athleteId: String(athleteCustomId),
           adjustedTimestamp,
           predictedValue: line.predictedValue,
-          oddsOver: line.oddsOver,
-          oddsUnder: line.oddsUnder,
+          odds: Number(
+            Number(inserted?.actualValue) > Number(inserted.predictedValue)
+              ? line.oddsOver
+              : line.oddsUnder,
+          ),
+          matchupId: Number(matchupCustomId),
         });
         insertedLines.push(inserted);
       }
@@ -296,22 +312,69 @@ export class LinesService {
   }
 
   async updateLine(id: string, dto: UpdateLineDto) {
-    const res = await this.db
-      .update(lines)
-      .set({
-        athleteId: dto.athleteId?.toString(),
-        statId: dto.statId?.toString(),
-        matchupId: dto.matchupId?.toString(),
-        predictedValue: dto.predictedValue?.toString(),
-        status: dto.status,
-        currentValue: dto.currentValue?.toString(),
-        lastUpdatedAt: dto.lastUpdatedAt,
-        isLatestOne: dto.isLatestOne,
-      })
-      .where(eq(lines.id, id))
-      .returning();
-    if (res.length === 0) throw new NotFoundException(`Line ${id} not found`);
-    return res[0];
+    return await this.db.transaction(async (tx) => {
+      const [updatedLine] = await tx
+        .update(lines)
+        .set({
+          athleteId: dto.athleteId?.toString(),
+          statId: dto.statId?.toString(),
+          matchupId: dto.matchupId?.toString(),
+          predictedValue: dto.predictedValue?.toString(),
+          status: dto.status,
+          currentValue: dto.currentValue?.toString(),
+          lastUpdatedAt: dto.lastUpdatedAt,
+          isLatestOne: dto.isLatestOne,
+        })
+        .where(eq(lines.id, id))
+        .returning();
+
+      let txn: string | undefined;
+
+      const statCustomId = await tx.query.stats
+        .findFirst({
+          where: eq(stats.id, dto.statId ?? ''),
+        })
+        .then((stat) => stat?.customId);
+
+      const matchupCustomId = await tx.query.matchups
+        .findFirst({
+          where: eq(matchups.id, updatedLine.matchupId ?? ''),
+        })
+        .then((matchup) => matchup?.espnEventId);
+
+      const athleteCustomId = await tx.query.athletes
+        .findFirst({
+          where: eq(athletes.id, updatedLine.athleteId ?? ''),
+        })
+        .then((athlete) => athlete?.customId);
+
+      try {
+        txn = await this.anchor.updateLinePointer(
+          String(athleteCustomId),
+          Number(matchupCustomId),
+          Number(statCustomId),
+          Number(updatedLine.predictedValue),
+        );
+
+        if (!txn || typeof txn !== 'string') {
+          throw new Error(
+            'Invalid transaction returned from updating line pointer',
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Anchor instruction failed for updateLinePointer, rolling back transaction:',
+          error,
+        );
+        await tx.rollback();
+        // Throw to rollback DB transaction
+        throw new BadRequestException(
+          "'Anchor instruction failed, rolling back lines creation",
+          error,
+        );
+      }
+      return { txn, updatedLine };
+    });
   }
 
   async deleteLine(id: string) {
@@ -345,13 +408,33 @@ export class LinesService {
       if (!lineCreatedAt) throw new BadRequestException('Line not created');
       const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
 
+      const athleteCustomId = await tx.query.athletes
+        .findFirst({
+          where: eq(athletes.id, line.athleteId ?? ''),
+        })
+        .then((athlete) => athlete?.customId);
+
+      const statCustomId = await tx.query.stats
+        .findFirst({
+          where: eq(stats.id, line.statId ?? ''),
+        })
+        .then((stat) => stat?.customId);
+
+      const matchupCustomId = await tx.query.matchups
+        .findFirst({
+          where: eq(matchups.id, line.matchupId ?? ''),
+        })
+        .then((matchup) => matchup?.espnEventId);
+
       // Ensure resolveLineInstruction throws if it fails
       let txn: string;
 
       try {
         txn = await this.anchor.resolveLineInstruction(
-          lineCreatedAtTimestamp,
+          String(athleteCustomId),
           predictedValue,
+          Number(statCustomId),
+          Number(matchupCustomId),
           dto.actualValue!,
           false,
           new PublicKey(user.walletAddress),
@@ -385,8 +468,10 @@ export class LinesService {
     try {
       return await this.db.transaction(async (tx) => {
         const linesInformation: {
-          lineId: number;
+          athleteId: string;
           predictedValue: number;
+          matchupId: number;
+          statCustomId: number;
           actualValue: number;
           shouldRefundBettors: boolean;
         }[] = [];
@@ -424,6 +509,7 @@ export class LinesService {
             );
             continue;
           }
+
           const lineCreatedAt = lineData.createdAt;
           if (!lineCreatedAt) {
             console.warn(
@@ -431,6 +517,7 @@ export class LinesService {
             );
             continue;
           }
+
           const lineCreatedAtTimestamp = new Date(lineCreatedAt).getTime();
           // Update line to mark as resolved
           await tx
@@ -438,20 +525,42 @@ export class LinesService {
             .set({
               actualValue: lineDataForResole.actualValue.toString(),
               isHigher:
-                (lineDataForResole.actualValue || lineDataForResole.actualValue === 0) && lineData.predictedValue
+                (lineDataForResole.actualValue ||
+                  lineDataForResole.actualValue === 0) &&
+                lineData.predictedValue
                   ? lineDataForResole.actualValue >
-                  Number(lineData.predictedValue)
+                    Number(lineData.predictedValue)
                   : null,
               status: LineStatus.RESOLVED,
               resolvedAt: new Date(),
             })
             .where(eq(lines.id, lineDataForResole.lineId));
 
+          const statCustomId = await tx.query.stats
+            .findFirst({
+              where: eq(stats.id, lineData.statId ?? ''),
+            })
+            .then((stat) => stat?.customId);
+
+          const matchupCustomId = await tx.query.matchups
+            .findFirst({
+              where: eq(matchups.id, lineData.matchupId ?? ''),
+            })
+            .then((matchup) => matchup?.espnEventId);
+
+          const athleteCustomId = await tx.query.athletes
+            .findFirst({
+              where: eq(athletes.id, lineData.athleteId ?? ''),
+            })
+            .then((athlete) => athlete?.customId);
+
           linesInformation.push({
-            lineId: lineCreatedAtTimestamp,
             predictedValue: Number(lineData.predictedValue),
             actualValue: lineDataForResole.actualValue,
             shouldRefundBettors: false,
+            athleteId: String(athleteCustomId),
+            matchupId: Number(matchupCustomId),
+            statCustomId: Number(statCustomId),
           });
         }
 
@@ -549,12 +658,22 @@ export class LinesService {
           .update(lines)
           .set({ isLatestOne: false })
           .where(inArray(lines.id, toBeDeactivatedLines));
-        console.log(`Deactivated ${toBeDeactivatedLines.length} duplicate lines`);
+        console.log(
+          `Deactivated ${toBeDeactivatedLines.length} duplicate lines`,
+        );
       } catch (error) {
         console.error('Error deactivating duplicate lines:', error);
-        return { deactivatedCount: 0, message: 'Error deactivating duplicate lines', success: false };
+        return {
+          deactivatedCount: 0,
+          message: 'Error deactivating duplicate lines',
+          success: false,
+        };
       }
+    }
+    return {
+      deactivatedCount: toBeDeactivatedLines.length,
+      message: 'Duplicate lines deactivated',
+      success: true,
     };
-    return { deactivatedCount: toBeDeactivatedLines.length, message: 'Duplicate lines deactivated', success: true };
   }
 }
