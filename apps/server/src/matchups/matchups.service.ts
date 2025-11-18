@@ -375,7 +375,7 @@ export class MatchupsService {
             eq(lines.athleteId, athleteId),
             eq(lines.statId, statId),
             eq(lines.matchupId, matchupId),
-            eq(lines.isLatestOne, true)
+            // eq(lines.isLatestOne, true)
           ),
         });
         let existingLineWithSamePredictedValue = false;
