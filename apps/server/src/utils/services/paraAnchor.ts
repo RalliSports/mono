@@ -176,29 +176,56 @@ export class ParaAnchor {
   }
 
   async createLineInstruction(
-    lineId: number,
     statId: number,
+    matchupId: number,
+    odds: number,
     predictedValue: number,
-    athleteId: number,
+    athleteId: string,
     startsAt: number,
     creator: PublicKey,
   ): Promise<string> {
     const program = await this.getProgram(false); // useAdminSigner
-    const _lineId = new BN(lineId);
     const _athleteId = new BN(athleteId);
+    const _matchupId = new BN(matchupId);
+    const _statId = new BN(statId);
+    const _lineValue = new BN(predictedValue);
     const _startsAt = new BN(startsAt);
 
-    const [lineAccount] = PublicKey.findProgramAddressSync(
-      [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+    const [playerLinePDa] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('player_line'),
+        _athleteId.toArrayLike(Buffer, 'le', 8),
+        _matchupId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 8),
+        _lineValue.toArrayLike(Buffer, 'le', 8),
+      ],
       program.programId,
     );
-    // console.log(program.provider.wallet?.publicKey, 'program provider wallet');
+
+    const [linePointerPDA] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('line_pointer'),
+        _athleteId.toArrayLike(Buffer, 'le', 8),
+        _matchupId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 8),
+      ],
+      program.programId,
+    );
+
     try {
       const ix = await program.methods
-        .createLine(_lineId, statId, predictedValue, _athleteId, _startsAt)
+        .createLineV2(
+          athleteId,
+          _matchupId,
+          statId,
+          _lineValue,
+          odds,
+          _startsAt,
+        )
         .accountsPartial({
           admin: creator,
-          line: lineAccount,
+          linePointer: linePointerPDA,
+          playerLine: playerLinePDa,
           systemProgram: SystemProgram.programId,
         })
         .instruction();
@@ -249,9 +276,10 @@ export class ParaAnchor {
 
   async bulkCreateLineInstruction(
     linesInformation: {
-      timestamp: number;
       statCustomId: number;
-      athleteCustomId: number;
+      athleteId: string;
+      matchupId: number;
+      odds: number;
       adjustedTimestamp: number;
       predictedValue: number;
     }[],
@@ -260,21 +288,46 @@ export class ParaAnchor {
     const program = await this.getProgram(true); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
-      const _lineId = new BN(line.timestamp);
-      const _athleteId = new BN(line.athleteCustomId);
+      const _athleteId = new BN(line.athleteId);
+      const _matchupId = new BN(line.matchupId);
       const _startsAt = new BN(line.adjustedTimestamp);
-      const _statId = line.statCustomId;
-      const _predictedValue = line.predictedValue;
+      const _statId = new BN(line.statCustomId);
+      const _predictedValue = new BN(line.predictedValue);
 
-      const [lineAccount] = PublicKey.findProgramAddressSync(
-        [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+      const [playerLinePDa] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('player_line'),
+          _athleteId.toArrayLike(Buffer, 'le', 8),
+          _matchupId.toArrayLike(Buffer, 'le', 8),
+          _statId.toArrayLike(Buffer, 'le', 8),
+          _predictedValue.toArrayLike(Buffer, 'le', 8),
+        ],
         program.programId,
       );
+
+      const [linePointerPDA] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('line_pointer'),
+          _athleteId.toArrayLike(Buffer, 'le', 8),
+          _matchupId.toArrayLike(Buffer, 'le', 8),
+          _statId.toArrayLike(Buffer, 'le', 8),
+        ],
+        program.programId,
+      );
+
       const ix = await program.methods
-        .createLine(_lineId, _statId, _predictedValue, _athleteId, _startsAt)
+        .createLineV2(
+          line.athleteId,
+          _matchupId,
+          line.statCustomId,
+          _predictedValue,
+          line.odds,
+          _startsAt,
+        )
         .accountsPartial({
           admin: creator,
-          line: lineAccount,
+          linePointer: linePointerPDA,
+          playerLine: playerLinePDa,
           systemProgram: SystemProgram.programId,
         })
         .instruction();
@@ -322,17 +375,29 @@ export class ParaAnchor {
   }
 
   async resolveLineInstruction(
-    lineId: number,
+    athleteId: string,
     predictedValue: number,
+    statCustomId: number,
+    matchupId: number,
     actualValue: number,
     shouldRefundBettors: boolean,
     creator: PublicKey,
   ): Promise<string> {
     const program = await this.getProgram(true); // useAdminSigner
-    const _lineId = new BN(lineId);
+    const _athleteId = new BN(athleteId);
+    const _matchupId = new BN(matchupId);
+    const _statId = new BN(statCustomId);
+    const _predictedValue = new BN(predictedValue);
+    const _actualValue = new BN(actualValue);
 
-    const [lineAccount] = PublicKey.findProgramAddressSync(
-      [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+    const [playerLinePDa] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('player_line'),
+        _athleteId.toArrayLike(Buffer, 'le', 8),
+        _matchupId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 8),
+        _predictedValue.toArrayLike(Buffer, 'le', 8),
+      ],
       program.programId,
     );
 
@@ -341,10 +406,18 @@ export class ParaAnchor {
 
     try {
       const ix = await program.methods
-        .resolveLine(direction, actualValue, shouldRefundBettors)
+        .resolveLineV2(
+          athleteId,
+          _matchupId,
+          statCustomId,
+          _predictedValue,
+          direction,
+          _actualValue,
+          shouldRefundBettors,
+        )
         .accountsPartial({
           admin: creator,
-          line: lineAccount,
+          playerLine: playerLinePDa,
         })
         .instruction();
 
@@ -388,10 +461,95 @@ export class ParaAnchor {
     }
   }
 
+  async updateLinePointer(
+    playerId: string,
+    matchupId: number,
+    statId: number,
+    line_value: number,
+  ) {
+    const program = await this.getProgram();
+    const _matchupId = new BN(matchupId);
+    const _lineValue = new BN(line_value);
+    const _statId = new BN(statId);
+    const _playerId = new BN(playerId);
+
+    const [playerLinePDa] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('player_line'),
+        _playerId.toArrayLike(Buffer, 'le', 8),
+        _matchupId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 8),
+        _lineValue.toArrayLike(Buffer, 'le', 8),
+      ],
+      program.programId,
+    );
+
+    const [linePointerPDA] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('line_pointer'),
+        _playerId.toArrayLike(Buffer, 'le', 8),
+        _matchupId.toArrayLike(Buffer, 'le', 8),
+        _statId.toArrayLike(Buffer, 'le', 8),
+      ],
+      program.programId,
+    );
+
+    try {
+      const ix = await program.methods
+        .updateLinePointer(playerId, _matchupId, statId, _lineValue)
+        .accountsPartial({
+          admin: this.admin,
+          linePointer: linePointerPDA,
+          playerLine: playerLinePDa,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
+
+      // Get latest blockhash
+      const { blockhash, lastValidBlockHeight } =
+        await program.provider.connection.getLatestBlockhash('finalized');
+
+      // Build TransactionMessage for VersionedTransaction
+      const messageV0 = new TransactionMessage({
+        payerKey: program.provider.publicKey as PublicKey,
+        recentBlockhash: blockhash,
+        instructions: [ix],
+      }).compileToV0Message();
+
+      // Create VersionedTransaction
+      const transaction = new VersionedTransaction(messageV0);
+
+      // Sign transaction
+      await program.provider.wallet?.signTransaction(transaction);
+
+      // Send transaction
+      const txSig =
+        await program.provider.connection.sendTransaction(transaction);
+
+      // Confirm transaction
+      await program.provider.connection.confirmTransaction(
+        {
+          signature: txSig,
+          blockhash: blockhash,
+          lastValidBlockHeight: lastValidBlockHeight,
+        },
+        'confirmed',
+      );
+
+      console.log(txSig, 'transaction signature');
+
+      return txSig;
+    } catch (error) {
+      console.log(error, 'error updating line pointer');
+    }
+  }
+
   async bulkResolveLineInstruction(
     linesInformation: {
-      lineId: number;
+      athleteId: string;
       predictedValue: number;
+      matchupId: number;
+      statCustomId: number;
       actualValue: number;
       shouldRefundBettors: boolean;
     }[],
@@ -400,22 +558,38 @@ export class ParaAnchor {
     const program = await this.getProgram(true); // useAdminSigner
     const linesIxs = [] as TransactionInstruction[];
     for (const line of linesInformation) {
-      const _lineId = new BN(line.lineId);
-      const _predictedValue = line.predictedValue;
-      const _actualValue = line.actualValue;
-      const _shouldRefundBettors = line.shouldRefundBettors;
+      const _predictedValue = new BN(line.predictedValue);
+      const _actualValue = new BN(line.actualValue);
+      const _athleteId = new BN(line.athleteId);
+      const _matchupId = new BN(line.matchupId);
+      const _statId = new BN(line.statCustomId);
 
-      const [lineAccount] = PublicKey.findProgramAddressSync(
-        [Buffer.from('line'), _lineId.toArrayLike(Buffer, 'le', 8)],
+      const [playerLinePDa] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('player_line'),
+          _athleteId.toArrayLike(Buffer, 'le', 8),
+          _matchupId.toArrayLike(Buffer, 'le', 8),
+          _statId.toArrayLike(Buffer, 'le', 8),
+          _predictedValue.toArrayLike(Buffer, 'le', 8),
+        ],
         program.programId,
       );
+
       const direction =
         _actualValue > _predictedValue ? { over: {} } : { under: {} };
       const ix = await program.methods
-        .resolveLine(direction, _actualValue, _shouldRefundBettors)
+        .resolveLineV2(
+          line.athleteId,
+          _matchupId,
+          line.statCustomId,
+          _predictedValue,
+          direction,
+          _actualValue,
+          line.shouldRefundBettors,
+        )
         .accountsPartial({
           admin: creator,
-          line: lineAccount,
+          playerLine: playerLinePDa,
         })
         .instruction();
       linesIxs.push(ix);
