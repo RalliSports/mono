@@ -42,6 +42,7 @@ import { chatClient } from 'src/utils/services/messaging';
 import { FriendsService } from 'src/friends/friends.service';
 import { sleep } from 'src/utils';
 import { ParaAnchor } from 'src/utils/services/paraAnchor';
+import { retry } from 'src/utils/retry';
 
 @Injectable()
 export class GamesService {
@@ -365,9 +366,15 @@ export class GamesService {
         };
       });
 
-      const submitTxnSig = await this.anchor.submitBetsInstruction(
-        dto.gameId,
-        await Promise.all(picks),
+      const submitTxnSig = await retry(
+        async () => {
+          return await this.anchor.submitBetsInstruction(
+            dto.gameId,
+            await Promise.all(picks),
+          );
+        },
+        3, // retries
+        2000, // delay (ms)
       );
 
       if (!submitTxnSig) {
